@@ -282,6 +282,30 @@ suite('nuxeo-document-activity', () => {
       element.$.user.get.restore();
     });
 
+    test('should not call the server for the internal system principal', async () => {
+      const getStub = sinon.stub(element.$.user, 'get').resolves({ 'entity-type': 'user', id: 'x' });
+      await element._fetchPrincipals([{ principalName: 'system', eventId: 'documentCreated' }]);
+      // WEBUI-2309: /user/system always 404s and floods server.log with WARNs.
+      expect(getStub).to.not.have.been.called;
+      expect(element._principalEntities).to.have.property('system', 'system');
+      element.$.user.get.restore();
+    });
+
+    test('should resolve real principals while skipping the system principal', async () => {
+      const entity = { 'entity-type': 'user', id: 'jdoe', properties: { firstName: 'Jane', lastName: 'Doe' } };
+      const getStub = sinon.stub(element.$.user, 'get').resolves(entity);
+      await element._fetchPrincipals([
+        { principalName: 'system', eventId: 'documentCreated' },
+        { principalName: 'jdoe', eventId: 'documentModified' },
+      ]);
+      // Only the real user is looked up.
+      expect(getStub).to.have.been.calledOnce;
+      expect(element.$.user.path).to.equal('/user/jdoe');
+      expect(element._principalEntities).to.have.property('system', 'system');
+      expect(element._principalEntities).to.have.property('jdoe', entity);
+      element.$.user.get.restore();
+    });
+
     test('should URL-encode principal names in the request path', async () => {
       const entity = { 'entity-type': 'user', id: 'a b/c' };
       const getStub = sinon.stub(element.$.user, 'get').callsFake(() => {

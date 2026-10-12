@@ -67,7 +67,23 @@ phases.** State the plan up front for the record, then keep going. Track phases 
 Useful constants:
 - Atlassian cloudId: `252cce86-035e-4b0e-abd2-3c002935632f` (site `hyland.atlassian.net`)
 - Upstream repo: `nuxeo/nuxeo-web-ui` · bases: `lts-2025` and `maintenance-3.1.x`
-- Validation workspace root: `~/Desktop/validation/<TICKET-ID>/`
+- Validation workspace root: `~/Desktop/jira-evidence/<TICKET-ID>/validation/`
+- Code worktree root: `~/Desktop/Projects/WebUI/worktrees/<TICKET-ID>/<role>/`
+
+### Filesystem layout — evidence and code live in separate roots
+| What | Where |
+|---|---|
+| Evidence, harness, logs, reports | `~/Desktop/jira-evidence/<TICKET-ID>/validation/` |
+| Code worktrees (the `target` and `fixed` checkouts) | `~/Desktop/Projects/WebUI/worktrees/<TICKET-ID>/<role>/` |
+
+> **Never create a folder directly on `~/Desktop`.** `validation/` sits beside the `fix/` and
+> `reproduce/` folders written by the `fix-nuxeo-web-ui-bug` and `reproduce-nuxeo-web-ui-bug` skills,
+> so every phase of a ticket collects under one `~/Desktop/jira-evidence/<TICKET-ID>/` folder.
+>
+> **Never create a worktree directly in `~/Desktop/Projects/WebUI/`** — that holds the primary clones,
+> and loose worktrees there accumulate silently at ~1 GB each. `dual-branch-up.sh` already places them
+> correctly and its `--remove` action deletes the ticket's worktree folder while keeping the evidence.
+> Override the roots with `NX_VAL_ROOT` / `NX_WT_ROOT` if you need to.
 
 ## Companion skills
 
@@ -117,7 +133,7 @@ Restate the goal, list Phases 1–17 as a TODO list, and start the **execution l
 
 ```bash
 bash .cursor/skills/bug-fix-validation/scripts/validation-init.sh <TICKET-ID> --with-firefox
-. ~/Desktop/validation/<TICKET-ID>/env.sh
+. ~/Desktop/jira-evidence/<TICKET-ID>/validation/env.sh
 ```
 
 This creates the `Evidence/` tree, the capture harness (`puppeteer` + `puppeteer-screen-recorder`),
@@ -324,7 +340,7 @@ themes. Record every scenario with a status, including the skipped ones and why.
 
 ## Phase 12 — Evidence collection
 
-Everything lands under `~/Desktop/validation/<TICKET-ID>/Evidence/`:
+Everything lands under `~/Desktop/jira-evidence/<TICKET-ID>/validation/Evidence/`:
 
 ```
 Evidence/
@@ -406,9 +422,11 @@ Tear down only what this run created:
 bash .cursor/skills/bug-fix-validation/scripts/dual-branch-up.sh <TICKET-ID> --remove
 ```
 
-Leave `~/Desktop/validation/<TICKET-ID>/` in place so the evidence stays available. Confirm via
-`list_containers` that no pre-existing container was touched. Report the final state: recommendation,
-blockers, and anything left running on purpose.
+Leave `~/Desktop/jira-evidence/<TICKET-ID>/validation/` in place so the evidence stays available —
+`dual-branch-up.sh --remove` removes the containers and the ticket's worktree folder but never the
+evidence. Confirm via `list_containers` that no pre-existing container was touched, and via
+`git -C <repo> worktree list | grep <TICKET-ID>` that no worktree is left behind. Report the final
+state: recommendation, blockers, and anything left running on purpose.
 
 ---
 

@@ -21,10 +21,17 @@ run the same checks that gate the PR, and **only push if they pass**.
 | **Lint** (`lint.yaml`) | `npm run lint` (eslint + `prettier --list-different`) | Yes — fast |
 | **Test** (`test.yaml`) | `npm run test` (web-test-runner `--coverage`) | Yes — ~2 min |
 | A11y (`a11y.yaml`) | `mvn -B -ntp install` + `mvn -B -ntp -f plugin/a11y install` | Optional — needs Java + npm token + repo creds |
+| Ftest (`ftest`, cross-repo `web-ui`) | `npm run ftest` (WebdriverIO + a running Nuxeo server) | No — tens of minutes |
 | Sonar / full build | push-only (`main.yaml`) | No — not a PR gate |
 
 `npm run lint` and `npm run test` are the gate developers must reproduce locally.
 A11y/build/sonar need Maven and secrets, so they're not part of the fast pre-push loop.
+
+**Don't wait on the functional tests.** `ftest` (and the cross-repo `web-ui` check) boots a Nuxeo
+server and drives a browser suite, so it runs for tens of minutes — never poll it locally or in CI
+while a task is in flight. Push once lint + unit are green, snapshot the ftest state, and report it as
+"still running, not waited on". Look at it only once it has reported **failed**; if the failure can't
+plausibly come from the change, re-run the job rather than investigating it.
 
 ## Run the gate
 
@@ -63,6 +70,25 @@ rm -rf node_modules/@nuxeo/nuxeo-dataviz-elements && ln -s ../../../nuxeo-elemen
 
 - **`package-lock.json` churn**: npm version differences add/remove `"peer": true`
   lines. Don't commit it: `git checkout -- package-lock.json`.
+
+- **"Tests were interrupted because the browser disconnected" with `0 passed, 0 failed`**: almost
+  never your change. `npm test` exiting `143` (SIGTERM) with no browser logs means something outside
+  the run killed it — most often another agent's helper script doing a machine-wide
+  `pkill -f web-test-runner`. Confirm with `pgrep -fl web-test-runner` (you will see the *other*
+  script's shell in the list), then either wait for it to finish or run the suite under a command
+  line that pattern cannot match. Note there must be **no `--config` argument**: the filename
+  `web-test-runner.config.mjs` contains the pattern, so passing it explicitly leaves you just as
+  killable. Web Test Runner picks that config up on its own. Keep the coverage steps so the run
+  stays equivalent to the gate:
+
+```bash
+npm run update-coverage-imports && npm run update-test-load-all \
+  && node node_modules/@web/test-runner/dist/bin.js --coverage \
+  && node scripts/test/unit/inject-zero-coverage.js
+```
+
+  Verify it is actually hidden with `pgrep -f web-test-runner` while it runs — that should list the
+  *other* script but not yours. Never write such a `pkill` yourself: kill only PIDs you started.
 
 - **Flaky `nuxeo-document-tree` test** (`test/nuxeo-document-tree.test.js` "Tree should
   collapse when clicking on a document"): timing flake unrelated to most changes. If it

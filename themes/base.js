@@ -164,7 +164,8 @@ const template = html`
         font-style: normal;
         font-weight: 400;
         font-display: swap;
-        src: url('../fonts/Inter-Regular.woff2?v=3.13') format('woff2'),
+        src:
+          url('../fonts/Inter-Regular.woff2?v=3.13') format('woff2'),
           url('../fonts/Inter-Regular.woff?v=3.13') format('woff');
       }
 
@@ -173,7 +174,8 @@ const template = html`
         font-style: normal;
         font-weight: 600;
         font-display: swap;
-        src: url('../fonts/Inter-SemiBold.woff2?v=3.13') format('woff2'),
+        src:
+          url('../fonts/Inter-SemiBold.woff2?v=3.13') format('woff2'),
           url('../fonts/Inter-SemiBold.woff?v=3.13') format('woff');
       }
 
@@ -182,7 +184,8 @@ const template = html`
         font-style: normal;
         font-weight: 700;
         font-display: swap;
-        src: url('../fonts/Inter-Bold.woff2?v=3.13') format('woff2'),
+        src:
+          url('../fonts/Inter-Bold.woff2?v=3.13') format('woff2'),
           url('../fonts/Inter-Bold.woff?v=3.13') format('woff');
       }
 
@@ -408,7 +411,11 @@ const template = html`
           overflow: hidden;
           text-overflow: ellipsis;
           font-weight: 400 !important;
-          letter-spacing: 0.005em !important;
+          /*
+           * WCAG 2.1 SC 1.4.12: labels live inside widget shadow roots, so pinning letter-spacing
+           * here makes it unreachable for a user text-spacing stylesheet. Inherit it instead.
+           */
+          letter-spacing: inherit;
           font-family: var(--nuxeo-app-font);
         }
 
@@ -698,7 +705,7 @@ const template = html`
         /* layout rules */
         --nuxeo-widget: {
           margin-bottom: 16px;
-        }
+        };
       }
 
       @media (max-width: 1024px) {
@@ -710,7 +717,7 @@ const template = html`
           --nuxeo-dialog: {
             min-width: 0;
             width: 90%;
-          }
+          };
         }
       }
 

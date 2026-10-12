@@ -136,7 +136,7 @@ Missing keys per locale file: <none, or `messages-xx.json: key.a, key.b`>.
 
 | Artifact | Path |
 |---|---|
-| Before screenshots | `~/Desktop/validation/<TICKET-ID>/Evidence/Before/` |
+| Before screenshots | `~/Desktop/jira-evidence/<TICKET-ID>/validation/Evidence/Before/` |
 | After screenshots | `.../Evidence/After/` |
 | Locale / RTL / browser shots | `.../Evidence/After/` (labelled by locale and browser) |
 | Videos | `.../Evidence/Videos/<TICKET-ID>-before.mp4`, `-after.mp4` |
@@ -144,7 +144,7 @@ Missing keys per locale file: <none, or `messages-xx.json: key.a, key.b`>.
 | Diff images | `.../Evidence/Reports/*-diff.png` |
 | Acceptance criteria | `.../Evidence/Reports/acceptance-criteria.md` |
 | Test cases | `.../Evidence/Reports/test-cases.md` |
-| Execution log | `~/Desktop/validation/<TICKET-ID>/run.log` |
+| Execution log | `~/Desktop/jira-evidence/<TICKET-ID>/validation/run.log` |
 
 Attached to the ticket: <list only files whose upload returned OK, or "none yet">.
 

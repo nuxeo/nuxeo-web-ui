@@ -89,14 +89,17 @@ case "${ONLY:-both}" in both|target|fixed) ;; *) die "--only takes 'target' or '
 script_dir=$(cd "$(dirname "$0")" && pwd)
 REPO=${NX_VAL_REPO:-$(git -C "$script_dir" rev-parse --show-toplevel 2>/dev/null || true)}
 [ -n "$REPO" ] || die "could not locate the nuxeo-web-ui checkout; set NX_VAL_REPO"
-ROOT=${NX_VAL_ROOT:-$HOME/Desktop/validation}
-DIR=$ROOT/$TICKET
+ROOT=${NX_VAL_ROOT:-$HOME/Desktop/jira-evidence}
+DIR=$ROOT/$TICKET/validation
+# Code worktrees live beside the primary clones, never inside the evidence tree and never loose in
+# Projects/WebUI itself: <...>/Projects/WebUI/worktrees/<TICKET>/<role>.
+WT_ROOT=${NX_WT_ROOT:-$(dirname "$REPO")/worktrees}
 ENVFILE=$DIR/env.sh
 RUNTIME=$DIR/runtime.sh
 SLUG=$(printf '%s' "$TICKET" | tr '[:upper:]' '[:lower:]')
 
 container_for() { printf 'nx-val-%s-%s\n' "$SLUG" "$1"; }
-worktree_for() { printf '%s/src/%s\n' "$DIR" "$1"; }
+worktree_for() { printf '%s/%s/%s\n' "$WT_ROOT" "$TICKET" "$1"; }
 
 # ---------------------------------------------------------------------- print
 
@@ -124,6 +127,10 @@ if [ "$ACTION" = remove ]; then
     fi
   done
   git -C "$REPO" worktree prune 2>/dev/null || true
+  # Drop the ticket's worktree folder once both roles are gone, so Projects/WebUI/worktrees does not
+  # accumulate empty per-ticket directories.
+  rmdir "$WT_ROOT/$TICKET" 2>/dev/null && note "removed $WT_ROOT/$TICKET"
+  rmdir "$WT_ROOT" 2>/dev/null || true
   rm -f "$RUNTIME"
   note "evidence kept at $DIR/Evidence"
   exit 0
@@ -174,7 +181,7 @@ PY
 claimed_ports() {
   local f
   [ -d "$ROOT" ] || return 0
-  for f in "$ROOT"/*/runtime.sh; do
+  for f in "$ROOT"/*/validation/runtime.sh; do
     [ -f "$f" ] || continue
     [ "$f" = "$RUNTIME" ] && continue
     grep -h '_PORT=' "$f" 2>/dev/null | sed 's/.*=//'

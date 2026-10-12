@@ -421,6 +421,142 @@ suite('nuxeo-document-tree', () => {
     });
   });
 
+  // WEBUI-1877: the row is the disclosure control, so it owns the expanded state and the focus;
+  // the arrow inside it is decorative and must stay out of the accessibility tree.
+  suite('Tree row disclosure accessibility', () => {
+    setup(async () => setupFixture());
+
+    const treeItemOf = (node) => node.querySelector('[role="treeitem"]');
+
+    const leafNode = () => {
+      const leaf = Array.from(getTreeNodes(documentTree)).find((node) => !node.querySelector('iron-icon[toggle]'));
+      expect(leaf, 'fixture should contain a leaf node').to.be.ok;
+      return leaf;
+    };
+
+    test('The row reports its expanded state', async () => {
+      const node = getTreeNodeByUid(documentTree, 4);
+      expect(treeItemOf(node).getAttribute('aria-expanded')).to.equal('false');
+      tap(node.querySelector('iron-icon'));
+      await flush();
+      expect(treeItemOf(node).getAttribute('aria-expanded')).to.equal('true');
+    });
+
+    // The arrow duplicated the row's state and name, so screen readers announced each toggle twice.
+    test('The arrow is decorative and carries no state of its own', () => {
+      const icon = getTreeNodeByUid(documentTree, 4).querySelector('iron-icon');
+      expect(icon.getAttribute('aria-hidden')).to.equal('true');
+      expect(icon.hasAttribute('aria-expanded')).to.be.false;
+      expect(icon.hasAttribute('aria-label')).to.be.false;
+      // An aria-hidden node must not be reachable by keyboard.
+      expect(icon.hasAttribute('tabindex')).to.be.false;
+    });
+
+    test('Expandable rows take the focus and leaves do not', () => {
+      const expandable = getTreeNodeByUid(documentTree, 4);
+      expect(treeItemOf(expandable).getAttribute('tabindex')).to.equal('0');
+      const leaf = leafNode();
+      expect(treeItemOf(leaf).hasAttribute('tabindex')).to.be.false;
+    });
+
+    // aria-expanded on an end node announces it as collapsed but expandable, which is the same
+    // wrong state this ticket is fixing elsewhere; the treeview pattern forbids it on leaves.
+    test('Leaf rows carry no expanded state', () => {
+      expect(treeItemOf(leafNode()).hasAttribute('aria-expanded')).to.be.false;
+    });
+
+    // "collapsed" on its own does not tell the listener the row can be opened, so expandable rows
+    // are described by a hint that does.
+    test('Expandable rows are described by the toggle hint and leaves are not', () => {
+      const expandable = getTreeNodeByUid(documentTree, 4);
+      expect(treeItemOf(expandable).getAttribute('aria-describedby')).to.equal('toggleHint');
+      expect(treeItemOf(leafNode()).hasAttribute('aria-describedby')).to.be.false;
+    });
+
+    test('The hint resolves to a translated string the row can reference', () => {
+      const hint = documentTree.shadowRoot.querySelector('#toggleHint');
+      expect(hint, 'the hint node must exist for aria-describedby to resolve').to.be.ok;
+      // Same shadow root as the rows, otherwise the IDREF would not resolve.
+      expect(treeItemOf(getTreeNodeByUid(documentTree, 4)).getRootNode()).to.equal(hint.getRootNode());
+      const text = hint.textContent.trim();
+      expect(text).to.not.be.empty;
+      expect(text).to.not.equal('browse.tree.toggleHint');
+    });
+
+    test('_toggleHintId only describes expandable rows', () => {
+      expect(documentTree._toggleHintId(false)).to.equal('toggleHint');
+      expect(documentTree._toggleHintId(true)).to.be.undefined;
+    });
+
+    test('Enter expands the node and announces the new state', async () => {
+      const node = getTreeNodeByUid(documentTree, 4);
+      const toggled = sinon.spy();
+      documentTree.addEventListener('tree-node-toggled', toggled);
+      treeItemOf(node).dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      await flush();
+      expect(node.opened).to.be.true;
+      expect(treeItemOf(node).getAttribute('aria-expanded')).to.equal('true');
+      expect(toggled).to.have.been.calledOnce;
+      expect(toggled.firstCall.args[0].detail.expanded).to.be.true;
+    });
+
+    test('Space toggles the row as well', async () => {
+      const node = getTreeNodeByUid(documentTree, 4);
+      treeItemOf(node).dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+      await flush();
+      expect(node.opened).to.be.true;
+    });
+
+    // The row and the link it contains are both keyboard reachable, so the row handler has to keep
+    // its hands off Enter once focus has moved on to the link.
+    test('Enter on the document link navigates instead of toggling', async () => {
+      const node = getTreeNodeByUid(documentTree, 4);
+      const toggled = sinon.spy();
+      documentTree.addEventListener('tree-node-toggled', toggled);
+      node.querySelector('a').dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      await flush();
+      expect(node.opened).to.be.false;
+      expect(toggled).to.not.have.been.called;
+    });
+
+    test('ArrowDown is left to tree navigation and does not toggle', async () => {
+      const node = getTreeNodeByUid(documentTree, 4);
+      const toggled = sinon.spy();
+      documentTree.addEventListener('tree-node-toggled', toggled);
+      treeItemOf(node).dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+      await flush();
+      expect(node.opened).to.be.false;
+      expect(toggled).to.not.have.been.called;
+    });
+
+    test('A row with no arrow ignores Enter', async () => {
+      const node = getTreeNodeByUid(documentTree, 4);
+      const item = treeItemOf(node);
+      const icon = node.querySelector('iron-icon');
+      icon.removeAttribute('toggle');
+      const toggled = sinon.spy();
+      documentTree.addEventListener('tree-node-toggled', toggled);
+      item.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      await flush();
+      expect(toggled).to.not.have.been.called;
+      icon.setAttribute('toggle', '');
+    });
+
+    test('_ariaExpanded stringifies the state and skips leaves', () => {
+      expect(documentTree._ariaExpanded(true, false)).to.equal('true');
+      expect(documentTree._ariaExpanded(false, false)).to.equal('false');
+      expect(documentTree._ariaExpanded(undefined, false)).to.equal('false');
+      // undefined makes Polymer drop the attribute rather than serialize a value.
+      expect(documentTree._ariaExpanded(false, true)).to.be.undefined;
+      expect(documentTree._ariaExpanded(true, true)).to.be.undefined;
+    });
+
+    test('_treeItemTabIndex only makes expandable rows focusable', () => {
+      expect(documentTree._treeItemTabIndex(false)).to.equal('0');
+      expect(documentTree._treeItemTabIndex(true)).to.be.undefined;
+    });
+  });
+
   suite('Updating the tree', () => {
     setup(async () => setupFixture());
 

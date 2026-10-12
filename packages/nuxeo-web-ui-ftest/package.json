@@ -1,6 +1,6 @@
 {
   "name": "@nuxeo/nuxeo-web-ui-ftest",
-  "version": "2025.19.0-SNAPSHOT",
+  "version": "2025.22.0-SNAPSHOT",
   "type": "module",
   "bin": {
     "nuxeo-web-ui-ftest": "./bin/nuxeo-web-ui-ftest.js"
@@ -13,7 +13,6 @@
     "node": ">=18.0.0"
   },
   "overrides": {
-    "ws": "8.20.1",
     "tar-fs": "^3.0.9",
     "serialize-javascript": "^7.0.5",
     "tmp": "^0.2.4",
