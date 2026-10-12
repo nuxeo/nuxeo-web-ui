@@ -59,7 +59,7 @@ Polymer({
         nuxeo-document-preview {
           height: min(
             calc(80vh - 100px),
-            max(200px, calc(100vh - 306px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0))))
+            max(200px, calc(100vh - 306px - (var(--nuxeo-app-top, 0px) + var(--nuxeo-app-bottom, 0px))))
           );
         }
       }

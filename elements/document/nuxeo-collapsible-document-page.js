@@ -102,7 +102,9 @@ Polymer({
          * across the whole tab; under is invisible, since the view scrolls its own content. Aim
          * short rather than at the edge.
          */
-        --nuxeo-document-content-height: calc(100vh - 245px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
+        --nuxeo-document-content-height: calc(
+          100vh - 245px - (var(--nuxeo-app-top, 0px) + var(--nuxeo-app-bottom, 0px))
+        );
       }
     </style>
 

@@ -54,7 +54,8 @@ suite('nuxeo-page', () => {
     const el = await page(html`<div>content</div>`);
     const style = await contentStyle(el);
     expect(style.paddingBottom).to.equal('0px');
-    // focus still has to land clear of the button, and this costs no space either way
+    // the alignment hint is kept because it costs no space; with no scroll range here there is
+    // nothing for it to act on, so this asserts only that it is retained
     expect(style.scrollPaddingBottom).to.equal('120px');
   });
 
