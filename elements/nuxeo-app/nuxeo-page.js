@@ -69,8 +69,8 @@ Polymer({
       /*
        * WEBUI-2314: on a region that already shows all of its content, the reserved strip is the
        * only thing there is to scroll to, so the tab gets a scrollbar that reveals nothing but the
-       * empty strip - the large blank space at the bottom of View, History and Trash. Reserving it
-       * attribute hands that room back; see _updateContentFit for when it is set.
+       * empty strip - the large blank space at the bottom of View, History and Trash. The
+       * content-fits attribute hands that room back; see _updateContentFit for when it is set.
        * scroll-padding-bottom stays either way because it costs no space. It only does anything
        * where the region scrolls, and there it keeps what is scrolled into view - keyboard focus
        * in particular - clear of the button.
