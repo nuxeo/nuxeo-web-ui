@@ -44,7 +44,9 @@ Polymer({
         @apply --layout-flex;
         display: block;
         position: relative;
-        min-height: calc(100vh - 17em - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
+        /* WEBUI-2314: 30px short of clearing the card this sits in, so Publishing kept a scrollbar
+           whose range was that gap plus the reserve. See nuxeo-collapsible-document-page. */
+        min-height: calc(100vh - 17em - 30px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
         margin-top: 8px;
       }
 

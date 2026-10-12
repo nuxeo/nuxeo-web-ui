@@ -56,7 +56,10 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
         }
 
         #table {
-          height: calc(100vh - 370px);
+          /* WEBUI-2314: stopped 23px short of clearing the card the table sits in, so History
+             always carried a scrollbar whose whole range was that gap. See
+             nuxeo-collapsible-document-page. */
+          height: calc(100vh - 402px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
         }
       </style>
 
