@@ -911,16 +911,16 @@ Polymer({
     const resolvedEntries = new Map();
     return ids
       .reduce(
+        // Sequential on purpose: each entry is fetched only after the previous one resolves.
         (promise, id) =>
-          promise.then(() =>
-            this._queryDirectorySuggestionEntry(suggestion, id).then((entry) => {
-              if (entry && typeof suggestion._selectionFormatter === 'function') {
-                suggestion._selectionFormatter(entry);
-                resolvedEntries.set(id, entry);
-                resolved = true;
-              }
-            }),
-          ),
+          promise.then(async () => {
+            const entry = await this._queryDirectorySuggestionEntry(suggestion, id);
+            if (entry && typeof suggestion._selectionFormatter === 'function') {
+              suggestion._selectionFormatter(entry);
+              resolvedEntries.set(id, entry);
+              resolved = true;
+            }
+          }),
         Promise.resolve(),
       )
       .then(() => {
@@ -1225,12 +1225,15 @@ Polymer({
     if (!id) {
       return;
     }
-    const load = () =>
-      (!this._searches ? this.$['saved-searches'].get() : Promise.resolve()).then(() => {
-        this.selectedSearchIdx = this._searches.findIndex((s) => s.id === id) + 1;
-        // XXX rely on debouncer to update the results request with the saved search params
-        return this._fetch(this.results).then(() => this._scheduleDirectorySuggestionRehydration());
-      });
+    const load = async () => {
+      if (!this._searches) {
+        await this.$['saved-searches'].get();
+      }
+      this.selectedSearchIdx = this._searches.findIndex((s) => s.id === id) + 1;
+      // XXX rely on debouncer to update the results request with the saved search params
+      await this._fetch(this.results);
+      return this._scheduleDirectorySuggestionRehydration();
+    };
     if (this.results) {
       return load();
     } else {
