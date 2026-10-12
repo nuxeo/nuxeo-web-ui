@@ -18,7 +18,9 @@
 #   validation-init.sh WEBUI-1234 --remove         # delete the workspace (asks about evidence)
 #
 # Environment overrides:
-#   NX_VAL_ROOT   Where validation workspaces live (default: ~/Desktop/validation)
+#   NX_VAL_ROOT   Evidence root for all tickets (default: ~/Desktop/jira-evidence). The workspace
+#                 itself is $NX_VAL_ROOT/<TICKET>/validation, a sibling of the fix/ and reproduce/
+#                 folders written by the other two skills. Never write directly to ~/Desktop.
 #   NX_VAL_REPO   nuxeo-web-ui checkout to validate (default: this script's repo)
 
 set -euo pipefail
@@ -60,8 +62,8 @@ script_dir=$(cd "$(dirname "$0")" && pwd)
 REPO=${NX_VAL_REPO:-$(git -C "$script_dir" rev-parse --show-toplevel 2>/dev/null || true)}
 [ -n "$REPO" ] || die "could not locate the nuxeo-web-ui checkout; set NX_VAL_REPO"
 
-ROOT=${NX_VAL_ROOT:-$HOME/Desktop/validation}
-DIR=$ROOT/$TICKET
+ROOT=${NX_VAL_ROOT:-$HOME/Desktop/jira-evidence}
+DIR=$ROOT/$TICKET/validation
 EVIDENCE=$DIR/Evidence
 HARNESS_DIR=$DIR/harness
 LOG=$DIR/run.log
@@ -116,7 +118,6 @@ step "Creating the evidence tree"
 for sub in Before After Videos Logs Console Network Traces Reports Reports/proposed-tests; do
   mkdir -p "$EVIDENCE/$sub"
 done
-mkdir -p "$DIR/src"
 note "$EVIDENCE"
 
 touch "$LOG"
@@ -130,7 +131,6 @@ export NX_VAL_EVIDENCE=$EVIDENCE
 export NX_VAL_HARNESS=$HARNESS_DIR
 export NX_VAL_LOG=$LOG
 export NX_VAL_REPO=$REPO
-export NX_VAL_SRC=$DIR/src
 
 # Append a timestamped line to the execution log. Every command, decision and
 # environment detail goes here so the run stays reproducible.

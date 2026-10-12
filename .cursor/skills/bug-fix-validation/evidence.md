@@ -8,7 +8,7 @@ if it is not captured, it did not happen.
 `scripts/validation-init.sh <TICKET-ID>` creates:
 
 ```
-~/Desktop/validation/<TICKET-ID>/
+~/Desktop/jira-evidence/<TICKET-ID>/validation/
   Evidence/
     Before/     # screenshots from the target (buggy) branch
     After/      # screenshots from the fixed branch, same labels
@@ -19,7 +19,6 @@ if it is not captured, it did not happen.
     Traces/     # profiles, performance traces
     Reports/    # test-cases.md, validation-report.md, diff images, proposed-tests/
   harness/      # puppeteer + puppeteer-screen-recorder + nuxeo-capture.js
-  src/          # per-branch worktrees created by dual-branch-up.sh
   run.log       # execution log — every command, decision and environment detail
   env.sh        # NX_VAL_* variables; source it in every shell
 ```
@@ -35,7 +34,7 @@ Take the **same shots in the same order** on both sides. `s.shot('create-dialog'
 recorder, deep shadow-DOM helpers, Nuxeo login, and metrics. Write a small scenario file per run:
 
 ```js
-// ~/Desktop/validation/WEBUI-1234/harness/after.js
+// ~/Desktop/jira-evidence/WEBUI-1234/validation/harness/after.js
 const { session } = require('./nuxeo-capture');
 
 (async () => {
@@ -56,7 +55,7 @@ const { session } = require('./nuxeo-capture');
 ```
 
 ```bash
-. ~/Desktop/validation/WEBUI-1234/env.sh
+. ~/Desktop/jira-evidence/WEBUI-1234/validation/env.sh
 node "$NX_VAL_HARNESS/after.js"
 ```
 

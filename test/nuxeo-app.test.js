@@ -1062,6 +1062,195 @@ suite('nuxeo-app', () => {
       expect(app.drawerOpened).to.be.false;
       expect(app.selectedTab).to.equal('');
     });
+
+    test('_toggleDrawer falls back to the first tab when the event carries no selection', () => {
+      sinon.stub(app, '_openDrawer');
+      app.drawerOpened = false;
+      app._selected = 'tasks';
+      app._toggleDrawer({});
+      expect(app._openDrawer).to.have.been.calledOnce;
+      expect(app._selected).to.equal(0);
+      app._openDrawer.restore();
+    });
+  });
+
+  // WEBUI-1877: the collapse chevron and the icon-rail items must expose their own expanded state,
+  // otherwise a screen reader stays silent when the drawer panel is shown or hidden.
+  suite('drawer expanded state announcements', () => {
+    const toggleButton = () => app.shadowRoot.querySelector('#drawer .toggle');
+
+    // iron-a11y-keys-behavior matches on key and keyCode depending on version, so send both.
+    // paper-item defers the synthesized click to a timer, so wait for the listbox to report the
+    // activation rather than guessing a delay. A timeout here means Enter never reached the listbox.
+    const pressEnter = async (node) => {
+      const activated = new Promise((resolve) => {
+        app.$.menu.addEventListener('iron-activate', resolve, { once: true });
+      });
+      node.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13, bubbles: true, composed: true }));
+      await activated;
+      await flush();
+    };
+
+    test('the collapse chevron is a labelled button that reports the drawer state', async () => {
+      app.drawerOpened = true;
+      await flush();
+      const toggle = toggleButton();
+      expect(toggle).to.be.ok;
+      expect(toggle.tagName).to.equal('BUTTON');
+      expect(toggle.getAttribute('aria-expanded')).to.equal('true');
+      expect(toggle.getAttribute('aria-controls')).to.equal('drawer-pages');
+      // The label is bound through i18n before the setup stub is installed, so assert it resolved
+      // to a translation rather than to the raw message key.
+      const label = toggle.getAttribute('aria-label');
+      expect(label).to.be.a('string').and.not.empty;
+      expect(label).to.not.equal('app.drawer.collapse');
+      expect(toggle.querySelector('iron-icon').getAttribute('aria-hidden')).to.equal('true');
+    });
+
+    test('the collapse chevron is keyboard reachable and closes the drawer', async () => {
+      app.drawerOpened = true;
+      await flush();
+      sinon.stub(app, '_closeDrawer');
+      const toggle = toggleButton();
+      expect(toggle.tabIndex).to.equal(0);
+      toggle.click();
+      expect(app._closeDrawer).to.have.been.calledOnce;
+      app._closeDrawer.restore();
+    });
+
+    test('aria-expanded is not on the listbox, which does not support it', () => {
+      expect(app.$.menu.hasAttribute('aria-expanded')).to.be.false;
+    });
+
+    // The keyup handlers that used to toggle the drawer are gone, so keyboard activation now relies
+    // solely on paper-item turning Enter into a click that paper-listbox reports as iron-activate.
+    // _openDrawer is stubbed throughout: letting the real modal drawer open locks body scrolling and
+    // moves focus into the drawer, which shifts viewport coordinates for later layout-sensitive
+    // suites. What matters here is that the keypress still reaches _toggleDrawer with the right tab.
+    test('Enter on an icon-rail item reaches _toggleDrawer with that tab selected', async () => {
+      const item = app.$.menu.querySelector('nuxeo-menu-icon[name="profile"]');
+      expect(item).to.be.ok;
+      sinon.stub(app, '_openDrawer');
+      const toggleSpy = sinon.spy(app, '_toggleDrawer');
+      app.drawerOpened = false;
+      app._selected = undefined;
+
+      await pressEnter(item);
+
+      expect(toggleSpy).to.have.been.calledOnce;
+      expect(toggleSpy.firstCall.args[0].detail.selected).to.equal('profile');
+      expect(app.selectedTab).to.equal('profile');
+      expect(app._openDrawer).to.have.been.calledOnce;
+      toggleSpy.restore();
+      app._openDrawer.restore();
+    });
+
+    test('Enter on the item of an already open panel collapses the drawer', async () => {
+      const item = app.$.menu.querySelector('nuxeo-menu-icon[name="profile"]');
+      sinon.stub(app, '_openDrawer');
+      sinon.stub(app, '_closeDrawer');
+      app._selected = 'profile';
+      app.drawerOpened = true;
+      await flush();
+
+      await pressEnter(item);
+      // _toggleDrawer defers the close to the next frame.
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+
+      expect(app._closeDrawer).to.have.been.calledOnce;
+      expect(app._openDrawer).to.not.have.been.called;
+      app._openDrawer.restore();
+      app._closeDrawer.restore();
+    });
+
+    // paper-listbox exposes each item as an `option` whose accessible name is empty, since the label
+    // lives in the shadow tooltip. A screen reader reads the inner button instead, so that is where
+    // the state has to be for it to be announced at all.
+    const announcedState = (item) => item.$.button.getAttribute('aria-expanded');
+
+    test('only the icon-rail item owning the open panel is marked expanded', async () => {
+      app.drawerOpened = true;
+      app.selectedTab = 'profile';
+      await flush();
+      const items = app.$.menu.querySelectorAll('nuxeo-menu-icon');
+      expect(items.length).to.be.above(0);
+      items.forEach((item) => {
+        const expected = item.getAttribute('name') === 'profile' ? 'true' : 'false';
+        expect(announcedState(item)).to.equal(expected);
+      });
+    });
+
+    test('the expanded state sits on the named button, not the unnamed option host', async () => {
+      app.drawerOpened = true;
+      app.selectedTab = 'profile';
+      await flush();
+      const item = app.$.menu.querySelector('nuxeo-menu-icon[name="profile"]');
+      expect(item.hasAttribute('aria-expanded')).to.be.false;
+      expect(item.$.button.getAttribute('aria-expanded')).to.equal('true');
+      expect(item.$.button.getAttribute('aria-labelledby')).to.equal('tooltip');
+    });
+
+    test('closing the drawer marks every icon-rail item collapsed', async () => {
+      app.drawerOpened = true;
+      app.selectedTab = 'profile';
+      await flush();
+      app.drawerOpened = false;
+      await flush();
+      app.$.menu.querySelectorAll('nuxeo-menu-icon').forEach((item) => {
+        expect(announcedState(item)).to.equal('false');
+      });
+    });
+
+    test('_updateDrawerItemsAria is a no-op before the template is stamped', () => {
+      expect(() => app._updateDrawerItemsAria.call({ $: null })).to.not.throw();
+    });
+
+    // The real drawer items are stamped by <nuxeo-slot name="DRAWER_ITEMS"> after drawerOpened and
+    // selectedTab have already settled, so the property observers never see them. Without the
+    // iron-items-changed binding every slotted icon stays without aria-expanded until the first
+    // toggle, which is precisely the state a screen reader reads on a fresh page load.
+    test('an icon-rail item added after startup is still marked collapsed', async () => {
+      const late = document.createElement('nuxeo-menu-icon');
+      late.setAttribute('name', 'lateArrival');
+      app.$.menu.appendChild(late);
+      await flush();
+      expect(announcedState(late)).to.equal('false');
+      app.$.menu.removeChild(late);
+    });
+
+    test('an icon-rail item added while its own panel is open is marked expanded', async () => {
+      app.drawerOpened = true;
+      app.selectedTab = 'lateArrival';
+      await flush();
+      const late = document.createElement('nuxeo-menu-icon');
+      late.setAttribute('name', 'lateArrival');
+      app.$.menu.appendChild(late);
+      await flush();
+      expect(announcedState(late)).to.equal('true');
+      app.$.menu.removeChild(late);
+    });
+
+    // A menu icon that only navigates is not a disclosure control, so it must not claim to be one.
+    test('a menu icon nobody drives has no expanded state at all', async () => {
+      const standalone = document.createElement('nuxeo-menu-icon');
+      document.body.appendChild(standalone);
+      await flush();
+      expect(standalone.$.button.hasAttribute('aria-expanded')).to.be.false;
+      document.body.removeChild(standalone);
+    });
+
+    test('_ariaExpanded stringifies the state', () => {
+      expect(app._ariaExpanded(true)).to.equal('true');
+      expect(app._ariaExpanded(false)).to.equal('false');
+      expect(app._ariaExpanded(undefined)).to.equal('false');
+    });
+
+    test('a menu icon keeps the attribute off until it is given a state', () => {
+      const item = app.$.menu.querySelector('nuxeo-menu-icon[name="profile"]');
+      expect(item._ariaExpanded(undefined)).to.be.undefined;
+      expect(item._ariaExpanded(true)).to.equal('true');
+      expect(item._ariaExpanded(false)).to.equal('false');
+    });
   });
 
   suite('showDiff', () => {
@@ -1569,158 +1758,6 @@ suite('nuxeo-app', () => {
     });
   });
 
-  suite('home menu keyboard navigation', () => {
-    // Call the handlers directly with fake home/menu/event objects. Never dispatch key events at
-    // the real paper-listbox: that corrupts the shared fixture and hangs the run.
-    let savedNav;
-    const item = () => document.createElement('div');
-    const fakeMenu = (items) => {
-      return { querySelectorAll: () => items };
-    };
-    const fakeEvent = (key, target) => {
-      return { key, target, preventDefault: sinon.spy() };
-    };
-
-    setup(() => {
-      savedNav = app._homeMenuNav;
-    });
-    teardown(() => {
-      app._homeMenuNav = savedNav;
-    });
-
-    test('homeToMenuNavigation returns early when the home shortcut is missing', () => {
-      const stub = sinon.stub(app.shadowRoot, 'querySelector').returns(null);
-      try {
-        expect(() => app.homeToMenuNavigation()).to.not.throw();
-      } finally {
-        stub.restore();
-      }
-    });
-
-    test('attached() re-arms homeToMenuNavigation after a detach/re-attach cycle', () => {
-      const spy = sinon.spy(app, 'homeToMenuNavigation');
-      try {
-        // Simulate a real detach: this is what flags the element for re-arming.
-        app.detached();
-        expect(app._inactivityNeedsRearm).to.be.true;
-        app.attached();
-        expect(spy).to.have.been.calledOnce;
-        expect(app._inactivityNeedsRearm).to.be.false;
-      } finally {
-        spy.restore();
-      }
-    });
-
-    test('_homeMenuVisibleItems returns [] when no menu is stashed', () => {
-      app._homeMenuNav = null;
-      expect(app._homeMenuVisibleItems()).to.deep.equal([]);
-    });
-
-    test('_homeMenuVisibleItems excludes hidden items', () => {
-      const visible = item();
-      const hidden = item();
-      hidden.setAttribute('hidden', '');
-      app._homeMenuNav = { home: {}, menu: fakeMenu([visible, hidden]) };
-      expect(app._homeMenuVisibleItems()).to.deep.equal([visible]);
-    });
-
-    test('ArrowDown on home focuses the first visible menu item', () => {
-      const first = item();
-      const last = item();
-      const firstSpy = sinon.spy(first, 'focus');
-      app._homeMenuNav = { home: {}, menu: fakeMenu([first, last]) };
-      const e = fakeEvent('ArrowDown');
-      app._onHomeShortcutKeydown(e);
-      expect(e.preventDefault).to.have.been.called;
-      expect(firstSpy).to.have.been.called;
-    });
-
-    test('ArrowUp on home focuses the last visible menu item', () => {
-      const first = item();
-      const last = item();
-      const firstSpy = sinon.spy(first, 'focus');
-      const lastSpy = sinon.spy(last, 'focus');
-      app._homeMenuNav = { home: {}, menu: fakeMenu([first, last]) };
-      const e = fakeEvent('ArrowUp');
-      app._onHomeShortcutKeydown(e);
-      expect(e.preventDefault).to.have.been.called;
-      expect(lastSpy).to.have.been.called;
-      expect(firstSpy).to.not.have.been.called;
-    });
-
-    test('a non-arrow key on home does not move focus', () => {
-      const first = item();
-      const firstSpy = sinon.spy(first, 'focus');
-      app._homeMenuNav = { home: {}, menu: fakeMenu([first]) };
-      const e = fakeEvent('Enter');
-      app._onHomeShortcutKeydown(e);
-      expect(e.preventDefault).to.not.have.been.called;
-      expect(firstSpy).to.not.have.been.called;
-    });
-
-    test('home navigation is a no-op when there are no visible menu items', () => {
-      app._homeMenuNav = { home: {}, menu: fakeMenu([]) };
-      const e = fakeEvent('ArrowDown');
-      app._onHomeShortcutKeydown(e);
-      expect(e.preventDefault).to.not.have.been.called;
-    });
-
-    test('ArrowUp on the first menu item returns focus to the home anchor', () => {
-      const first = item();
-      const last = item();
-      const anchor = { focus: sinon.spy() };
-      const home = { shadowRoot: { querySelector: () => anchor } };
-      app._homeMenuNav = { home, menu: fakeMenu([first, last]) };
-      const e = fakeEvent('ArrowUp', first);
-      app._onMenuEdgeKeydown(e);
-      expect(e.preventDefault).to.have.been.called;
-      expect(anchor.focus).to.have.been.called;
-    });
-
-    test('ArrowDown on the last menu item returns focus to the home anchor', () => {
-      const first = item();
-      const last = item();
-      const anchor = { focus: sinon.spy() };
-      const home = { shadowRoot: { querySelector: () => anchor } };
-      app._homeMenuNav = { home, menu: fakeMenu([first, last]) };
-      const e = fakeEvent('ArrowDown', last);
-      app._onMenuEdgeKeydown(e);
-      expect(e.preventDefault).to.have.been.called;
-      expect(anchor.focus).to.have.been.called;
-    });
-
-    test('ArrowDown on a non-edge menu item does not return focus to home', () => {
-      const first = item();
-      const last = item();
-      const anchor = { focus: sinon.spy() };
-      const home = { shadowRoot: { querySelector: () => anchor } };
-      app._homeMenuNav = { home, menu: fakeMenu([first, last]) };
-      const e = fakeEvent('ArrowDown', first);
-      app._onMenuEdgeKeydown(e);
-      expect(e.preventDefault).to.not.have.been.called;
-      expect(anchor.focus).to.not.have.been.called;
-    });
-
-    test('menu navigation is a no-op when there are no visible items', () => {
-      app._homeMenuNav = { home: {}, menu: fakeMenu([]) };
-      const e = fakeEvent('ArrowUp', {});
-      app._onMenuEdgeKeydown(e);
-      expect(e.preventDefault).to.not.have.been.called;
-    });
-
-    test('_focusHomeShortcut falls back to the host when there is no inner anchor', () => {
-      const home = { shadowRoot: { querySelector: () => null }, focus: sinon.spy() };
-      app._homeMenuNav = { home, menu: fakeMenu([]) };
-      app._focusHomeShortcut();
-      expect(home.focus).to.have.been.called;
-    });
-
-    test('_focusHomeShortcut is a no-op when no home is stashed', () => {
-      app._homeMenuNav = null;
-      expect(() => app._focusHomeShortcut()).to.not.throw();
-    });
-  });
-
   suite('ready listeners and snackbar', () => {
     test('drawer transitionrun triggers resize during animation', () => {
       const drawer = app.$.drawer;
@@ -1734,20 +1771,27 @@ suite('nuxeo-app', () => {
       app._resizeDuringAnimation.restore();
     });
 
-    test('default toast opening listener applies snackbar layout hacks', () => {
+    test('default toast opening listener applies snackbar layout hacks and mutes the label', () => {
       const { toast } = app.$;
       if (!toast) {
         return;
       }
+      const label = { style: {}, setAttribute: sinon.spy() };
       Object.defineProperty(toast, 'mdcRoot', {
         configurable: true,
         value: {
           style: {},
-          querySelector: sinon.stub().returns({ style: {} }),
+          querySelector: sinon.stub().callsFake((sel) => (sel === '.mdc-snackbar__label' ? label : { style: {} })),
         },
       });
       toast.dispatchEvent(new Event('MDCSnackbar:opening'));
       expect(toast.mdcRoot.style.position).to.equal('relative');
+      expect(label.setAttribute).to.have.been.calledWith('aria-hidden', 'true');
+    });
+
+    test('_muteSnackbarLabel does nothing while the label is not rendered', () => {
+      expect(() => app._muteSnackbarLabel({})).to.not.throw();
+      expect(() => app._muteSnackbarLabel({ mdcRoot: { querySelector: () => null } })).to.not.throw();
     });
   });
 
@@ -2029,6 +2073,161 @@ suite('nuxeo-app', () => {
     });
   });
 
+  // WEBUI-1880: the snackbar's own live region is built inside a hidden subtree, so the app owns a
+  // permanently visible live region and writes every toast message into it.
+  suite('toast screen reader announcements', () => {
+    function stubToast() {
+      return {
+        __state: {},
+        open: false,
+        close: sinon.spy(),
+        show: sinon.spy(),
+        querySelector: sinon.stub().returns({ hidden: false }),
+      };
+    }
+
+    test('the live region lives in the document body, not in shadow DOM', () => {
+      const announcer = app._getAnnouncer();
+      expect(announcer.parentNode).to.equal(document.body);
+      expect(announcer.getAttribute('role')).to.equal('status');
+      expect(announcer.getAttribute('aria-live')).to.equal('polite');
+      expect(announcer.getAttribute('aria-atomic')).to.equal('true');
+    });
+
+    test('_getAnnouncer reuses the single shared live region', () => {
+      expect(app._getAnnouncer()).to.equal(app._getAnnouncer());
+      expect(document.querySelectorAll('#nuxeo-toast-announcer')).to.have.lengthOf(1);
+    });
+
+    test('_announce fills the live region after the aria delay', async () => {
+      const clock = sinon.useFakeTimers();
+      try {
+        app._announce('CSV export is ready');
+        expect(app._getAnnouncer().textContent).to.equal('');
+        await clock.tickAsync(150);
+        expect(app._getAnnouncer().textContent).to.equal('CSV export is ready');
+      } finally {
+        clock.restore();
+      }
+    });
+
+    test('_announce clears the region first so an identical message is announced again', async () => {
+      const clock = sinon.useFakeTimers();
+      try {
+        app._announce('CSV export is ready');
+        await clock.tickAsync(650);
+        app._announce('CSV export is ready');
+        expect(app._getAnnouncer().textContent).to.equal('');
+        await clock.tickAsync(150);
+        expect(app._getAnnouncer().textContent).to.equal('CSV export is ready');
+      } finally {
+        clock.restore();
+      }
+    });
+
+    // WEBUI-1880: finishing a CSV export notifies twice in the same tick, once from
+    // nuxeo-csv-export-button and once from nuxeo-operation-button. Neither may silence the other.
+    test('_announce speaks both messages when two arrive in the same tick', async () => {
+      const clock = sinon.useFakeTimers();
+      try {
+        app._announce('CSV export is ready');
+        app._announce('Export CSV: completed successfully');
+        await clock.tickAsync(150);
+        expect(app._getAnnouncer().textContent).to.equal('CSV export is ready');
+        await clock.tickAsync(500);
+        expect(app._getAnnouncer().textContent).to.equal('');
+        await clock.tickAsync(150);
+        expect(app._getAnnouncer().textContent).to.equal('Export CSV: completed successfully');
+      } finally {
+        clock.restore();
+      }
+    });
+
+    test('_announce skips a duplicate of the message being announced', () => {
+      const clock = sinon.useFakeTimers();
+      try {
+        app._announce('CSV export is running');
+        app._announce('CSV export is running');
+        expect(app._announceQueue).to.have.lengthOf(0);
+      } finally {
+        clock.restore();
+      }
+    });
+
+    // The dedupe window must not outlive the clear phase. Once the text has landed in the region the
+    // message has been spoken, so an identical toast arriving later is a new event, not a replay.
+    test('_announce speaks a repeat that arrives after the message was spoken', async () => {
+      const clock = sinon.useFakeTimers();
+      try {
+        app._announce('CSV export is ready');
+        await clock.tickAsync(200); // past the aria delay, still inside the spacing window
+        expect(app._getAnnouncer().textContent).to.equal('CSV export is ready');
+        app._announce('CSV export is ready');
+        expect(app._announceQueue).to.deep.equal(['CSV export is ready']);
+        await clock.tickAsync(450); // spacing ends, the repeat is pumped and the region cleared
+        expect(app._getAnnouncer().textContent).to.equal('');
+        await clock.tickAsync(150);
+        expect(app._getAnnouncer().textContent).to.equal('CSV export is ready');
+      } finally {
+        clock.restore();
+      }
+    });
+
+    test('_announce caps the backlog and keeps the newest messages', () => {
+      const clock = sinon.useFakeTimers();
+      try {
+        ['a', 'b', 'c', 'd', 'e'].forEach((m) => app._announce(m));
+        // 'a' is being announced already; 'b' is dropped so the three newest survive
+        expect(app._announceQueue).to.deep.equal(['c', 'd', 'e']);
+      } finally {
+        clock.restore();
+      }
+    });
+
+    test('_announce ignores an empty message', async () => {
+      const clock = sinon.useFakeTimers();
+      try {
+        app._getAnnouncer().textContent = 'previous';
+        app._announce('');
+        app._announce(undefined);
+        await clock.tickAsync(150);
+        expect(app._getAnnouncer().textContent).to.equal('previous');
+      } finally {
+        clock.restore();
+      }
+    });
+
+    test('_notify announces the toast message', () => {
+      sinon.stub(app, '_getToastFor').returns(stubToast());
+      sinon.stub(app, '_announce');
+      app._notify({ detail: { commandId: 'cmd-3', message: 'CSV export is ready' } });
+      expect(app._announce).to.have.been.calledWith('CSV export is ready');
+      app._announce.restore();
+      app._getToastFor.restore();
+    });
+
+    test('_notify does not announce when the event carries no message', () => {
+      sinon.stub(app, '_getToastFor').returns(stubToast());
+      sinon.stub(app, '_announce');
+      app._notify({ detail: { commandId: 'cmd-4', close: true } });
+      expect(app._announce).to.not.have.been.called;
+      app._announce.restore();
+      app._getToastFor.restore();
+    });
+
+    test('detached cancels a pending announcement', async () => {
+      const clock = sinon.useFakeTimers();
+      try {
+        app._announce('CSV export is ready');
+        app.detached();
+        await clock.tickAsync(150);
+        expect(app._getAnnouncer().textContent).to.equal('');
+      } finally {
+        clock.restore();
+      }
+    });
+  });
+
   suite('accessibility and menu keyboard', () => {
     test('quick search is tabbable before main content without a transformed ancestor', () => {
       const { suggester, mainContent } = app.$;
@@ -2289,34 +2488,63 @@ suite('nuxeo-app', () => {
     });
   });
 
-  suite('home-link keyboard navigation (NXENG-527)', () => {
-    test('removes tabindex from home-link to prevent double Tab stop', () => {
-      const homeLink = app.shadowRoot && app.shadowRoot.querySelector('.home-link');
-      expect(homeLink).to.exist;
-      expect(homeLink.hasAttribute('tabindex')).to.be.false;
+  suite('logo home link (WEBUI-2315)', () => {
+    const logo = () => app.shadowRoot && app.shadowRoot.querySelector('#logo');
+
+    test('the logo is an anchor whose href resolves the home route', async () => {
+      const el = logo();
+      expect(el).to.exist;
+      expect(el.localName).to.equal('a');
+      // The fixture starts without a router, so RoutingBehavior has not computed urlFor yet.
+      // Install a fake router for the assertion and restore the global one, so the shared
+      // single-graph test run is left exactly as it was found.
+      const savedRouter = RoutingBehavior.__router;
+      try {
+        app.router = { baseUrl: '/ui/', useHashbang: true, home: () => 'home' };
+        await flush();
+        const href = el.getAttribute('href');
+        expect(href).to.be.a('string').and.not.empty;
+        expect(href).to.equal(app.urlFor('home'));
+        expect(href).to.contain('home');
+      } finally {
+        RoutingBehavior.__router = savedRouter;
+      }
     });
 
-    test('home-link is inside menuContainer but outside paper-listbox', () => {
-      const homeLink = app.shadowRoot && app.shadowRoot.querySelector('.home-link');
-      const menuContainer = app.shadowRoot && app.shadowRoot.querySelector('#menuContainer');
-      const menu = app.shadowRoot && app.shadowRoot.querySelector('#menu');
-
-      expect(homeLink).to.exist;
-      expect(menuContainer).to.exist;
-      expect(menu).to.exist;
-
-      expect(menuContainer.contains(homeLink)).to.be.true;
-      expect(menu.contains(homeLink)).to.be.false;
+    test('the standalone home shortcut is gone from the drawer', () => {
+      expect(app.shadowRoot.querySelector('.home-link')).to.not.exist;
+      expect(app.shadowRoot.querySelector('nuxeo-menu-icon[name="home"]')).to.not.exist;
     });
 
-    test('home-link remains programmatically focusable after tabindex removal', () => {
-      const homeLink = app.shadowRoot && app.shadowRoot.querySelector('.home-link');
-      expect(homeLink).to.exist;
-      // Should be able to focus programmatically (no tabindex="-1" which would prevent focus)
-      const focusSpy = sinon.spy(homeLink, 'focus');
-      homeLink.focus();
-      expect(focusSpy).to.have.been.called;
-      focusSpy.restore();
+    test('the logo is a single Tab stop with no nested interactive element', () => {
+      const el = logo();
+      // An <a href> is focusable on its own: no tabindex is needed, and none is set that could
+      // add a second stop (the NXENG-527 shortcut needed its host attributes stripped for this).
+      expect(el.hasAttribute('tabindex')).to.be.false;
+      expect(el.querySelectorAll('a, button, [tabindex], [role="button"], [role="link"]')).to.have.length(0);
+    });
+
+    test('the logo is named by its destination, not only by the image', () => {
+      const el = logo();
+      // Both labels are bound through i18n before the setup stub is installed, so assert they
+      // resolved to translations rather than to the raw message keys.
+      const label = el.getAttribute('aria-label');
+      expect(label).to.be.a('string').and.not.empty;
+      expect(label).to.not.equal('app.home');
+      const alt = el.querySelector('img').getAttribute('alt');
+      expect(alt).to.be.a('string').and.not.empty;
+      expect(alt).to.not.equal('accessibility.logo');
+    });
+
+    test('clicking the logo resets the task selection', () => {
+      const el = logo();
+      app.currentTask = { id: 'task-1' };
+      app.currentTaskId = 'task-1';
+      // Swallow the navigation the anchor would otherwise perform on the test page.
+      el.addEventListener('click', (e) => e.preventDefault(), { once: true });
+      el.click();
+      expect(app.currentTask).to.be.null;
+      expect(app.currentTaskId).to.be.null;
     });
   });
 });

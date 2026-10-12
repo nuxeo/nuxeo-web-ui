@@ -82,7 +82,7 @@ Polymer({
       }
 
       .file-to-import {
-        height: 58px;
+        min-height: 58px;
         margin: 0 0.3em 0.8em;
         width: calc(50% - 3em);
         padding: 0.8em 1em;
@@ -136,7 +136,7 @@ Polymer({
         display: block;
         font-weight: normal;
         font-size: 0.75rem;
-        line-height: 10px;
+        line-height: 1.5;
         margin-top: 4px;
       }
 
@@ -149,7 +149,7 @@ Polymer({
       }
 
       #dropzone .file-error {
-        white-space: nowrap;
+        white-space: normal;
       }
 
       #sidePanel {
@@ -188,7 +188,7 @@ Polymer({
         font-weight: bold;
         text-transform: none;
         color: var(--secondary-text-color);
-        height: 88px;
+        min-height: 88px;
       }
 
       .file-overview:hover {
@@ -212,7 +212,8 @@ Polymer({
         font-weight: bold;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
-        height: 40px; /* XXX: 2 * line height, consider extracting variable at the base theme leve */
+        /* min-height, not height: the two clamped lines must still fit when the user increases line spacing */
+        min-height: 40px;
         word-break: break-all;
         overflow: hidden;
       }
@@ -292,6 +293,54 @@ Polymer({
 
       .buttons {
         @apply --buttons-bar;
+        @apply --layout-wrap;
+        flex-shrink: 0;
+        gap: 4px 8px;
+        /* Lets the navigation group react to the bar's own rendered width instead of the
+           viewport's, so the layout below adapts the same way at any zoom level or screen
+           resolution instead of only around the width a fixed viewport breakpoint assumed. */
+        container-type: inline-size;
+      }
+
+      /* Groups the navigation buttons so they wrap as a single block instead of each
+         inline-block button breaking onto a line of its own. */
+      .navigation {
+        @apply --layout-horizontal;
+        @apply --layout-center;
+        @apply --layout-center-justified;
+        @apply --layout-wrap;
+        gap: 4px 8px;
+      }
+
+      /* paper-button's default horizontal margin is replaced by the flex gap, so that the
+         three buttons still fit on one line once the group has a row to itself. */
+      .navigation paper-button {
+        margin: 0;
+      }
+
+      /* Below this width the five action buttons no longer fit on a single line. Give the
+         navigation group a row of its own above the cancel/create row so none of the
+         buttons is misaligned or clipped by the dialog. */
+      @container (max-width: 620px) {
+        .navigation {
+          order: -1;
+          flex: 1 0 100%;
+        }
+      }
+
+      /* Lets the editor/side-panel area give up space instead of pushing the action bar
+         past the bottom edge of the dialog. */
+      .customize-content {
+        min-height: 0;
+        overflow: auto;
+      }
+
+      /* At extreme zoom the dialog itself can be too short to fit the content area and
+         the (possibly stacked) action bar together, even with the content area shrunk to
+         nothing. Make the whole stage scrollable so the buttons stay reachable instead of
+         being clipped past the dialog's bottom edge. */
+      div[name='customize'] {
+        overflow-y: auto;
       }
 
       .add-more .importActions {
@@ -369,6 +418,9 @@ Polymer({
         border: none;
         cursor: pointer;
         font: inherit;
+        /* WCAG 2.1 SC 1.4.12: the UA stylesheet resets text spacing on form controls, so opt back in */
+        letter-spacing: inherit;
+        word-spacing: inherit;
       }
 
       button.link:hover {
@@ -542,7 +594,7 @@ Polymer({
 
       <!--Stage: allow the user to fill in properties for the uploaded files and create the respective documents-->
       <div name="customize" class="vertical layout flex">
-        <div class="horizontal layout flex">
+        <div class="customize-content horizontal layout flex">
           <div id="blobEditor" class="vertical layout flex">
             <paper-dialog-scrollable>
               <div class="suggester">
@@ -654,7 +706,7 @@ Polymer({
             [[i18n('command.cancel')]]
           </paper-button>
 
-          <div>
+          <div class="navigation">
             <paper-button
               noink
               class="text"
@@ -1108,8 +1160,11 @@ Polymer({
     const nodes = innerLayout._getValidatableElements(innerLayout.element.root);
     const invalidField = nodes.find((node) => node.invalid);
     if (invalidField) {
-      invalidField.scrollIntoView();
-      invalidField.focus();
+      // `nearest` keeps the error summary that nuxeo-document-layout scrolled to the top of the
+      // form in view, instead of pushing it out by aligning the field with the top. Focusing
+      // would scroll again, undoing that.
+      invalidField.scrollIntoView({ block: 'nearest' });
+      invalidField.focus({ preventScroll: true });
     }
   },
 
@@ -1239,7 +1294,7 @@ Polymer({
     for (let i = 0; i < args.length; i++) {
       const current = args[i];
       if (current && current.entries) {
-        response.entries.concat(current.entries);
+        response.entries.push(...current.entries);
       } else {
         response.entries.push(current);
       }
@@ -1305,15 +1360,14 @@ Polymer({
       if (errorFree.length < results.length) {
         this.set('_creating', false);
         this.set('_importWithPropertiesError', 'These documents could not be created.');
+        // splice from the highest index down, so that removals do not shift the indexes still to be removed
         localIndexes
-          .sort()
-          .reverse()
+          .sort((a, b) => b - a)
           .forEach((index) => {
             this.splice('localFiles', index, 1);
           });
         remoteIndexes
-          .sort()
-          .reverse()
+          .sort((a, b) => b - a)
           .forEach((index) => {
             this.splice('remoteFiles', index, 1);
           });

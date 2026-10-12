@@ -125,9 +125,13 @@ async function poll(fn, { timeout = 15000, interval = 250, what = 'condition' } 
   }
 }
 
+const SENSITIVE_HEADER = /^(authorization|cookie|set-cookie|proxy-authorization|x-auth-token|x-nuxeo-token)$/i;
+
+const headerValue = (name, value) => (SENSITIVE_HEADER.test(name) ? '<redacted>' : String(value));
+
 const asHeaders = (headers = {}) =>
   Object.entries(headers).map(([name, value]) => {
-    return { name, value: String(value) };
+    return { name, value: headerValue(name, value) };
   });
 
 /** Collects CDP network events into a HAR 1.2 document and a flat jsonl log. */

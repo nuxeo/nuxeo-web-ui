@@ -55,6 +55,51 @@ suite('nuxeo-document-info', () => {
     });
   });
 
+  suite('text spacing (WCAG 1.4.12)', () => {
+    // Reproduces what the running app applies to these labels: the truncation carried by the theme's
+    // --nuxeo-label mixin, plus the text spacing a user is allowed to override per WCAG 2.1 AA 1.4.12.
+    const THEME_AND_SPACING_CSS = `
+      label {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      label {
+        line-height: 1.5 !important;
+        letter-spacing: 0.12em !important;
+        word-spacing: 0.16em !important;
+      }
+    `;
+
+    setup(() => {
+      const style = document.createElement('style');
+      style.textContent = THEME_AND_SPACING_CSS;
+      element.shadowRoot.appendChild(style);
+    });
+
+    test('should let labels wrap instead of truncating them', () => {
+      const labels = Array.from(element.shadowRoot.querySelectorAll('.item label'));
+      expect(labels.length).to.be.above(0);
+      labels.forEach((label) => {
+        const labelStyle = getComputedStyle(label);
+        expect(labelStyle.whiteSpace).to.equal('normal');
+        expect(labelStyle.overflow).to.equal('visible');
+        expect(labelStyle.textOverflow).to.equal('clip');
+      });
+    });
+
+    test('should not lose label content when the user overrides text spacing', () => {
+      const row = document.createElement('div');
+      row.className = 'item';
+      const label = document.createElement('label');
+      // a translated label ("Last Modified" in French) — longer than the label column, so it has to wrap
+      label.textContent = 'Dernière modification';
+      row.appendChild(label);
+      element.shadowRoot.appendChild(row);
+      expect(label.scrollWidth, 'label text is truncated').to.be.at.most(label.clientWidth + 1);
+    });
+  });
+
   suite('_documentChanged', () => {
     test('should set _showProcess to true when doc has running workflows', () => {
       element.document = {

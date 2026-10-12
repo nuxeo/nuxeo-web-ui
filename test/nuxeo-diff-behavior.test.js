@@ -302,6 +302,46 @@ suite('DiffBehavior', () => {
     });
   });
 
+  suite('_getArrayDelta on arrays of ten or more entries', () => {
+    const items = (count, factory) => Array.from({ length: count }, (_, i) => factory(i));
+
+    test('should remove the entries the delta points at when hiding deletions', () => {
+      const originalValue = items(12, (i) => `item-${i}`);
+      const delta = { _t: 'a', _2: ['item-2', 0, 0], _11: ['item-11', 0, 0] };
+      const result = ctx._getArrayDelta(delta, originalValue, [], false, true);
+      expect(result.map((d) => d.originalValue)).to.deep.equal(
+        originalValue.filter((value) => value !== 'item-2' && value !== 'item-11'),
+      );
+    });
+
+    test('should mark the entry the delta points at when an addition precedes it', () => {
+      const originalValue = items(12, (i) => {
+        return { name: `item-${i}` };
+      });
+      const delta = { _t: 'a', 2: [{ name: 'added' }], 10: { name: ['item-10', 'renamed'] } };
+      const result = ctx._getArrayDelta(delta, originalValue, originalValue);
+      const unchanged = result.filter((d) => d.change === 'unchanged').map((d) => d.originalValue.name);
+      expect(unchanged).to.include('item-9');
+      expect(unchanged).to.not.include('item-10');
+    });
+
+    test('should apply a deletion before the addition that takes the same position', () => {
+      const originalValue = items(12, (i) => `item-${i}`);
+      const delta = { _t: 'a', _3: ['item-3', 0, 0], 3: ['inserted'] };
+      const result = ctx._getArrayDelta(delta, originalValue, originalValue);
+      expect(result.filter((d) => d.index === '3').map((d) => d.change)).to.deep.equal(['deleted', 'added']);
+      expect(result.filter((d) => d.change === 'unchanged').map((d) => d.originalValue)).to.not.include('item-3');
+    });
+
+    test('should order the resulting entries by numeric index', () => {
+      const originalValue = items(12, (i) => `item-${i}`);
+      const delta = { _t: 'a', 11: ['added'] };
+      const result = ctx._getArrayDelta(delta, originalValue, originalValue);
+      expect(result.map((d) => Number(d.index))).to.deep.equal([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 11]);
+      expect(result[result.length - 1].change).to.equal('added');
+    });
+  });
+
   suite('_computeType', () => {
     test('should resolve type from schema fields', () => {
       ctx.type = 'string';

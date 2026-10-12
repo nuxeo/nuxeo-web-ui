@@ -40,6 +40,9 @@ listed, call `mcp_auth` for the Atlassian server first.
   *Issue / Root cause / Fix provided / Steps to reproduce / Steps to verify / Areas affected*
   produced by the `fix-nuxeo-web-ui-bug` skill) and for **PR links**. Also check
   `getJiraIssueRemoteIssueLinks` for linked PRs if the comments don't have them.
+  If the PRs are known but have **no remote web link** on the parent, that's a gap on the parent —
+  add them per [`fix-nuxeo-web-ui-bug` → Phase 6.5](../../fix-nuxeo-web-ui-bug/SKILL.md#phase-65--link-every-pr-on-the-jira-issue-as-a-remote-web-link-mandatory)
+  while you're here, so QA can reach the PRs from the ticket.
 - **Metadata to inherit** — `components` (copy to the sub-task), `fixVersions`, `priority`.
 
 If the fix details are missing (no fix-summary comment, no PRs, ticket not yet resolved), do NOT

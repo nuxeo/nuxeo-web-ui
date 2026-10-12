@@ -5,7 +5,7 @@ description: >-
   ELEMENTS-<id>/other ticket whose fix lands in nuxeo-web-ui) in the
   nuxeo-web-ui repo: runs fully autonomously end-to-end (YOLO mode, no
   confirmation gates), analyse the ticket + all comments, reproduce
-  and capture evidence (images AND videos) to ~/Desktop/<TICKET-ID>/ first, then branch from both
+  and capture evidence (images AND videos) to ~/Desktop/jira-evidence/<TICKET-ID>/fix/ first, then branch from both
   lts-2025 and maintenance-3.1.x, fix without inducing regressions, run the PR gating
   checks, create signed-commit PRs on both bases, watch CI and fix/rerun
   failures, then evaluate the Ready-for-QA checklist. Use when asked to fix a
@@ -37,6 +37,32 @@ Useful constants:
 - Ready-for-QA checklist page: `4169400498` · Signed-commits guide: `4125330218`
 - Upstream repo: `nuxeo/nuxeo-web-ui` · bases: `lts-2025` and `maintenance-3.1.x`
 
+### Filesystem layout — write only inside these two roots
+Every file this skill creates belongs under one of these. Both are keyed by ticket id so a finished
+ticket is one `rm -rf` away, and neither ever puts a loose folder next to unrelated work.
+
+| What | Where |
+|---|---|
+| Evidence (screenshots, videos, logs, repro scratch) | `~/Desktop/jira-evidence/<TICKET-ID>/fix/` |
+| Code workspaces (extra checkouts for the second base or sibling repo) | `~/Desktop/Projects/WebUI/worktrees/<TICKET-ID>/<base>/<repo-role>/` |
+
+> **Never create a folder directly on `~/Desktop`.** Evidence goes in the ticket's `fix/` subfolder;
+> `reproduce/` and `validation/` are sibling subfolders owned by the `reproduce-nuxeo-web-ui-bug` and
+> `bug-fix-validation` skills, so all three phases of a ticket collect in one place.
+>
+> **Never create a worktree directly in `~/Desktop/Projects/WebUI/`** — that directory holds the
+> primary `nuxeo-web-ui` / `nuxeo-elements` clones, and loose worktrees there accumulate silently
+> (each carries its own `node_modules`, ~1 GB apiece). `<repo-role>` is `web-ui` or `elements` under
+> the base-specific workspace. Phase 10 removes the ticket's worktree folder.
+
+Export both once at the start of the run and use the variables everywhere after:
+```bash
+export TICKET=WEBUI-<id>                            # or ELEMENTS-<id>
+export EVID="$HOME/Desktop/jira-evidence/$TICKET/fix"
+export WT="$HOME/Desktop/Projects/WebUI/worktrees/$TICKET"
+mkdir -p "$EVID"
+```
+
 ## Setup check — first-time users
 Before the first run on a new machine, verify the environment is set up. If anything is missing,
 **pause and walk the user through it** (point them at [`.cursor/skills/README.md`](../README.md),
@@ -63,10 +89,40 @@ immediately proceed — do not wait for approval.** Re-plan on the fly if scope 
 - Read the description **and every comment** (repro steps, expected vs actual, affected
   versions). Note `fixVersions` — they map to the base branches you must target.
 
+## Phase 1.5 — Take an isolated ticket workspace (before touching anything)
+**Never work on a ticket in the shared checkout, and never `git stash` to make room for it.** The
+shared clone is usually mid-flight on someone else's ticket, and a stash is a global stack: another
+agent can pop yours, or you can pop theirs. Instead give this ticket its own clone, node_modules,
+Docker container, host port and build dirs:
+```bash
+bash .cursor/skills/fix-nuxeo-web-ui-bug/scripts/new-ticket-workspace.sh <TICKET-ID> <base> \
+  --branch <type>-WEBUI-<id>-<kebab-summary>-<base>
+. <printed path>/env.sh     # exports NX_WT, NX_BASE, NX_EVIDENCE, NX_CONTAINER, NX_PORT, NX_URL, NX_DIST_*
+```
+Do this **once per base** (`lts-2025` and `maintenance-3.1.x` each get their own workspace), then
+**move your working directory to `$NX_WT` and run every later command from there.** The script is
+idempotent — re-running it re-prints `env.sh` — and `--remove` tears the workspace down at the end
+(Phase 10) while keeping the evidence. See the header of the script for all options.
+
+Why it matters: one working tree can only be on one branch, so agents sharing the shared clone fight
+over `HEAD`, over `node_modules`, and over the stash stack. A git *worktree* is not enough — it still
+shares refs, config and stashes with its parent.
+
+**Parallel-safety rules that follow from this:**
+- Run everything from `$NX_WT`; never `git`-write in the shared reference checkout.
+- Never `git stash` anywhere. If you must set changes aside, use `git diff > /tmp/<ticket>.patch`.
+- Never kill processes by a shared pattern (`pkill -f web-test-runner`, `pkill -f node`, `docker rm`
+  on a container you did not create). Those match another agent's run and kill it mid-flight — a
+  suite that dies with "the browser disconnected" and exit code 143 is usually someone else's stray
+  `pkill`, not your change. Kill only PIDs you started, and only your own `$NX_CONTAINER`.
+- If the shared checkout is dirty when you arrive, **leave it alone** — the workspace means you
+  never need it to be clean.
+
 ## Phase 2 — Reproduce + capture evidence (first hands-on step)
-**Reproduce the bug on the `lts-2025` branch before creating any feature branch or touching code.**
-Confirming the bug exists — and capturing the "before" evidence — is the first thing you do after
-understanding the ticket. Check out the base first so the repro reflects released code:
+**Reproduce the bug on the base branch before writing any code.** Confirming the bug exists — and
+capturing the "before" evidence — is the first thing you do after taking the workspace. The
+workspace is already checked out at the base (or at the `--branch` you asked for, which is cut from
+it), so the repro reflects released code. Only if you are not using a workspace:
 ```bash
 git fetch origin lts-2025
 git switch -c lts-2025 origin/lts-2025 2>/dev/null || git switch lts-2025 && git pull --ff-only
@@ -78,9 +134,10 @@ git switch -c lts-2025 origin/lts-2025 2>/dev/null || git switch lts-2025 && git
 > **Always capture BOTH images and videos** — before *and* after. Screenshots for the ticket/summary,
 > screen recordings for QA. Capture both every time; never ask which format.
 
-Create the evidence folder up front and put **before/after** screenshots, **videos**, and logs there:
+Create the evidence folder up front and put **before/after** screenshots, **videos**, and logs there.
+It is the ticket's `fix/` subfolder — never a folder directly on `~/Desktop`:
 ```bash
-mkdir -p ~/Desktop/<TICKET-ID>   # e.g. WEBUI-1234 or ELEMENTS-1856
+mkdir -p "$EVID"   # ~/Desktop/jira-evidence/WEBUI-1234/fix (or ELEMENTS-1856)
 ```
 - Reproduce against a real instance. If the bug needs a special setup (e.g. multi-repository),
   stand up a throwaway Docker instance rather than touching any live container; remove it with
@@ -123,14 +180,20 @@ curl -s -u Administrator:Administrator -H "Content-Type: application/json" -X PO
 
 ### Skew-free A/B by deploying your own build for BOTH states
 `npm run build` is fast (~15s), so build twice and deploy each into the container's UI dir. Both
-captures then use the *same* dev build, differing only by your fix (eliminates marketplace skew):
+captures then use the *same* dev build, differing only by your fix (eliminates marketplace skew).
+Set the fix aside with a **patch file, never `git stash`** — the stash stack is shared with every
+other worktree of the clone, so a stash here can be popped by (or strand) another ticket's agent:
 ```bash
-UI=$(docker exec nx-<ticket> sh -lc 'find /opt/nuxeo/server -type d -name ui -path "*nuxeo.war*"' | head -1)
-npm run build && cp -R dist /tmp/dist-patched                 # current tree (with fix)
-git stash && npm run build && cp -R dist /tmp/dist-unpatched && git stash pop   # baseline
-docker cp /tmp/dist-unpatched/. nx-<ticket>:"$UI/"            # deploy BEFORE, capture
-docker cp /tmp/dist-patched/.   nx-<ticket>:"$UI/"            # deploy AFTER,  capture
+UI=$(docker exec "$NX_CONTAINER" sh -lc 'find /opt/nuxeo/server -type d -name ui -path "*nuxeo.war*"' | head -1)
+npm run build && cp -R dist "$NX_DIST_PATCHED"                # current tree (with fix)
+git diff > /tmp/$NX_TICKET.patch && git checkout -- .         # set the fix aside
+npm run build && cp -R dist "$NX_DIST_UNPATCHED"              # baseline
+git apply /tmp/$NX_TICKET.patch                               # put the fix back
+docker cp "$NX_DIST_UNPATCHED/." "$NX_CONTAINER:$UI/"         # deploy BEFORE, capture
+docker cp "$NX_DIST_PATCHED/."   "$NX_CONTAINER:$UI/"         # deploy AFTER,  capture
 ```
+`git checkout -- .` only reverts tracked files, so check `git status` first and move any untracked
+work out of the way; confirm the fix is back (`git diff --stat`) before you commit anything.
 Confirm the deployed bundle actually changed (addon elements land in a hashed
 `dist/<addon>.<hash>.bundle.js`): `rg -c "<the-markup-you-added>" /tmp/dist-*/…bundle.js`.
 
@@ -153,12 +216,12 @@ Confirm the deployed bundle actually changed (addon elements land in a hashed
 
 ### Video capture (required — before AND after)
 QA and the Ready-for-QA checklist expect a short screen recording of the bug and the fix, not just
-stills. Record both `~/Desktop/WEBUI-<id>/WEBUI-<id>-before.mp4` and `-after.mp4`.
+stills. Record both `$EVID/<TICKET-ID>-before.mp4` and `-after.mp4`.
 
 Drive a headless Chrome with Puppeteer and record with `puppeteer-screen-recorder` (it bundles its
 own ffmpeg, so no system ffmpeg is needed). Do it in a throwaway repro dir, not the repo:
 ```bash
-mkdir -p ~/Desktop/WEBUI-<id>/repro && cd ~/Desktop/WEBUI-<id>/repro
+mkdir -p "$EVID/repro" && cd "$EVID/repro"
 [ -f package.json ] || echo '{"name":"repro","private":true}' > package.json
 npm install puppeteer puppeteer-screen-recorder
 ```
@@ -176,7 +239,9 @@ await page.evaluateOnNewDocument(() => { window.automationReady = true; });
 await page.setViewport({ width: 1280, height: 800 });
 await page.setCacheEnabled(false);
 const rec = new PuppeteerScreenRecorder(page, { fps: 25, videoFrame: { width: 1280, height: 800 } });
-await rec.start('/Users/<you>/Desktop/WEBUI-<id>/WEBUI-<id>-after.mp4');
+// Absolute path required — pass process.env.EVID rather than a literal, so it always lands in
+// ~/Desktop/jira-evidence/<TICKET-ID>/fix/ even when the MCP/recorder resolves cwd differently.
+await rec.start(`${process.env.EVID}/${process.env.TICKET}-after.mp4`);
 /* ...navigate + interact (type creds with { delay: 90 }, add short sleeps so the flow is followable)... */
 await rec.stop(); await browser.close();
 ```
@@ -205,15 +270,31 @@ instance's root html tree into `ui/elements/` so they resolve. Patching the mark
 minified code is unreliable (the error-handling code path and property names drift between versions).
 
 ## Phase 3 — Branches (both bases)
-**Only after the bug is reproduced on `lts-2025`**, create one feature branch per base — cut from the
-bases, not from your local repro state — named per the `nuxeo-web-ui-pr` skill
-(`<type>-WEBUI-<id>-<kebab-summary>-<base>`):
+**Only after the bug is reproduced on `lts-2025`**, make sure there is one feature branch per base —
+cut from the bases, not from your local repro state — named per the `nuxeo-web-ui-pr` skill
+(`<type>-WEBUI-<id>-<kebab-summary>-<base>`). If you passed `--branch` to
+`new-ticket-workspace.sh` (Phase 1.5) the branch already exists in each workspace and there is
+nothing to do here; each base lives in its own workspace, so you never switch branches. Otherwise:
 ```bash
 git fetch origin lts-2025 maintenance-3.1.x
 git switch -c <type>-WEBUI-<id>-<summary>-lts-2025 origin/lts-2025
 git switch -c <type>-WEBUI-<id>-<summary>-maintenance-3.1.x origin/maintenance-3.1.x
 ```
 Implement on `lts-2025` first, then cherry-pick to `maintenance-3.1.x` (see the PR skill's backport section).
+
+### If you need both bases checked out at once, use `$WT` — not a loose folder
+Switching branches in the primary clone is enough for most fixes. Only when you genuinely need two
+bases (or a sibling `nuxeo-elements` checkout) live at the same time — a side-by-side build, an A/B
+capture — create worktrees, and create them **under the ticket's `$WT` folder**:
+```bash
+mkdir -p "$WT"
+git -C ~/Desktop/Projects/WebUI/nuxeo-web-ui   worktree add "$WT/webui-m31"    <branch-m31>
+git -C ~/Desktop/Projects/WebUI/nuxeo-elements worktree add "$WT/elements-lts" <branch-lts>
+```
+Roles are `webui-lts`, `webui-m31`, `elements-lts`, `elements-m31`. This keeps every checkout for the
+ticket in one deletable folder instead of scattering `wt-<ticket>-*` directories across
+`~/Desktop/Projects/WebUI/`, which is how ~100 stale worktrees and 36 GB once accumulated unnoticed.
+Tear them down in Phase 10.
 
 ## Phase 4 — Fix (no new induced issues)
 > **Fix autonomously (no confirmation).** Once the issue is reproduced and the "before" evidence is
@@ -265,6 +346,64 @@ This is the "commit and raise PR" trigger.
   `gh api repos/nuxeo/nuxeo-web-ui/commits/<sha> --jq '.commit.verification'` → `verified:true`.
   `unknown_key` means the signing key isn't added on GitHub as a **Signing Key** (separate
   from an Authentication key) — fix that, no re-push needed.
+
+## Phase 6.5 — Link every PR on the Jira issue as a remote **web link** (MANDATORY)
+> ### ⛔ NON-NEGOTIABLE — this is a separate action, not a side effect of anything else
+> The moment a PR exists, add it to the ticket as a Jira **remote web link** (what shows under the
+> issue's *Web links* / *Links* section). This is the step that keeps getting skipped; treat it as part
+> of "raise the PR", not as paperwork for later.
+
+**None of these count as done.** If you only did one of them, the step is still outstanding:
+- ❌ pasting the PR URL inside a Jira **comment** (Phase 7.5 does that too — it is *not* a web link);
+- ❌ the **PR title / branch name containing `WEBUI-<id>`** (that is a GitHub-side convention);
+- ❌ a link **on the GitHub side** pointing at the Jira issue, or the Jira dev-panel/Smart-Commit
+  integration picking the key up (it may never fire — do not rely on it);
+- ❌ an **issue link** created with `createIssueLink` (that links Jira issue ↔ Jira issue only and
+  rejects a URL).
+
+**The Atlassian MCP cannot do this — there is no create-remote-link tool.** It exposes only
+`getJiraIssueRemoteIssueLinks` (read) and `createIssueLink` (issue↔issue). Reaching for MCP here finds
+nothing and is exactly the trap that makes this step get dropped. **The Jira REST `remotelink`
+endpoint is the required path**, with the same `~/.jira_email` / `~/.jira_token` credentials used for
+attachments (Phase 7.5).
+
+1. **Create one remote link per PR — including every backport** (so two links for the standard
+   `lts-2025` + `maintenance-3.1.x` pair). `globalId` = the PR URL makes it an **upsert**, so
+   re-running is idempotent and never duplicates:
+   ```bash
+   U="$(cat ~/.jira_email):$(cat ~/.jira_token)"
+   TICKET=WEBUI-<id>
+   SUMMARY="<the ticket summary>"
+   for E in <pr1>:lts-2025 <pr2>:maintenance-3.1.x; do   # one entry per PR opened for this ticket
+     N=${E%%:*}; B=${E##*:}; URL="https://github.com/nuxeo/nuxeo-web-ui/pull/$N"
+     curl -s -u "$U" -H "Content-Type: application/json" -X POST \
+       "https://hyland.atlassian.net/rest/api/3/issue/$TICKET/remotelink" \
+       -d "{\"globalId\":\"$URL\",
+            \"application\":{\"type\":\"com.github\",\"name\":\"GitHub\"},
+            \"relationship\":\"mentioned in\",
+            \"object\":{\"url\":\"$URL\",\"title\":\"PR #$N — $TICKET: $SUMMARY ($B)\",
+              \"icon\":{\"url16x16\":\"https://github.githubassets.com/favicon.ico\",\"title\":\"GitHub\"}}}"
+   done
+   ```
+   Expect `201` (created) or `200` (updated) per PR; anything else means it did **not** land.
+2. **Verify by reading the links back and asserting one per PR.** Do not take the POST response as
+   proof — `GET /remotelink` is the check, and it must list every PR:
+   ```bash
+   curl -s -u "$U" "https://hyland.atlassian.net/rest/api/3/issue/$TICKET/remotelink" \
+     | PRS="<pr1> <pr2>" python3 -c "
+   import json,os,sys
+   links=json.load(sys.stdin)
+   for l in links: print('•', l['object']['title'], '->', l['object']['url'])
+   have={(l.get('globalId') or '').rsplit('/',1)[-1] for l in links}
+   missing=set(os.environ['PRS'].split())-have
+   print('❌ MISSING remote web link for PR(s):', sorted(missing)) if missing else print('✅ one remote web link per PR')
+   sys.exit(1 if missing else 0)"
+   ```
+3. **Print the resulting link titles/URLs** in your summary so the state is on the record. If a PR is
+   opened later (e.g. a second backport), come back and add its link too.
+
+**Exit gate:** the `GET /remotelink` check above exits 0 — one remote web link per PR opened for this
+ticket, backports included.
 
 ## Phase 7 — Watch checks; fix or rerun
 ```bash
@@ -330,7 +469,7 @@ Stored credentials (created for this account, outside the repo — never commit 
 If `~/.jira_token` exists, upload attachments directly — no need to ask the user for a token. First
 verify auth (`GET /rest/api/3/myself`), then upload:
 ```bash
-cd ~/Desktop/<TICKET-ID>
+cd "$EVID"
 U="$(cat ~/.jira_email):$(cat ~/.jira_token)"
 for f in <TICKET-ID>-before.png <TICKET-ID>-before.mp4 <TICKET-ID>-after.png <TICKET-ID>-after.mp4; do
   curl -s -u "$U" -H "X-Atlassian-Token: no-check" -F "file=@$f" \
@@ -381,13 +520,31 @@ fix-summary comment (Phase 7.5). Use exactly these sections, in this order:
      permissions table untouched; unit suite still green"). Keep it honest — only list something as
      unaffected once you've actually checked.
 
-Reference the evidence in both formats: `~/Desktop/<TICKET-ID>/<TICKET-ID>-before.{png,mp4}` and
-`-after.{png,mp4}`.
+Reference the evidence in both formats: `~/Desktop/jira-evidence/<TICKET-ID>/fix/<TICKET-ID>-before.{png,mp4}`
+and `-after.{png,mp4}`.
 
 ## Phase 10 — Clean up & report
-- Tear down the throwaway repro container(s): `docker rm -f nx-<ticket>`. Never remove or disturb
-  pre-existing/live containers.
-- Leave the evidence files in `~/Desktop/<TICKET-ID>/` so they can be attached to the ticket.
+- Tear down each ticket workspace once its PR is open — this also removes the container and the
+  build dirs, and keeps the evidence:
+  `bash .cursor/skills/fix-nuxeo-web-ui-bug/scripts/new-ticket-workspace.sh <TICKET-ID> <base> --remove`
+  (it refuses to delete uncommitted work unless you add `--force`). Without a workspace, remove the
+  throwaway repro container by hand: `docker rm -f nx-<ticket>`. Never remove or disturb
+  pre-existing/live containers, or another ticket's workspace.
+- If you created manual worktrees under `$WT`, remove every worktree before dropping the folder. Use
+  `git worktree remove` (not `rm -rf`) so each repo's `.git/worktrees` metadata is cleaned up at the
+  same time; the branches themselves survive, so nothing is lost:
+  ```bash
+  for repo in nuxeo-web-ui nuxeo-elements; do
+    R="$HOME/Desktop/Projects/WebUI/$repo"
+    git -C "$R" worktree list --porcelain | awk '/^worktree /{print $2}' | grep -F "/worktrees/$TICKET/" \
+      | while read -r w; do git -C "$R" worktree remove --force "$w"; done
+    git -C "$R" worktree prune
+  done
+  rmdir "$WT" 2>/dev/null   # empty once every worktree is removed
+  ```
+  Verify nothing is left: `git -C <repo> worktree list | grep "$TICKET"` prints nothing.
+- Leave the evidence files in `~/Desktop/jira-evidence/<TICKET-ID>/fix/` so they can be attached to
+  the ticket — evidence is the one thing that outlives the run.
 - Report the final CI state of both PRs. If a long cross-repo check (e.g. `web-ui`) is still
   running, say so explicitly — do **not** claim green until it is.
 
@@ -404,6 +561,8 @@ Reference the evidence in both formats: `~/Desktop/<TICKET-ID>/<TICKET-ID>-befor
 
 ## Guardrails (these still hold in YOLO mode)
 - Never force-push to `lts-2025` / `maintenance-3.1.x`; only to feature branches (`--force-with-lease`).
+- Never `git stash`, never git-write in the shared reference checkout, and never kill processes or
+  containers by a pattern that could match another agent's run (Phase 1.5).
 - Never edit git config silently beyond the one-time signing setup; confirm global config changes.
 - Keep the PR scoped to the fix — never bundle unrelated files.
 - YOLO relaxes *confirmation gates only*. It does **not** authorize destructive/irreversible git

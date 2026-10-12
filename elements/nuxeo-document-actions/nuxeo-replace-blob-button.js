@@ -47,7 +47,12 @@ Polymer({
     <dom-if if="[[_isAvailable(document)]]">
       <template>
         <div class="action" on-tap="_toggleDialog">
-          <paper-icon-button id="replaceBtn" icon="[[icon]]" noink aria-labelledby="label"></paper-icon-button>
+          <paper-icon-button
+            id="replaceBtn"
+            icon="[[icon]]"
+            noink
+            aria-label$="[[_computeAriaLabel(i18n)]]"
+          ></paper-icon-button>
           <span class="label" hidden$="[[!showLabel]]" id="label">[[_label]]</span>
           <nuxeo-tooltip>[[_label]]</nuxeo-tooltip>
         </div>
@@ -175,6 +180,10 @@ Polymer({
 
   _computeLabel() {
     return this.i18n('replaceBlobButton.tooltip');
+  },
+
+  _computeAriaLabel() {
+    return this.i18n('replaceBlobButton.ariaLabel');
   },
 
   _isAvailable(doc) {

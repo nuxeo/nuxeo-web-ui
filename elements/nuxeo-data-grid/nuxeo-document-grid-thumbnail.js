@@ -327,8 +327,24 @@ Polymer({
   },
 
   _onCheckBoxTap(e) {
-    // WEBUI-1262 : prevents checkbox selection during tab navigation
-    if (e.type === 'tap' || (e.key !== 'Tab' && e.key !== 'Shift')) {
+    // WEBUI-1262 : prevents checkbox selection during tab navigation. Only an unmodified Enter or
+    // Space activates a control, so everything else — arrows, bare modifiers, shortcuts such as
+    // Ctrl+Enter — has to leave the selection alone instead of silently flipping it while the user
+    // moves around the results. Mouse taps keep going through so shift-clicking still extends a
+    // range. A keyboard activation can also reach us as a synthetic tap wrapping the original
+    // keydown (nuxeo-default-search-results._triggerItemToggle), so the guard reads that source
+    // event rather than the wrapper.
+    const source = e.type === 'tap' ? e.detail?.sourceEvent || {} : e;
+    if (typeof source.key !== 'string') {
+      if (e.type === 'tap') {
+        this._toogleSelect(e);
+      }
+      return;
+    }
+    if (
+      (source.key === 'Enter' || source.key === ' ') &&
+      !(source.ctrlKey || source.metaKey || source.altKey || source.shiftKey)
+    ) {
       this._toogleSelect(e);
     }
   },

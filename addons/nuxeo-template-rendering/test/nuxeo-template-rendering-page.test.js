@@ -118,6 +118,17 @@ suite('nuxeo-template-rendering-page', () => {
         .sort();
       expect(ids).to.deep.equal(['File', 'Folder']);
     });
+
+    test('orders doc types alphabetically regardless of case and accents', () => {
+      el._handleDocTypes({
+        detail: {
+          response: {
+            doctypes: { Zeta: {}, Élan: {}, apple: {}, Banana: {} },
+          },
+        },
+      });
+      expect(el.docTypes.slice(1).map((d) => d.id)).to.deep.equal(['apple', 'Banana', 'Élan', 'Zeta']);
+    });
   });
 
   suite('config mode', () => {

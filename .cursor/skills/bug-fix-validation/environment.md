@@ -121,7 +121,7 @@ resolves the head branch from a PR. `--prepare-only` builds the worktrees withou
 What it does, per side:
 
 1. Allocates a **free host port** (scanning from 8100, skipping ports already claimed by another run).
-2. Creates a git worktree at `~/Desktop/validation/<TICKET>/src/<role>` checked out at the ref, with its
+2. Creates a git worktree at `~/Desktop/Projects/WebUI/worktrees/<TICKET>/<role>` checked out at the ref, with its
    own `node_modules` (APFS copy-on-write clone of the main one — seconds, ~0 bytes).
 3. `npm run build` with the chosen `NUXEO_PACKAGES`.
 4. Starts `nx-val-<ticket>-<role>`, waits for `/nuxeo/runningstatus` = 200.

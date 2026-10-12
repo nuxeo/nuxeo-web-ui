@@ -53,6 +53,7 @@ import './nuxeo-app/nuxeo-offline-banner.js';
 import './nuxeo-app/nuxeo-expired-session.js';
 import './nuxeo-document-creation/nuxeo-document-creation-behavior.js';
 import { NuxeoAppDrawerResizeBehavior } from './behaviors/nuxeo-app-drawer-resize-behavior.js';
+import { NuxeoAnonymousBehavior } from './behaviors/nuxeo-anonymous-behavior.js';
 import { NuxeoInactivityBehavior } from './behaviors/nuxeo-inactivity-behavior.js';
 import '@nuxeo/nuxeo-elements/nuxeo-page-provider.js';
 import '@nuxeo/nuxeo-elements/nuxeo-task-page-provider.js';
@@ -97,6 +98,16 @@ window.nuxeo.importBlacklist = window.nuxeo.importBlacklist || [
   'Root',
 ];
 const MAX_TOASTS = 3; // max number of toasts that can be displayed simultaneously besides the default one
+// Gap between clearing and refilling the live region. A synchronous clear/set pair is coalesced into a
+// single mutation, so without it a repeated message would not be announced again.
+const ARIA_ANNOUNCE_DELAY_MS = 150;
+// Gap between two consecutive messages, so each one lands as its own mutation and is queued by the
+// screen reader in order rather than overwriting the one before it.
+const ANNOUNCE_SPACING_MS = 500;
+// A long-running bulk operation reports progress every second; cap the backlog so those updates cannot
+// pile up faster than they are spoken. The newest messages are the ones worth keeping.
+const MAX_QUEUED_ANNOUNCEMENTS = 3;
+const ANNOUNCER_ID = 'nuxeo-toast-announcer';
 
 setPassiveTouchGestures(true);
 
@@ -167,8 +178,8 @@ Polymer({
         top: var(--nuxeo-app-top);
         z-index: 102;
         box-sizing: border-box;
+        outline: none;
         background-color: var(--nuxeo-sidebar-background);
-        display: block;
       }
 
       :host([dir='ltr']) #logo {
@@ -187,61 +198,36 @@ Polymer({
         left: auto;
       }
 
-      /* NXENG-527: Single scrollable container for home shortcut and menu below the pinned logo.
-         Prevents scrollbar overlap by keeping it within the column boundary. */
-      #menuContainer {
-        position: fixed;
-        top: calc(var(--nuxeo-app-top, 0px) + var(--nuxeo-drawer-header-height, 53px));
-        height: calc(
-          100vh - var(--nuxeo-drawer-header-height, 53px) - (var(--nuxeo-app-top, 0px) + var(--nuxeo-app-bottom, 0px))
-        );
-        width: var(--nuxeo-sidebar-width);
-        z-index: 100;
-        box-sizing: border-box;
-        overflow-x: hidden;
-        overflow-y: auto;
-        background-color: var(--nuxeo-sidebar-background);
-        display: flex;
-        flex-direction: column;
-      }
-
-      :host([dir='ltr']) #menuContainer {
-        left: 0;
-        right: auto;
-      }
-
-      :host([dir='rtl']) #menuContainer {
-        right: 0;
-        left: auto;
-      }
-
-      /* NXENG-527: home shortcut positioned outside paper-listbox (navigation only, no drawer)
-         but inside scroll area with other icons. */
-      .home-link {
-        position: relative;
-        width: var(--nuxeo-sidebar-width);
-        flex-shrink: 0;
-        margin-top: 43px;
-        background-color: var(--nuxeo-sidebar-background);
-        display: block;
-        text-decoration: none;
-      }
-
       /* menu */
       #menu {
         @apply --nuxeo-sidebar;
-        position: relative;
+        position: fixed;
         width: var(--nuxeo-sidebar-width);
+        height: calc(100vh - 54px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
         z-index: 100;
         padding: 0;
+        padding-top: 54px;
+        /* Icons are column-width, so a vertical scrollbar makes them overflow sideways. */
+        overflow-x: hidden;
+        overflow-y: auto;
         display: flex;
         flex-direction: column;
-        flex: 1 1 auto;
-        min-height: 0;
       }
 
-      #menu nuxeo-menu-icon {
-        flex-shrink: 0;
+      #logo:hover img {
+        background: rgba(0, 0, 0, 0.2);
+        color: var(--nuxeo-sidebar-menu-hover);
+      }
+
+      #logo:hover img {
+        filter: brightness(110%);
+        -webkit-filter: brightness(110%);
+      }
+
+      /* 'auto' is invisible on the dark themes, which define --nuxeo-focus-outline instead. */
+      #logo:focus-visible {
+        outline: var(--nuxeo-focus-outline, auto);
+        outline-offset: -2px;
       }
 
       /* Apply margin-top: auto to all settings and then reset them, except the first one */
@@ -293,6 +279,11 @@ Polymer({
         height: 100%;
         cursor: pointer;
         z-index: 10;
+        padding: 0;
+        border: none;
+        background: none;
+        color: inherit;
+        font: inherit;
       }
 
       :host([dir='rtl']) #drawer .toggle {
@@ -311,7 +302,8 @@ Polymer({
       }
 
       #drawer:hover .toggle iron-icon,
-      #drawer .toggle:hover iron-icon {
+      #drawer .toggle:hover iron-icon,
+      #drawer .toggle:focus-visible iron-icon {
         visibility: visible !important;
       }
 
@@ -499,52 +491,39 @@ Polymer({
           hidden$="[[isDrawerHidden(isNarrow, drawerOpened)]]"
         >
           <div role="list">
-            <!-- Logo: decorative only, home navigation handled by menu shortcut below -->
-            <div id="logo">
+            <!-- WEBUI-2315: the logo is the Home link, in both branding modes. The image alt only
+                 describes the logo, so the anchor carries its own label naming the destination
+                 (WCAG 2.4.4 Link Purpose); it is a single Tab stop with no nested interactive. -->
+            <a id="logo" href$="[[urlFor('home')]]" aria-label$="[[i18n('app.home')]]" on-click="_resetTaskSelection">
               <img src$="[[_logo(baseUrl)]]" alt="[[i18n('accessibility.logo')]]" />
-            </div>
+            </a>
 
-            <!-- Scrollable container for home shortcut and menu (below pinned logo) -->
-            <div id="menuContainer">
-              <!-- Home shortcut: placed outside paper-listbox to navigate home without triggering
-                   the secondary-nav drawer. Focus and activation are managed by nuxeo-menu-icon. -->
+            <!-- menu -->
+            <paper-listbox
+              id="menu"
+              selected="{{selectedTab}}"
+              attr-for-selected="name"
+              selected-class="selected"
+              on-iron-activate="_toggleDrawer"
+              on-iron-items-changed="_updateDrawerItemsAria"
+              aria-label$="[[i18n('app.drawer')]]"
+            >
+              <nuxeo-slot name="DRAWER_ITEMS" model="[[actionContext]]"></nuxeo-slot>
               <nuxeo-menu-icon
-                class="home-link"
-                name="home"
-                route="home"
-                icon="nuxeo:home"
-                label="app.home"
-                on-click="_resetTaskSelection"
+                name="administration"
+                icon="nuxeo:admin"
+                label="app.administration"
+                class="settings"
+                hidden$="[[!hasAdministrationPermissions(currentUser)]]"
               ></nuxeo-menu-icon>
-
-              <!-- menu -->
-              <paper-listbox
-                id="menu"
-                selected="{{selectedTab}}"
-                attr-for-selected="name"
-                selected-class="selected"
-                on-iron-activate="_toggleDrawer"
-                aria-label$="[[i18n('app.drawer')]]"
-                aria-expanded="[[drawerOpened]]"
-                on-keyup="_toggleDrawer"
-              >
-                <nuxeo-slot name="DRAWER_ITEMS" model="[[actionContext]]"></nuxeo-slot>
-                <nuxeo-menu-icon
-                  name="administration"
-                  icon="nuxeo:admin"
-                  label="app.administration"
-                  class="settings"
-                  hidden$="[[!hasAdministrationPermissions(currentUser)]]"
-                ></nuxeo-menu-icon>
-                <nuxeo-menu-icon
-                  name="profile"
-                  src="[[currentUser.contextParameters.userprofile.avatar.data]]"
-                  icon="nuxeo:user-settings"
-                  label="app.account"
-                  class="settings"
-                ></nuxeo-menu-icon>
-              </paper-listbox>
-            </div>
+              <nuxeo-menu-icon
+                name="profile"
+                src="[[currentUser.contextParameters.userprofile.avatar.data]]"
+                icon="nuxeo:user-settings"
+                label="app.account"
+                class="settings"
+              ></nuxeo-menu-icon>
+            </paper-listbox>
 
             <!-- drawer content -->
             <div id="drawer" style="width: {{drawerWidth}}">
@@ -579,9 +558,17 @@ Polymer({
                 </div>
               </iron-pages>
 
-              <div class="toggle" on-tap="_closeDrawer" hidden$="[[!drawerOpened]]">
-                <iron-icon icon="[[toggleChevronIcon]]"></iron-icon>
-              </div>
+              <button
+                type="button"
+                class="toggle"
+                on-tap="_closeDrawer"
+                hidden$="[[!drawerOpened]]"
+                aria-expanded$="[[_ariaExpanded(drawerOpened)]]"
+                aria-controls="drawer-pages"
+                aria-label$="[[i18n('app.drawer.collapse')]]"
+              >
+                <iron-icon icon="[[toggleChevronIcon]]" aria-hidden="true"></iron-icon>
+              </button>
 
               <nuxeo-resize-handle
                 id="drawerResizeHandle"
@@ -696,7 +683,14 @@ Polymer({
   `,
 
   is: 'nuxeo-app',
-  behaviors: [RoutingBehavior, FormatBehavior, FiltersBehavior, NuxeoAppDrawerResizeBehavior, NuxeoInactivityBehavior],
+  behaviors: [
+    RoutingBehavior,
+    FormatBehavior,
+    FiltersBehavior,
+    NuxeoAppDrawerResizeBehavior,
+    NuxeoAnonymousBehavior,
+    NuxeoInactivityBehavior,
+  ],
   importMeta: import.meta,
   properties: {
     productName: {
@@ -720,7 +714,10 @@ Polymer({
       observer: '_pageChanged',
     },
 
-    selectedTab: String,
+    selectedTab: {
+      type: String,
+      observer: '_updateDrawerItemsAria',
+    },
     selectedAdminTab: String,
 
     currentDocument: Object,
@@ -752,6 +749,7 @@ Polymer({
       type: Boolean,
       value: false,
       notify: true,
+      observer: '_updateDrawerItemsAria',
     },
 
     keyEventTarget: {
@@ -863,7 +861,6 @@ Polymer({
   ready() {
     this.skipLinkEvent();
     this._checkRtl();
-    this.homeToMenuNavigation();
     this._updateIsNarrow();
 
     const main = this.$.mainContent;
@@ -897,7 +894,12 @@ Polymer({
       toast.mdcRoot.style.position = 'relative';
       toast.mdcRoot.querySelector('.mdc-snackbar__label').style.webkitFontSmoothing = 'auto';
       toast.mdcRoot.querySelector('.mdc-snackbar__surface').style.width = '344px';
+      this._muteSnackbarLabel(toast);
     });
+
+    // Create the live region up front: screen readers track regions that were present before the text
+    // changed, and ignore one that appears already carrying its message.
+    this._getAnnouncer();
 
     window.addEventListener('unhandledrejection', (e) => {
       if (e.reason && e.reason.status === 404) {
@@ -919,21 +921,6 @@ Polymer({
     this._setupUnauthorizedRedirect();
 
     Performance.mark('nuxeo-app.ready');
-    this.$.menu.addEventListener('keyup', (event) => {
-      this._toggleDrawer(event, { detail: { selected: event.target.getAttribute('name') } });
-    });
-
-    // Remove interactive attributes from home link to fix accessibility issue.
-    // PaperItemBehavior adds role/tabindex/aria-disabled to the host, but the inner <a>
-    // already provides the interactive control. This causes nested-interactive violations
-    // and double Tab stops. Strip these attributes to make the host a plain container.
-    // The inner <a> carries its own aria-label (see nuxeo-menu-icon), so it stays named.
-    const homeLink = this.shadowRoot?.querySelector('.home-link');
-    if (homeLink) {
-      homeLink.removeAttribute('tabindex');
-      homeLink.removeAttribute('role');
-      homeLink.removeAttribute('aria-disabled');
-    }
 
     // fire resize event during drawer animation for elements that need to adapt to size changes (nuxeo-data-table etc)
     // Filter to transitions on the drawer element itself; descendant transitions
@@ -979,71 +966,6 @@ Polymer({
     );
   },
 
-  // Arrow-key navigation between the home shortcut and the menu. Handlers are named methods
-  // (not inline closures) so they can be unit-tested without firing key events at the listbox.
-  homeToMenuNavigation() {
-    const home = this.shadowRoot?.querySelector('.home-link');
-    const { menu } = this.$;
-    if (!home || !menu) {
-      return;
-    }
-    // Retain the bound handlers so detached() can remove them and re-adding is idempotent.
-    this._boundHomeShortcutKeydown = this._boundHomeShortcutKeydown || this._onHomeShortcutKeydown.bind(this);
-    this._boundMenuEdgeKeydown = this._boundMenuEdgeKeydown || this._onMenuEdgeKeydown.bind(this);
-    this._homeMenuNav = { home, menu };
-    home.addEventListener('keydown', this._boundHomeShortcutKeydown);
-    menu.addEventListener('keydown', this._boundMenuEdgeKeydown);
-  },
-
-  // Visible menu items, excluding hidden ones.
-  _homeMenuVisibleItems() {
-    const menu = this._homeMenuNav?.menu;
-    if (!menu) {
-      return [];
-    }
-    return Array.from(menu.querySelectorAll('nuxeo-menu-icon, [name]')).filter((el) => !el.hasAttribute('hidden'));
-  },
-
-  // Focus the home shortcut's inner link, falling back to the host.
-  _focusHomeShortcut() {
-    const home = this._homeMenuNav?.home;
-    if (!home) {
-      return;
-    }
-    const anchor = home.shadowRoot?.querySelector('a');
-    (anchor || home).focus();
-  },
-
-  // On home: ArrowDown focuses the first menu item, ArrowUp the last.
-  _onHomeShortcutKeydown(e) {
-    const items = this._homeMenuVisibleItems();
-    if (!items.length) {
-      return;
-    }
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      items[0].focus();
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      items[items.length - 1].focus();
-    }
-  },
-
-  // On menu edges: ArrowUp on the first item or ArrowDown on the last returns focus to home.
-  _onMenuEdgeKeydown(e) {
-    const items = this._homeMenuVisibleItems();
-    if (!items.length) {
-      return;
-    }
-    const first = items[0];
-    const last = items[items.length - 1];
-    const active = e.target;
-    if ((e.key === 'ArrowUp' && active === first) || (e.key === 'ArrowDown' && active === last)) {
-      e.preventDefault();
-      this._focusHomeShortcut();
-    }
-  },
-
   attached() {
     // WEBUI-1987: only re-arm after a real detach/re-attach cycle. ready() already did the initial
     // wiring, so re-running setup here on the first attach would issue a redundant keep-alive request
@@ -1052,9 +974,6 @@ Polymer({
       this._inactivityNeedsRearm = false;
       this._setupInactivityTimer();
       this._setupUnauthorizedRedirect();
-      // detached() removed the home<->menu arrow-key handlers; re-arm them here to mirror the
-      // inactivity timer. Re-adding is idempotent (bound handler refs are retained).
-      this.homeToMenuNavigation();
     }
   },
 
@@ -1065,11 +984,8 @@ Polymer({
     this.removeEventListener('nuxeo-layout-updated', this._onDescendantLayoutUpdated);
     this._teardownInactivityTimer();
     this._teardownUnauthorizedRedirect();
+    this._cancelPendingAnnouncement();
     this._inactivityNeedsRearm = true; // re-arm from the next attached()
-    if (this._homeMenuNav) {
-      this._homeMenuNav.home.removeEventListener('keydown', this._boundHomeShortcutKeydown);
-      this._homeMenuNav.menu.removeEventListener('keydown', this._boundMenuEdgeKeydown);
-    }
   },
 
   skipLinkEvent() {
@@ -1313,6 +1229,12 @@ Polymer({
         if (err && err.name === 'AbortError') {
           return;
         }
+        // WEBUI-1857: an anonymous user hitting a 403 is redirected to the login page (preserving the
+        // permalink) instead of being shown a dead-end permission error page.
+        if (this._isAnonymousForbidden(err)) {
+          this._redirectAnonymousToLogin();
+          return;
+        }
         this.showError(err.status, this.i18n('browse.error'), err.message);
       });
   },
@@ -1524,10 +1446,8 @@ Polymer({
     this.navigateTo('search', target.searchName);
   },
 
-  _toggleDrawer(e, selectedObj) {
-    const selectedItem = e.type === 'keyup' ? selectedObj : e;
-    const selectedItemDetailSelected =
-      selectedItem.detail && selectedItem.detail.selected ? selectedItem.detail.selected : 0;
+  _toggleDrawer(e) {
+    const selectedItemDetailSelected = e?.detail?.selected || 0;
     if (this._selected === selectedItemDetailSelected && this.drawerOpened) {
       requestAnimationFrame(() => {
         this._closeDrawer();
@@ -1536,6 +1456,37 @@ Polymer({
       this._selected = this.selectedTab = selectedItemDetailSelected;
       this._openDrawer();
     }
+  },
+
+  // Polymer serializes a bound boolean as '' or drops the attribute, neither of which is a valid
+  // aria-expanded value, so the state is stringified explicitly.
+  _ariaExpanded(opened) {
+    return opened ? 'true' : 'false';
+  },
+
+  /**
+   * WEBUI-1877: each icon-rail item is the disclosure control for the drawer panel, so it has to
+   * carry the expanded state. `aria-expanded` is not allowed on the `listbox` role the surrounding
+   * paper-listbox exposes, where it was silently ignored. Setting the `expanded` property rather
+   * than the attribute lets nuxeo-menu-icon place the state on the button a screen reader actually
+   * announces; see the property docs there for why the host itself is the wrong element.
+   *
+   * Also bound to `iron-items-changed`: the DRAWER_ITEMS are stamped by `nuxeo-slot` after
+   * `drawerOpened`/`selectedTab` have already settled, so the property observers alone leave every
+   * slotted item without a state until the first toggle.
+   */
+  _updateDrawerItemsAria() {
+    const menu = this.$?.menu;
+    if (!menu) {
+      return;
+    }
+    menu.querySelectorAll('nuxeo-menu-icon').forEach((item) => {
+      const name = item.getAttribute('name');
+      if (!name) {
+        return;
+      }
+      item.expanded = !!this.drawerOpened && name === this.selectedTab;
+    });
   },
 
   /** Open drawer at stored/clamped width and sync the resize-handle ARIA values. */
@@ -1943,6 +1894,7 @@ Polymer({
       toast.mdcRoot.style.position = 'relative';
       toast.mdcRoot.querySelector('.mdc-snackbar__label').style.webkitFontSmoothing = 'auto';
       toast.mdcRoot.querySelector('.mdc-snackbar__surface').style.width = '344px';
+      this._muteSnackbarLabel(toast);
 
       const defaultAction = toast.mdcFoundation.handleActionButtonClick.bind(toast);
       toast.mdcFoundation.handleActionButtonClick = () => {
@@ -2043,7 +1995,117 @@ Polymer({
         toast.close();
       }
       toast.show();
+      this._announce(message);
     }
+  },
+
+  /**
+   * Takes the snackbar's own label out of the accessibility tree, so a message is not announced twice.
+   *
+   * From its second open onwards mwc-snackbar clears the label and restores it ARIA_LIVE_DELAY_MS later,
+   * precisely to provoke an announcement. That text is already spoken by our own region, and the two land
+   * about a second apart. `aria-hidden` is what silences it: the directive rewrites `aria-live` when its
+   * timer fires, so setting that instead would be undone (WEBUI-1880).
+   */
+  _muteSnackbarLabel(toast) {
+    const label = toast.mdcRoot?.querySelector('.mdc-snackbar__label');
+    if (label) {
+      label.setAttribute('aria-hidden', 'true');
+    }
+  },
+
+  /**
+   * Returns the shared live region, creating it on first use.
+   *
+   * WEBUI-1880: mwc-snackbar builds its own live region lazily, inside a subtree that is hidden until
+   * the toast opens, so screen readers never see the text change and stay silent. This region replaces
+   * it. It is appended to the document body rather than declared in this element's template because
+   * Narrator does not reliably observe live regions nested in shadow DOM.
+   */
+  _getAnnouncer() {
+    if (!this._announcer?.isConnected) {
+      let announcer = document.getElementById(ANNOUNCER_ID);
+      if (!announcer) {
+        announcer = document.createElement('div');
+        announcer.id = ANNOUNCER_ID;
+        announcer.setAttribute('role', 'status');
+        announcer.setAttribute('aria-live', 'polite');
+        announcer.setAttribute('aria-atomic', 'true');
+        // Clipped rather than hidden: display none, visibility hidden, zero height and zero opacity
+        // all take the node out of the accessibility tree, which would stop it announcing.
+        announcer.style.cssText =
+          'position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;' +
+          'clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;';
+        document.body.appendChild(announcer);
+      }
+      this._announcer = announcer;
+    }
+    return this._announcer;
+  },
+
+  /**
+   * Queues `message` for announcement by screen readers.
+   *
+   * Messages are queued rather than replaced because a single event is often reported twice in the same
+   * tick by different elements: finishing a CSV export makes `nuxeo-csv-export-button` announce "CSV
+   * export is ready" and, one microtask later, `nuxeo-operation-button` announce its own bulk summary.
+   * Overwriting a pending message would silence the first of the pair (WEBUI-1880).
+   *
+   * A duplicate is only dropped while its twin has yet to be spoken — still queued, or still in the
+   * clear phase. Once the text has landed in the region it has been announced, so an identical message
+   * arriving later is a new event and is spoken again.
+   */
+  _announce(message) {
+    if (!message) {
+      return;
+    }
+    this._announceQueue = this._announceQueue || [];
+    let previous = null;
+    if (this._announceQueue.length) {
+      previous = this._announceQueue[this._announceQueue.length - 1];
+    } else if (this._announceClearing) {
+      previous = this._announcingMessage;
+    }
+    if (previous === message) {
+      return; // the same event reported twice; no need to say it twice
+    }
+    this._announceQueue.push(message);
+    if (this._announceQueue.length > MAX_QUEUED_ANNOUNCEMENTS) {
+      this._announceQueue.shift();
+    }
+    this._pumpAnnouncements();
+  },
+
+  _pumpAnnouncements() {
+    if (this._announceTimeout || !this._announceQueue || this._announceQueue.length === 0) {
+      return;
+    }
+    const announcer = this._getAnnouncer();
+    const message = this._announceQueue.shift();
+    this._announcingMessage = message;
+    this._announceClearing = true;
+    // A live region is only announced when its text changes, so clear it first: without this an
+    // identical consecutive toast produces no mutation and stays silent.
+    announcer.textContent = '';
+    this._announceTimeout = setTimeout(() => {
+      announcer.textContent = message;
+      this._announceClearing = false;
+      this._announceTimeout = setTimeout(() => {
+        this._announceTimeout = null;
+        this._announcingMessage = null;
+        this._pumpAnnouncements();
+      }, ANNOUNCE_SPACING_MS);
+    }, ARIA_ANNOUNCE_DELAY_MS);
+  },
+
+  _cancelPendingAnnouncement() {
+    if (this._announceTimeout) {
+      clearTimeout(this._announceTimeout);
+      this._announceTimeout = null;
+    }
+    this._announcingMessage = null;
+    this._announceClearing = false;
+    this._announceQueue = [];
   },
 
   _clipboardUpdated(e) {

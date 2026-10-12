@@ -15,7 +15,7 @@ All Hyland product names are registered or unregistered trademarks of Hyland Sof
  See the License for the specific language governing permissions and
  limitations under the License.
  */
-import { fixture, html } from '@nuxeo/testing-helpers';
+import { fixture, flush, html } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-document-actions/nuxeo-replace-blob-button.js';
 
 suite('nuxeo-replace-blob-button', () => {
@@ -91,6 +91,22 @@ suite('nuxeo-replace-blob-button', () => {
       const properties = { 'file:content': { name: 'report.pdf' } };
       const root = element._getRootProperty(['file:content', 'name'], properties);
       expect(root).to.eql('file:content.name');
+    });
+  });
+
+  suite('accessible name', () => {
+    test('names what is replaced, rather than reusing the bare tooltip', () => {
+      expect(element._computeAriaLabel()).to.eql(element.i18n('replaceBlobButton.ariaLabel'));
+      expect(element._computeAriaLabel()).to.not.eql(element._computeLabel());
+    });
+
+    test('exposes the accessible name on the icon button', async () => {
+      element.document = { uid: '1', properties: { 'file:content': { name: 'report.pdf' } } };
+      await flush();
+      const iconButton = element.shadowRoot.querySelector('#replaceBtn');
+      expect(iconButton).to.exist;
+      expect(iconButton.getAttribute('aria-label')).to.eql(element.i18n('replaceBlobButton.ariaLabel'));
+      expect(iconButton.hasAttribute('aria-labelledby')).to.be.false;
     });
   });
 });

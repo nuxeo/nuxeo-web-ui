@@ -121,8 +121,12 @@ Polymer({
 
   _deepFind(obj, props) {
     for (let i = 0, path = props.split('/'), len = path.length; i < len; i++) {
-      if (!obj || obj === []) {
+      if (!obj) {
         break;
+      }
+      // an empty array has nothing left to descend into, so there is no blob at this xpath
+      if (Array.isArray(obj) && obj.length === 0) {
+        return undefined;
       }
       obj = obj[path[i]];
     }
