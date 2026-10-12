@@ -67,6 +67,19 @@ suite('nuxeo-page', () => {
     expect(style.scrollPaddingBottom).to.equal('120px');
   });
 
+  // The decision has to survive a tab swapping its layout in and out, not just the first paint.
+  test('re-decides when slotted content grows and shrinks', async () => {
+    const el = await page(html`<div>content</div>`);
+    const child = el.querySelector('div');
+    expect((await contentStyle(el)).paddingBottom).to.equal('0px');
+
+    child.style.height = '400vh';
+    expect((await contentStyle(el)).paddingBottom).to.equal('120px');
+
+    child.style.height = '';
+    expect((await contentStyle(el)).paddingBottom).to.equal('0px');
+  });
+
   test('stops observing the content region once detached', async () => {
     const el = await page(html`<div>content</div>`);
     await contentStyle(el);
