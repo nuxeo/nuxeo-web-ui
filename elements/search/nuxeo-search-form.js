@@ -1226,9 +1226,9 @@ Polymer({
       return;
     }
     const load = async () => {
-      if (!this._searches) {
-        await this.$['saved-searches'].get();
-      }
+      // Awaited even when the searches are already loaded, so the body still runs in a
+      // microtask exactly as the previous promise chain did.
+      await (!this._searches ? this.$['saved-searches'].get() : Promise.resolve());
       this.selectedSearchIdx = this._searches.findIndex((s) => s.id === id) + 1;
       // XXX rely on debouncer to update the results request with the saved search params
       await this._fetch(this.results);
