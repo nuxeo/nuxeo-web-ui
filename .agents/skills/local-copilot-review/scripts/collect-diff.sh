@@ -16,7 +16,10 @@ if [ -z "$BASE" ]; then
   # hotfix branches, which still target them.
   for candidate in origin/develop-2025 origin/develop-2023 origin/lts-2025 origin/maintenance-3.1.x; do
     git rev-parse --verify --quiet "$candidate^{commit}" >/dev/null || continue
-    merge_base=$(git merge-base HEAD "$candidate")
+    # The two LTS lines have unrelated histories, so most candidates have no merge base with HEAD.
+    # Left unguarded under `set -e` this exits the whole script, which silently broke auto-detection
+    # entirely: no base, no output, exit 1. A missing merge base just means "not this candidate".
+    merge_base=$(git merge-base HEAD "$candidate" 2>/dev/null) || continue
     ts=$(git show -s --format=%ct "$merge_base")
     if [ "$ts" -gt "$best_ts" ]; then
       best_ts=$ts
