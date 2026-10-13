@@ -17,10 +17,10 @@ import { refresh, url } from './helpers.js';
 
 export default class UI extends BasePage {
   async goHome() {
-    const homeEle = await this.drawer.home;
-    await homeEle.waitForExist();
-    await homeEle.waitForVisible();
-    await homeEle.click();
+    const logoEle = await this.drawer.logo;
+    await logoEle.waitForExist();
+    await logoEle.waitForVisible();
+    await logoEle.click();
   }
 
   // Navigate off the dashboard (to the browse page) so home navigation can be

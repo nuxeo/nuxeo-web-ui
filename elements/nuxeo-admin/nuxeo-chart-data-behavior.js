@@ -104,20 +104,14 @@ export const ChartDataBehavior = {
     const async = typeof this.async === 'function' ? this.async.bind(this) : (fn, waitTime) => setTimeout(fn, waitTime);
     async(() => {
       const root = this.root || this.shadowRoot || this;
-      this._logChartResizeDebug('resizeCharts.schedule', {
-        trigger,
-        rootTag: root?.tagName,
-      });
+      this._logChartResizeDebug('resizeCharts.schedule', { trigger, rootTag: root?.tagName });
       if (!root || typeof root.querySelectorAll !== 'function') {
         return;
       }
       const charts = Array.from(
         root.querySelectorAll('chart-bar, chart-line, chart-pie, nuxeo-document-distribution-chart'),
       );
-      this._logChartResizeDebug('resizeCharts.chartsFound', {
-        trigger,
-        chartCount: charts.length,
-      });
+      this._logChartResizeDebug('resizeCharts.chartsFound', { trigger, chartCount: charts.length });
       charts.forEach((chart, chartIndex) => {
         if (!chart || typeof chart.resize !== 'function') {
           this._logChartResizeDebug('resizeCharts.chartSkipped', {
@@ -157,7 +151,6 @@ export const ChartDataBehavior = {
           });
         }
       });
-
       if (this._chartDebugEnabled) {
         requestAnimationFrame(() => {
           charts.forEach((chart) => {
@@ -180,7 +173,6 @@ export const ChartDataBehavior = {
     const chartRect = chart?.getBoundingClientRect?.() ?? null;
     const parentRect = parent?.getBoundingClientRect?.() ?? null;
     const computed = chart instanceof Element ? window.getComputedStyle(chart) : null;
-
     return {
       viewport: {
         devicePixelRatio: window.devicePixelRatio,
@@ -214,10 +206,7 @@ export const ChartDataBehavior = {
         overflow: computed?.overflow,
         transform: computed?.transform,
       },
-      chartInstance: {
-        width: chart?.chart?.width,
-        height: chart?.chart?.height,
-      },
+      chartInstance: { width: chart?.chart?.width, height: chart?.chart?.height },
       canvas: {
         cssWidth: canvas?.style?.width,
         cssHeight: canvas?.style?.height,
@@ -234,13 +223,8 @@ export const ChartDataBehavior = {
       return;
     }
     const timestamp = new Date().toISOString();
-    if (details !== undefined) {
-      // eslint-disable-next-line no-console
-      console.debug(`[nuxeo-chart-debug][${timestamp}] ${message}`, details);
-      return;
-    }
     // eslint-disable-next-line no-console
-    console.debug(`[nuxeo-chart-debug][${timestamp}] ${message}`);
+    console.debug(`[nuxeo-chart-debug][${timestamp}] ${message}`, ...(details === undefined ? [] : [details]));
   },
 
   _labels(data) {
@@ -264,6 +248,22 @@ export const ChartDataBehavior = {
       }),
     ];
   },
+  _chartAria(headingKey, data, headingArg) {
+    const heading = this.i18n(headingKey, headingArg);
+    if (!data || data.length === 0) {
+      return heading;
+    }
+    const points = data
+      .map((entry) => {
+        const value = Array.isArray(entry.value)
+          ? entry.value.map((item) => `${item.key}: ${item.value}`).join(', ')
+          : entry.value;
+        return `${entry.key}: ${value}`;
+      })
+      .join(', ');
+    return `${heading}. ${points}`;
+  },
+
   _extendEndDate(date) {
     if (date && moment) {
       return this._formatDate(moment(date).add(1, 'days').subtract(1, 'ms').toJSON());

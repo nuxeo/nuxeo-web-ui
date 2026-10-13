@@ -151,7 +151,13 @@ Polymer({
   },
 
   _buildPermalink(document) {
-    return document ? `${window.location.origin + window.location.pathname}#!/doc/${document.uid}` : '';
+    if (!document) {
+      return '';
+    }
+    // RFC 3986 compliant permalink (no `#!` fragment); the server redirects it to the
+    // hashbang route so the SPA can resolve the document (WEBUI-1726).
+    const base = window.location.origin + window.location.pathname;
+    return `${base}${base.endsWith('/') ? '' : '/'}doc?id=${encodeURIComponent(document.uid)}`;
   },
 
   _buildEasysharelink(document) {
