@@ -113,9 +113,18 @@ bash .cursor/skills/bug-fix-validation/scripts/dual-branch-up.sh WEBUI-1234 \
   [--only target|fixed] [--no-build] [--prepare-only] [--print] [--remove] [--force]
 ```
 
-Any git revision works for `--target`/`--fixed`: a branch, `origin/<branch>`, a tag or a sha — so
-`--target develop-2025~1 --fixed develop-2025` validates a fix that is already merged. `--fixed-pr <n>`
-resolves the head branch from a PR. `--prepare-only` builds the worktrees without starting containers
+Any git revision works for `--target`/`--fixed`: a branch, `origin/<branch>`, a tag or a sha. To
+validate a fix that is **already merged**, resolve the PR's merge commit and compare it against its
+first parent:
+
+```bash
+SHA=$(gh pr view <n> --repo nuxeo/nuxeo-web-ui --json mergeCommit --jq .mergeCommit.oid)
+... --target "$SHA^" --fixed "$SHA"
+```
+
+Do **not** use `develop-2025~1`. Every ticket now lands on the dev branch, so by the time you
+validate, the tip is rarely your fix and both sides of the comparison can contain it — which looks
+like a passing validation. `--fixed-pr <n>` resolves the head branch from a PR. `--prepare-only` builds the worktrees without starting containers
 (useful when Docker is unavailable or you only need the built bundles).
 
 What it does, per side:

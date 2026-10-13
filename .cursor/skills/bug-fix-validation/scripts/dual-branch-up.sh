@@ -11,7 +11,10 @@
 # Usage:
 #   dual-branch-up.sh <TICKET-ID> --target <ref> --fixed <ref> [options]
 #   dual-branch-up.sh WEBUI-1234 --target develop-2025 --fixed fix-WEBUI-1234-foo-develop-2025
-#   dual-branch-up.sh WEBUI-1234 --target develop-2025~1 --fixed develop-2025   # fix already merged
+#   # fix already merged: compare the merge commit against its first parent. Not
+#   # develop-2025~1, which stops naming the fix's parent as soon as another ticket lands.
+#   SHA=$(gh pr view 3259 --repo nuxeo/nuxeo-web-ui --json mergeCommit --jq .mergeCommit.oid)
+#   dual-branch-up.sh WEBUI-1234 --target "$SHA^" --fixed "$SHA"
 #   dual-branch-up.sh WEBUI-1234 --target develop-2025 --fixed-pr 3259
 #   dual-branch-up.sh WEBUI-1234 --print
 #   dual-branch-up.sh WEBUI-1234 --remove

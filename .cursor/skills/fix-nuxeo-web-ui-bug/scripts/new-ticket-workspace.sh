@@ -290,8 +290,14 @@ MAIN_ELEMENTS=$PARENT/nuxeo-elements
 ELEMENTS_TARGET=
 if [ "$WITH_ELEMENTS" = 1 ] && [ -d "$MAIN_ELEMENTS/.git" ]; then
   el_base=$BASE
-  git -C "$MAIN_ELEMENTS" rev-parse --verify --quiet "refs/remotes/origin/$el_base" >/dev/null ||
+  # clone_repo re-points origin at the real remote and fetches the base, so a branch this
+  # reference clone has never fetched is still usable. Ask the remote before falling back: the
+  # dev branches are new, and a long-lived clone missing origin/develop-2023 would otherwise
+  # pair a 2023 Web UI workspace with 2025 Elements without saying so.
+  if ! git -C "$MAIN_ELEMENTS" rev-parse --verify --quiet "refs/remotes/origin/$el_base" >/dev/null &&
+    ! git -C "$MAIN_ELEMENTS" ls-remote --exit-code --heads origin "$el_base" >/dev/null 2>&1; then
     el_base=develop-2025
+  fi
   step "Cloning nuxeo-elements @ $el_base"
   clone_repo "$MAIN_ELEMENTS" "$EL" "$el_base"
   note "$EL"

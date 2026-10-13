@@ -5,7 +5,7 @@ Used by the `dependabot-fix` skill (Step 0 onward) when the ticket is an `ELEMEN
 ## Identity
 - GitHub repo: `nuxeo/nuxeo-elements`
 - Jira: cloudId `hyland.atlassian.net`, project `ELEMENTS`
-- Branch mapping (PR base): **LTS-2025 → `develop-2025`**, **LTS-2023 → `develop-2023`** (default branch) — same mapping as nuxeo-web-ui. `lts-2025` / `maintenance-3.1.x` hold released code only.
+- Branch mapping — the downstream dev branch per LTS line, **not** the PR base: **LTS-2025 → `develop-2025`**, **LTS-2023 → `develop-2023`** (default branch) — same mapping as nuxeo-web-ui. `lts-2025` / `maintenance-3.1.x` hold released code only. A security PR targets the rotating integration branch from Step 4.0, not either of these.
 - Feature-branch naming: `ELEMENTS-<num>-<slug>-develop-2025` and `ELEMENTS-<num>-<slug>-develop-2023` — mirror the nuxeo-web-ui convention (always suffix the LTS line) so agent behaviour is symmetric across both repos and the target base stays unambiguous, since a fix lands on both lines as separate branches. As in web-ui, security-fix branches **drop** the `<type>-` prefix (`ELEMENTS-<num>-…`, not `fix-ELEMENTS-<num>-…`). (Some historical elements branches used a bare `ELEMENTS-<num>-<slug>`; check recent branches with `gh api repos/nuxeo/nuxeo-elements/branches` when matching an existing one.)
 - Downstream consumer (not a dependency of this repo): `../nuxeo-web-ui`
 

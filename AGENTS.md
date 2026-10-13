@@ -147,9 +147,9 @@ npm run ftest:dev           # Against localhost:8080 + localhost:5000
 
 ## CI Workflow
 
-Push to a dev branch (`develop-2025`, `develop-2023`) runs `develop.yaml`: **lint → test → a11y → ftest** (all must pass). Sonar and CodeQL trigger themselves on the same push. There is no publish step.
+Push to a dev branch (`develop-2025`, `develop-2023`) runs `develop.yaml`, which starts **lint**, **test**, **a11y** and **ftest** in parallel — all must pass. Sonar and CodeQL trigger themselves on the same push. There is no publish step.
 
-Push to a release branch runs `main.yaml` for that line (`maintenance-3.1.x` here, `lts-2025` on the 2025 line): the same checks plus **build**, which tags and publishes.
+Push to a release branch runs `main.yaml` for that line: those four plus **sonar**, again in parallel, then **build**, which depends on all five and does the tag and publish.
 
 PRs run lint and test workflows automatically.
 

@@ -30,9 +30,11 @@ Automates the full lifecycle of a dependency-security ticket, in either `nuxeo-w
 | --- | --- | --- |
 | GitHub repo | `nuxeo/nuxeo-web-ui` | `nuxeo/nuxeo-elements` |
 | Jira project | `WEBUI` | `ELEMENTS` |
-| LTS-2025 / LTS-2023 PR bases | `develop-2025` / `develop-2023` (default) | `develop-2025` / `develop-2023` (default) |
+| LTS-2025 / LTS-2023 dev branches | `develop-2025` / `develop-2023` (default) | `develop-2025` / `develop-2023` (default) |
 | Lockfile topology | root **+ 3 independent sibling projects**, each its own install | root **npm workspaces** (5 packages), **1 shared lockfile** |
 | Ships as | deployed app | published `@nuxeo/*` npm packages, consumed by nuxeo-web-ui |
+
+Those dev branches are where this work eventually lands — they are **not** what you open the PR against. Security PRs target the rotating integration branch resolved in Step 4.0, which is merged up into the dev branch later. Do not short-circuit that staging step.
 
 Full per-repo detail (lockfile topology, CI gate commands, branch naming, publish model, common pitfalls) lives in:
 - `references/nuxeo-web-ui.md`
