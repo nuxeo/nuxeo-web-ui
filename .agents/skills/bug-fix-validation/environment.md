@@ -11,7 +11,7 @@ Detect from the repo, not from habit. Run the checks, then set up only what the 
 |---|---|---|
 | `package.json` + `package-lock.json` | **npm** (this repo — Node ≥ 18) | `nvm use 22 && npm ci` |
 | `yarn.lock` / `pnpm-lock.yaml` | yarn / pnpm | `yarn install --frozen-lockfile` / `pnpm i --frozen-lockfile` |
-| `pom.xml`, `plugin/*/pom.xml` | **Maven + Java 21** (`lts-2025`; Java 17 on `maintenance-3.1.x`) | `mvn -B -ntp install` |
+| `pom.xml`, `plugin/*/pom.xml` | **Maven + Java 21** (2025 line; Java 17 on the 2023 line) | `mvn -B -ntp install` |
 | `build.gradle` | Gradle | `./gradlew build` |
 | `Dockerfile` | Docker image build | `docker build -t <tag> .` |
 | `docker-compose.yml` | Docker Compose | ⚠️ the repo compose file is **stale** — prefer a single container (below) |
@@ -64,7 +64,7 @@ docker run -d --name nx-val-<ticket>-<role> -p <free-port>:8080 \
 curl -s -o /dev/null -w '%{http_code}\n' http://localhost:<free-port>/nuxeo/runningstatus   # 200 when ready
 ```
 
-Match the image to the branch line: `nuxeo/nuxeo:2025` for `lts-2025`; for a `3.1.x` validation prefer
+Match the image to the branch line: `nuxeo/nuxeo:2025` for the 2025 line (`develop-2025`); for a `3.1.x` validation prefer
 the image built from that maintenance line when the bug is version-sensitive.
 
 **Always pick a free port.** `list_containers` (or `docker ps --format '{{.Names}} {{.Ports}}'`) first —
@@ -108,13 +108,13 @@ normally generates those. Without the customer's Studio project:
 
 ```bash
 bash .cursor/skills/bug-fix-validation/scripts/dual-branch-up.sh WEBUI-1234 \
-  --target lts-2025 --fixed fix-WEBUI-1234-foo-lts-2025 \
+  --target develop-2025 --fixed fix-WEBUI-1234-foo-develop-2025 \
   [--packages "nuxeo-web-ui nuxeo-drive"] [--image <image>] [--fixed-pr 3259] \
   [--only target|fixed] [--no-build] [--prepare-only] [--print] [--remove] [--force]
 ```
 
 Any git revision works for `--target`/`--fixed`: a branch, `origin/<branch>`, a tag or a sha — so
-`--target lts-2025~1 --fixed lts-2025` validates a fix that is already merged. `--fixed-pr <n>`
+`--target develop-2025~1 --fixed develop-2025` validates a fix that is already merged. `--fixed-pr <n>`
 resolves the head branch from a PR. `--prepare-only` builds the worktrees without starting containers
 (useful when Docker is unavailable or you only need the built bundles).
 

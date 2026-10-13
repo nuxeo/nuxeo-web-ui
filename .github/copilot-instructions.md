@@ -130,7 +130,8 @@ See `.github/skills/link-nuxeo-elements/SKILL.md` for full details and custom pa
 
 ## CI / GitHub Actions
 
-- **Main branch flow (`maintenance-3.1.x`)**: lint → test → a11y → ftest → sonar → build (sequential gates)
+- **Dev branch flow (`develop-2025`, `develop-2023`)**: lint → test → a11y → ftest via `develop.yaml`, with no publish step. Ticket PRs target these branches.
+- **Release branch flow (`lts-2025`, `maintenance-3.1.x`)**: lint → test → a11y → ftest → sonar → build (sequential gates)
 - **Preview**: PRs tagged `preview` get ephemeral environments (cross-repo with nuxeo-elements)
 - **Registry**: `@nuxeo` packages come from `https://packages.nuxeo.com/repository/npm-public/`
 - **Lockfile**: `package-lock.json` is committed. CI workflows use `npm ci` for deterministic installs.

@@ -66,7 +66,7 @@ phases.** State the plan up front for the record, then keep going. Track phases 
 
 Useful constants:
 - Atlassian cloudId: `252cce86-035e-4b0e-abd2-3c002935632f` (site `hyland.atlassian.net`)
-- Upstream repo: `nuxeo/nuxeo-web-ui` · bases: `lts-2025` and `maintenance-3.1.x`
+- Upstream repo: `nuxeo/nuxeo-web-ui` · bases: `develop-2025` and `develop-2023`
 - Validation workspace root: `~/Desktop/jira-evidence/<TICKET-ID>/validation/`
 - Code worktree root: `~/Desktop/Projects/WebUI/worktrees/<TICKET-ID>/<role>/`
 
@@ -148,8 +148,8 @@ Collect and understand: summary · description · expected vs actual behaviour �
 labels · components · environment · `issuelinks` · parent story · epic · attachments (screenshots,
 videos) · **every comment**, separating developer comments, QA comments and any stated root cause.
 
-`fixVersions` decides the branches: a `3.1.x` version → `maintenance-3.1.x`; an LTS/2025 version →
-`lts-2025`. Both → validate both. Empty/ambiguous → default to `lts-2025` and say so.
+`fixVersions` decides the branches: a `3.1.x` version → `develop-2023`; an LTS/2025 version →
+`develop-2025`. Both → validate both. Empty/ambiguous → default to `develop-2025` and say so.
 
 An `ELEMENTS-<id>` link usually means the real fix lands in **nuxeo-elements** (shared widgets) — pull
 that ticket and its PR too.
@@ -230,7 +230,7 @@ with exponential backoff — 5s, 15s, 45s — then record a blocker.
 ## Phase 5 — Multi-branch setup (buggy vs fixed, side by side)
 
 Identify the two refs:
-- **Target branch** — where the bug exists: the base (`lts-2025` / `maintenance-3.1.x`) at the commit
+- **Target branch** — where the bug exists: the base (`develop-2025` / `develop-2023`) at the commit
   *before* the fix, or simply the base if the fix is not merged yet.
 - **Source branch** — the fix: the PR head branch, or the merge commit on the base.
 
@@ -238,10 +238,10 @@ Bring both up simultaneously on isolated ports and runtimes:
 
 ```bash
 bash .cursor/skills/bug-fix-validation/scripts/dual-branch-up.sh <TICKET-ID> \
-  --target lts-2025 --fixed fix-WEBUI-<id>-<summary>-lts-2025
+  --target develop-2025 --fixed fix-WEBUI-<id>-<summary>-develop-2025
 # already merged? compare the base against itself one commit earlier:
-#   --target lts-2025~1 --fixed lts-2025
-# only have a PR number?   --target lts-2025 --fixed-pr 3259
+#   --target develop-2025~1 --fixed develop-2025
+# only have a PR number?   --target develop-2025 --fixed-pr 3259
 ```
 
 The script allocates two free host ports (e.g. `8100` / `8101`), starts one throwaway Nuxeo container per

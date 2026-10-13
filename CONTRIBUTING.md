@@ -34,7 +34,7 @@ nuxeo.cors.urls=*
 
 ### Making Changes
 
-1. Create a feature branch from `maintenance-3.1.x`
+1. Create a feature branch from the dev branch for the LTS line you are targeting — `develop-2025` or `develop-2023` (see [Branch Strategy](#branch-strategy))
 2. Edit components in `elements/`
 3. The webpack dev server hot-reloads changes
 4. Format and lint before committing:
@@ -202,14 +202,25 @@ This starts:
 
 ## Branch Strategy
 
-- The main development branch is `maintenance-3.1.x` (the long-lived branch for the current LTS version)
-- Feature branches are created from and merged back to `maintenance-3.1.x`
+Each LTS line has a permanent **dev branch** that collects work, and a **release branch** that holds released code only:
+
+| LTS line | Dev branch — branch from and target this | Release branch      |
+| -------- | ---------------------------------------- | ------------------- |
+| LTS 2025 | `develop-2025`                           | `lts-2025`          |
+| LTS 2023 | `develop-2023`                           | `maintenance-3.1.x` |
+
+- `develop-2023` is the repository default branch.
+- Create your feature branch from the dev branch for the line you are targeting, and open the PR back against that same dev branch. Most fixes apply to both lines, so raise one PR per line.
+- When the release content is agreed, the dev branch is merged into its release branch, and the release branch is merged back afterwards to pick up the version bump.
+- **Those two merges must use a merge commit.** The sync checks whether anything is outstanding with `git rev-list --count dev..release`, which only reaches zero when the release branch is an ancestor of the dev branch. Squashing copies the content without the ancestry, so every later sync re-proposes the whole release branch. Ordinary ticket PRs are still squashed.
+- Hotfix work on an already-released version branches from the release branch directly. That path is unchanged.
+- Delete your branch once its PR is merged or closed. Cross-repo CI pairs a Web UI PR with a `nuxeo-elements` branch of the **same name**, so an abandoned branch can be silently picked up by a later, unrelated PR — the only clue is one line in a CI log.
 - PRs trigger lint and test workflows automatically
 - PRs tagged `preview` get ephemeral preview environments
 
 ## CI/CD
 
-GitHub Actions run on every push to the `maintenance-3.1.x` branch and on PRs:
+GitHub Actions run on every push to a dev branch (`develop-2025`, `develop-2023`), on every push to a release branch, and on PRs:
 
 1. **Lint** — ESLint + Prettier
 2. **Test** — Web Test Runner unit tests (`test/load-all-tests.js` entry, Mocha pass/fail counts)
@@ -217,6 +228,8 @@ GitHub Actions run on every push to the `maintenance-3.1.x` branch and on PRs:
 4. **FTest** — WebdriverIO functional tests
 5. **Sonar** — SonarCloud quality/security scan
 6. **Build** — Maven marketplace package (only after all above pass)
+
+Steps 1–4 run on a dev branch via `develop.yaml`. Step 6 tags and publishes, so it runs only on a release branch via `main.yaml`.
 
 CI workflows use `npm ci` for deterministic installs from `package-lock.json`. Always commit lockfile changes when dependencies are added or updated.
 
