@@ -220,6 +220,29 @@ suite('ChartDataBehavior', () => {
       expect(behavior._chartResizeObserver).to.be.null;
     });
 
+    test('logs ResizeObserver entries when chart debug is enabled', () => {
+      const observeSpy = sinon.spy();
+      window.ResizeObserver = function ResizeObserverMock(callback) {
+        this.callback = callback;
+        this.observe = observeSpy;
+        this.disconnect = sinon.spy();
+      };
+      behavior = document.createElement('div');
+      Object.assign(behavior, ChartDataBehavior);
+      behavior._resizeCharts = sinon.spy();
+      behavior.attached();
+      behavior._chartDebugEnabled = true;
+      const debugSpy = sinon.spy(behavior, '_logChartResizeDebug');
+
+      behavior._chartResizeObserver.callback([{ target: behavior, contentRect: { width: 120, height: 80 } }]);
+
+      expect(debugSpy).to.have.been.calledWith('ResizeObserver.callback', {
+        entries: [{ target: 'DIV', width: 120, height: 80 }],
+      });
+      expect(behavior._resizeCharts).to.have.been.calledWith('ResizeObserver.callback');
+      behavior.detached();
+    });
+
     test('returns early when no querySelectorAll is available', () => {
       behavior.root = {};
       behavior.async = (fn) => fn();
@@ -435,6 +458,25 @@ suite('ChartDataBehavior', () => {
     test('should currently throw for nested values payload', () => {
       const data = [{ key: 'Parent', value: [{ key: 'Child A', value: 5 }] }];
       expect(() => behavior._values(data)).to.throw();
+    });
+  });
+
+  suite('_chartAria', () => {
+    setup(() => {
+      behavior.i18n = sinon.stub().callsFake((key, argument) => (argument ? `${key} ${argument}` : key));
+    });
+
+    test('returns the heading for empty data', () => {
+      expect(behavior._chartAria('chart.heading', [])).to.equal('chart.heading');
+    });
+
+    test('formats flat and nested data points', () => {
+      const data = [
+        { key: 'Flat', value: 3 },
+        { key: 'Nested', value: [{ key: 'Child', value: 2 }] },
+      ];
+
+      expect(behavior._chartAria('chart.heading', data, '10')).to.equal('chart.heading 10. Flat: 3, Nested: Child: 2');
     });
   });
 

@@ -1758,158 +1758,6 @@ suite('nuxeo-app', () => {
     });
   });
 
-  suite('home menu keyboard navigation', () => {
-    // Call the handlers directly with fake home/menu/event objects. Never dispatch key events at
-    // the real paper-listbox: that corrupts the shared fixture and hangs the run.
-    let savedNav;
-    const item = () => document.createElement('div');
-    const fakeMenu = (items) => {
-      return { querySelectorAll: () => items };
-    };
-    const fakeEvent = (key, target) => {
-      return { key, target, preventDefault: sinon.spy() };
-    };
-
-    setup(() => {
-      savedNav = app._homeMenuNav;
-    });
-    teardown(() => {
-      app._homeMenuNav = savedNav;
-    });
-
-    test('homeToMenuNavigation returns early when the home shortcut is missing', () => {
-      const stub = sinon.stub(app.shadowRoot, 'querySelector').returns(null);
-      try {
-        expect(() => app.homeToMenuNavigation()).to.not.throw();
-      } finally {
-        stub.restore();
-      }
-    });
-
-    test('attached() re-arms homeToMenuNavigation after a detach/re-attach cycle', () => {
-      const spy = sinon.spy(app, 'homeToMenuNavigation');
-      try {
-        // Simulate a real detach: this is what flags the element for re-arming.
-        app.detached();
-        expect(app._inactivityNeedsRearm).to.be.true;
-        app.attached();
-        expect(spy).to.have.been.calledOnce;
-        expect(app._inactivityNeedsRearm).to.be.false;
-      } finally {
-        spy.restore();
-      }
-    });
-
-    test('_homeMenuVisibleItems returns [] when no menu is stashed', () => {
-      app._homeMenuNav = null;
-      expect(app._homeMenuVisibleItems()).to.deep.equal([]);
-    });
-
-    test('_homeMenuVisibleItems excludes hidden items', () => {
-      const visible = item();
-      const hidden = item();
-      hidden.setAttribute('hidden', '');
-      app._homeMenuNav = { home: {}, menu: fakeMenu([visible, hidden]) };
-      expect(app._homeMenuVisibleItems()).to.deep.equal([visible]);
-    });
-
-    test('ArrowDown on home focuses the first visible menu item', () => {
-      const first = item();
-      const last = item();
-      const firstSpy = sinon.spy(first, 'focus');
-      app._homeMenuNav = { home: {}, menu: fakeMenu([first, last]) };
-      const e = fakeEvent('ArrowDown');
-      app._onHomeShortcutKeydown(e);
-      expect(e.preventDefault).to.have.been.called;
-      expect(firstSpy).to.have.been.called;
-    });
-
-    test('ArrowUp on home focuses the last visible menu item', () => {
-      const first = item();
-      const last = item();
-      const firstSpy = sinon.spy(first, 'focus');
-      const lastSpy = sinon.spy(last, 'focus');
-      app._homeMenuNav = { home: {}, menu: fakeMenu([first, last]) };
-      const e = fakeEvent('ArrowUp');
-      app._onHomeShortcutKeydown(e);
-      expect(e.preventDefault).to.have.been.called;
-      expect(lastSpy).to.have.been.called;
-      expect(firstSpy).to.not.have.been.called;
-    });
-
-    test('a non-arrow key on home does not move focus', () => {
-      const first = item();
-      const firstSpy = sinon.spy(first, 'focus');
-      app._homeMenuNav = { home: {}, menu: fakeMenu([first]) };
-      const e = fakeEvent('Enter');
-      app._onHomeShortcutKeydown(e);
-      expect(e.preventDefault).to.not.have.been.called;
-      expect(firstSpy).to.not.have.been.called;
-    });
-
-    test('home navigation is a no-op when there are no visible menu items', () => {
-      app._homeMenuNav = { home: {}, menu: fakeMenu([]) };
-      const e = fakeEvent('ArrowDown');
-      app._onHomeShortcutKeydown(e);
-      expect(e.preventDefault).to.not.have.been.called;
-    });
-
-    test('ArrowUp on the first menu item returns focus to the home anchor', () => {
-      const first = item();
-      const last = item();
-      const anchor = { focus: sinon.spy() };
-      const home = { shadowRoot: { querySelector: () => anchor } };
-      app._homeMenuNav = { home, menu: fakeMenu([first, last]) };
-      const e = fakeEvent('ArrowUp', first);
-      app._onMenuEdgeKeydown(e);
-      expect(e.preventDefault).to.have.been.called;
-      expect(anchor.focus).to.have.been.called;
-    });
-
-    test('ArrowDown on the last menu item returns focus to the home anchor', () => {
-      const first = item();
-      const last = item();
-      const anchor = { focus: sinon.spy() };
-      const home = { shadowRoot: { querySelector: () => anchor } };
-      app._homeMenuNav = { home, menu: fakeMenu([first, last]) };
-      const e = fakeEvent('ArrowDown', last);
-      app._onMenuEdgeKeydown(e);
-      expect(e.preventDefault).to.have.been.called;
-      expect(anchor.focus).to.have.been.called;
-    });
-
-    test('ArrowDown on a non-edge menu item does not return focus to home', () => {
-      const first = item();
-      const last = item();
-      const anchor = { focus: sinon.spy() };
-      const home = { shadowRoot: { querySelector: () => anchor } };
-      app._homeMenuNav = { home, menu: fakeMenu([first, last]) };
-      const e = fakeEvent('ArrowDown', first);
-      app._onMenuEdgeKeydown(e);
-      expect(e.preventDefault).to.not.have.been.called;
-      expect(anchor.focus).to.not.have.been.called;
-    });
-
-    test('menu navigation is a no-op when there are no visible items', () => {
-      app._homeMenuNav = { home: {}, menu: fakeMenu([]) };
-      const e = fakeEvent('ArrowUp', {});
-      app._onMenuEdgeKeydown(e);
-      expect(e.preventDefault).to.not.have.been.called;
-    });
-
-    test('_focusHomeShortcut falls back to the host when there is no inner anchor', () => {
-      const home = { shadowRoot: { querySelector: () => null }, focus: sinon.spy() };
-      app._homeMenuNav = { home, menu: fakeMenu([]) };
-      app._focusHomeShortcut();
-      expect(home.focus).to.have.been.called;
-    });
-
-    test('_focusHomeShortcut is a no-op when no home is stashed', () => {
-      app._homeMenuNav = null;
-      expect(() => app._focusHomeShortcut()).to.not.throw();
-    });
-  });
-
   suite('ready listeners and snackbar', () => {
     test('drawer transitionrun triggers resize during animation', () => {
       const drawer = app.$.drawer;
@@ -2640,34 +2488,63 @@ suite('nuxeo-app', () => {
     });
   });
 
-  suite('home-link keyboard navigation (NXENG-527)', () => {
-    test('removes tabindex from home-link to prevent double Tab stop', () => {
-      const homeLink = app.shadowRoot && app.shadowRoot.querySelector('.home-link');
-      expect(homeLink).to.exist;
-      expect(homeLink.hasAttribute('tabindex')).to.be.false;
+  suite('logo home link (WEBUI-2315)', () => {
+    const logo = () => app.shadowRoot && app.shadowRoot.querySelector('#logo');
+
+    test('the logo is an anchor whose href resolves the home route', async () => {
+      const el = logo();
+      expect(el).to.exist;
+      expect(el.localName).to.equal('a');
+      // The fixture starts without a router, so RoutingBehavior has not computed urlFor yet.
+      // Install a fake router for the assertion and restore the global one, so the shared
+      // single-graph test run is left exactly as it was found.
+      const savedRouter = RoutingBehavior.__router;
+      try {
+        app.router = { baseUrl: '/ui/', useHashbang: true, home: () => 'home' };
+        await flush();
+        const href = el.getAttribute('href');
+        expect(href).to.be.a('string').and.not.empty;
+        expect(href).to.equal(app.urlFor('home'));
+        expect(href).to.contain('home');
+      } finally {
+        RoutingBehavior.__router = savedRouter;
+      }
     });
 
-    test('home-link is inside menuContainer but outside paper-listbox', () => {
-      const homeLink = app.shadowRoot && app.shadowRoot.querySelector('.home-link');
-      const menuContainer = app.shadowRoot && app.shadowRoot.querySelector('#menuContainer');
-      const menu = app.shadowRoot && app.shadowRoot.querySelector('#menu');
-
-      expect(homeLink).to.exist;
-      expect(menuContainer).to.exist;
-      expect(menu).to.exist;
-
-      expect(menuContainer.contains(homeLink)).to.be.true;
-      expect(menu.contains(homeLink)).to.be.false;
+    test('the standalone home shortcut is gone from the drawer', () => {
+      expect(app.shadowRoot.querySelector('.home-link')).to.not.exist;
+      expect(app.shadowRoot.querySelector('nuxeo-menu-icon[name="home"]')).to.not.exist;
     });
 
-    test('home-link remains programmatically focusable after tabindex removal', () => {
-      const homeLink = app.shadowRoot && app.shadowRoot.querySelector('.home-link');
-      expect(homeLink).to.exist;
-      // Should be able to focus programmatically (no tabindex="-1" which would prevent focus)
-      const focusSpy = sinon.spy(homeLink, 'focus');
-      homeLink.focus();
-      expect(focusSpy).to.have.been.called;
-      focusSpy.restore();
+    test('the logo is a single Tab stop with no nested interactive element', () => {
+      const el = logo();
+      // An <a href> is focusable on its own: no tabindex is needed, and none is set that could
+      // add a second stop (the NXENG-527 shortcut needed its host attributes stripped for this).
+      expect(el.hasAttribute('tabindex')).to.be.false;
+      expect(el.querySelectorAll('a, button, [tabindex], [role="button"], [role="link"]')).to.have.length(0);
+    });
+
+    test('the logo is named by its destination, not only by the image', () => {
+      const el = logo();
+      // Both labels are bound through i18n before the setup stub is installed, so assert they
+      // resolved to translations rather than to the raw message keys.
+      const label = el.getAttribute('aria-label');
+      expect(label).to.be.a('string').and.not.empty;
+      expect(label).to.not.equal('app.home');
+      const alt = el.querySelector('img').getAttribute('alt');
+      expect(alt).to.be.a('string').and.not.empty;
+      expect(alt).to.not.equal('accessibility.logo');
+    });
+
+    test('clicking the logo resets the task selection', () => {
+      const el = logo();
+      app.currentTask = { id: 'task-1' };
+      app.currentTaskId = 'task-1';
+      // Swallow the navigation the anchor would otherwise perform on the test page.
+      el.addEventListener('click', (e) => e.preventDefault(), { once: true });
+      el.click();
+      expect(app.currentTask).to.be.null;
+      expect(app.currentTaskId).to.be.null;
     });
   });
 });
