@@ -123,7 +123,10 @@ shares refs, config and stashes with its parent.
 **Reproduce the bug on the base branch before writing any code.** Confirming the bug exists — and
 capturing the "before" evidence — is the first thing you do after taking the workspace. The
 workspace is already checked out at the base (or at the `--branch` you asked for, which is cut from
-it), so the repro reflects released code. Only if you are not using a workspace:
+it), so the repro reflects the base you will target. That base is a **dev branch**, i.e. the current
+integration baseline rather than a shipped release — so when the ticket claims a regression in a
+released version, reproduce against the release branch too and say which one the evidence came from.
+Only if you are not using a workspace:
 ```bash
 git fetch origin develop-2025
 git switch -c develop-2025 origin/develop-2025 2>/dev/null || git switch develop-2025 && git pull --ff-only
