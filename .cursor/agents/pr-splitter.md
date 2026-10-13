@@ -57,7 +57,8 @@ If one bucket is empty there is nothing to split — say so and stop rather than
   a tooling PR must commit **both** — committing one leaves the other stale and the next agent run
   may read either. `.claude/skills` holds symlinks into `.agents/skills`, which follow automatically,
   plus its own tracked `README.md`. Re-mirror and verify before committing:
-  `rsync -a --delete .cursor/skills/ .agents/skills/`, copy `README.md` over `.claude/skills/`, then
+  `rsync -a --delete .cursor/skills/ .agents/skills/`, then
+  `cp .cursor/skills/README.md .claude/skills/README.md`, then
   `diff -r .cursor/skills .agents/skills`.
 - **A tooling PR needs its own workspace too, with the skills overlay switched off.** Do not commit
   it from the shared reference clone — that is the shared-`HEAD` contention Phase 1.5 exists to
