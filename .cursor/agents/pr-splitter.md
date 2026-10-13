@@ -50,7 +50,7 @@ If one bucket is empty there is nothing to split — say so and stop rather than
 
 ## Repository specifics you must respect
 
-- **Both bases.** Product fixes target `lts-2025` *and* `maintenance-3.1.x`, so a split usually
+- **Both bases.** Product fixes target `develop-2025` *and* `develop-2023`, so a split usually
   produces an even number of PRs. Tooling PRs follow the same rule unless the user says the skills
   only matter on one base — ask rather than assume.
 - **`.cursor/skills` is tracked, its mirrors are not.** `.agents/skills/**` is an untracked mirror

@@ -10,9 +10,9 @@
 #
 # Usage:
 #   dual-branch-up.sh <TICKET-ID> --target <ref> --fixed <ref> [options]
-#   dual-branch-up.sh WEBUI-1234 --target lts-2025 --fixed fix-WEBUI-1234-foo-lts-2025
-#   dual-branch-up.sh WEBUI-1234 --target lts-2025~1 --fixed lts-2025      # fix already merged
-#   dual-branch-up.sh WEBUI-1234 --target lts-2025 --fixed-pr 3259
+#   dual-branch-up.sh WEBUI-1234 --target develop-2025 --fixed fix-WEBUI-1234-foo-develop-2025
+#   dual-branch-up.sh WEBUI-1234 --target develop-2025~1 --fixed develop-2025   # fix already merged
+#   dual-branch-up.sh WEBUI-1234 --target develop-2025 --fixed-pr 3259
 #   dual-branch-up.sh WEBUI-1234 --print
 #   dual-branch-up.sh WEBUI-1234 --remove
 #

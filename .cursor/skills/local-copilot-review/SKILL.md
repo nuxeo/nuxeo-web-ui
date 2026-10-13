@@ -3,8 +3,8 @@ name: local-copilot-review
 description: >-
   Run a local, pre-PR code review that mirrors GitHub Copilot's automatic PR
   review, using the SAME rules Copilot uses (.github/copilot-instructions.md +
-  AGENTS.md). Diffs the current branch against its PR base (lts-2025 or
-  maintenance-3.1.x), then reviews the changes so you can fix issues BEFORE
+  AGENTS.md). Diffs the current branch against its PR base (develop-2025 or
+  develop-2023), then reviews the changes so you can fix issues BEFORE
   opening/updating the PR — so Copilot has nothing to comment on. Use before
   every push to a PR branch, or when the user says "review my changes like
   Copilot would", "avoid Copilot comments", or "check against copilot rules".
@@ -29,11 +29,11 @@ rules **before** pushing, so the eventual Copilot review finds nothing.
 
 ```bash
 bash .cursor/skills/local-copilot-review/scripts/collect-diff.sh
-# or force a base: ... collect-diff.sh origin/maintenance-3.1.x
+# or force a base: ... collect-diff.sh origin/develop-2023
 ```
 
-   The script auto-picks the closest PR base (`origin/lts-2025` or
-   `origin/maintenance-3.1.x`), prints the changed files, the committed
+   The script auto-picks the closest PR base (`origin/develop-2025` or
+   `origin/develop-2023`), prints the changed files, the committed
    `base...HEAD` diff, and any uncommitted working-tree changes.
 
 2. **Load the rulebook** Copilot uses, in this priority order:
