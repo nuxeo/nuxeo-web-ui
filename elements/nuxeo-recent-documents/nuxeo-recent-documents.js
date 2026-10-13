@@ -65,7 +65,7 @@ Polymer({
       }
 
       .list-item:hover {
-        @apply --hyland-drawer-item-selected;
+        @apply --hyland-drawer-item-hover;
       }
 
       .list-item.selected,

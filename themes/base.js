@@ -350,11 +350,23 @@ const template = html`
         }
         /* Selected drawer item with pill-shaped background */
         --hyland-drawer-item-selected: {
-          /* Background colour, from most to least specific: branding pill colour, then the generic
-             container-hover colour (which classic themes also use for the pill), then a hard fallback. */
+          /* Background colour, from most to least specific: the branding pill colour set by the
+             Hyland themes, then the classic themes' own token, then the generic container-hover
+             colour, then a hard fallback. */
           background-color: var(
             --hyland-selection-pill-background,
-            var(--nuxeo-container-hover, rgba(0, 0, 0, 0.14))
+            var(--nuxeo-drawer-item-selected-background, var(--nuxeo-container-hover, rgba(0, 0, 0, 0.14)))
+          );
+          border-radius: 54px;
+          outline: 0;
+        }
+        /* Hovered drawer item: the same pill in a different colour, which is what tells hover and
+           selected apart. Same two-prefix lookup as above; a theme that sets neither falls back to
+           the container-hover colour the drawers used before these states were split. */
+        --hyland-drawer-item-hover: {
+          background-color: var(
+            --hyland-drawer-item-hover-background,
+            var(--nuxeo-drawer-item-hover-background, var(--nuxeo-container-hover, rgba(0, 0, 0, 0.14)))
           );
           border-radius: 54px;
           outline: 0;
