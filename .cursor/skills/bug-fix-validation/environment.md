@@ -107,14 +107,17 @@ normally generates those. Without the customer's Studio project:
 `scripts/dual-branch-up.sh` automates the whole thing:
 
 ```bash
-BEFORE=$(git merge-base origin/develop-2025 fix-WEBUI-1234-foo-develop-2025)
+git fetch -q origin develop-2025 fix-WEBUI-1234-foo-develop-2025
+BEFORE=$(git merge-base origin/develop-2025 origin/fix-WEBUI-1234-foo-develop-2025)
 bash .cursor/skills/bug-fix-validation/scripts/dual-branch-up.sh WEBUI-1234 \
-  --target "$BEFORE" --fixed fix-WEBUI-1234-foo-develop-2025 \
+  --target "$BEFORE" --fixed origin/fix-WEBUI-1234-foo-develop-2025 \
   [--packages "nuxeo-web-ui nuxeo-drive"] [--image <image>] [--fixed-pr 3259] \
   [--only target|fixed] [--no-build] [--prepare-only] [--print] [--remove] [--force]
 ```
 
-For an open PR the "before" side has to be that **merge base**, not `develop-2025` itself. The dev
+For an open PR the "before" side has to be that **merge base**, not `develop-2025` itself. Both
+refs are `origin/*`-qualified because fetching a PR head creates a remote-tracking ref, not a local
+branch, so the bare name would not resolve in a fresh validation checkout. The dev
 branch collects every ticket, so its tip will have moved since the feature branch was cut; using it
 puts unrelated merged work on the "before" side and breaks the "differs by the fix alone" invariant
 the whole comparison rests on.

@@ -231,7 +231,7 @@ with exponential backoff — 5s, 15s, 45s — then record a blocker.
 
 Identify the two refs. They must differ by **the fix alone** — anything else ends up in the evidence:
 - **Target branch** — where the bug exists. For an open PR that is the commit the feature branch was
-  cut from, i.e. `git merge-base origin/<dev-branch> <feature-branch>`, **not** the live dev tip. The
+  cut from, i.e. `git merge-base origin/<dev-branch> origin/<feature-branch>`, **not** the live dev tip. The
   dev branch collects every ticket, so it will have moved on since the branch was cut, and comparing
   against its tip puts unrelated merged tickets on the "before" side.
 - **Source branch** — the fix: the PR head branch, or the merge commit on the base.
@@ -240,9 +240,11 @@ Bring both up simultaneously on isolated ports and runtimes:
 
 ```bash
 BRANCH=fix-WEBUI-<id>-<summary>-develop-2025
-BEFORE=$(git merge-base origin/develop-2025 "$BRANCH")   # stable; the dev tip is not
+# Fetching a PR head creates origin/<branch>, never a local branch, so qualify both refs.
+git fetch -q origin develop-2025 "$BRANCH"
+BEFORE=$(git merge-base origin/develop-2025 "origin/$BRANCH")   # stable; the dev tip is not
 bash .cursor/skills/bug-fix-validation/scripts/dual-branch-up.sh <TICKET-ID> \
-  --target "$BEFORE" --fixed "$BRANCH"
+  --target "$BEFORE" --fixed "origin/$BRANCH"
 # already merged? use the merge commit and its first parent. Not develop-2025~1:
 # every ticket lands on the dev branch, so its tip is rarely your fix.
 #   SHA=$(gh pr view <n> --repo nuxeo/nuxeo-web-ui --json mergeCommit --jq .mergeCommit.oid)

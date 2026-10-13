@@ -32,9 +32,11 @@ bash .cursor/skills/local-copilot-review/scripts/collect-diff.sh
 # or force a base: ... collect-diff.sh origin/develop-2023
 ```
 
-   The script auto-picks the closest PR base (`origin/develop-2025` or
-   `origin/develop-2023`), prints the changed files, the committed
-   `base...HEAD` diff, and any uncommitted working-tree changes.
+   The script auto-picks the closest PR base, trying the dev branches first
+   (`origin/develop-2025`, `origin/develop-2023`) and then the release branches
+   (`origin/lts-2025`, `origin/maintenance-3.1.x`) so a hotfix branch still
+   resolves. It prints the changed files, the committed `base...HEAD` diff, and
+   any uncommitted working-tree changes.
 
 2. **Load the rulebook** Copilot uses, in this priority order:
    - `.github/copilot-instructions.md`
