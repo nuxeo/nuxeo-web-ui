@@ -137,7 +137,9 @@ const config = {
     .filter(Boolean),
   requireAllChecks: asBool(env('REQUIRE_ALL_CHECKS'), true),
   skipChangesRequested: asBool(env('SKIP_CHANGES_REQUESTED'), true),
-  allowedBaseBranches: (env('ALLOWED_BASE_BRANCHES', 'develop-2025,develop-2023,lts-2025,maintenance-3.1.x') || '')
+  // Read straight from process.env: env() maps '' to its fallback, so going through it would make
+  // ALLOWED_BASE_BRANCHES='' restore the default list instead of disabling the filter.
+  allowedBaseBranches: (process.env.ALLOWED_BASE_BRANCHES ?? 'develop-2025,develop-2023,lts-2025,maintenance-3.1.x')
     .split(',')
     .map((b) => b.trim().toLowerCase())
     .filter(Boolean),
