@@ -290,13 +290,22 @@ MAIN_ELEMENTS=$PARENT/nuxeo-elements
 ELEMENTS_TARGET=
 if [ "$WITH_ELEMENTS" = 1 ] && [ -d "$MAIN_ELEMENTS/.git" ]; then
   el_base=$BASE
-  # clone_repo re-points origin at the real remote and fetches the base, so a branch this
-  # reference clone has never fetched is still usable. Ask the remote before falling back: the
-  # dev branches are new, and a long-lived clone missing origin/develop-2023 would otherwise
-  # pair a 2023 Web UI workspace with 2025 Elements without saying so.
-  if ! git -C "$MAIN_ELEMENTS" rev-parse --verify --quiet "refs/remotes/origin/$el_base" >/dev/null &&
-    ! git -C "$MAIN_ELEMENTS" ls-remote --exit-code --heads origin "$el_base" >/dev/null 2>&1; then
-    el_base=develop-2025
+  if ! git -C "$MAIN_ELEMENTS" rev-parse --verify --quiet "refs/remotes/origin/$el_base" >/dev/null; then
+    # clone_repo re-points origin at the real remote and fetches the base, so a branch this
+    # reference clone has never fetched is still usable. Ask the remote rather than trust a stale
+    # cache: the dev branches are new, and a clone missing origin/develop-2023 would otherwise
+    # pair a 2023 Web UI workspace with 2025 Elements without saying so.
+    ls_remote_status=0
+    git -C "$MAIN_ELEMENTS" ls-remote --exit-code --heads origin "$el_base" >/dev/null 2>&1 ||
+      ls_remote_status=$?
+    case $ls_remote_status in
+      0) ;;
+      # 2 is ls-remote's "no matching ref" and the only status that actually means absent. Any
+      # other status is a failed query - network, auth, bad URL - which is not an answer; falling
+      # back on it would quietly build the mismatched pair a later fetch then makes look valid.
+      2) el_base=develop-2025 ;;
+      *) die "could not reach origin to look up nuxeo-elements branch '$el_base' (git ls-remote exited $ls_remote_status)" ;;
+    esac
   fi
   step "Cloning nuxeo-elements @ $el_base"
   clone_repo "$MAIN_ELEMENTS" "$EL" "$el_base"
