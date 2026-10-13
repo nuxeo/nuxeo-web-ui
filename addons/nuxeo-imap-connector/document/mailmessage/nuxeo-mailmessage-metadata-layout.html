@@ -24,33 +24,49 @@ limitations under the License.
     <style include="nuxeo-styles"></style>
 
     <div role="widget">
-      <label>[[i18n('label.mail.message.subject')]]</label>
-      <div name="title">[[document.properties.dc:title]]</div>
+      <span class="label" id="subject-label">[[i18n('label.mail.message.subject')]]</span>
+      <div role="definition" aria-labelledby="subject-label" name="title">[[document.properties.dc:title]]</div>
     </div>
 
     <div role="widget">
-      <label>[[i18n('label.mail.message.sender')]]</label>
-      <div name="title">[[document.properties.mail:sender]]</div>
+      <span class="label" id="sender-label">[[i18n('label.mail.message.sender')]]</span>
+      <div role="definition" aria-labelledby="sender-label" name="title">[[document.properties.mail:sender]]</div>
     </div>
 
     <div role="widget">
-      <label>[[i18n('label.mail.message.sending_date')]]</label>
-      <nuxeo-date datetime="[[document.properties.mail:sending_date]]"></nuxeo-date>
+      <span class="label" id="sending_date-label">[[i18n('label.mail.message.sending_date')]]</span>
+      <nuxeo-date
+        role="definition"
+        aria-labelledby="sending_date-label"
+        datetime="[[document.properties.mail:sending_date]]"
+      ></nuxeo-date>
     </div>
 
     <div role="widget">
-      <label>[[i18n('label.mail.message.importing_date')]]</label>
-      <nuxeo-date datetime="[[document.properties.dc:created]]"></nuxeo-date>
+      <span class="label" id="importing_date-label">[[i18n('label.mail.message.importing_date')]]</span>
+      <nuxeo-date
+        role="definition"
+        aria-labelledby="importing_date-label"
+        datetime="[[document.properties.dc:created]]"
+      ></nuxeo-date>
     </div>
 
     <div role="widget">
-      <label>[[i18n('label.mail.message.recipients')]]</label>
-      <nuxeo-tags items="[[document.properties.mail:recipients]]"></nuxeo-tags>
+      <span class="label" id="recipients-label">[[i18n('label.mail.message.recipients')]]</span>
+      <nuxeo-tags
+        role="definition"
+        aria-labelledby="recipients-label"
+        items="[[document.properties.mail:recipients]]"
+      ></nuxeo-tags>
     </div>
 
     <div role="widget" hidden$="[[!document.properties.mail:cc_recipients.length]]">
-      <label>[[i18n('label.mail.message.cc_recipients')]]</label>
-      <nuxeo-tags items="[[document.properties.mail:cc_recipients]]"></nuxeo-tags>
+      <span class="label" id="cc_recipients-label">[[i18n('label.mail.message.cc_recipients')]]</span>
+      <nuxeo-tags
+        role="definition"
+        aria-labelledby="cc_recipients-label"
+        items="[[document.properties.mail:cc_recipients]]"
+      ></nuxeo-tags>
     </div>
 
     <nuxeo-document-attachments role="widget" document="[[document]]"></nuxeo-document-attachments>
