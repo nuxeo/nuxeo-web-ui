@@ -53,9 +53,12 @@ If one bucket is empty there is nothing to split — say so and stop rather than
 - **Both bases.** Product fixes target `develop-2025` *and* `develop-2023`, so a split usually
   produces an even number of PRs. Tooling PRs follow the same rule unless the user says the skills
   only matter on one base — ask rather than assume.
-- **`.cursor/skills` is tracked, its mirrors are not.** `.agents/skills/**` is an untracked mirror
-  and `.claude/skills` is a symlink to it. Commit the tracked copy, and make sure the mirror is
-  byte-identical first (`diff -q`) so the next agent run does not read stale instructions.
+- **`.cursor/skills` and `.agents/skills` are both tracked mirrors.** Their blobs are identical, so
+  a tooling PR must commit **both** — committing one leaves the other stale and the next agent run
+  may read either. `.claude/skills` holds symlinks into `.agents/skills`, which follow automatically,
+  plus its own tracked `README.md`. Re-mirror and verify before committing:
+  `rsync -a --delete .cursor/skills/ .agents/skills/`, copy `README.md` over `.claude/skills/`, then
+  `diff -r .cursor/skills .agents/skills`.
 - **A tooling PR needs its own workspace too, with the skills overlay switched off.** Do not commit
   it from the shared reference clone — that is the shared-`HEAD` contention Phase 1.5 exists to
   prevent. Take a workspace for the tooling ticket like any other, then undo the concealment
