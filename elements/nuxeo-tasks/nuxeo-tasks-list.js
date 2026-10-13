@@ -72,13 +72,20 @@ Polymer({
       }
 
       .list-item:hover {
+        @apply --hyland-drawer-item-hover;
+      }
+
+      /* Only the selected row carries the selected background. Plain focus must not: a row keeps
+         DOM focus after a mouse click, so it would go on looking selected once the selection has
+         moved or been cleared. Keyboard focus stays visible through the focus-visible ring below. */
+      .list-item.selected,
+      .list-item.selected:focus {
         @apply --hyland-drawer-item-selected;
       }
 
-      .list-item.selected,
-      .list-item:focus,
-      .list-item.selected:focus {
-        @apply --hyland-drawer-item-selected;
+      .list-item:focus {
+        border-radius: 54px;
+        outline: 0;
       }
 
       /* Keyboard focus ring: --hyland-drawer-item-selected removes outline, so we apply

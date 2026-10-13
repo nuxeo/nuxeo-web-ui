@@ -195,7 +195,11 @@ limitations under the License.
       --hyland-page-surface-background: #1a1c1e;
 
       /* Drawer + Sidebar content */
-      --hyland-selection-pill-background: #444366;
+      /* Active item: the hover indigo a step heavier, halfway to the #5753d1 the create button uses
+         for hover. 1.3:1 against the hover fill, 5.8:1 under #e4e0f0 text. */
+      --hyland-selection-pill-background: #4e4b9c;
+      /* Hovered item: the muted indigo that used to carry both states, a step below the active one. */
+      --hyland-drawer-item-hover-background: #444366;
       --hyland-sidebar-item-selected-background: #26227b1f;
       --hyland-sidebar-item-hover-background: #26227b1f;
 
