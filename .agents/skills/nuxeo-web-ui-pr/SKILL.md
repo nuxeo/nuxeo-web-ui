@@ -6,7 +6,7 @@ description: >-
   flow — always push branches to origin (nuxeo/nuxeo-web-ui), never a fork,
   because CI checks out the branch by name from the upstream repo — the Problem /
   Root cause / Changes / Test plan / Notes PR body format, and backporting to both
-  lts-2025 and maintenance-3.1.x. Use when opening a PR, pushing a branch, or
+  develop-2025 and develop-2023. Use when opening a PR, pushing a branch, or
   backporting a fix in nuxeo-web-ui.
 ---
 
@@ -42,7 +42,7 @@ Do not commit incidental `package-lock.json` churn (npm version differences add/
 
 - type: `fix` (bug), `feat` (feature), `task` (chore/infra)
 - include the base branch suffix so the target is unambiguous, e.g.
-  `fix-WEBUI-1571-queue-view-navigation-multi-repository-lts-2025`
+  `fix-WEBUI-1571-queue-view-navigation-multi-repository-develop-2025`
 
 ## Commit message
 
@@ -96,22 +96,40 @@ Run it as soon as the PR exists, then confirm the link is listed before calling 
 
 ## Base branches & backports
 
-**Default rule: every fix targets BOTH bases.** For each fix, create a branch off `lts-2025`
-*and* a branch off `maintenance-3.1.x`, each named with the ticket id
+Ticket work never targets a release branch. Each LTS line has a permanent **dev branch** that
+collects tickets until the release content is agreed:
+
+| LTS line | Base your PR on | Released through    |
+| -------- | --------------- | ------------------- |
+| LTS 2025 | `develop-2025`  | `lts-2025`          |
+| LTS 2023 | `develop-2023`  | `maintenance-3.1.x` |
+
+**Default rule: every fix targets BOTH bases.** For each fix, create a branch off `develop-2025`
+*and* a branch off `develop-2023`, each named with the ticket id
 (`<type>-WEBUI-<id>-<kebab-summary>-<base>`), and open **one PR per base** (two PRs total).
 Only skip a base when the Jira `fixVersions` explicitly exclude it — call that out.
 
-- Primary development: `lts-2025`.
-- Maintenance/backport: `maintenance-3.1.x` (the repo default branch).
+- Primary development: `develop-2025`.
+- Maintenance/backport: `develop-2023` (the repo default branch).
 - Match the Jira `fixVersions`. When a fix targets multiple versions, open one PR per base.
-  Backport by branching from the maintenance base and cherry-picking the commit:
+  Backport by branching from the maintenance dev branch and cherry-picking the commit:
 
 ```bash
-git fetch origin maintenance-3.1.x
-git checkout -b <branch>-maintenance-3.1.x origin/maintenance-3.1.x
+git fetch origin develop-2023
+git checkout -b <branch>-develop-2023 origin/develop-2023
 git cherry-pick <sha>
 git push -u origin HEAD
 ```
+
+Ticket PRs are **squash**-merged. Only the dev → release merge and the release → dev sync PR use a
+merge commit, and neither is part of ticket work.
+
+**Target a release branch only for a hotfix** to an already-released version. That path is
+unchanged: branch from `lts-2025` / `maintenance-3.1.x` and open the PR back into it.
+
+**Delete your branch once the PR is merged or closed.** Cross-repo CI pairs a Web UI PR with a
+`nuxeo-elements` branch of the *same name*, so an abandoned branch can be built in place of the one
+you intended, and the only clue is a single line in a CI log.
 
 ## Keep both PRs in sync (post-creation changes)
 
@@ -157,5 +175,6 @@ git push origin HEAD
 
 ## Git safety
 
-- Never update git config; never force-push to `lts-2025`/`maintenance-3.1.x`.
+- Never update git config; never force-push to a shared branch (`develop-2025`, `develop-2023`,
+  `lts-2025`, `maintenance-3.1.x`).
 - Only commit when asked; keep the bug-fix PR focused (don't bundle unrelated files).

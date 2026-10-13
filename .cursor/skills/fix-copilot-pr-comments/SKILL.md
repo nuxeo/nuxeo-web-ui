@@ -26,8 +26,8 @@ overridable (see the scripts).
 ## Prerequisites
 - `gh` authenticated (`gh auth status`) with access to the repo, and `jq`.
 - Local checkout able to run the repo's gating checks (`npm run format && npm run lint && npm test`).
-- Repo requires **signed commits**; WEBUI fixes ship as a **backport pair** (`lts-2025` +
-  `maintenance-3.1.x`) — keep both branches identical by committing once and cherry-picking.
+- Repo requires **signed commits**; WEBUI fixes ship as a **backport pair** (`develop-2025` +
+  `develop-2023`) — keep both branches identical by committing once and cherry-picking.
 
 ## Workflow
 
@@ -64,8 +64,8 @@ threads — you're done.
 ### Phase 2 — Triage & group into ONE worklist
 Read every `body` and build a single list of **unique issues**, not per-PR items:
 
-- **Collapse backport pairs.** WEBUI fixes ship as two PRs (base `lts-2025` +
-  `maintenance-3.1.x`) with identical code, so the *same* Copilot finding usually
+- **Collapse backport pairs.** WEBUI fixes ship as two PRs (base `develop-2025` +
+  `develop-2023`) with identical code, so the *same* Copilot finding usually
   appears on both. Group by `(path, normalized-issue)` → one fix, applied once and
   cherry-picked (Phase 5). Keep the `{pr, threadId, commentId}` for **every**
   occurrence so you can resolve them all later.

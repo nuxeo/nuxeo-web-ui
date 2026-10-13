@@ -5,8 +5,8 @@ Used by the `dependabot-fix` skill (Step 0 onward) when the ticket is an `ELEMEN
 ## Identity
 - GitHub repo: `nuxeo/nuxeo-elements`
 - Jira: cloudId `hyland.atlassian.net`, project `ELEMENTS`
-- Branch mapping: **LTS-2025 → `lts-2025`**, **LTS-2023 → `maintenance-3.1.x`** (default branch) — same mapping as nuxeo-web-ui
-- Feature-branch naming: `ELEMENTS-<num>-<slug>-lts-2025` and `ELEMENTS-<num>-<slug>-lts-2023` — mirror the nuxeo-web-ui convention (always suffix the LTS line) so agent behaviour is symmetric across both repos and the target base stays unambiguous, since a fix lands on both lines as separate branches. As in web-ui, security-fix branches **drop** the `<type>-` prefix (`ELEMENTS-<num>-…`, not `fix-ELEMENTS-<num>-…`). (Some historical elements branches used a bare `ELEMENTS-<num>-<slug>`; check recent branches with `gh api repos/nuxeo/nuxeo-elements/branches` when matching an existing one.)
+- Branch mapping — the downstream dev branch per LTS line, **not** the PR base: **LTS-2025 → `develop-2025`**, **LTS-2023 → `develop-2023`** (default branch) — same mapping as nuxeo-web-ui. `lts-2025` / `maintenance-3.1.x` hold released code only. A security PR targets the rotating integration branch from Step 4.0, not either of these.
+- Feature-branch naming: `ELEMENTS-<num>-<slug>-develop-2025` and `ELEMENTS-<num>-<slug>-develop-2023` — mirror the nuxeo-web-ui convention (always suffix the LTS line) so agent behaviour is symmetric across both repos and the target base stays unambiguous, since a fix lands on both lines as separate branches. As in web-ui, security-fix branches **drop** the `<type>-` prefix (`ELEMENTS-<num>-…`, not `fix-ELEMENTS-<num>-…`). (Some historical elements branches used a bare `ELEMENTS-<num>-<slug>`; check recent branches with `gh api repos/nuxeo/nuxeo-elements/branches` when matching an existing one.)
 - Downstream consumer (not a dependency of this repo): `../nuxeo-web-ui`
 
 ## Lockfile topology — npm workspaces, ONE shared lockfile
@@ -30,7 +30,7 @@ CI (`lint.yaml`/`test.yaml`) uses `npm ci --ignore-scripts`; the `pretest` hook 
 
 ## Publish model — this repo produces npm packages, it does not deploy
 Fixing a dependency here does **not** by itself reach end users of nuxeo-web-ui. The chain is:
-1. A PR merges to `lts-2025` (or `maintenance-3.1.x`) → `main.yaml` runs lint + test + storybook + sonar, then **auto-publishes a `SNAPSHOT`** version of every workspace package (except storybook) to `packages.nuxeo.com`.
+1. A PR merges to a dev branch (`develop-2025` / `develop-2023`) → `develop.yaml` runs lint + test + storybook, with sonar on its own trigger. **Nothing is published at this point.** The `SNAPSHOT` publish happens later, when the dev branch is merged into its release branch (`lts-2025` / `maintenance-3.1.x`) and `main.yaml` runs.
 2. A maintainer later runs `promote.yaml` (manual `workflow_dispatch`) to cut and publish the real release version from an RC tag.
 3. **Only once nuxeo-web-ui bumps its own `@nuxeo/nuxeo-elements` / `@nuxeo/nuxeo-ui-elements` / `@nuxeo/nuxeo-dataviz-elements` version** (in `nuxeo-web-ui`'s `package.json`/lockfile) do the fixed dependencies actually ship to Web UI users.
 
