@@ -81,6 +81,19 @@ EOF
 )"
 ```
 
+## After opening each PR — link it on the Jira issue (required)
+
+Every PR must also appear on the ticket as a Jira **remote web link** (the issue's *Web links* /
+*Links* section) — one link per PR, backports included. A PR URL pasted in a Jira **comment**, a PR
+**title containing `WEBUI-<id>`**, or a GitHub-side link do **not** satisfy this, and the Atlassian MCP
+has **no** create-remote-link tool (only `getJiraIssueRemoteIssueLinks` to read, and `createIssueLink`
+for issue↔issue links), so it must go through the Jira REST `remotelink` endpoint.
+
+Canonical procedure, with the ready-to-run `curl` (idempotent via `globalId`) and the
+`GET /remotelink` verification:
+[`fix-nuxeo-web-ui-bug` → Phase 6.5](../fix-nuxeo-web-ui-bug/SKILL.md#phase-65--link-every-pr-on-the-jira-issue-as-a-remote-web-link-mandatory).
+Run it as soon as the PR exists, then confirm the link is listed before calling the PR done.
+
 ## Base branches & backports
 
 **Default rule: every fix targets BOTH bases.** For each fix, create a branch off `lts-2025`
