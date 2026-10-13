@@ -229,21 +229,27 @@ with exponential backoff — 5s, 15s, 45s — then record a blocker.
 
 ## Phase 5 — Multi-branch setup (buggy vs fixed, side by side)
 
-Identify the two refs:
-- **Target branch** — where the bug exists: the base (`develop-2025` / `develop-2023`) at the commit
-  *before* the fix, or simply the base if the fix is not merged yet.
+Identify the two refs. They must differ by **the fix alone** — anything else ends up in the evidence:
+- **Target branch** — where the bug exists. For an open PR that is the commit the feature branch was
+  cut from, i.e. `git merge-base origin/<dev-branch> <feature-branch>`, **not** the live dev tip. The
+  dev branch collects every ticket, so it will have moved on since the branch was cut, and comparing
+  against its tip puts unrelated merged tickets on the "before" side.
 - **Source branch** — the fix: the PR head branch, or the merge commit on the base.
 
 Bring both up simultaneously on isolated ports and runtimes:
 
 ```bash
+BRANCH=fix-WEBUI-<id>-<summary>-develop-2025
+BEFORE=$(git merge-base origin/develop-2025 "$BRANCH")   # stable; the dev tip is not
 bash .cursor/skills/bug-fix-validation/scripts/dual-branch-up.sh <TICKET-ID> \
-  --target develop-2025 --fixed fix-WEBUI-<id>-<summary>-develop-2025
+  --target "$BEFORE" --fixed "$BRANCH"
 # already merged? use the merge commit and its first parent. Not develop-2025~1:
 # every ticket lands on the dev branch, so its tip is rarely your fix.
 #   SHA=$(gh pr view <n> --repo nuxeo/nuxeo-web-ui --json mergeCommit --jq .mergeCommit.oid)
 #   --target "$SHA^" --fixed "$SHA"
-# only have a PR number?   --target develop-2025 --fixed-pr 3259
+# only have a PR number? --fixed-pr resolves the head, but still pass a merge-base target:
+#   BRANCH=$(gh pr view <n> --repo nuxeo/nuxeo-web-ui --json headRefName --jq .headRefName)
+#   --target "$(git merge-base origin/develop-2025 "origin/$BRANCH")" --fixed-pr <n>
 ```
 
 The script allocates two free host ports (e.g. `8100` / `8101`), starts one throwaway Nuxeo container per
