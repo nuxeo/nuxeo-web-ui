@@ -107,11 +107,17 @@ normally generates those. Without the customer's Studio project:
 `scripts/dual-branch-up.sh` automates the whole thing:
 
 ```bash
+BEFORE=$(git merge-base origin/develop-2025 fix-WEBUI-1234-foo-develop-2025)
 bash .cursor/skills/bug-fix-validation/scripts/dual-branch-up.sh WEBUI-1234 \
-  --target develop-2025 --fixed fix-WEBUI-1234-foo-develop-2025 \
+  --target "$BEFORE" --fixed fix-WEBUI-1234-foo-develop-2025 \
   [--packages "nuxeo-web-ui nuxeo-drive"] [--image <image>] [--fixed-pr 3259] \
   [--only target|fixed] [--no-build] [--prepare-only] [--print] [--remove] [--force]
 ```
+
+For an open PR the "before" side has to be that **merge base**, not `develop-2025` itself. The dev
+branch collects every ticket, so its tip will have moved since the feature branch was cut; using it
+puts unrelated merged work on the "before" side and breaks the "differs by the fix alone" invariant
+the whole comparison rests on.
 
 Any git revision works for `--target`/`--fixed`: a branch, `origin/<branch>`, a tag or a sha. To
 validate a fix that is **already merged**, resolve the PR's merge commit and compare it against its
