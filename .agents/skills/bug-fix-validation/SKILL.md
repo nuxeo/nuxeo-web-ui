@@ -239,8 +239,10 @@ Bring both up simultaneously on isolated ports and runtimes:
 ```bash
 bash .cursor/skills/bug-fix-validation/scripts/dual-branch-up.sh <TICKET-ID> \
   --target develop-2025 --fixed fix-WEBUI-<id>-<summary>-develop-2025
-# already merged? compare the base against itself one commit earlier:
-#   --target develop-2025~1 --fixed develop-2025
+# already merged? use the merge commit and its first parent. Not develop-2025~1:
+# every ticket lands on the dev branch, so its tip is rarely your fix.
+#   SHA=$(gh pr view <n> --repo nuxeo/nuxeo-web-ui --json mergeCommit --jq .mergeCommit.oid)
+#   --target "$SHA^" --fixed "$SHA"
 # only have a PR number?   --target develop-2025 --fixed-pr 3259
 ```
 

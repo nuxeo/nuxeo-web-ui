@@ -229,7 +229,7 @@ GitHub Actions run on every push to a dev branch (`develop-2025`, `develop-2023`
 5. **Sonar** — SonarCloud quality/security scan
 6. **Build** — Maven marketplace package (only after all above pass)
 
-Steps 1–4 run on a dev branch via `develop.yaml`. Step 6 tags and publishes, so it runs only on a release branch via `main.yaml`.
+On a dev branch, steps 1–4 run in parallel via `develop.yaml` and step 5 runs from `sonar.yaml`'s own push trigger. Step 6 tags and publishes, so it runs only on a release branch, where `main.yaml` starts steps 1–5 in parallel and makes the build depend on all of them.
 
 CI workflows use `npm ci` for deterministic installs from `package-lock.json`. Always commit lockfile changes when dependencies are added or updated.
 

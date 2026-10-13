@@ -291,15 +291,18 @@ Environment variables control deployment:
 Workflow orchestration in `.github/workflows/main.yaml` (release branches) and `.github/workflows/develop.yaml` (dev branches):
 
 ```
-Push to a release branch (lts-2025, maintenance-3.1.x) triggers main.yaml:
+Push to a release branch (lts-2025, maintenance-3.1.x) triggers main.yaml.
+These five run in parallel; build depends on all of them:
   lint    → ESLint + Prettier check
   test    → Web Test Runner unit tests (single entry: test/load-all-tests.js)
   a11y    → Accessibility tests
   ftest   → WebdriverIO functional tests
-  build   → (depends on all above) Maven marketplace build, tag and publish
+  sonar   → SonarCloud quality/security scan
+  build   → Maven marketplace build, tag and publish
 
 Push to a dev branch (develop-2025, develop-2023) triggers develop.yaml:
-  the same lint / test / a11y / ftest set, without the build and publish step
+  the same lint / test / a11y / ftest set in parallel, without build and publish.
+  sonar is absent here only because sonar.yaml already has its own push trigger.
 ```
 
 Additional workflows: `preview.yaml` (PR preview environments), `cross-repo.yaml` (nuxeo-elements coordination), `crowdin.yaml` (translation sync), `promote.yaml` (release promotion), `sync-release-to-dev.yaml` (merges a release branch back into its dev branch after promotion).
