@@ -844,8 +844,7 @@ Polymer({
     // before the template is stamped, and `queue` is set as an attribute on some search forms.
     // Such a form can be handed the document while still un-fetched, and an observer only runs
     // on a change, so ask the queue fetch to replay the lookup instead (WEBUI-2303).
-    const list = this.$?.list;
-    if (!list || !list.items?.length) {
+    if (!this.$?.list?.items?.length) {
       this.__queueSelectionPending = true;
       return;
     }
