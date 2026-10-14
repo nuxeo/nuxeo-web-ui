@@ -37,6 +37,9 @@ class Spreadsheet {
   constructor(container, connection, columns, pageProvider, language) {
     this.container = container;
     this.connection = connection;
+    // Called when an autosave fails. Nothing on this side can reach the console the app renders
+    // the message in, and a save the user did not ask for still has to say why it did not happen.
+    this.onSaveFailure = () => {};
     this._data = [];
     this.options = {
       data: this._data,
@@ -303,7 +306,11 @@ class Spreadsheet {
         assign(doc, field, newV);
       }
       if (this.autosave) {
-        this.save();
+        this.save().then((results) => {
+          if (!results) {
+            this.onSaveFailure();
+          }
+        });
       }
       this.ht.render();
     }

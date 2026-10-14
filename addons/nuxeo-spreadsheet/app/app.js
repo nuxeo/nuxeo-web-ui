@@ -35,6 +35,10 @@ let sheet;
 
 let log;
 
+function reportSaveFailure() {
+  log.error(i18n(sheet.hasConflicts ? 'conflictSave' : 'failedSave'));
+}
+
 function setupUI() {
   log = new Log($('#console'));
 
@@ -49,7 +53,7 @@ function setupUI() {
     log.info(i18n('saving'));
     sheet.save().then((results) => {
       if (!results) {
-        log.error(i18n(sheet.hasConflicts ? 'conflictSave' : 'failedSave'));
+        reportSaveFailure();
         return;
       }
       let msg;
@@ -114,6 +118,10 @@ function run({ baseURL = '/nuxeo', resultColumns, pageProviderName, queryParamet
 
     // Setup the SpreadSheet
     window.spreadsheet = sheet = new Spreadsheet($('#grid'), nx, resultColumns, pageProviderName, language);
+
+    // An autosave the user did not trigger still has to report a stale write, otherwise the row is
+    // only coloured and the reload they need is never asked for.
+    sheet.onSaveFailure = reportSaveFailure;
 
     // Add query parameters
     if (queryParameters) {
