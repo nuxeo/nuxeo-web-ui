@@ -38,19 +38,25 @@ import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior
 Polymer({
   _template: html`
     <style include="nuxeo-styles">
-      nuxeo-data-table {
-        min-height: calc(100vh - 9.3em);
+      /*
+       * WEBUI-2314: these floors size the view here - they win over the height nuxeo-results
+       * computes - and cleared none of the 139px of chrome above them, so Collection and Favorites
+       * overflowed by 119px with or without rows. See nuxeo-collapsible-document-page for why the
+       * budget is aimed a few pixels short.
+       */
+      nuxeo-data-table,
+      nuxeo-data-grid,
+      nuxeo-data-list {
+        /* Published here too, so nuxeo-results stops falling back to the theme's generic budget,
+           which assumes less chrome than this layout has. */
+        --nuxeo-results-view-height: calc(100vh - 248px - (var(--nuxeo-app-top, 0px) + var(--nuxeo-app-bottom, 0px)));
+        min-height: calc(100vh - 248px - (var(--nuxeo-app-top, 0px) + var(--nuxeo-app-bottom, 0px)));
       }
 
       nuxeo-data-grid,
       nuxeo-data-list {
         display: block;
         position: relative;
-      }
-
-      nuxeo-data-grid,
-      nuxeo-data-list {
-        min-height: calc(100vh - 8em);
       }
 
       .ellipsis {
