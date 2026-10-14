@@ -30,6 +30,21 @@
     </filter-mapping>
   </extension>
 
+  <!-- Redirect RFC 3986 compliant permalinks (/ui/doc?id=<docId>) to the hashbang route (WEBUI-1728) -->
+  <extension target="web#SERVLET">
+    <servlet>
+      <servlet-name>docPermalinkServlet</servlet-name>
+      <servlet-class>org.nuxeo.web.ui.DocumentPermalinkServlet</servlet-class>
+    </servlet>
+  </extension>
+
+  <extension target="web#SERVLET-MAPPING">
+    <servlet-mapping>
+      <servlet-name>docPermalinkServlet</servlet-name>
+      <url-pattern>/ui/doc</url-pattern>
+    </servlet-mapping>
+  </extension>
+
   <extension target="rewrite#RULE">
     # Request attributes set:
     # NXREPOSITORY: repository name

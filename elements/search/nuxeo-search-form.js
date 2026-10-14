@@ -26,6 +26,7 @@ import '@polymer/paper-input/paper-input.js';
 import '@polymer/paper-spinner/paper-spinner-lite.js';
 import '@polymer/paper-toggle-button/paper-toggle-button.js';
 import '@nuxeo/nuxeo-elements/nuxeo-page-provider.js';
+import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 import '@nuxeo/nuxeo-elements/nuxeo-search.js';
 import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-layout.js';
@@ -175,9 +176,11 @@ Polymer({
         font-weight: 500;
       }
       #actionsDropdown {
+        box-sizing: border-box;
         width: 82%;
         /* No top padding: the always visible label now occupies the top of the header row. */
         padding: 0;
+        overflow-y: hidden;
         --selectivity-dropdown-min-width: auto;
         --selectivity-dropdown-max-width: 100%;
         --selectivity-result-item-white-space: normal;
@@ -296,6 +299,7 @@ Polymer({
     </nuxeo-page-provider>
 
     <nuxeo-search id="saved-search"></nuxeo-search>
+    <nuxeo-resource id="directoryEntry"></nuxeo-resource>
 
     <div id="search-container">
       <div class="header ellipsis search-header">
@@ -889,9 +893,9 @@ Polymer({
       list.selectIndex(index);
       // Selecting writes `selectedDocument`, which schedules `_selectedDocChanged`'s debounced
       // navigation. Following the route must only ever move the highlight: the route already
-      // shows this document. Leaving the timer armed lets it fire after a later `currentDocument`
-      // change that is not in the queue, navigating back to the stale document and overriding the
-      // external navigation.
+      // shows this document. Leaving the timer armed lets it fire after a later host-driven
+      // `currentDocument` change that is not in the queue, navigating back to the stale document
+      // and overriding the external navigation.
       if (this.__renderDebouncer) {
         this.__renderDebouncer.cancel();
       }
@@ -982,6 +986,7 @@ Polymer({
       const clonedParams = JSON.parse(JSON.stringify(search.params));
       this.params = this._mutateParams(clonedParams, true);
       this._navigateToResults();
+      this._scheduleDirectorySuggestionRehydration();
     } else {
       this._clear();
     }
@@ -1022,6 +1027,106 @@ Polymer({
     if (this.form) {
       this.form.searchTerm = this.searchTerm;
     }
+    this._scheduleDirectorySuggestionRehydration();
+  },
+
+  _scheduleDirectorySuggestionRehydration() {
+    if (this.__directorySuggestionRehydrationPromise) {
+      return this.__directorySuggestionRehydrationPromise;
+    }
+    this.__directorySuggestionRehydrationPromise = Promise.resolve()
+      .then(() => this._rehydrateDirectorySuggestionLabels())
+      .finally(() => {
+        this.__directorySuggestionRehydrationPromise = null;
+      });
+    return this.__directorySuggestionRehydrationPromise;
+  },
+
+  _rehydrateDirectorySuggestionLabels() {
+    const { form } = this;
+    if (!form) {
+      return Promise.resolve();
+    }
+    const roots = form.shadowRoot ? [form.shadowRoot, form] : [form];
+    const suggestions = roots.reduce((result, root) => {
+      if (typeof root.querySelectorAll === 'function') {
+        root.querySelectorAll('nuxeo-directory-suggestion').forEach((suggestion) => result.add(suggestion));
+      }
+      return result;
+    }, new Set());
+    return Array.from(suggestions).reduce(
+      (promise, suggestion) => promise.then(() => this._rehydrateDirectorySuggestionLabel(suggestion)),
+      Promise.resolve(),
+    );
+  },
+
+  _rehydrateDirectorySuggestionLabel(suggestion) {
+    const selectivity = suggestion?.$?.s2?._selectivity;
+    const savedValue = suggestion?.value;
+    let ids = [];
+    if (Array.isArray(savedValue)) {
+      ids = savedValue.filter((id) => id !== null && id !== undefined && id !== '');
+    } else if (savedValue !== null && savedValue !== undefined && savedValue !== '') {
+      ids = [savedValue];
+    }
+    if (!selectivity || !ids.length) {
+      return Promise.resolve();
+    }
+    let resolved = false;
+    const resolvedEntries = new Map();
+    return ids
+      .reduce(
+        // Sequential on purpose: each entry is fetched only after the previous one resolves.
+        (promise, id) =>
+          promise.then(async () => {
+            const entry = await this._queryDirectorySuggestionEntry(suggestion, id);
+            if (entry && typeof suggestion._selectionFormatter === 'function') {
+              suggestion._selectionFormatter(entry);
+              resolvedEntries.set(id, entry);
+              resolved = true;
+            }
+          }),
+        Promise.resolve(),
+      )
+      .then(() => {
+        if (resolved && typeof selectivity.setValue === 'function') {
+          const hydratedValue = Array.isArray(savedValue)
+            ? savedValue.map((id) => resolvedEntries.get(id) || id)
+            : resolvedEntries.get(savedValue) || savedValue;
+          selectivity.setValue(hydratedValue, { triggerChange: false });
+        }
+      });
+  },
+
+  _queryDirectorySuggestionEntry(suggestion, id) {
+    const resource = this.$.directoryEntry;
+    if (!resource || !suggestion?.directoryName) {
+      return Promise.resolve(null);
+    }
+    resource.path = `/directory/${encodeURIComponent(suggestion.directoryName)}/${encodeURIComponent(String(id))}`;
+    resource.headers = {
+      'fetch-directoryEntry': 'parent',
+      'translate-directoryEntry': 'label',
+    };
+    return resource
+      .get()
+      .then((entry) => {
+        if (!entry) {
+          return null;
+        }
+        const properties = entry.properties || {};
+        const formattedLabel =
+          typeof suggestion.formatDirectory === 'function'
+            ? suggestion.formatDirectory(entry, suggestion.separator)
+            : undefined;
+        return {
+          ...entry,
+          id: entry.id || properties.id || String(id),
+          displayLabel: entry.displayLabel || entry.absoluteLabel || formattedLabel || properties.label || String(id),
+        };
+      })
+      .catch(() => null)
+      .then((entry) => entry || null);
   },
 
   _resultsElementChanged(results, oldResults) {
@@ -1285,23 +1390,29 @@ Polymer({
     if (!id) {
       return;
     }
-    const load = () =>
-      (!this._searches ? this.$['saved-searches'].get() : Promise.resolve()).then(() => {
-        this.selectedSearchIdx = this._searches.findIndex((s) => s.id === id) + 1;
-        // XXX rely on debouncer to update the results request with the saved search params
-        this._fetch(this.results);
-      });
+    const load = async () => {
+      // Awaited even when the searches are already loaded, so the body still runs in a
+      // microtask exactly as the previous promise chain did.
+      await (!this._searches ? this.$['saved-searches'].get() : Promise.resolve());
+      this.selectedSearchIdx = this._searches.findIndex((s) => s.id === id) + 1;
+      // XXX rely on debouncer to update the results request with the saved search params
+      await this._fetch(this.results);
+      return this._scheduleDirectorySuggestionRehydration();
+    };
     if (this.results) {
-      load();
+      return load();
     } else {
       this._loadSavedSearchListener = () => {
         if (this.results) {
-          load();
+          // Deliberately not awaited: an event listener cannot return a promise. "void" marks it
+          // ignored without attaching a handler, so a rejection still surfaces as it did before.
+          void load();
           this.removeEventListener('results-changed', this._loadSavedSearchListener);
         }
       };
       this.addEventListener('results-changed', this._loadSavedSearchListener);
     }
+    return undefined;
   },
 
   // To fix NXP-27429 so action buttons can be displayed on mobile browsers

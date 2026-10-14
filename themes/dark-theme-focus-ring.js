@@ -75,7 +75,9 @@ limitations under the License.
  * original ring) is acceptable; over-covering a self-indicating host is not. Add another
  * entry only after verifying it is a ring-less primitive, not a host that styles its own
  * focus. Every other element keeps its own original focus styling untouched in all themes;
- * this injector is the only place that consumes `--nuxeo-focus-outline`.
+ * this injector is the only place that adopts a rule into every root. Elements outside the
+ * allowlist may still consume `--nuxeo-focus-outline` directly in their own styles (e.g.
+ * `#logo` in nuxeo-app.js), which is the supported way to opt a non-primitive in.
  */
 
 export const FOCUS_RULE =
