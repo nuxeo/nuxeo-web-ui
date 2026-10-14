@@ -2,7 +2,22 @@
 
 ## Overview
 
-This is a Polymer 3 web application (SPA) for the Nuxeo content services platform. Code ownership: `@nuxeo/ui`. The main development branch is `lts-2025` for LTS-2025.
+This is a Polymer 3 web application (SPA) for the Nuxeo content services platform. Code ownership: `@nuxeo/ui`.
+
+## Branching
+
+Tickets are collected on a permanent dev branch per LTS line. They are never merged straight into a release branch.
+
+| LTS line | Branch from / target | Release branch      |
+| -------- | -------------------- | ------------------- |
+| LTS 2025 | `develop-2025`       | `lts-2025`          |
+| LTS 2023 | `develop-2023`       | `maintenance-3.1.x` |
+
+`develop-2023` is the default branch. Most fixes apply to both lines, so raise one PR per line.
+
+Ticket PRs are squashed. The dev → release merge and the release → dev sync PR must use a **merge commit** — squashing breaks the ancestry the sync check relies on, so the next sync re-proposes the whole release branch. Hotfix work on an already-released version still branches from the release branch.
+
+Delete your branch once its PR is merged or closed: cross-repo CI pairs a Web UI PR with a `nuxeo-elements` branch of the same name, so an abandoned branch can be silently picked up by a later, unrelated PR.
 
 ## Build & Validate
 
@@ -132,7 +147,9 @@ npm run ftest:dev           # Against localhost:8080 + localhost:5000
 
 ## CI Workflow
 
-Push to the `lts-2025` branch triggers: **lint → test → a11y → ftest → sonar → build** (all must pass).
+Push to a dev branch (`develop-2025`, `develop-2023`) runs `develop.yaml`, which starts **lint**, **test**, **a11y** and **ftest** in parallel — all must pass. Sonar and CodeQL trigger themselves on the same push. There is no publish step.
+
+Push to a release branch runs `main.yaml` for that line: those four plus **sonar**, again in parallel, then **build**, which depends on all five and does the tag and publish.
 
 PRs run lint and test workflows automatically.
 
