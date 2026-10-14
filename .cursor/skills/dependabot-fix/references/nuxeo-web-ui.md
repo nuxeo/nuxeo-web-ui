@@ -5,8 +5,8 @@ Used by the `dependabot-fix` skill (Step 0 onward) when the ticket is a `WEBUI-<
 ## Identity
 - GitHub repo: `nuxeo/nuxeo-web-ui`
 - Jira: cloudId `hyland.atlassian.net`, project `WEBUI`
-- Branch mapping: **LTS-2025 → `lts-2025`**, **LTS-2023 → `maintenance-3.1.x`** (default branch)
-- Feature-branch naming: `WEBUI-<num>-<slug>-lts-2025` and `WEBUI-<num>-<slug>-lts-2023`. Note: security-fix branches intentionally **drop** the `<type>-` prefix that the general `nuxeo-web-ui-pr` skill uses (i.e. `WEBUI-<num>-…`, not `fix-WEBUI-<num>-…`) — the ticket is already a `[Security]` task, so no `fix-`/`chore-` type prefix is added. Keep the LTS-line suffix so the target base stays unambiguous.
+- Branch mapping — the downstream dev branch per LTS line, **not** the PR base: **LTS-2025 → `develop-2025`**, **LTS-2023 → `develop-2023`** (default branch). These collect the work; `lts-2025` / `maintenance-3.1.x` hold released code only. A security PR is opened against neither: it targets the rotating integration branch resolved in Step 4.0, which merges up into the dev branch afterwards.
+- Feature-branch naming: `WEBUI-<num>-<slug>-develop-2025` and `WEBUI-<num>-<slug>-develop-2023`. Note: security-fix branches intentionally **drop** the `<type>-` prefix that the general `nuxeo-web-ui-pr` skill uses (i.e. `WEBUI-<num>-…`, not `fix-WEBUI-<num>-…`) — the ticket is already a `[Security]` task, so no `fix-`/`chore-` type prefix is added. Keep the LTS-line suffix so the target base stays unambiguous.
 - Sibling repo (published dependency, not vendored): `../nuxeo-elements`
 
 ## Lockfile topology — root + 3 independent sibling projects

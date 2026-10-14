@@ -6,7 +6,7 @@ description: >-
   nuxeo-web-ui repo: runs fully autonomously end-to-end (YOLO mode, no
   confirmation gates), analyse the ticket + all comments, reproduce
   and capture evidence (images AND videos) to ~/Desktop/jira-evidence/<TICKET-ID>/fix/ first, then branch from both
-  lts-2025 and maintenance-3.1.x, fix without inducing regressions, run the PR gating
+  develop-2025 and develop-2023, fix without inducing regressions, run the PR gating
   checks, create signed-commit PRs on both bases, watch CI and fix/rerun
   failures, then evaluate the Ready-for-QA checklist. Use when asked to fix a
   WEBUI-/Jira bug, "commit and raise PR", or take a nuxeo-web-ui ticket to
@@ -27,7 +27,7 @@ gating to the [`nuxeo-web-ui-pr-checks`](../nuxeo-web-ui-pr-checks/SKILL.md) ski
 > before and after.** Never ask which format; always produce both.
 
 > **Core rule — every fix ships on BOTH bases.** For *every* fix, always create a new branch
-> from **`lts-2025`** *and* a new branch from **`maintenance-3.1.x`** (the maintenance base),
+> from **`develop-2025`** *and* a new branch from **`develop-2023`** (the maintenance base),
 > each named with the ticket id (`<type>-WEBUI-<id>-<kebab-summary>-<base>`), and **raise a PR
 > for each**. Two branches, two PRs — never fix on only one base. (If the ticket's `fixVersions`
 > genuinely exclude a base, state that explicitly in your summary and skip it — no need to ask.)
@@ -35,7 +35,8 @@ gating to the [`nuxeo-web-ui-pr-checks`](../nuxeo-web-ui-pr-checks/SKILL.md) ski
 Useful constants:
 - Atlassian cloudId: `252cce86-035e-4b0e-abd2-3c002935632f` (site `hyland.atlassian.net`)
 - Ready-for-QA checklist page: `4169400498` · Signed-commits guide: `4125330218`
-- Upstream repo: `nuxeo/nuxeo-web-ui` · bases: `lts-2025` and `maintenance-3.1.x`
+- Upstream repo: `nuxeo/nuxeo-web-ui` · bases: `develop-2025` and `develop-2023` (the dev branches;
+  `lts-2025` / `maintenance-3.1.x` are release-only and are not ticket PR targets)
 
 ### Filesystem layout — write only inside these two roots
 Every file this skill creates belongs under one of these. Both are keyed by ticket id so a finished
@@ -99,7 +100,7 @@ bash .cursor/skills/fix-nuxeo-web-ui-bug/scripts/new-ticket-workspace.sh <TICKET
   --branch <type>-WEBUI-<id>-<kebab-summary>-<base>
 . <printed path>/env.sh     # exports NX_WT, NX_BASE, NX_EVIDENCE, NX_CONTAINER, NX_PORT, NX_URL, NX_DIST_*
 ```
-Do this **once per base** (`lts-2025` and `maintenance-3.1.x` each get their own workspace), then
+Do this **once per base** (`develop-2025` and `develop-2023` each get their own workspace), then
 **move your working directory to `$NX_WT` and run every later command from there.** The script is
 idempotent — re-running it re-prints `env.sh` — and `--remove` tears the workspace down at the end
 (Phase 10) while keeping the evidence. See the header of the script for all options.
@@ -122,10 +123,13 @@ shares refs, config and stashes with its parent.
 **Reproduce the bug on the base branch before writing any code.** Confirming the bug exists — and
 capturing the "before" evidence — is the first thing you do after taking the workspace. The
 workspace is already checked out at the base (or at the `--branch` you asked for, which is cut from
-it), so the repro reflects released code. Only if you are not using a workspace:
+it), so the repro reflects the base you will target. That base is a **dev branch**, i.e. the current
+integration baseline rather than a shipped release — so when the ticket claims a regression in a
+released version, reproduce against the release branch too and say which one the evidence came from.
+Only if you are not using a workspace:
 ```bash
-git fetch origin lts-2025
-git switch -c lts-2025 origin/lts-2025 2>/dev/null || git switch lts-2025 && git pull --ff-only
+git fetch origin develop-2025
+git switch -c develop-2025 origin/develop-2025 2>/dev/null || git switch develop-2025 && git pull --ff-only
 ```
 > **Reproduce autonomously (no confirmation).** Default to a **throwaway Docker container** (recipe
 > below) — never touch a live/running container. Only fall back to another approach if Docker is
@@ -270,17 +274,17 @@ instance's root html tree into `ui/elements/` so they resolve. Patching the mark
 minified code is unreliable (the error-handling code path and property names drift between versions).
 
 ## Phase 3 — Branches (both bases)
-**Only after the bug is reproduced on `lts-2025`**, make sure there is one feature branch per base —
+**Only after the bug is reproduced on `develop-2025`**, make sure there is one feature branch per base —
 cut from the bases, not from your local repro state — named per the `nuxeo-web-ui-pr` skill
 (`<type>-WEBUI-<id>-<kebab-summary>-<base>`). If you passed `--branch` to
 `new-ticket-workspace.sh` (Phase 1.5) the branch already exists in each workspace and there is
 nothing to do here; each base lives in its own workspace, so you never switch branches. Otherwise:
 ```bash
-git fetch origin lts-2025 maintenance-3.1.x
-git switch -c <type>-WEBUI-<id>-<summary>-lts-2025 origin/lts-2025
-git switch -c <type>-WEBUI-<id>-<summary>-maintenance-3.1.x origin/maintenance-3.1.x
+git fetch origin develop-2025 develop-2023
+git switch -c <type>-WEBUI-<id>-<summary>-develop-2025 origin/develop-2025
+git switch -c <type>-WEBUI-<id>-<summary>-develop-2023 origin/develop-2023
 ```
-Implement on `lts-2025` first, then cherry-pick to `maintenance-3.1.x` (see the PR skill's backport section).
+Implement on `develop-2025` first, then cherry-pick to `develop-2023` (see the PR skill's backport section).
 
 ### If you need both bases checked out at once, use `$WT` — not a loose folder
 Switching branches in the primary clone is enough for most fixes. Only when you genuinely need two
@@ -305,9 +309,6 @@ Tear them down in Phase 10.
   `nuxeo-elements` repo) before editing. **Print the root cause to the user** — a clear,
   explicit statement of what is actually causing the bug (file/function/line and why) — before
   making any change. Then make the **minimal** change in `nuxeo-web-ui`.
-- **When the fix lands in `nuxeo-elements`:** do **not** use optional chaining (`?.`) in
-  `core/`, `ui/`, or `dataviz/` source — Polymer lint/analyze cannot parse it and elements go
-  missing from `analysis.json`. Use explicit `&&` guards instead (see `nuxeo-elements/AGENTS.md`).
 - Keep the diff focused — do not bundle unrelated files. Capture the **after** evidence, including
   the **after video** (Phase 2 recipe) showing the fixed behavior end-to-end.
 - **Extract self-contained/cross-cutting client logic into a Polymer behavior**, don't inline it
@@ -349,6 +350,64 @@ This is the "commit and raise PR" trigger.
   `gh api repos/nuxeo/nuxeo-web-ui/commits/<sha> --jq '.commit.verification'` → `verified:true`.
   `unknown_key` means the signing key isn't added on GitHub as a **Signing Key** (separate
   from an Authentication key) — fix that, no re-push needed.
+
+## Phase 6.5 — Link every PR on the Jira issue as a remote **web link** (MANDATORY)
+> ### ⛔ NON-NEGOTIABLE — this is a separate action, not a side effect of anything else
+> The moment a PR exists, add it to the ticket as a Jira **remote web link** (what shows under the
+> issue's *Web links* / *Links* section). This is the step that keeps getting skipped; treat it as part
+> of "raise the PR", not as paperwork for later.
+
+**None of these count as done.** If you only did one of them, the step is still outstanding:
+- ❌ pasting the PR URL inside a Jira **comment** (Phase 7.5 does that too — it is *not* a web link);
+- ❌ the **PR title / branch name containing `WEBUI-<id>`** (that is a GitHub-side convention);
+- ❌ a link **on the GitHub side** pointing at the Jira issue, or the Jira dev-panel/Smart-Commit
+  integration picking the key up (it may never fire — do not rely on it);
+- ❌ an **issue link** created with `createIssueLink` (that links Jira issue ↔ Jira issue only and
+  rejects a URL).
+
+**The Atlassian MCP cannot do this — there is no create-remote-link tool.** It exposes only
+`getJiraIssueRemoteIssueLinks` (read) and `createIssueLink` (issue↔issue). Reaching for MCP here finds
+nothing and is exactly the trap that makes this step get dropped. **The Jira REST `remotelink`
+endpoint is the required path**, with the same `~/.jira_email` / `~/.jira_token` credentials used for
+attachments (Phase 7.5).
+
+1. **Create one remote link per PR — including every backport** (so two links for the standard
+   `develop-2025` + `develop-2023` pair). `globalId` = the PR URL makes it an **upsert**, so
+   re-running is idempotent and never duplicates:
+   ```bash
+   U="$(cat ~/.jira_email):$(cat ~/.jira_token)"
+   TICKET=WEBUI-<id>
+   SUMMARY="<the ticket summary>"
+   for E in <pr1>:develop-2025 <pr2>:develop-2023; do   # one entry per PR opened for this ticket
+     N=${E%%:*}; B=${E##*:}; URL="https://github.com/nuxeo/nuxeo-web-ui/pull/$N"
+     curl -s -u "$U" -H "Content-Type: application/json" -X POST \
+       "https://hyland.atlassian.net/rest/api/3/issue/$TICKET/remotelink" \
+       -d "{\"globalId\":\"$URL\",
+            \"application\":{\"type\":\"com.github\",\"name\":\"GitHub\"},
+            \"relationship\":\"mentioned in\",
+            \"object\":{\"url\":\"$URL\",\"title\":\"PR #$N — $TICKET: $SUMMARY ($B)\",
+              \"icon\":{\"url16x16\":\"https://github.githubassets.com/favicon.ico\",\"title\":\"GitHub\"}}}"
+   done
+   ```
+   Expect `201` (created) or `200` (updated) per PR; anything else means it did **not** land.
+2. **Verify by reading the links back and asserting one per PR.** Do not take the POST response as
+   proof — `GET /remotelink` is the check, and it must list every PR:
+   ```bash
+   curl -s -u "$U" "https://hyland.atlassian.net/rest/api/3/issue/$TICKET/remotelink" \
+     | PRS="<pr1> <pr2>" python3 -c "
+   import json,os,sys
+   links=json.load(sys.stdin)
+   for l in links: print('•', l['object']['title'], '->', l['object']['url'])
+   have={(l.get('globalId') or '').rsplit('/',1)[-1] for l in links}
+   missing=set(os.environ['PRS'].split())-have
+   print('❌ MISSING remote web link for PR(s):', sorted(missing)) if missing else print('✅ one remote web link per PR')
+   sys.exit(1 if missing else 0)"
+   ```
+3. **Print the resulting link titles/URLs** in your summary so the state is on the record. If a PR is
+   opened later (e.g. a second backport), come back and add its link too.
+
+**Exit gate:** the `GET /remotelink` check above exits 0 — one remote web link per PR opened for this
+ticket, backports included.
 
 ## Phase 7 — Watch checks; fix or rerun
 ```bash
@@ -460,7 +519,7 @@ fix-summary comment (Phase 7.5). Use exactly these sections, in this order:
    - **Edge cases & scale** — empty/1-item/large lists, multiple pages, special characters,
      permissions variants, and any case intentionally left out of scope (state it explicitly).
    - **Cross-cutting concerns** — i18n (new keys need translations across all locales),
-     accessibility, theming/styles, and the two base branches (`lts-2025` vs `maintenance-3.1.x`).
+     accessibility, theming/styles, and the two base branches (`develop-2025` vs `develop-2023`).
    - **Explicitly list what was NOT affected** when you verified it (e.g. "nested-groups table and
      permissions table untouched; unit suite still green"). Keep it honest — only list something as
      unaffected once you've actually checked.
@@ -505,7 +564,8 @@ and `-after.{png,mp4}`.
   drag-and-drop fallback so QA gets the recordings.
 
 ## Guardrails (these still hold in YOLO mode)
-- Never force-push to `lts-2025` / `maintenance-3.1.x`; only to feature branches (`--force-with-lease`).
+- Never force-push to a shared branch (`develop-2025`, `develop-2023`, `lts-2025`, `maintenance-3.1.x`);
+  only to feature branches (`--force-with-lease`).
 - Never `git stash`, never git-write in the shared reference checkout, and never kill processes or
   containers by a pattern that could match another agent's run (Phase 1.5).
 - Never edit git config silently beyond the one-time signing setup; confirm global config changes.

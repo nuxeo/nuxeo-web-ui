@@ -40,15 +40,20 @@ npm run lint || fail "lint failed - run with --fix (or 'npm run format'), commit
 step "npm test"
 if ! npm test; then
   # Most common local-only cause: npm install replaced the nuxeo-elements symlinks.
-  if [ -e node_modules/@nuxeo/nuxeo-ui-elements ] && [ ! -L node_modules/@nuxeo/nuxeo-ui-elements ] && [ -d ../nuxeo-elements ]; then
-    cat >&2 <<'HINT'
+  if [ -e node_modules/@nuxeo/nuxeo-ui-elements ] && [ ! -L node_modules/@nuxeo/nuxeo-ui-elements ]; then
+    # Prefer this run's own elements clone; fall back to the sibling reference checkout.
+    EL="${NX_ELEMENTS:-$(cd .. 2>/dev/null && pwd)/nuxeo-elements}"
+    if [ -d "$EL" ]; then
+      cat >&2 <<HINT
 
-Hint: @nuxeo packages are not symlinked to ../nuxeo-elements (a prior `npm install`
-likely replaced them). Re-link and retry:
-  rm -rf node_modules/@nuxeo/nuxeo-ui-elements && ln -s ../../../nuxeo-elements/ui node_modules/@nuxeo/nuxeo-ui-elements
-  rm -rf node_modules/@nuxeo/nuxeo-elements && ln -s ../../../nuxeo-elements/core node_modules/@nuxeo/nuxeo-elements
-  rm -rf node_modules/@nuxeo/nuxeo-dataviz-elements && ln -s ../../../nuxeo-elements/dataviz node_modules/@nuxeo/nuxeo-dataviz-elements
+Hint: @nuxeo packages are not symlinked to $EL (a prior \`npm install\`
+likely replaced them). Re-link with ABSOLUTE paths and retry — relative links resolve
+against whatever sits beside the checkout, which cross-wires parallel ticket workspaces:
+  rm -rf node_modules/@nuxeo/nuxeo-ui-elements && ln -s "$EL/ui" node_modules/@nuxeo/nuxeo-ui-elements
+  rm -rf node_modules/@nuxeo/nuxeo-elements && ln -s "$EL/core" node_modules/@nuxeo/nuxeo-elements
+  rm -rf node_modules/@nuxeo/nuxeo-dataviz-elements && ln -s "$EL/dataviz" node_modules/@nuxeo/nuxeo-dataviz-elements
 HINT
+    fi
   fi
   fail "unit tests failed"
 fi
