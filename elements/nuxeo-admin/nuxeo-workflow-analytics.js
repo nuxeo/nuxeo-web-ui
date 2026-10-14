@@ -73,7 +73,6 @@ Polymer({
 
       .flex-layout nuxeo-card {
         flex: 1 0 calc(33% - 2em);
-        max-width: calc(33% - 2em);
         margin: 0 8px 16px;
         text-align: center;
       }
@@ -96,7 +95,6 @@ Polymer({
       @media (max-width: 1024px) {
         .flex-layout nuxeo-card {
           flex: 1 0 calc(100% - 2em);
-          max-width: calc(100% - 2em);
         }
       }
     </style>
@@ -146,7 +144,14 @@ Polymer({
         </nuxeo-workflow-data>
 
         <nuxeo-card heading="[[i18n('workflowAnalytics.workflowInitiators.heading')]]">
-          <chart-pie values="[[_values(initiators)]]" labels="[[_series(initiators)]]"> </chart-pie>
+          <chart-pie
+            role="img"
+            tabindex="0"
+            aria-label$="[[_chartAria('workflowAnalytics.workflowInitiators.heading', initiators)]]"
+            values="[[_values(initiators)]]"
+            labels="[[_series(initiators)]]"
+          >
+          </chart-pie>
         </nuxeo-card>
 
         <!-- Actions per user -->
@@ -162,6 +167,9 @@ Polymer({
 
         <nuxeo-card heading="[[i18n('workflowAnalytics.actionsPerUser.heading')]]">
           <chart-bar
+            role="img"
+            tabindex="0"
+            aria-label$="[[_chartAria('workflowAnalytics.actionsPerUser.heading', numberOfActionsPerUser)]]"
             labels="[[_labels(numberOfActionsPerUser)]]"
             series="[[_series(numberOfActionsPerUser)]]"
             values="[[_values(numberOfActionsPerUser)]]"
