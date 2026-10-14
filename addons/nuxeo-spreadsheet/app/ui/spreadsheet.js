@@ -21,7 +21,14 @@ import { Query } from '../nuxeo/rpc/query';
 import { DirectoryEditor } from './editors/directory';
 import { Select2Editor } from './editors/select2';
 import { assign, hasProp } from '../utils';
-import { applySavedChangeToken, createDirtyDocument, markSaveError } from './optimistic-locking';
+import {
+  applySavedChangeToken,
+  createDirtyDocument,
+  detachDirtyBatch,
+  markSaveError,
+  restoreUnsavedRow,
+  stampChangeToken,
+} from './optimistic-locking';
 
 /**
  * Spreadsheet backed by Hansontable
@@ -221,8 +228,8 @@ class Spreadsheet {
    * Autosave calls this on each edit without waiting for the previous batch. Overlapping batches
    * would send the same change token twice for a row, and the one that landed second would be
    * rejected as a stale write by the row's own earlier save — a conflict reported to the user
-   * with no other user involved. Queueing the batches also means each one sends the token the
-   * previous one brought back.
+   * with no other user involved. Queueing them means a row is only ever in flight once, so each
+   * batch submits against the token the one before it brought back.
    */
   save() {
     this._saving = (this._saving || Promise.resolve()).then(() => this._saveDirtyRows());
@@ -231,33 +238,29 @@ class Spreadsheet {
 
   _saveDirtyRows() {
     this.hasConflicts = false;
+    const batch = detachDirtyBatch(this._dirty);
+
     // Every PUT has to settle before the outcome is read: hasConflicts decides which message the
     // caller shows, and Promise.all would hand back as soon as one row failed, so a non-conflict
     // failure could report the generic error while a slower 409 was still in flight.
     return Promise.allSettled(
-      Object.entries(this._dirty).map(([uid, dirtyDocument]) =>
-        this.connection
+      batch.map(([uid, dirtyDocument]) => {
+        const row = this.data.find((document) => document.uid === uid);
+        return this.connection
           .request(`/id/${uid}`)
-          .put({ body: dirtyDocument })
+          .put({ body: stampChangeToken(dirtyDocument, row) })
           .then((response) => {
-            applySavedChangeToken(
-              this.data.find((document) => document.uid === uid),
-              response,
-            );
-            // Only drop the entry this request saved. Holding the reference also means a failed
-            // save reports against the payload it actually sent, never against `undefined`.
-            if (this._dirty[uid] === dirtyDocument) {
-              delete this._dirty[uid];
-            }
+            applySavedChangeToken(row, response);
             return uid;
           })
           .catch((error) => {
             if (markSaveError(dirtyDocument, error)) {
               this.hasConflicts = true;
             }
+            restoreUnsavedRow(this._dirty, uid, dirtyDocument);
             throw error;
-          }),
-      ),
+          });
+      }),
     ).then((outcomes) => {
       this.ht.clearUndo();
       this.ht.render();
