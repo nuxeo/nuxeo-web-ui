@@ -18,7 +18,10 @@ limitations under the License.
 import {
   applySavedChangeToken,
   createDirtyDocument,
+  detachDirtyBatch,
   markSaveError,
+  restoreUnsavedRow,
+  stampChangeToken,
 } from '../addons/nuxeo-spreadsheet/app/ui/optimistic-locking.js';
 
 suite('nuxeo-spreadsheet optimistic locking', () => {
@@ -83,5 +86,68 @@ suite('nuxeo-spreadsheet optimistic locking', () => {
     applySavedChangeToken(row, { uid: 'doc-1', changeToken: '4-2' });
 
     expect(createDirtyDocument(row).changeToken).to.equal('4-2');
+  });
+
+  test('a payload is stamped with the token the row holds when it is submitted', () => {
+    // The payload is built when the cell is edited but sent later. If an earlier save lands in
+    // between, the token it brought back is the one this payload has to carry.
+    const row = { uid: 'doc-1', changeToken: '3-1' };
+    const dirtyDocument = createDirtyDocument(row);
+
+    applySavedChangeToken(row, { changeToken: '4-2' });
+
+    expect(stampChangeToken(dirtyDocument, row).changeToken).to.equal('4-2');
+  });
+
+  test('stamping leaves the payload untouched when the row is gone or has no token', () => {
+    expect(stampChangeToken({ uid: 'doc-1' }, undefined)).to.deep.equal({ uid: 'doc-1' });
+    expect(stampChangeToken({ uid: 'doc-1' }, { uid: 'doc-1' })).to.deep.equal({ uid: 'doc-1' });
+  });
+
+  test('detaching a batch empties the dirty set and hands over the payloads', () => {
+    const payload = { uid: 'doc-1' };
+    const dirty = { 'doc-1': payload };
+
+    expect(detachDirtyBatch(dirty)).to.deep.equal([['doc-1', payload]]);
+    expect(dirty).to.deep.equal({});
+  });
+
+  test('an edit made during a save is kept rather than cleared with the request', () => {
+    // onChange reuses whatever entry it finds for a row. Detaching the batch is what stops the
+    // edit from mutating a payload already on the wire and then vanishing with it.
+    const row = { uid: 'doc-1', changeToken: '3-1' };
+    const dirty = { 'doc-1': createDirtyDocument(row) };
+
+    const [[, submitted]] = detachDirtyBatch(dirty);
+
+    // the user types again while the request is in flight
+    const reopened = (dirty['doc-1'] = dirty['doc-1'] || createDirtyDocument(row));
+    reopened['dc:title'] = 'edited during save';
+
+    expect(reopened, 'the later edit must not touch the payload already sent').to.not.equal(submitted);
+    expect(dirty['doc-1']['dc:title']).to.equal('edited during save');
+  });
+
+  test('a failed payload goes back to the dirty set so the row is retried', () => {
+    const dirty = {};
+    const failed = { uid: 'doc-1', 'dc:title': 'first' };
+    markSaveError(failed, { status: 409 });
+
+    restoreUnsavedRow(dirty, 'doc-1', failed);
+
+    expect(dirty['doc-1']).to.equal(failed);
+    expect(dirty['doc-1']._error).to.deep.equal({ status: 409 });
+  });
+
+  test('a newer edit outranks the payload that failed but inherits its error', () => {
+    const failed = { uid: 'doc-1', 'dc:title': 'first', 'dc:description': 'kept' };
+    markSaveError(failed, { status: 409 });
+    const dirty = { 'doc-1': { uid: 'doc-1', 'dc:title': 'typed during the save' } };
+
+    restoreUnsavedRow(dirty, 'doc-1', failed);
+
+    expect(dirty['doc-1']['dc:title'], 'the newer value wins').to.equal('typed during the save');
+    expect(dirty['doc-1']['dc:description'], 'the failed value is still retried').to.equal('kept');
+    expect(dirty['doc-1']._error, 'the row stays flagged as failed').to.deep.equal({ status: 409 });
   });
 });
