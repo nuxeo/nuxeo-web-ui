@@ -188,7 +188,11 @@ limitations under the License.
       --hyland-page-surface-background: #f4f3f7;
 
       /* Drawer + Sidebar content */
-      --hyland-selection-pill-background: #e2dfff;
+      /* Active item: the hover lavender a step heavier, so the two states share a colour family and
+         differ in weight. 1.6:1 against the hover fill, 8.1:1 under #1a1c1e text. */
+      --hyland-selection-pill-background: #afaaf9;
+      /* Hovered item: the lighter lavender, so hover reads as a step below the active item. */
+      --hyland-drawer-item-hover-background: #e2dfff;
       --hyland-sidebar-item-selected-background: rgba(255, 255, 255, 0.12);
       --hyland-sidebar-item-hover-background: rgba(255, 255, 255, 0.12);
 

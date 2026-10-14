@@ -50,12 +50,16 @@ Polymer({
         text-decoration: none;
       }
 
-      /* iron-selector adds .iron-selected (Administration, Profile drawers) */
-      :host(.iron-selected),
-      :host(.iron-selected:hover),
-      :host(.iron-selected:focus),
       :host(:hover),
       :host(:focus-within) {
+        @apply --hyland-drawer-item-hover;
+      }
+
+      /* iron-selector adds .iron-selected (Administration, Profile drawers). These come after the
+         hover rule so the selected item keeps its own colour while the pointer is over it. */
+      :host(.iron-selected),
+      :host(.iron-selected:hover),
+      :host(.iron-selected:focus) {
         @apply --hyland-drawer-item-selected;
       }
 
