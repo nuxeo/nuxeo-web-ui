@@ -19,9 +19,11 @@ All Hyland product names are registered or unregistered trademarks of Hyland Sof
  */
 package org.nuxeo.web.ui.url.codec;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.nuxeo.ecm.core.api.DocumentLocation;
 import org.nuxeo.ecm.core.api.IdRef;
@@ -32,12 +34,20 @@ import org.nuxeo.ecm.platform.url.service.AbstractDocumentViewCodec;
 
 /**
  * Codec handling document URL pointing to the Web UI for notification templates.
+ * <p>
+ * The URL uses the RFC 3986 compliant permalink format (no {@code #!} fragment) introduced by
+ * WEBUI-1726: {@code ui/doc?repo=<serverName>&id=<docId>}. The {@code DocumentPermalinkServlet}
+ * redirects it to the Web UI hashbang route so the single page application can resolve the document.
  *
  * @since 8.10
  */
 public class WebNotificationDocumentIdCodec extends AbstractDocumentViewCodec {
 
-    protected static final List<String> WEB_UI_URL_PREFIXES = Arrays.asList("ui", "#!");
+    protected static final String WEB_UI_URL_PREFIX = "ui";
+
+    protected static final String REPOSITORY_PARAM = "repo";
+
+    protected static final String DOC_ID_PARAM = "id";
 
     @Override
     public String getUrlFromDocumentView(DocumentView docView) {
@@ -49,12 +59,13 @@ public class WebNotificationDocumentIdCodec extends AbstractDocumentViewCodec {
         if (docRef == null) {
             return null;
         }
-        List<String> fragments = new ArrayList<String>();
-        fragments.addAll(WEB_UI_URL_PREFIXES);
-        fragments.add(getPrefix());
-        fragments.add(docLoc.getServerName());
-        fragments.add(docRef.toString());
-        return String.join("/", fragments);
+        StringBuilder url = new StringBuilder(WEB_UI_URL_PREFIX).append('/').append(getPrefix()).append('?');
+        String serverName = docLoc.getServerName();
+        if (serverName != null) {
+            url.append(REPOSITORY_PARAM).append('=').append(encode(serverName)).append('&');
+        }
+        url.append(DOC_ID_PARAM).append('=').append(encode(docRef.toString()));
+        return url.toString();
     }
 
     @Override
@@ -63,13 +74,35 @@ public class WebNotificationDocumentIdCodec extends AbstractDocumentViewCodec {
         if (path.startsWith("/")) {
             path = path.substring(1);
         }
-        String[] fragments = path.split("/");
-        int prefixCount = WEB_UI_URL_PREFIXES.size();
-        if (fragments.length < prefixCount + 3 || !getPrefix().equals(fragments[prefixCount])) {
+        int queryIndex = path.indexOf('?');
+        if (queryIndex < 0) {
             return null;
         }
-        return new DocumentViewImpl(
-                new DocumentLocationImpl(fragments[prefixCount + 1], new IdRef(fragments[prefixCount + 2])));
+        String prefix = path.substring(0, queryIndex);
+        if (!(WEB_UI_URL_PREFIX + "/" + getPrefix()).equals(prefix)) {
+            return null;
+        }
+        Map<String, String> params = parseQuery(path.substring(queryIndex + 1));
+        String id = params.get(DOC_ID_PARAM);
+        if (id == null || id.isEmpty()) {
+            return null;
+        }
+        return new DocumentViewImpl(new DocumentLocationImpl(params.get(REPOSITORY_PARAM), new IdRef(id)));
+    }
+
+    protected Map<String, String> parseQuery(String query) {
+        Map<String, String> params = new HashMap<>();
+        for (String pair : query.split("&")) {
+            int eq = pair.indexOf('=');
+            if (eq > 0) {
+                params.put(pair.substring(0, eq), URLDecoder.decode(pair.substring(eq + 1), StandardCharsets.UTF_8));
+            }
+        }
+        return params;
+    }
+
+    protected String encode(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
 }
