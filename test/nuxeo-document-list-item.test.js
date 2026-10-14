@@ -429,11 +429,6 @@ suite('nuxeo-document-list-item', () => {
 
     test('takes keyboard focus', () => {
       title().focus();
-      // Some headless environments ignore focus(), and the assertion only means something once
-      // the link is actually focused.
-      if (element.shadowRoot.activeElement !== title()) {
-        return;
-      }
       expect(element.shadowRoot.activeElement).to.equal(title());
     });
 
