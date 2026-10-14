@@ -140,6 +140,101 @@ suite('nuxeo-note-editor', () => {
     el.fire.restore();
   });
 
+  // WEBUI-1820
+  test('_editorSave sends the change token', async () => {
+    el.document = noteDoc({ changeToken: '2-1' });
+    el._value = 'new content';
+    sinon.stub(el.$.note, 'put').resolves();
+
+    el._editorSave();
+    await flush();
+
+    expect(el.$.note.data.changeToken).to.equal('2-1');
+    el.$.note.put.restore();
+  });
+
+  test('_editorSave reports a conflict instead of leaving the save rejected', async () => {
+    el.document = noteDoc({ changeToken: '2-1' });
+    el._value = 'new content';
+    el._viewMode = false;
+    sinon.stub(el.$.note, 'put').rejects({ status: 409 });
+    sinon.stub(el, 'notify');
+    sinon.stub(el, 'fire');
+
+    await el._editorSave();
+
+    expect(el.notify).to.have.been.calledOnce;
+    expect(el.notify.firstCall.args[0].message).to.equal('documentUpdate.conflict');
+    expect(el.fire).to.have.been.calledWith('document-updated');
+    // the save did not go through, so the editor stays open on the user's text
+    expect(el._viewMode).to.be.false;
+
+    el.$.note.put.restore();
+    el.notify.restore();
+    el.fire.restore();
+  });
+
+  test('_editorSave still rejects on a non-conflict failure', async () => {
+    el.document = noteDoc();
+    el._value = 'new content';
+    sinon.stub(el.$.note, 'put').rejects({ status: 500 });
+    sinon.stub(el, 'notify');
+
+    let caught;
+    await el._editorSave().catch((err) => {
+      caught = err;
+    });
+
+    expect(caught).to.deep.equal({ status: 500 });
+    expect(el.notify).to.not.have.been.called;
+
+    el.$.note.put.restore();
+    el.notify.restore();
+  });
+
+  test('a conflict does not let the next save adopt the refreshed token', async () => {
+    // A conflict leaves an HTML note's editor open on the draft and refreshes the document behind
+    // it. The draft is only safe to write over the revision it was taken from, so every save has
+    // to keep carrying that one — otherwise the second attempt silently overwrites the change the
+    // user was just warned about.
+    el.document = { ...htmlDoc(), changeToken: '2-1' };
+    el._editHtml();
+    el._value = '<p>my draft</p>';
+    sinon.stub(el.$.note, 'put').rejects({ status: 409 });
+    sinon.stub(el, 'notify');
+    sinon.stub(el, 'fire');
+
+    await el._editorSave();
+    expect(el.$.note.data.changeToken).to.equal('2-1');
+
+    // document-updated refreshes the note while the editor stays open on the draft
+    el.document = { ...htmlDoc('<p>the other user</p>'), changeToken: '9-9' };
+    expect(el._value, 'the draft survives the refresh').to.equal('<p>my draft</p>');
+
+    await el._editorSave();
+
+    expect(el.$.note.data.changeToken, 'a stale draft must not be sent with the fresh token').to.equal('2-1');
+
+    el.$.note.put.restore();
+    el.notify.restore();
+    el.fire.restore();
+  });
+
+  test('reloading the note rebases the draft on the revision it shows', async () => {
+    el.document = { ...htmlDoc(), changeToken: '2-1' };
+    el._editHtml();
+    // leaving the editor and coming back is the reload the conflict message asks for
+    el._cancel();
+    el.document = { ...htmlDoc('<p>the other user</p>'), changeToken: '9-9' };
+    el._editHtml();
+    sinon.stub(el.$.note, 'put').resolves();
+
+    await el._editorSave();
+
+    expect(el.$.note.data.changeToken).to.equal('9-9');
+    el.$.note.put.restore();
+  });
+
   suite('HTML notes are displayed as stored (ELEMENTS-1806)', () => {
     // Quill cannot represent thead/tfoot/th/colgroup/colspan/rowspan or nested tables, so an
     // HTML note must not be routed through the rich text editor just to be read.

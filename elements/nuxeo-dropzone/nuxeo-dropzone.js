@@ -30,6 +30,7 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 import { UploaderBehavior } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-uploader-behavior.js';
+import { NuxeoOptimisticLockingBehavior } from '../behaviors/nuxeo-optimistic-locking-behavior.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
@@ -238,7 +239,13 @@ Polymer({
   `,
 
   is: 'nuxeo-dropzone',
-  behaviors: [NotifyBehavior, UploaderBehavior, FormatBehavior, IronValidatableBehavior],
+  behaviors: [
+    NotifyBehavior,
+    UploaderBehavior,
+    FormatBehavior,
+    IronValidatableBehavior,
+    NuxeoOptimisticLockingBehavior,
+  ],
 
   properties: {
     /**
@@ -465,24 +472,37 @@ Polymer({
     if (this.document && this.xpath) {
       this._legacyImportBatch(value);
     }
-    if (failed.length > 0) {
-      this.notify({
-        message: this.i18n('dropzone.toast.error', failed.map((f) => f.name).join(', ')),
-        duration: 0,
-        dismissible: true,
-      });
-    } else {
-      if (this.document && this.xpath) {
-        await this._legacyUpdateDocument();
-      }
-      this.notify({ message: this.i18n(this.uploadedMessage), close: true });
-      this.invalid = false;
+    if (!(await this._reportUploadOutcome(failed))) {
+      this._setHasFilesUploaded(true);
+      return;
     }
     if (this.invalid) {
       // if we're already displaying an error, we better update it, otherwise the user can be mislead
       this.validate();
     }
     this._setHasFilesUploaded(true);
+  },
+
+  /**
+   * Tells the user how the upload went, and persists it on the document when this dropzone owns
+   * one. Returns false when a stale write was rejected, so the caller stops rather than reporting
+   * a success that did not happen.
+   */
+  async _reportUploadOutcome(failed) {
+    if (failed.length > 0) {
+      this.notify({
+        message: this.i18n('dropzone.toast.error', failed.map((f) => f.name).join(', ')),
+        duration: 0,
+        dismissible: true,
+      });
+      return true;
+    }
+    if (this.document && this.xpath && (await this._legacyUpdateDocument()) === false) {
+      return false;
+    }
+    this.notify({ message: this.i18n(this.uploadedMessage), close: true });
+    this.invalid = false;
+    return true;
   },
 
   _getFiles(data) {
@@ -746,16 +766,25 @@ Polymer({
       const props = {};
       createNestedObject(props, this._parsedXpath.split('.'));
       this.set(this._parsedXpath, this.get(`document.properties.${this._parsedXpath}`), props);
-      this.$.doc.data = {
+      this.$.doc.data = this.withChangeToken({
         'entity-type': 'document',
         repository: this.document.repository,
         uid: this.document.uid,
         properties: props,
-      };
-      return this.$.doc.put().then((response) => {
-        this.document = response;
-        this.fire('document-updated');
       });
+      return this.$.doc
+        .put()
+        .then((response) => {
+          this.document = response;
+          this.fire('document-updated');
+          return true;
+        })
+        .catch((err) => {
+          if (this.handleConflictError(err)) {
+            return false;
+          }
+          throw err;
+        });
     }
     return Promise.resolve();
   },
