@@ -58,6 +58,19 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
         #table {
           height: calc(100vh - 370px);
         }
+
+        /* The table cells are stamped into this element's shadow root, so the global link styles
+           in themes/base.js never reach them and the user agent colors take over. Scoped to
+           [href] because the comment cells render a plain <a> with no href when the comment is
+           not a document reference, and those must keep the cell text color. */
+        a[href] {
+          color: var(--nuxeo-audit-link-color, #0000ee);
+          text-decoration: underline;
+        }
+
+        a[href]:visited {
+          color: var(--nuxeo-audit-link-visited-color, #551a8b);
+        }
       </style>
 
       <nuxeo-audit-page-provider id="provider" doc-id="[[document.uid]]" page-size="40"></nuxeo-audit-page-provider>
