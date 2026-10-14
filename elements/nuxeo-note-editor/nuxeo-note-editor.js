@@ -243,8 +243,20 @@ Polymer({
     // an edit in progress alone, draft included. Copying the stored value back over _value
     // here would silently discard whatever the user has typed.
     if (!this._editing) {
-      this._value = this.document.properties['note:note'];
+      this._loadValue();
     }
+  },
+
+  /**
+   * Takes the editor's content from the loaded document, and records the revision it came from.
+   *
+   * The draft is only a safe thing to write on top of that revision. A conflict refreshes the
+   * document, so without remembering this the next save would carry the token the refresh brought
+   * in and overwrite the change it was warned about.
+   */
+  _loadValue() {
+    this._value = this.document.properties['note:note'];
+    this._draftChangeToken = this.document.changeToken;
   },
 
   _computeHtmlPreview(document) {
@@ -277,13 +289,20 @@ Polymer({
   },
 
   _editorSave() {
-    this.$.note.data = this.withChangeToken({
-      'entity-type': 'document',
-      uid: this.document.uid,
-      properties: {
-        'note:note': this._value,
+    // Deliberately the draft's own revision rather than the loaded document's. A conflict leaves
+    // the editor open on the user's text and refreshes the document, so sending the live token
+    // would let the next save overwrite the very change the user was just warned about. Saving
+    // keeps being refused, as the message asks, until the note is reloaded.
+    this.$.note.data = this.withChangeToken(
+      {
+        'entity-type': 'document',
+        uid: this.document.uid,
+        properties: {
+          'note:note': this._value,
+        },
       },
-    });
+      { changeToken: this._draftChangeToken },
+    );
     return this.$.note
       .put()
       .then(() => {
@@ -304,18 +323,19 @@ Polymer({
   },
 
   _edit() {
-    this._value = this.document.properties['note:note'];
+    this._loadValue();
     this._viewMode = false;
   },
 
   _editHtml() {
-    this._value = this.document.properties['note:note'];
+    this._loadValue();
     this._viewMode = true;
     this._editing = true;
   },
 
   _cancel() {
     this._value = '';
+    this._draftChangeToken = undefined;
     this._viewMode = true;
     this._editing = false;
   },
