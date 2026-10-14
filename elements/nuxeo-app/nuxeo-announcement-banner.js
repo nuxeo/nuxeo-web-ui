@@ -208,7 +208,9 @@ class AnnouncementBanner extends mixinBehaviors([I18nBehavior], Nuxeo.Element) {
 
   _userChanged(user) {
     if (user) {
-      this.refresh();
+      // Deliberately not awaited: a Polymer observer cannot return a promise. `void` marks it
+      // ignored without attaching a handler, so rejection behaviour is exactly as it was.
+      void this.refresh();
     } else {
       // Abandon anything in flight so it cannot reopen the banner for a user who just left.
       this._requestId += 1;

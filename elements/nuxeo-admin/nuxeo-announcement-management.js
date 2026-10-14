@@ -244,7 +244,9 @@ class AnnouncementManagement extends mixinBehaviors([I18nBehavior, NotifyBehavio
 
   _visibleChanged(visible) {
     if (visible) {
-      this.refresh();
+      // Deliberately not awaited: a Polymer observer cannot return a promise. `void` marks it
+      // ignored without attaching a handler, so rejection behaviour is exactly as it was.
+      void this.refresh();
     } else {
       this._requestId += 1;
       this._loading = false;
