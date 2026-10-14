@@ -170,4 +170,37 @@ jobs:
           git commit -a -m "Update $OLD_SNAPSHOT to $NEW_SNAPSHOT"
 
       - if: ${{ github.event.inputs.dryRun == 'false' }}
-        run: git push origin ${{ github.event.inputs.referenceBranch }}
+        env:
+          # Via the environment, never interpolated into the command: referenceBranch is
+          # free text from workflow_dispatch.
+          REFERENCE_BRANCH: ${{ github.event.inputs.referenceBranch }}
+        # "--" ends option parsing: referenceBranch is free text, and a ref named like an
+        # option is legal. git push origin "--mirror" is read as git push --mirror origin,
+        # which pushes every ref and prunes the remote. Verified locally.
+        run: git push origin -- "$REFERENCE_BRANCH"
+
+      # Opens the pull request carrying this bump to the dev branch. Runs last and cannot
+      # fail the release: by this point the release is already published.
+      #
+      # Without --ref this resolves the workflow on the repository default branch, where it
+      # lives. If the default branch moves, the workflow has to move with it.
+      - name: Open the pull request syncing this bump to the dev branch
+        if: ${{ github.event.inputs.dryRun == 'false' }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GIT_ADMIN_TOKEN }}
+          # Via the environment, never interpolated into the script: referenceBranch is
+          # free text from workflow_dispatch.
+          REFERENCE_BRANCH: ${{ github.event.inputs.referenceBranch }}
+        run: |
+          # Checked first: the sync workflow takes a choice input, so anything outside the
+          # list fails the dispatch with a 422 that continue-on-error would swallow.
+          case "$REFERENCE_BRANCH" in
+            lts-2025 | maintenance-3.1.x) ;;
+            *)
+              echo "::warning::No dev branch is mapped for $REFERENCE_BRANCH; skipping the sync dispatch."
+              exit 0
+              ;;
+          esac
+          gh workflow run sync-release-to-dev.yaml --repo "$GITHUB_REPOSITORY" \
+            -f release_branch="$REFERENCE_BRANCH"

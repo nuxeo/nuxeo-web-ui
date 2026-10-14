@@ -1,0 +1,52 @@
+name: Develop branch
+
+# The dev branches receive every ticket, so they need the same post-merge safety net the
+# release branches have had: two pull requests can each be green against an older base and
+# still break once both are in. This is main.yaml's check set without the publish job.
+#
+# sonar.yaml and codeql.yml are deliberately absent - both already trigger on push to these
+# branches themselves, and listing them here would run them twice.
+on:
+  push:
+    branches:
+      - 'develop-20[0-9][0-9]'
+  workflow_dispatch:
+
+# Several tickets can land within minutes of each other and only the newest state matters.
+concurrency:
+  group: develop-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    uses: ./.github/workflows/lint.yaml
+    permissions:
+      contents: read
+    secrets:
+      NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+
+  test:
+    uses: ./.github/workflows/test.yaml
+    permissions:
+      contents: read
+    secrets:
+      NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+      SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+
+  a11y:
+    uses: ./.github/workflows/a11y.yaml
+    permissions:
+      contents: read
+    secrets:
+      NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+      REPOSITORY_MANAGER_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
+      REPOSITORY_MANAGER_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
+
+  ftest:
+    uses: ./.github/workflows/ftest.yaml
+    permissions:
+      contents: read
+    secrets:
+      NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+      REPOSITORY_MANAGER_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
+      REPOSITORY_MANAGER_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
