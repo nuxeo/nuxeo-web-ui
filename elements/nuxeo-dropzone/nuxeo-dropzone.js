@@ -621,6 +621,13 @@ Polymer({
     e.preventDefault();
     this._setDraggingFiles(false);
     const droppedFiles = Array.from(e.dataTransfer.files || []);
+    // A single blob dropzone only ever keeps the first file (see `_getFiles`), so accepting the
+    // whole drop would upload every file and then silently discard all but one.
+    if (droppedFiles.length > 1 && !this.multiple && !this.blobList) {
+      this._errorMessage = this.i18n('dropzone.invalid.multipleFiles');
+      this.invalid = true;
+      return;
+    }
     this.files = droppedFiles;
     if (this.validate()) {
       this._upload(e.dataTransfer.files);

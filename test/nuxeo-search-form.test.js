@@ -16,6 +16,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 import { fixture, html, flush } from '@nuxeo/testing-helpers';
+import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-directory-suggestion.js';
 import '../elements/search/nuxeo-search-form.js';
 
 window.nuxeo.I18n.language = 'en';
@@ -50,6 +51,13 @@ suite('nuxeo-search-form', () => {
     expect(input.getAttribute('aria-labelledby')).to.equal('label');
     expect(input.hasAttribute('aria-label')).to.be.false;
     expect(visibleLabel.getAttribute('for')).to.equal(input.id);
+  });
+
+  test('prevents actionsDropdown from showing a phantom vertical scrollbar', () => {
+    const dropdown = searchForm.shadowRoot.querySelector('#actionsDropdown');
+    const style = getComputedStyle(dropdown);
+    expect(style.boxSizing).to.equal('border-box');
+    expect(style.overflowY).to.equal('hidden');
   });
 
   test('maps saved searches for selectivity data', () => {
@@ -95,6 +103,7 @@ suite('nuxeo-search-form', () => {
       },
     });
     sinon.stub(searchForm, '_mutateParams').callsFake((p) => p);
+    const scheduleStub = sinon.stub(searchForm, '_scheduleDirectorySuggestionRehydration').resolves();
 
     searchForm._selectedSearchChanged({ id: 'two' });
 
@@ -102,7 +111,9 @@ suite('nuxeo-search-form', () => {
     expect(searchForm.params).to.deep.equal({ ecm_fulltext: '*world*' });
     expect(searchForm.searchTerm).to.equal('world');
     expect(mockForm.searchTerm).to.equal('world');
+    expect(scheduleStub).to.have.been.called;
     searchForm._mutateParams.restore();
+    scheduleStub.restore();
     delete searchForm.form;
   });
 
@@ -222,6 +233,392 @@ suite('nuxeo-search-form', () => {
     selectSpy.restore();
   });
 
+  test('keeps the selected document when toggling back to the queue (WEBUI-1881)', async () => {
+    searchForm.visible = true;
+    const entries = [
+      { uid: 'uid-1', path: '/default-domain/doc-1' },
+      { uid: 'uid-2', path: '/default-domain/doc-2' },
+      { uid: 'uid-3', path: '/default-domain/doc-3' },
+    ];
+    const fetchStub = sinon.stub(searchForm.$.list, 'fetch').callsFake(() => {
+      // a fetch replaces the entries with new object instances
+      searchForm.$.list.items = entries.map((entry) => Object.assign({}, entry));
+      return Promise.resolve();
+    });
+    const scrollSpy = sinon.spy(searchForm.$.list, 'scrollToIndex');
+    const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+    const navigateToSpy = sinon.spy();
+    Object.defineProperty(searchForm, 'navigateTo', { value: navigateToSpy, configurable: true, writable: true });
+    // the third document was opened from the queue, then the filters view was displayed
+    searchForm.selectedDocument = entries[2];
+    searchForm.currentDocument = null;
+
+    searchForm.displayQueueAndNavigateToFirst();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(scrollSpy).to.have.been.calledWith(2);
+    expect(selectSpy).to.have.been.calledWith(2);
+    expect(navigateToSpy).to.have.been.calledOnce;
+    expect(navigateToSpy.firstCall.args[0].uid).to.equal('uid-3');
+
+    fetchStub.restore();
+    scrollSpy.restore();
+    selectSpy.restore();
+    delete searchForm.navigateTo;
+  });
+
+  test('falls back to the first queue entry when the selection is gone (WEBUI-1881)', async () => {
+    searchForm.visible = true;
+    const fetchStub = sinon.stub(searchForm.$.list, 'fetch').callsFake(() => {
+      searchForm.$.list.items = [{ uid: 'uid-1', path: '/default-domain/doc-1' }];
+      return Promise.resolve();
+    });
+    const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+    const navigateToSpy = sinon.spy();
+    Object.defineProperty(searchForm, 'navigateTo', { value: navigateToSpy, configurable: true, writable: true });
+    // the previously selected document is no longer part of the results
+    searchForm.selectedDocument = { uid: 'gone', path: '/default-domain/gone' };
+    searchForm.currentDocument = null;
+
+    searchForm.displayQueueAndNavigateToFirst();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(selectSpy).to.have.been.calledWith(0);
+    expect(navigateToSpy.firstCall.args[0].uid).to.equal('uid-1');
+
+    fetchStub.restore();
+    selectSpy.restore();
+    delete searchForm.navigateTo;
+  });
+
+  test('opens the restored document even when currentDocument is stale (WEBUI-1881)', async () => {
+    searchForm.visible = true;
+    const fetchStub = sinon.stub(searchForm.$.list, 'fetch').callsFake(() => {
+      searchForm.$.list.items = [{ uid: 'uid-1', path: '/default-domain/doc-1' }];
+      return Promise.resolve();
+    });
+    const navigateToSpy = sinon.spy();
+    Object.defineProperty(searchForm, 'navigateTo', { value: navigateToSpy, configurable: true, writable: true });
+    searchForm.selectedDocument = { uid: 'uid-1', path: '/default-domain/doc-1' };
+    // `navigateTo` never fires the `navigate` event, so currentDocument still points at the
+    // document the filters view navigated away from and must not suppress the navigation
+    searchForm.currentDocument = { uid: 'uid-1', path: '/default-domain/doc-1' };
+
+    searchForm.displayQueueAndNavigateToFirst();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(navigateToSpy).to.have.been.calledOnce;
+    expect(navigateToSpy.firstCall.args[0].uid).to.equal('uid-1');
+
+    fetchStub.restore();
+    delete searchForm.navigateTo;
+  });
+
+  test('opens the document when the already-selected queue row is tapped (WEBUI-2300)', () => {
+    // real row element, classed exactly as the queue template classes it
+    const row = document.createElement('div');
+    row.className = searchForm._computedClass(true);
+    searchForm.selectedDocument = { uid: 'uid-2', path: '/default-domain/doc-2' };
+    const navigateToSpy = sinon.spy();
+    Object.defineProperty(searchForm, 'navigateTo', { value: navigateToSpy, configurable: true, writable: true });
+    const stopPropagation = sinon.spy();
+
+    searchForm._queueItemTapped({ currentTarget: row, stopPropagation });
+
+    // the tap must not reach iron-list, which would deselect the row and open nothing
+    expect(stopPropagation).to.have.been.calledOnce;
+    expect(navigateToSpy).to.have.been.calledOnce;
+    expect(navigateToSpy.firstCall.args[0].uid).to.equal('uid-2');
+    expect(searchForm.currentDocument.uid).to.equal('uid-2');
+
+    delete searchForm.navigateTo;
+  });
+
+  test('lets iron-list handle a tap on an unselected queue row (WEBUI-2300)', () => {
+    const row = document.createElement('div');
+    row.className = searchForm._computedClass(false);
+    const doc = { uid: 'uid-2', path: '/default-domain/doc-2' };
+    // prime currentDocument so the debounced selection observer treats this document as already
+    // displayed and does not fire a navigation 150ms later, after this test has torn down
+    searchForm.currentDocument = doc;
+    searchForm.selectedDocument = doc;
+    const navigateToSpy = sinon.spy();
+    Object.defineProperty(searchForm, 'navigateTo', { value: navigateToSpy, configurable: true, writable: true });
+    const stopPropagation = sinon.spy();
+
+    searchForm._queueItemTapped({ currentTarget: row, stopPropagation });
+
+    // selecting a new row is iron-list's job; the selection observer navigates from there
+    expect(stopPropagation).to.not.have.been.called;
+    expect(navigateToSpy).to.not.have.been.called;
+
+    delete searchForm.navigateTo;
+  });
+
+  test('ignores a queue tap when nothing is selected yet (WEBUI-2300)', () => {
+    const row = document.createElement('div');
+    row.className = searchForm._computedClass(true);
+    searchForm.selectedDocument = undefined;
+    const navigateToSpy = sinon.spy();
+    Object.defineProperty(searchForm, 'navigateTo', { value: navigateToSpy, configurable: true, writable: true });
+    const stopPropagation = sinon.spy();
+
+    searchForm._queueItemTapped({ currentTarget: row, stopPropagation });
+
+    expect(stopPropagation).to.not.have.been.called;
+    expect(navigateToSpy).to.not.have.been.called;
+
+    delete searchForm.navigateTo;
+  });
+
+  test('queue rows are wired to the tap handler (WEBUI-2300)', () => {
+    // iron-list does not stamp rows in the unit-test environment, so assert the binding Polymer
+    // parsed out of the queue row template - that is what makes _queueItemTapped reachable
+    const listTemplate = searchForm.shadowRoot.querySelector('#list template');
+    expect(listTemplate).to.exist;
+    const events = (listTemplate._templateInfo.nodeInfoList || []).reduce(
+      (acc, node) => acc.concat((node.events || []).map((event) => `${event.name}:${event.value}`)),
+      [],
+    );
+    expect(events).to.contain('tap:_queueItemTapped');
+    expect(typeof searchForm._queueItemTapped).to.equal('function');
+  });
+
+  test('reopens a document that was opened earlier in the queue (WEBUI-2300)', async () => {
+    const doc7 = { uid: 'uid-7', path: '/default-domain/doc-7' };
+    const doc3 = { uid: 'uid-3', path: '/default-domain/doc-3' };
+    const navigateToSpy = sinon.spy();
+    Object.defineProperty(searchForm, 'navigateTo', { value: navigateToSpy, configurable: true, writable: true });
+
+    // doc 7 opened from the queue (as the filter/queue toggle does)
+    searchForm._openDocument(doc7);
+    expect(navigateToSpy.lastCall.args[0].uid).to.equal('uid-7');
+
+    // another row is clicked: iron-list moves the selection, the observer navigates
+    searchForm.selectedDocument = doc3;
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    expect(navigateToSpy.lastCall.args[0].uid).to.equal('uid-3');
+
+    // back to doc 7: currentDocument must have followed doc 3, otherwise the observer guard
+    // compares against a stale doc 7 and silently skips this navigation
+    searchForm.selectedDocument = doc7;
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    expect(navigateToSpy.lastCall.args[0].uid).to.equal('uid-7');
+    expect(navigateToSpy).to.have.been.calledThrice;
+
+    delete searchForm.navigateTo;
+  });
+
+  test('_openDocument keeps currentDocument in step with the navigation (WEBUI-2300)', () => {
+    const doc = { uid: 'uid-9', path: '/default-domain/doc-9' };
+    const navigateToSpy = sinon.spy();
+    Object.defineProperty(searchForm, 'navigateTo', { value: navigateToSpy, configurable: true, writable: true });
+
+    searchForm._openDocument(doc);
+
+    expect(navigateToSpy).to.have.been.calledWith(doc);
+    expect(searchForm.currentDocument).to.equal(doc);
+
+    delete searchForm.navigateTo;
+  });
+
+  test('follows the displayed document in the queue selection (WEBUI-2301)', () => {
+    searchForm.queue = true;
+    searchForm.$.list.items = [
+      { uid: 'uid-1', path: '/default-domain/doc-1' },
+      { uid: 'uid-2', path: '/default-domain/doc-2' },
+    ];
+    const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+    const clearSpy = sinon.spy(searchForm.$.list, 'clearSelection');
+    const navigateToSpy = sinon.spy();
+    Object.defineProperty(searchForm, 'navigateTo', { value: navigateToSpy, configurable: true, writable: true });
+
+    // the host pushes down the document the router loaded, e.g. after browser back
+    searchForm.currentDocument = { uid: 'uid-1', path: '/default-domain/doc-1' };
+
+    expect(selectSpy).to.have.been.calledWith(0);
+    // the previous row has to be cleared through the behaviour, otherwise it stays highlighted
+    // as well and two rows look selected at once
+    expect(clearSpy).to.have.been.calledBefore(selectSpy);
+    // syncing the selection from the route must never navigate, or the two would loop
+    expect(navigateToSpy).to.not.have.been.called;
+
+    selectSpy.restore();
+    clearSpy.restore();
+    delete searchForm.navigateTo;
+  });
+
+  test('does not touch the selection while the filters view is shown (WEBUI-2301)', () => {
+    searchForm.queue = false;
+    searchForm.$.list.items = [{ uid: 'uid-1', path: '/default-domain/doc-1' }];
+    const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+
+    searchForm.currentDocument = { uid: 'uid-1', path: '/default-domain/doc-1' };
+
+    expect(selectSpy).to.not.have.been.called;
+
+    selectSpy.restore();
+  });
+
+  test('leaves the selection alone for a document outside the queue (WEBUI-2301)', () => {
+    searchForm.queue = true;
+    searchForm.$.list.items = [{ uid: 'uid-1', path: '/default-domain/doc-1' }];
+    const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+    const clearSpy = sinon.spy(searchForm.$.list, 'clearSelection');
+
+    // a child document opened from the main content area is not part of the result set
+    searchForm.currentDocument = { uid: 'uid-child', path: '/default-domain/doc-1/child' };
+
+    expect(selectSpy).to.not.have.been.called;
+    expect(clearSpy).to.not.have.been.called;
+
+    selectSpy.restore();
+    clearSpy.restore();
+  });
+
+  test('ignores documents without a uid and an empty queue (WEBUI-2301)', () => {
+    searchForm.queue = true;
+    const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+
+    // the global `navigate` listener sets undefined whenever the event carries `doc` not `item`
+    searchForm.currentDocument = undefined;
+    searchForm.currentDocument = { path: '/default-domain/no-uid' };
+    searchForm.$.list.items = [];
+    searchForm.currentDocument = { uid: 'uid-1', path: '/default-domain/doc-1' };
+
+    expect(selectSpy).to.not.have.been.called;
+
+    selectSpy.restore();
+  });
+
+  test('reselecting the displayed document does not re-enter the navigation (WEBUI-2301)', () => {
+    const doc = { uid: 'uid-2', path: '/default-domain/doc-2' };
+    searchForm.queue = true;
+    searchForm.$.list.items = [{ uid: 'uid-1', path: '/default-domain/doc-1' }, doc];
+    const navigateToSpy = sinon.spy();
+    Object.defineProperty(searchForm, 'navigateTo', { value: navigateToSpy, configurable: true, writable: true });
+
+    // _openDocument writes currentDocument, which now has an observer: the selection it syncs
+    // must be recognised as already displayed so _selectedDocChanged does not navigate again
+    searchForm._openDocument(doc);
+    searchForm.selectedDocument = doc;
+
+    expect(navigateToSpy).to.have.been.calledOnce;
+
+    delete searchForm.navigateTo;
+  });
+
+  test('does not re-select the document that is already selected (WEBUI-2301)', () => {
+    const doc = { uid: 'uid-1', path: '/default-domain/doc-1' };
+    searchForm.queue = true;
+    searchForm.$.list.items = [doc];
+    searchForm.selectedDocument = doc;
+    // iron-list.selectIndex clears the selection before selecting, so a redundant call would
+    // push a transient null through selectedDocument on every navigation
+    const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+
+    searchForm.currentDocument = { uid: 'uid-1', path: '/default-domain/doc-1' };
+
+    expect(selectSpy).to.not.have.been.called;
+
+    selectSpy.restore();
+  });
+
+  test('a focused queue row is not styled as selected (WEBUI-2301)', () => {
+    const styles = Array.from(searchForm.shadowRoot.querySelectorAll('style'))
+      .map((style) => style.textContent)
+      .join('');
+    // sanity check that the element's own CSS was read, so the assertions below cannot pass
+    // vacuously. Mixin names are gone by now - Polymer's ApplyShim expands `@apply` at runtime -
+    // so assert on the selectors, which survive.
+    expect(styles).to.contain('.list-item.selected');
+    expect(styles).to.contain('.list-item:hover');
+
+    // The defect was `.list-item:focus` being grouped with `.list-item.selected`, so a focused
+    // row inherited the selected background. Once the queue selection follows the displayed
+    // document, a row left focused behind it kept looking selected and two rows appeared
+    // highlighted at once. A standalone `:focus` rule (outline, radius) is fine - only the
+    // grouping is forbidden, which is what the trailing commas below detect.
+    // The rendered background cannot be asserted here: the theme that defines
+    // --hyland-drawer-item-selected is not loaded in the unit-test fixture.
+    expect(styles).to.not.contain('.list-item:focus,');
+    expect(styles).to.not.contain('.list-item.selected:focus {');
+    // keyboard focus stays visible through the focus-visible ring
+    expect(styles).to.contain('.list-item:focus-visible');
+  });
+
+  test('queue lookups tolerate a list with no items yet (WEBUI-1881)', () => {
+    searchForm.$.list.items = undefined;
+    const navigateToSpy = sinon.spy();
+    Object.defineProperty(searchForm, 'navigateTo', { value: navigateToSpy, configurable: true, writable: true });
+
+    // no entries to search: the caller's fallback index is returned untouched
+    expect(searchForm._queueIndexOf('uid-1', 7)).to.equal(7);
+    // and nothing is opened rather than throwing on an absent items array
+    searchForm._navigateToQueueItem(0);
+    expect(navigateToSpy).to.not.have.been.called;
+
+    delete searchForm.navigateTo;
+  });
+
+  test('ignores a queue tap that carries no row (WEBUI-2300)', () => {
+    const doc = { uid: 'uid-1', path: '/default-domain/doc-1' };
+    // prime currentDocument so the debounced selection observer treats this document as already
+    // displayed and does not fire a navigation 150ms later, after this test has torn down
+    searchForm.currentDocument = doc;
+    searchForm.selectedDocument = doc;
+    const navigateToSpy = sinon.spy();
+    Object.defineProperty(searchForm, 'navigateTo', { value: navigateToSpy, configurable: true, writable: true });
+    const stopPropagation = sinon.spy();
+
+    searchForm._queueItemTapped({ currentTarget: null, stopPropagation });
+
+    expect(stopPropagation).to.not.have.been.called;
+    expect(navigateToSpy).to.not.have.been.called;
+
+    delete searchForm.navigateTo;
+  });
+
+  test('does not open a selected row whose document has no path (WEBUI-2300)', () => {
+    const row = document.createElement('div');
+    row.className = searchForm._computedClass(true);
+    searchForm.selectedDocument = { uid: 'uid-1' };
+    const navigateToSpy = sinon.spy();
+    Object.defineProperty(searchForm, 'navigateTo', { value: navigateToSpy, configurable: true, writable: true });
+    const stopPropagation = sinon.spy();
+
+    searchForm._queueItemTapped({ currentTarget: row, stopPropagation });
+
+    expect(stopPropagation).to.not.have.been.called;
+    expect(navigateToSpy).to.not.have.been.called;
+
+    delete searchForm.navigateTo;
+  });
+
+  test('ignores a route change before the list exists (WEBUI-2301)', () => {
+    searchForm.queue = true;
+    const list = searchForm.$.list;
+    // `currentDocument` can be pushed in by the host before the template is stamped
+    delete searchForm.$.list;
+
+    expect(() => {
+      searchForm.currentDocument = { uid: 'uid-1', path: '/default-domain/doc-1' };
+    }).to.not.throw();
+
+    searchForm.$.list = list;
+  });
+
+  test('queue lookup skips holes in the results array (WEBUI-1881)', () => {
+    // a page provider can leave gaps in `items` for ranges that were never fetched
+    searchForm.$.list.items = [null, { uid: 'uid-2', path: '/default-domain/doc-2' }];
+
+    expect(searchForm._queueIndexOf('uid-2', 9)).to.equal(1);
+    expect(searchForm._queueIndexOf('uid-missing', 9)).to.equal(9);
+  });
+
   test('resetResults invokes list reset when required inputs exist', () => {
     const resetSpy = sinon.spy(searchForm.$.list, '_resetResults');
     searchForm.provider = 'default_search';
@@ -246,6 +643,7 @@ suite('nuxeo-search-form', () => {
 
   test('selectedSearchIdxChanged populates params for known search', () => {
     const navigateSpy = sinon.spy(searchForm, '_navigateToResults');
+    const scheduleStub = sinon.stub(searchForm, '_scheduleDirectorySuggestionRehydration').resolves();
     sinon.stub(searchForm, '_mutateParams').callsFake((p) => p);
     searchForm._searches = [{ id: 'one', title: 'One', text: 'One', params: { ecm_fulltext: '*a*' } }];
     searchForm.selectedSearchIdx = 1;
@@ -259,10 +657,296 @@ suite('nuxeo-search-form', () => {
     expect(searchForm.selectedSearch.id).to.equal('one');
     expect(searchForm.params).to.deep.equal({ ecm_fulltext: '*a*' });
     expect(navigateSpy).to.have.been.calledOnce;
+    expect(scheduleStub).to.have.been.called;
     expect(searchForm.dirty).to.be.false;
 
     searchForm._mutateParams.restore();
     navigateSpy.restore();
+    scheduleStub.restore();
+  });
+
+  suite('saved directory labels', () => {
+    const suggestionWith = (value, overrides = {}) => {
+      return {
+        value,
+        directoryName: 'building_picture_type',
+        dbl10n: false,
+        _selectionFormatter: sinon.spy(),
+        $: {
+          s2: {
+            _selectivity: { setValue: sinon.spy() },
+            $: {
+              op: {
+                op: 'Directory.SuggestEntries',
+                params: { directoryName: 'building_picture_type' },
+                execute: sinon.stub().resolves({ id: 'id_civil', displayLabel: 'label_Civil' }),
+              },
+            },
+          },
+        },
+        ...overrides,
+      };
+    };
+
+    const savedSearch = {
+      id: 'saved-search',
+      title: 'save1',
+      text: 'save1',
+      displaytext: 'save1',
+      params: {
+        'PP_BUILDING_PICTURES_pp:building_picture_type': 'id_civil',
+        'PP_BUILDING_PICTURES_pp:building_picture_activities': 'id_residential',
+      },
+    };
+
+    test('coalesces requests until rehydration finishes', async () => {
+      let finish;
+      const pending = new Promise((resolve) => {
+        finish = resolve;
+      });
+      const rehydrateStub = sinon.stub(searchForm, '_rehydrateDirectorySuggestionLabels').returns(pending);
+
+      const first = searchForm._scheduleDirectorySuggestionRehydration();
+      await Promise.resolve();
+      const second = searchForm._scheduleDirectorySuggestionRehydration();
+
+      expect(first).to.equal(second);
+      expect(rehydrateStub).to.have.been.calledOnce;
+
+      finish();
+      await first;
+      await searchForm._scheduleDirectorySuggestionRehydration();
+
+      expect(rehydrateStub).to.have.been.calledTwice;
+      rehydrateStub.restore();
+    });
+
+    test('handles missing forms and layout roots without query support', async () => {
+      const rehydrateSpy = sinon.spy(searchForm, '_rehydrateDirectorySuggestionLabel');
+      Object.defineProperty(searchForm, 'form', {
+        configurable: true,
+        get() {
+          return null;
+        },
+      });
+
+      await searchForm._rehydrateDirectorySuggestionLabels();
+      expect(rehydrateSpy).to.not.have.been.called;
+
+      Object.defineProperty(searchForm, 'form', {
+        configurable: true,
+        get() {
+          return {};
+        },
+      });
+      await searchForm._rehydrateDirectorySuggestionLabels();
+
+      expect(rehydrateSpy).to.not.have.been.called;
+      rehydrateSpy.restore();
+      delete searchForm.form;
+    });
+
+    test('finds and deduplicates suggestions in light and shadow DOM', async () => {
+      const suggestion = suggestionWith('id_civil');
+      const querySelectorAll = sinon.stub().returns([suggestion]);
+      Object.defineProperty(searchForm, 'form', {
+        configurable: true,
+        get() {
+          return {
+            querySelectorAll,
+            shadowRoot: { querySelectorAll },
+          };
+        },
+      });
+      const rehydrateStub = sinon.stub(searchForm, '_rehydrateDirectorySuggestionLabel').resolves();
+
+      await searchForm._rehydrateDirectorySuggestionLabels();
+
+      expect(querySelectorAll).to.have.been.calledTwice;
+      expect(rehydrateStub).to.have.been.calledOnceWithExactly(suggestion);
+      rehydrateStub.restore();
+      delete searchForm.form;
+    });
+
+    test('rehydrates scalar and multiple values sequentially', async () => {
+      const scalar = suggestionWith('id_civil');
+      const multiple = suggestionWith(['id_residential', null, undefined, '', 'id_parking']);
+      let queryPending = false;
+      const queryStub = sinon.stub(searchForm, '_queryDirectorySuggestionEntry').callsFake((_suggestion, id) => {
+        expect(queryPending).to.be.false;
+        queryPending = true;
+        const entry = id === 'id_parking' ? null : { id, displayLabel: `${id}_label` };
+        return Promise.resolve(entry).then((result) => {
+          queryPending = false;
+          return result;
+        });
+      });
+
+      await searchForm._rehydrateDirectorySuggestionLabel(scalar);
+      await searchForm._rehydrateDirectorySuggestionLabel(multiple);
+
+      expect(queryStub.callCount).to.equal(3);
+      expect(scalar._selectionFormatter).to.have.been.calledOnceWithExactly({
+        id: 'id_civil',
+        displayLabel: 'id_civil_label',
+      });
+      expect(multiple._selectionFormatter).to.have.been.calledOnceWithExactly({
+        id: 'id_residential',
+        displayLabel: 'id_residential_label',
+      });
+      expect(scalar.$.s2._selectivity.setValue).to.have.been.calledOnceWithExactly(
+        { id: 'id_civil', displayLabel: 'id_civil_label' },
+        { triggerChange: false },
+      );
+      expect(multiple.$.s2._selectivity.setValue).to.have.been.calledOnceWithExactly(
+        [{ id: 'id_residential', displayLabel: 'id_residential_label' }, null, undefined, '', 'id_parking'],
+        { triggerChange: false },
+      );
+      queryStub.restore();
+    });
+
+    test('skips unusable values, missing formatters, and missing setters', async () => {
+      const querySpy = sinon.spy(searchForm, '_queryDirectorySuggestionEntry');
+      const noSelectivity = suggestionWith('id_civil', { $: { s2: {} } });
+
+      await searchForm._rehydrateDirectorySuggestionLabel(null);
+      await searchForm._rehydrateDirectorySuggestionLabel(noSelectivity);
+      await searchForm._rehydrateDirectorySuggestionLabel(suggestionWith(null));
+      await searchForm._rehydrateDirectorySuggestionLabel(suggestionWith(undefined));
+      await searchForm._rehydrateDirectorySuggestionLabel(suggestionWith(''));
+
+      expect(querySpy).to.not.have.been.called;
+      querySpy.restore();
+
+      const queryStub = sinon
+        .stub(searchForm, '_queryDirectorySuggestionEntry')
+        .resolves({ id: 'id_civil', displayLabel: 'label_Civil' });
+      const noFormatter = suggestionWith('id_civil', { _selectionFormatter: null });
+      const noSetter = suggestionWith('id_civil');
+      noSetter.$.s2._selectivity = {};
+
+      await searchForm._rehydrateDirectorySuggestionLabel(noFormatter);
+      await searchForm._rehydrateDirectorySuggestionLabel(noSetter);
+
+      expect(noFormatter.$.s2._selectivity.setValue).to.not.have.been.called;
+      expect(queryStub).to.have.been.calledTwice;
+      queryStub.restore();
+    });
+
+    test('queries directory entries through the REST resource', async () => {
+      const suggestion = suggestionWith('id_civil');
+      const response = { id: 'id_civil', displayLabel: 'label_Civil' };
+      const resource = {
+        get: sinon.stub().resolves(response),
+        headers: null,
+        path: null,
+      };
+      searchForm.$.directoryEntry = resource;
+
+      const entry = await searchForm._queryDirectorySuggestionEntry(suggestion, 'id_civil');
+
+      expect(entry).to.deep.equal(response);
+      expect(resource.path).to.equal('/directory/building_picture_type/id_civil');
+      expect(resource.headers).to.deep.equal({
+        'fetch-directoryEntry': 'parent',
+        'translate-directoryEntry': 'label',
+      });
+      expect(resource.get).to.have.been.calledOnce;
+    });
+
+    test('returns null for missing, empty, and failed directory operations', async () => {
+      expect(await searchForm._queryDirectorySuggestionEntry(null, 'id_civil')).to.be.null;
+      const resource = {
+        get: sinon.stub(),
+        headers: null,
+        path: null,
+      };
+      searchForm.$.directoryEntry = resource;
+      const emptySuggestion = suggestionWith('id_civil');
+      resource.get.onFirstCall().resolves(null);
+      expect(await searchForm._queryDirectorySuggestionEntry(emptySuggestion, 'id_civil')).to.be.null;
+
+      const failedSuggestion = suggestionWith('id_civil');
+      resource.get.onSecondCall().rejects(new Error('failed'));
+      expect(await searchForm._queryDirectorySuggestionEntry(failedSuggestion, 'id_civil')).to.be.null;
+    });
+
+    test('renders labels for saved scalar and hierarchical directory values', async () => {
+      const typeSuggestion = await fixture(
+        html`<nuxeo-directory-suggestion directory-name="building_picture_type"></nuxeo-directory-suggestion>`,
+      );
+      const activitySuggestion = await fixture(
+        html`<nuxeo-directory-suggestion directory-name="building_picture_activities"></nuxeo-directory-suggestion>`,
+      );
+      typeSuggestion.value = 'id_civil';
+      activitySuggestion.value = 'id_residential/id_house';
+      await flush();
+
+      const paths = [];
+      const entries = {
+        '/directory/building_picture_type/id_civil': {
+          'entity-type': 'directoryEntry',
+          directoryName: 'building_picture_type',
+          properties: { id: 'id_civil', label: 'Civil' },
+        },
+        '/directory/building_picture_activities/id_residential%2Fid_house': {
+          'entity-type': 'directoryEntry',
+          directoryName: 'building_picture_activities',
+          properties: {
+            id: 'id_house',
+            label: 'House',
+            parent: {
+              'entity-type': 'directoryEntry',
+              directoryName: 'building_picture_activities',
+              properties: { id: 'id_residential', label: 'Residential' },
+            },
+          },
+        },
+      };
+      searchForm.$.directoryEntry = {
+        get: sinon.stub().callsFake(() => {
+          paths.push(searchForm.$.directoryEntry.path);
+          return Promise.resolve(entries[searchForm.$.directoryEntry.path]);
+        }),
+        headers: null,
+        path: null,
+      };
+
+      await searchForm._rehydrateDirectorySuggestionLabel(typeSuggestion);
+      await searchForm._rehydrateDirectorySuggestionLabel(activitySuggestion);
+      await flush();
+
+      expect(typeSuggestion.$.s2.$.input.textContent.trim()).to.equal('Civil');
+      expect(activitySuggestion.$.s2.$.input.textContent.trim()).to.equal('Residential/House');
+      expect(paths).to.deep.equal(Object.keys(entries));
+    });
+
+    test('rehydrates after direct and deferred saved-search loading', async () => {
+      const rehydrateStub = sinon.stub(searchForm, '_scheduleDirectorySuggestionRehydration').resolves();
+      const fetchStub = sinon.stub(searchForm, '_fetch').resolves();
+      searchForm._searches = [savedSearch];
+      searchForm.results = {};
+
+      await searchForm._loadSavedSearch('saved-search');
+
+      expect(fetchStub).to.have.been.calledOnceWithExactly(searchForm.results);
+      expect(rehydrateStub).to.have.been.called;
+
+      fetchStub.resetHistory();
+      rehydrateStub.resetHistory();
+      searchForm.results = null;
+
+      expect(searchForm._loadSavedSearch('saved-search')).to.be.undefined;
+
+      searchForm.results = {};
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(fetchStub).to.have.been.calledOnceWithExactly(searchForm.results);
+      expect(rehydrateStub).to.have.been.called;
+      fetchStub.restore();
+      rehydrateStub.restore();
+    });
   });
 
   test('clear resets state and triggers search in manual mode', () => {
