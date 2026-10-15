@@ -25,6 +25,9 @@ limitations under the License.
  * time — `./i18n/i18n.js` does, to start loading the locale early (WEBUI-1570) — would already have
  * sent its request. Keeping the call in a module of its own lets `index.js` order it ahead of those
  * imports, and keeps `entry-url.js` itself side-effect free for its unit tests.
+ *
+ * Running at import time rather than from the bootstrap chain also means the credential is removed
+ * even if a later startup step rejects.
  */
 import { normalizeCurrentEntryUrl } from './entry-url.js';
 
