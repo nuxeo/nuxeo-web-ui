@@ -1,37 +1,54 @@
 version: 2
-# Updated to trigger Dependabot re-runs
+
+# Dependency updates target the development branches, not the release branches. A pull
+# request raised against a release branch bypasses the dev branch entirely, so the update
+# would never appear in a dev build, and it would land on a branch meant to hold released
+# code only.
+#
+# The trade is that the dev branch now rewrites package.json and the lockfile during a
+# cycle, while the release job rewrites the same files at release time. The post-release
+# sync pull request can therefore conflict on them; its body says which side to take.
+#
+# Every entry sets target-branch explicitly, including the one for the repository's
+# default branch, so the target does not silently move if the default ever changes.
 updates:
-  # Default branch (maintenance-3.1.x)
+  # LTS 2023
   - package-ecosystem: "npm"
     directory: "/"
+    target-branch: "develop-2023"
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "[develop-2023]"
 
   - package-ecosystem: "github-actions"
     directory: "/"
+    target-branch: "develop-2023"
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "[develop-2023]"
     groups:
       gha:
         patterns:
           - "*"
 
-  # LTS-2025 branch
+  # LTS 2025
   - package-ecosystem: "npm"
     directory: "/"
-    target-branch: "lts-2025"
+    target-branch: "develop-2025"
     schedule:
       interval: "weekly"
     commit-message:
-      prefix: "[lts-2025]"
+      prefix: "[develop-2025]"
 
   - package-ecosystem: "github-actions"
     directory: "/"
-    target-branch: "lts-2025"
+    target-branch: "develop-2025"
     schedule:
       interval: "weekly"
     commit-message:
-      prefix: "[lts-2025]"
+      prefix: "[develop-2025]"
     groups:
       gha:
         patterns:

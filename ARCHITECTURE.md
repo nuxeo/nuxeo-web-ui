@@ -203,15 +203,21 @@ Addon loading is a two-step process. During the build, webpack injects `Nuxeo.UI
 
 ## Theming
 
-Four built-in themes in `themes/`. Which pair is offered depends on the branding opt-in
+Six built-in themes in `themes/`. Which set is offered depends on the branding opt-in
 (`org.nuxeo.web.ui.branding.rebrand`, see `themes/theme-config.js`):
 
 | Theme | Directory | Offered when |
 |---|---|---|
-| Default | `themes/default/theme.html` | branding off |
+| Nuxeo | `themes/default/theme.html` | branding off |
 | Dark | `themes/dark/theme.html` | branding off |
+| Kawaii | `themes/kawaii/theme.html` | branding off |
+| Light | `themes/light/theme.html` | branding off |
 | Hyland Light | `themes/hyland-light/theme.html` | branding on |
 | Hyland Dark | `themes/hyland-dark/theme.html` | branding on |
+
+The classic set is the Nuxeo default plus Dark, Kawaii and Light; the Hyland pair replaces
+them entirely when branding is on. Kawaii is deliberately unconventional: it exists to
+demonstrate how far the UI can be themed, not as a production look.
 
 Structural (non-colour) tokens shared by the two Hyland themes live in
 `themes/hyland-design-tokens.css`, which only those themes import.
@@ -282,18 +288,26 @@ Environment variables control deployment:
 
 ## CI/CD (GitHub Actions)
 
-Workflow orchestration in `.github/workflows/main.yaml`:
+Workflow orchestration in `.github/workflows/main.yaml` (release branches) and `.github/workflows/develop.yaml` (dev branches):
 
 ```
-Push to the maintenance-3.1.x branch triggers:
+Push to a release branch (lts-2025, maintenance-3.1.x) triggers main.yaml.
+These five run in parallel; build depends on all of them:
   lint    → ESLint + Prettier check
   test    → Web Test Runner unit tests (single entry: test/load-all-tests.js)
   a11y    → Accessibility tests
   ftest   → WebdriverIO functional tests
-  build   → (depends on all above) Maven marketplace build
+  sonar   → SonarCloud quality/security scan
+  build   → Maven marketplace build, tag and publish
+
+Push to a dev branch (develop-2025, develop-2023) triggers develop.yaml:
+  the same lint / test / a11y / ftest set in parallel, without build and publish.
+  sonar is absent here only because sonar.yaml already has its own push trigger.
 ```
 
-Additional workflows: `preview.yaml` (PR preview environments), `cross-repo.yaml` (nuxeo-elements coordination), `crowdin.yaml` (translation sync), `promote.yaml` (release promotion).
+Additional workflows: `preview.yaml` (PR preview environments), `cross-repo.yaml` (nuxeo-elements coordination), `crowdin.yaml` (translation sync), and `promote.yaml` (release promotion).
+
+After a release is promoted, `sync-release-to-dev.yaml` **opens a pull request** carrying the release branch's version bump, plus any hotfix made directly on it, back into that line's dev branch. It does not merge anything itself. It lives on the default branch, which is this one, and serves both LTS lines through its `release_branch` choice input, so `promote.yaml` dispatches it without a `--ref` from either line.
 
 ## Key Directories Reference
 

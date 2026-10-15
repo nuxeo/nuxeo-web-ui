@@ -26,6 +26,7 @@ import '@polymer/paper-input/paper-input.js';
 import '@polymer/paper-spinner/paper-spinner-lite.js';
 import '@polymer/paper-toggle-button/paper-toggle-button.js';
 import '@nuxeo/nuxeo-elements/nuxeo-page-provider.js';
+import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 import '@nuxeo/nuxeo-elements/nuxeo-search.js';
 import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-layout.js';
@@ -190,9 +191,11 @@ Polymer({
         font-weight: 500;
       }
       #actionsDropdown {
+        box-sizing: border-box;
         width: 82%;
         /* No top padding: the always visible label now occupies the top of the header row. */
         padding: 0;
+        overflow-y: hidden;
         --selectivity-dropdown-min-width: auto;
         --selectivity-dropdown-max-width: 100%;
         --selectivity-result-item-white-space: normal;
@@ -243,10 +246,16 @@ Polymer({
         @apply --hyland-drawer-item-selected;
       }
 
-      .list-item.selected,
-      .list-item:focus,
-      .list-item.selected:focus {
+      /* Only the selected row carries the selected background. Plain focus must not, or a row
+         left focused behind a selection that moved on its own - the queue now follows the
+         displayed document - keeps looking selected and two rows appear highlighted at once
+         (WEBUI-2301). Keyboard focus stays visible through the focus-visible ring below. */
+      .list-item.selected {
         @apply --hyland-drawer-item-selected;
+      }
+      .list-item:focus {
+          border-radius: 54px;
+          outline: 0;
       }
 
         /* Keyboard focus ring: --hyland-drawer-item-selected removes outline, so we apply
@@ -305,6 +314,7 @@ Polymer({
     </nuxeo-page-provider>
 
     <nuxeo-search id="saved-search"></nuxeo-search>
+    <nuxeo-resource id="directoryEntry"></nuxeo-resource>
 
     <div id="search-container">
       <div class="header ellipsis search-header">
@@ -387,6 +397,7 @@ Polymer({
                 tabindex$="{{_computeTabAndLastIndex(index)}}"
                 class$="[[_computedClass(selected)]]"
                 index="[[index]]"
+                on-tap="_queueItemTapped"
               >
                 <div class="list-item-box">
                   <div class="list-item-info" role="listitem" aria-selected="true">
@@ -688,6 +699,7 @@ Polymer({
     currentDocument: {
       type: Object,
       value: null,
+      observer: '_currentDocumentChanged',
     },
 
     /**
@@ -752,19 +764,120 @@ Polymer({
   },
 
   displayQueueAndNavigateToFirst() {
-    this.displayQueue(0);
+    // Toggling back from the filters view must keep the document the user opened from the
+    // queue, so ask for the selection to be restored and only fall back to the first entry
+    // when there is nothing to restore (WEBUI-1881).
+    this.displayQueue(0, true);
   },
 
-  displayQueue(index) {
+  displayQueue(index, restoreSelection) {
     this.queue = true;
     if (this.visible) {
+      // `fetch` replaces the items with new object instances, so the previously selected
+      // document has to be looked up again by uid once the new entries are in.
+      const selectedUid = restoreSelection ? this.selectedDocument?.uid : null;
       this.$.list.fetch().then(() => {
         if (typeof index === 'number') {
-          this.$.list.scrollToIndex(index);
-          this.$.list.selectIndex(index);
+          const targetIndex = this._queueIndexOf(selectedUid, index);
+          this.$.list.scrollToIndex(targetIndex);
+          this.$.list.selectIndex(targetIndex);
+          this._navigateToQueueItem(targetIndex);
         }
       });
     }
+  },
+
+  _queueItemTapped(e) {
+    const row = e.currentTarget;
+    // `iron-list` toggles the selection on tap, so tapping the row that is already selected
+    // deselects it and opens nothing (WEBUI-2300). The queue is a single-selection navigation
+    // list where clearing the selection is never the intent, so keep the tap away from
+    // `iron-list` in that case and open the document instead, leaving the selection untouched.
+    // The tapped row carries the `selected` class from `_computedClass`, and when it is the
+    // selected one `selectedDocument` is by definition that document, so no index lookup is
+    // needed (the row's `index` binding sets a property, not an attribute).
+    if (!row?.classList.contains('selected')) {
+      return;
+    }
+    const doc = this.selectedDocument;
+    if (doc?.path) {
+      e.stopPropagation();
+      this._openDocument(doc);
+    }
+  },
+
+  _queueIndexOf(uid, fallbackIndex) {
+    if (!uid) {
+      return fallbackIndex;
+    }
+    const items = this.$.list.items;
+    if (!items) {
+      return fallbackIndex;
+    }
+    const index = items.findIndex((item) => item?.uid === uid);
+    return index > -1 ? index : fallbackIndex;
+  },
+
+  _navigateToQueueItem(index) {
+    const doc = this.$.list.items?.[index];
+    if (doc?.path) {
+      // The queue can only be toggled back on from the filters view, which always navigated away
+      // to the search results, so the document has to be opened again rather than relying on the
+      // selection observer, which skips a selection whose path did not change.
+      this._openDocument(doc);
+    }
+  },
+
+  _currentDocumentChanged(doc) {
+    // The queue selection only ever followed a tap inside the queue, so any other way of changing
+    // the displayed document - browser back/forward, a breadcrumb, a deep link, a child document
+    // opened from the main content area - left the highlight on the previous document
+    // (WEBUI-2301). Follow the displayed document instead.
+    if (!this.queue || !doc?.uid) {
+      return;
+    }
+    // The list is guarded because `currentDocument` is bound from the host and can be pushed in
+    // before the template is stamped, and `queue` is set as an attribute on some search forms.
+    const list = this.$?.list;
+    if (!list) {
+      return;
+    }
+    // Nothing to do when the displayed document is already the selected one. This guard matters:
+    // `iron-list.selectIndex` calls `clearSelection()` before selecting on a single-selection
+    // list, so a redundant call would push a transient null through `selectedDocument` on every
+    // navigation.
+    if (this.selectedDocument?.uid === doc.uid) {
+      return;
+    }
+    const index = this._queueIndexOf(doc.uid, -1);
+    // Leave the selection alone when the document is not part of the queue (e.g. a child document)
+    // rather than clearing it, so nothing else that relies on the selection is disturbed.
+    if (index > -1) {
+      // `iron-list.selectIndex` drops the previous selection through its own internal path, which
+      // bypasses the page provider behaviour's bookkeeping and can leave the previously selected
+      // row still rendered as selected. Clear through the behaviour first so exactly one row stays
+      // highlighted.
+      list.clearSelection();
+      list.selectIndex(index);
+      // Selecting writes `selectedDocument`, which schedules `_selectedDocChanged`'s debounced
+      // navigation. This observer must only ever move the highlight: the route already shows this
+      // document. Leaving the timer armed lets it fire after a later host-driven `currentDocument`
+      // change that is not in the queue, navigating back to the stale document and overriding the
+      // external navigation.
+      if (this.__renderDebouncer) {
+        this.__renderDebouncer.cancel();
+      }
+    }
+  },
+
+  _openDocument(doc) {
+    // Every navigation this element performs has to go through here. `navigateTo` does not fire
+    // the global `navigate` event that maintains `currentDocument`, and queue rows are not
+    // `nuxeo-document-list-item` so they do not fire it either. Leaving `currentDocument` behind
+    // makes the `_selectedDocChanged` guard below compare against a document that is no longer
+    // displayed and silently skip a navigation back to a previously opened one (WEBUI-2300).
+    this.currentDocument = doc;
+    this.navigateTo(doc);
   },
 
   _resetResults() {
@@ -799,7 +912,7 @@ Polymer({
     if ((doc && doc.path && !old) || (doc && doc.path && old && old.path && doc.path !== old.path)) {
       this.__renderDebouncer = Debouncer.debounce(this.__renderDebouncer, timeOut.after(150), () => {
         if (!this.currentDocument || (this.currentDocument && this.currentDocument.path !== doc.path)) {
-          this.navigateTo(doc);
+          this._openDocument(doc);
         }
       });
     }
@@ -841,6 +954,7 @@ Polymer({
       const clonedParams = structuredClone(search.params);
       this.params = this._mutateParams(clonedParams, true);
       this._navigateToResults();
+      this._scheduleDirectorySuggestionRehydration();
     } else {
       this._clear();
     }
@@ -881,6 +995,106 @@ Polymer({
     if (this.form) {
       this.form.searchTerm = this.searchTerm;
     }
+    this._scheduleDirectorySuggestionRehydration();
+  },
+
+  _scheduleDirectorySuggestionRehydration() {
+    if (this.__directorySuggestionRehydrationPromise) {
+      return this.__directorySuggestionRehydrationPromise;
+    }
+    this.__directorySuggestionRehydrationPromise = Promise.resolve()
+      .then(() => this._rehydrateDirectorySuggestionLabels())
+      .finally(() => {
+        this.__directorySuggestionRehydrationPromise = null;
+      });
+    return this.__directorySuggestionRehydrationPromise;
+  },
+
+  _rehydrateDirectorySuggestionLabels() {
+    const { form } = this;
+    if (!form) {
+      return Promise.resolve();
+    }
+    const roots = form.shadowRoot ? [form.shadowRoot, form] : [form];
+    const suggestions = roots.reduce((result, root) => {
+      if (typeof root.querySelectorAll === 'function') {
+        root.querySelectorAll('nuxeo-directory-suggestion').forEach((suggestion) => result.add(suggestion));
+      }
+      return result;
+    }, new Set());
+    return Array.from(suggestions).reduce(
+      (promise, suggestion) => promise.then(() => this._rehydrateDirectorySuggestionLabel(suggestion)),
+      Promise.resolve(),
+    );
+  },
+
+  _rehydrateDirectorySuggestionLabel(suggestion) {
+    const selectivity = suggestion?.$?.s2?._selectivity;
+    const savedValue = suggestion?.value;
+    let ids = [];
+    if (Array.isArray(savedValue)) {
+      ids = savedValue.filter((id) => id !== null && id !== undefined && id !== '');
+    } else if (savedValue !== null && savedValue !== undefined && savedValue !== '') {
+      ids = [savedValue];
+    }
+    if (!selectivity || !ids.length) {
+      return Promise.resolve();
+    }
+    let resolved = false;
+    const resolvedEntries = new Map();
+    return ids
+      .reduce(
+        // Sequential on purpose: each entry is fetched only after the previous one resolves.
+        (promise, id) =>
+          promise.then(async () => {
+            const entry = await this._queryDirectorySuggestionEntry(suggestion, id);
+            if (entry && typeof suggestion._selectionFormatter === 'function') {
+              suggestion._selectionFormatter(entry);
+              resolvedEntries.set(id, entry);
+              resolved = true;
+            }
+          }),
+        Promise.resolve(),
+      )
+      .then(() => {
+        if (resolved && typeof selectivity.setValue === 'function') {
+          const hydratedValue = Array.isArray(savedValue)
+            ? savedValue.map((id) => resolvedEntries.get(id) || id)
+            : resolvedEntries.get(savedValue) || savedValue;
+          selectivity.setValue(hydratedValue, { triggerChange: false });
+        }
+      });
+  },
+
+  _queryDirectorySuggestionEntry(suggestion, id) {
+    const resource = this.$.directoryEntry;
+    if (!resource || !suggestion?.directoryName) {
+      return Promise.resolve(null);
+    }
+    resource.path = `/directory/${encodeURIComponent(suggestion.directoryName)}/${encodeURIComponent(String(id))}`;
+    resource.headers = {
+      'fetch-directoryEntry': 'parent',
+      'translate-directoryEntry': 'label',
+    };
+    return resource
+      .get()
+      .then((entry) => {
+        if (!entry) {
+          return null;
+        }
+        const properties = entry.properties || {};
+        const formattedLabel =
+          typeof suggestion.formatDirectory === 'function'
+            ? suggestion.formatDirectory(entry, suggestion.separator)
+            : undefined;
+        return {
+          ...entry,
+          id: entry.id || properties.id || String(id),
+          displayLabel: entry.displayLabel || entry.absoluteLabel || formattedLabel || properties.label || String(id),
+        };
+      })
+      .catch(() => null)
+      .then((entry) => entry || null);
   },
 
   _resultsElementChanged(results, oldResults) {
@@ -1144,23 +1358,29 @@ Polymer({
     if (!id) {
       return;
     }
-    const load = () =>
-      (!this._searches ? this.$['saved-searches'].get() : Promise.resolve()).then(() => {
-        this.selectedSearchIdx = this._searches.findIndex((s) => s.id === id) + 1;
-        // XXX rely on debouncer to update the results request with the saved search params
-        this._fetch(this.results);
-      });
+    const load = async () => {
+      // Awaited even when the searches are already loaded, so the body still runs in a
+      // microtask exactly as the previous promise chain did.
+      await (!this._searches ? this.$['saved-searches'].get() : Promise.resolve());
+      this.selectedSearchIdx = this._searches.findIndex((s) => s.id === id) + 1;
+      // XXX rely on debouncer to update the results request with the saved search params
+      await this._fetch(this.results);
+      return this._scheduleDirectorySuggestionRehydration();
+    };
     if (this.results) {
-      load();
+      return load();
     } else {
       this._loadSavedSearchListener = () => {
         if (this.results) {
-          load();
+          // Deliberately not awaited: an event listener cannot return a promise. "void" marks it
+          // ignored without attaching a handler, so a rejection still surfaces as it did before.
+          void load();
           this.removeEventListener('results-changed', this._loadSavedSearchListener);
         }
       };
       this.addEventListener('results-changed', this._loadSavedSearchListener);
     }
+    return undefined;
   },
 
   // To fix NXP-27429 so action buttons can be displayed on mobile browsers

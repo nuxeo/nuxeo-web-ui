@@ -33,6 +33,11 @@ import '../nuxeo-workflow-graph/nuxeo-workflow-graph.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
+// Principals the platform creates internally and never stores in the user directory.
+// Resolving one via /user/<name> always 404s and makes the server log a WARN for every
+// call, which floods server.log (WEBUI-2309), so we never ask the server for them.
+const INTERNAL_PRINCIPALS = new Set(['system']);
+
 /**
 `nuxeo-document-info-bar`
 @group Nuxeo UI
@@ -254,21 +259,32 @@ Polymer({
       const initiator = wf.initiator;
       if (initiator && typeof initiator === 'string' && !seen.has(initiator)) {
         seen.add(initiator);
-        try {
-          this.$.user.path = `/user/${encodeURIComponent(initiator)}`;
-          const user = await this.$.user.get();
-          entities[initiator] = user;
-        } catch (error) {
-          if (error.status !== 404) {
-            console.warn(`Unexpected error resolving user "${initiator}":`, error);
-          }
-          entities[initiator] = initiator; // fallback: keep raw username for system/deleted users
-        }
+        entities[initiator] = await this._resolveUser(initiator);
       }
     }
     if (requestId !== this._initiatorsRequestId) return;
     this._initiatorEntities = entities;
     this._initiatorsLoading = false;
+  },
+
+  /**
+   * Resolves an initiator name to a user entity, or returns the raw name when it cannot be
+   * resolved, which is what the template renders as-is.
+   */
+  async _resolveUser(name) {
+    if (INTERNAL_PRINCIPALS.has(name)) {
+      // Never resolvable: skip the request entirely and display the raw name.
+      return name;
+    }
+    try {
+      this.$.user.path = `/user/${encodeURIComponent(name)}`;
+      return await this.$.user.get();
+    } catch (error) {
+      if (error.status !== 404) {
+        console.warn(`Unexpected error resolving user "${name}":`, error);
+      }
+      return name; // fallback: keep raw username for deleted users
+    }
   },
 
   _resolvedInitiator(initiator, entities, loading) {
