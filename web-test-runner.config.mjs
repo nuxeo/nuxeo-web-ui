@@ -22,6 +22,7 @@ import { createRequire } from 'node:module';
 import { chromeLauncher } from '@web/test-runner-chrome';
 import { defaultReporter } from '@web/test-runner';
 import { fromRollup } from '@web/dev-server-rollup';
+import { setViewportPlugin } from '@web/test-runner-commands/plugins';
 import { nuxeoTestFallbackPlugin } from './scripts/test/unit/web-test-runner-fallback-plugin.mjs';
 
 const require = createRequire(import.meta.url);
@@ -73,6 +74,9 @@ const appSources = [
 export default {
   files: ['test/load-all-tests.js'],
   plugins: [
+    // WEBUI-2314: lets a test drive the viewport, so responsive height caps can be asserted
+    // at the breakpoints they are written for rather than only at whatever size the runner uses.
+    setViewportPlugin(),
     nuxeoTestFallbackPlugin(),
     // Istanbul instrumentation (only when --coverage) — instruments app source files so function bodies
     // get accurate hit/miss counting (unlike V8 which inflates coverage for Polymer declarations).
