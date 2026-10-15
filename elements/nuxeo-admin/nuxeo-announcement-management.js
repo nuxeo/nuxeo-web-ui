@@ -191,9 +191,19 @@ class AnnouncementManagement extends mixinBehaviors([I18nBehavior, NotifyBehavio
         value: false,
       },
 
+      /**
+       * True when the lookup failed for a reason other than a confirmed 404, which leaves `_exists`
+       * unknown. Saving is blocked in that state: the entry may well exist, and POSTing the
+       * reserved id would fail with a 409 instead of updating it.
+       */
+      _loadFailed: {
+        type: Boolean,
+        value: false,
+      },
+
       _busy: {
         type: Boolean,
-        computed: '_computeBusy(_loading, _saving)',
+        computed: '_computeBusy(_loading, _saving, _loadFailed)',
       },
 
       _maxLength: {
@@ -253,8 +263,8 @@ class AnnouncementManagement extends mixinBehaviors([I18nBehavior, NotifyBehavio
     }
   }
 
-  _computeBusy(loading, saving) {
-    return loading || saving;
+  _computeBusy(loading, saving, loadFailed) {
+    return loading || saving || loadFailed;
   }
 
   /**
@@ -267,6 +277,7 @@ class AnnouncementManagement extends mixinBehaviors([I18nBehavior, NotifyBehavio
     }
     const requestId = ++this._requestId;
     this.$.announcement.path = ANNOUNCEMENT_ENTRY_PATH;
+    this._loadFailed = false;
     this._loading = true;
     return this.$.announcement.get().then(
       (response) => {
@@ -288,11 +299,19 @@ class AnnouncementManagement extends mixinBehaviors([I18nBehavior, NotifyBehavio
         if (requestId !== this._requestId) {
           return;
         }
-        this._resetEntry();
         this._loading = false;
-        if (!this._isNotFound(err) && !this._isAbortError(err)) {
-          this._notifyError('announcementManagement.errorLoading', err);
+        if (this._isAbortError(err)) {
+          return;
         }
+        if (this._isNotFound(err)) {
+          // Confirmed absent, so the empty form is the create case.
+          this._resetEntry();
+          return;
+        }
+        // Anything else leaves existence unknown. Keep the form disabled rather than offering a
+        // save that would POST the reserved id over an entry that may already exist.
+        this._loadFailed = true;
+        this._notifyError('announcementManagement.errorLoading', err);
       },
     );
   }
@@ -371,6 +390,11 @@ class AnnouncementManagement extends mixinBehaviors([I18nBehavior, NotifyBehavio
       return this._failMessageValidation(this.i18n('announcementManagement.message.tooLong', ANNOUNCEMENT_MAX_LENGTH));
     }
     this._clearMessageError();
+    if (!this._entry.enabled) {
+      // A disabled announcement is never rendered, and the banner already tolerates an unsafe link
+      // by dropping it. Validating the link here would block the very action that makes it harmless.
+      return true;
+    }
     // The link fields are plain inputs, so let iron-form run their own validators.
     if (!this.$.form.validate()) {
       return false;
