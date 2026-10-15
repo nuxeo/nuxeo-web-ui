@@ -56,5 +56,24 @@ export default class Announcement extends BasePage {
     const button = await this.saveButton;
     await button.waitForVisible();
     await button.click();
+    // The click only starts the POST/PUT. Without waiting for it to settle, a following
+    // assertion or a cleanup hook can run against a form that is still saving, and leave the
+    // test entry behind. `this.el` is resolved through WDIO's shadow-piercing `$`, so
+    // `getProperty` reads `_saving` across `nuxeo-admin`'s shadow boundary.
+    await driver.waitUntil(
+      async () => {
+        try {
+          return (await this.el.getProperty('_saving')) === false;
+        } catch (e) {
+          // Element may be temporarily detached while the form re-renders — keep waiting.
+          return false;
+        }
+      },
+      {
+        timeout: browser.options.waitforTimeout,
+        interval: 250,
+        timeoutMsg: 'Announcement save did not complete',
+      },
+    );
   }
 }

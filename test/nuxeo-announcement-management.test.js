@@ -84,10 +84,40 @@ suite('nuxeo-announcement-management', () => {
       expect(element._loading).to.be.false;
     });
 
-    test('re-enables the form when loading fails', async () => {
+    test('stops loading when the lookup fails', async () => {
       sinon.stub(element.$.announcement, 'get').rejects(new Error('boom'));
       await element.refresh();
       expect(element._loading).to.be.false;
+    });
+
+    test('keeps the form disabled when the lookup fails for a reason other than a 404', async () => {
+      sinon.stub(element.$.announcement, 'get').rejects({ status: 500 });
+      await element.refresh();
+      // Existence is unknown, so saving must not be offered: a POST of the reserved id would
+      // return a 409 rather than update the announcement that may already be there.
+      expect(element._loadFailed).to.be.true;
+      expect(element._busy).to.be.true;
+    });
+
+    test('does not wipe the form when the lookup fails for a reason other than a 404', async () => {
+      sinon.stub(element.$.announcement, 'get').rejects({ status: 500 });
+      element._exists = true;
+      element._entry = { enabled: true, message: 'Keep me', linkUrl: '', linkLabel: '' };
+      await element.refresh();
+      expect(element._exists).to.be.true;
+      expect(element._entry.message).to.equal('Keep me');
+    });
+
+    test('clears the failed state once a later lookup succeeds', async () => {
+      const get = sinon.stub(element.$.announcement, 'get');
+      get.onFirstCall().rejects({ status: 500 });
+      get.onSecondCall().resolves({ id: 'announcement', properties: { enabled: true, message: 'Back' } });
+      await element.refresh();
+      expect(element._busy).to.be.true;
+      await element.refresh();
+      expect(element._loadFailed).to.be.false;
+      expect(element._busy).to.be.false;
+      expect(element._entry.message).to.equal('Back');
     });
 
     test('notifies the user when loading fails', async () => {
@@ -312,6 +342,18 @@ suite('nuxeo-announcement-management', () => {
       await element._save();
       expect(put).to.have.been.calledOnce;
       expect(element._messageInvalid).to.be.false;
+    });
+
+    test('lets the banner be turned off even when the stored link is unsafe', async () => {
+      element._exists = true;
+      // An unsafe link can reach the directory through REST; the banner tolerates it by dropping
+      // the link, so validation must not block the one action that makes it harmless.
+      // eslint-disable-next-line no-script-url
+      element._entry = { enabled: false, message: 'Maintenance', linkUrl: 'javascript:alert(1)', linkLabel: '' };
+      const put = sinon.stub(element.$.announcement, 'put').resolves();
+      await element._save();
+      expect(put).to.have.been.calledOnce;
+      expect(element.notify).to.have.been.calledWith({ message: 'announcementManagement.saved' });
     });
 
     test('lets the banner be turned off even after an over-long message was typed', async () => {
