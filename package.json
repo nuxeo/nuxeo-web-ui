@@ -79,7 +79,7 @@
     "puppeteer": "^24.0.0",
     "replace": "^1.0.1",
     "rollup-plugin-istanbul": "^5.0.0",
-    "sinon": "^21.0.3",
+    "sinon": "^22.1.0",
     "sinon-chai": "^4.0.1",
     "style-loader": "^4.0.0",
     "url-loader": "^4.1.1",
