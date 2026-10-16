@@ -25,6 +25,9 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { ANNOUNCEMENT_ENTRY_PATH, ANNOUNCEMENT_UPDATED_EVENT, sanitizeAnnouncementLink } from './nuxeo-announcement.js';
 
+// Dispatched on `document` by `setI18n` once a locale's messages are in place.
+const I18N_LOCALE_LOADED_EVENT = 'i18n-locale-loaded';
+
 /**
 `nuxeo-announcement-banner`
 
@@ -50,12 +53,18 @@ class AnnouncementBanner extends mixinBehaviors([I18nBehavior], Nuxeo.Element) {
        * so it pushes the whole application down instead of covering the top of the page. The fixed
        * chrome (drawer, logo, menu, toolbars) is viewport positioned and cannot be pushed that way,
        * so the height is also published as --nuxeo-app-top, which that chrome already honours.
-       * The z-index stays below the skip link so the skip link remains visible when focused.
+       *
+       * The z-index only has to lift the banner's shadow over the content that follows it in the
+       * flow. It deliberately sits below every overlay: unlike nuxeo-offline-banner and
+       * nuxeo-expired-session, which claim 1000 because losing the connection or the session has to
+       * be seen even over a dialog, an announcement is informational, so a modal dialog keeps the
+       * screen. It stays below the fixed chrome too, which never overlaps it because that chrome is
+       * anchored at --nuxeo-app-top, and below the skip link so that stays visible when focused.
        */
         :host {
           display: none;
           position: relative;
-          z-index: 999;
+          z-index: 99;
           background: var(--nuxeo-announcement-banner-background, #fee066);
           color: var(--nuxeo-announcement-banner-text, #3a3a54);
           box-shadow: var(--nuxeo-app-header-box-shadow);
@@ -75,6 +84,19 @@ class AnnouncementBanner extends mixinBehaviors([I18nBehavior], Nuxeo.Element) {
           min-height: 2.5rem;
           padding: 0.5rem 1rem;
           text-align: center;
+          /* The height is published as --nuxeo-app-top, which the fixed navigation sits below and
+             which nuxeo-page subtracts from the viewport. A maximum-length message and label wrap
+             into enough lines at 400% zoom to consume the whole viewport, so cap what the banner can
+             claim and scroll the rest. */
+          max-height: 30vh;
+          overflow-y: auto;
+        }
+
+        /* The region only takes a tab stop while it scrolls, so this is the focus ring a keyboard
+           user sees when stepping onto the overflow. */
+        .content:focus-visible {
+          outline: 2px solid var(--nuxeo-announcement-banner-text, #3a3a54);
+          outline-offset: -2px;
         }
 
         iron-icon {
@@ -99,7 +121,7 @@ class AnnouncementBanner extends mixinBehaviors([I18nBehavior], Nuxeo.Element) {
 
       <nuxeo-resource id="announcement" path="[[_path]]"></nuxeo-resource>
 
-      <div class="content" role="status" aria-live="polite">
+      <div id="content" class="content" role="status" aria-live="polite" tabindex$="[[_computeTabIndex(_scrollable)]]">
         <iron-icon icon="icons:info-outline" aria-hidden="true"></iron-icon>
         <span class="message">[[_message]]</span>
         <!-- restamp: removing the link must not leave a hidden anchor behind holding the previous href -->
@@ -148,9 +170,28 @@ class AnnouncementBanner extends mixinBehaviors([I18nBehavior], Nuxeo.Element) {
         value: '',
       },
 
+      /**
+       * The administrator's own label, kept apart from the displayed one so that the built-in
+       * fallback stays a function of the current locale rather than of the locale that happened to
+       * be loaded when the announcement arrived.
+       */
+      _customLinkLabel: {
+        type: String,
+        value: '',
+      },
+
       _linkLabel: {
         type: String,
         value: '',
+      },
+
+      /**
+       * True while the banner's contents are taller than the height it is allowed to occupy, which
+       * is the only state in which the region needs its own tab stop.
+       */
+      _scrollable: {
+        type: Boolean,
+        value: false,
       },
     };
   }
@@ -170,6 +211,12 @@ class AnnouncementBanner extends mixinBehaviors([I18nBehavior], Nuxeo.Element) {
     this._attachedToDom = true;
     this._boundRefresh = () => this.refresh();
     document.addEventListener(ANNOUNCEMENT_UPDATED_EVENT, this._boundRefresh);
+    // Locales load asynchronously, so an announcement can be applied while the fallback label still
+    // resolves to its key. Recompute it here rather than through a computed property bound to
+    // `i18n`: that only invalidates when the translate function changes identity, which it is not
+    // guaranteed to do across locale loads.
+    this._boundLocaleLoaded = () => this._updateLinkLabel();
+    document.addEventListener(I18N_LOCALE_LOADED_EVENT, this._boundLocaleLoaded);
   }
 
   disconnectedCallback() {
@@ -178,6 +225,10 @@ class AnnouncementBanner extends mixinBehaviors([I18nBehavior], Nuxeo.Element) {
     if (this._boundRefresh) {
       document.removeEventListener(ANNOUNCEMENT_UPDATED_EVENT, this._boundRefresh);
       this._boundRefresh = null;
+    }
+    if (this._boundLocaleLoaded) {
+      document.removeEventListener(I18N_LOCALE_LOADED_EVENT, this._boundLocaleLoaded);
+      this._boundLocaleLoaded = null;
     }
     this._disconnectResizeObserver();
     this._opened = false;
@@ -228,7 +279,8 @@ class AnnouncementBanner extends mixinBehaviors([I18nBehavior], Nuxeo.Element) {
     if (!enabled || !message) {
       this._message = '';
       this._linkUrl = '';
-      this._linkLabel = '';
+      this._customLinkLabel = '';
+      this._updateLinkLabel();
       this._opened = false;
       return;
     }
@@ -236,8 +288,22 @@ class AnnouncementBanner extends mixinBehaviors([I18nBehavior], Nuxeo.Element) {
     const linkLabel = typeof entry.linkLabel === 'string' ? entry.linkLabel.trim() : '';
     this._message = message;
     this._linkUrl = linkUrl;
-    this._linkLabel = linkUrl ? linkLabel || this.i18n('announcementBanner.moreDetails') : '';
+    this._customLinkLabel = linkLabel;
+    this._updateLinkLabel();
     this._opened = true;
+  }
+
+  /**
+   * Derives the displayed label from the administrator's own one, falling back to a translated
+   * default. Called again whenever a locale finishes loading, because a response can be applied
+   * before the translations it needs are available.
+   */
+  _updateLinkLabel() {
+    if (!this._linkUrl) {
+      this._linkLabel = '';
+      return;
+    }
+    this._linkLabel = this._customLinkLabel || this.i18n('announcementBanner.moreDetails');
   }
 
   _openedChanged(opened) {
@@ -250,17 +316,28 @@ class AnnouncementBanner extends mixinBehaviors([I18nBehavior], Nuxeo.Element) {
   }
 
   _observeHeight() {
-    this._setAppTop(this.offsetHeight);
+    this._measure();
     if (this._resizeObserver || typeof ResizeObserver === 'undefined') {
       return;
     }
     // The message wraps on narrow viewports, so the space to reserve is only known once rendered.
     this._resizeObserver = new ResizeObserver(() => {
       if (this._opened) {
-        this._setAppTop(this.offsetHeight);
+        this._measure();
       }
     });
     this._resizeObserver.observe(this);
+  }
+
+  _measure() {
+    this._setAppTop(this.offsetHeight);
+    const content = this.$?.content;
+    // Sub-pixel rounding leaves a harmless one-pixel difference on content that in fact fits.
+    this._scrollable = !!content && content.scrollHeight - content.clientHeight > 1;
+  }
+
+  _computeTabIndex(scrollable) {
+    return scrollable ? '0' : null;
   }
 
   _disconnectResizeObserver() {
