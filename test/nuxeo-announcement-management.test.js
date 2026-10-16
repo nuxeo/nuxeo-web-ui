@@ -178,6 +178,20 @@ suite('nuxeo-announcement-management', () => {
       expect(element._messageLength).to.equal(ANNOUNCEMENT_MAX_LENGTH);
     });
 
+    test('does not split a supplementary character when clamping', async () => {
+      // The emoji straddles the limit: naive slicing keeps only its leading surrogate.
+      element.set('_entry.message', `${'a'.repeat(ANNOUNCEMENT_MAX_LENGTH - 1)}🚧b`);
+      await flush();
+      expect(element._entry.message).to.equal('a'.repeat(ANNOUNCEMENT_MAX_LENGTH - 1));
+      expect(element._entry.message).to.not.match(/[\ud800-\udbff]/);
+    });
+
+    test('keeps a supplementary character that fits whole', async () => {
+      element.set('_entry.message', `${'a'.repeat(ANNOUNCEMENT_MAX_LENGTH - 2)}🚧b`);
+      await flush();
+      expect(element._entry.message).to.equal(`${'a'.repeat(ANNOUNCEMENT_MAX_LENGTH - 2)}🚧`);
+    });
+
     test('keeps a message that is exactly at the limit', async () => {
       element.set('_entry.message', 'a'.repeat(ANNOUNCEMENT_MAX_LENGTH));
       await flush();

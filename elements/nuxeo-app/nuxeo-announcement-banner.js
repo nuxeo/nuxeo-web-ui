@@ -91,6 +91,9 @@ class AnnouncementBanner extends mixinBehaviors([I18nBehavior], Nuxeo.Element) {
           color: inherit;
           font-weight: 700;
           text-decoration: underline;
+          /* A label may be one unbroken 255-character run. Wrapping the flex line only moves the whole
+             anchor to the next row, so without this it keeps its content width and overflows. */
+          overflow-wrap: anywhere;
         }
       </style>
 

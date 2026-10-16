@@ -21,9 +21,33 @@ export default class Announcement extends BasePage {
     return this.el.$('#save');
   }
 
+  /**
+   * Blocks until the form has finished its current request. The fields are visible while the initial
+   * GET is still in flight and `_busy` disables them, so reading or clicking a control before this
+   * settles can act on a stale value or on a disabled element.
+   */
+  async waitForIdle() {
+    await driver.waitUntil(
+      async () => {
+        try {
+          return (await this.el.getProperty('_busy')) === false;
+        } catch (e) {
+          // Element may be temporarily detached while the form re-renders — keep waiting.
+          return false;
+        }
+      },
+      {
+        timeout: browser.options.waitforTimeout,
+        interval: 250,
+        timeoutMsg: 'Announcement form did not finish loading',
+      },
+    );
+  }
+
   async setEnabled(enabled) {
     const toggle = await this.enabledToggle;
     await toggle.waitForVisible();
+    await this.waitForIdle();
     const checked = await toggle.getProperty('checked');
     if (checked !== enabled) {
       await toggle.click();
@@ -33,6 +57,7 @@ export default class Announcement extends BasePage {
   async fillMessage(message) {
     const field = await this.messageInput;
     await field.waitForVisible();
+    await this.waitForIdle();
     // `nuxeo-textarea` is a wrapper; the editable control is the native textarea it exposes as
     // `#textarea` — the same selector the functional-test field registry uses for this component.
     const textarea = await field.$('#textarea');
@@ -40,6 +65,7 @@ export default class Announcement extends BasePage {
   }
 
   async fillLink(linkUrl, linkLabel) {
+    await this.waitForIdle();
     if (linkUrl !== undefined) {
       const field = await this.linkUrlInput;
       await field.waitForVisible();

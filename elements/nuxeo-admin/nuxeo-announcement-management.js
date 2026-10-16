@@ -238,12 +238,26 @@ class AnnouncementManagement extends mixinBehaviors([I18nBehavior, NotifyBehavio
     this._requestId = 0;
   }
 
+  /**
+   * Cuts `message` to the directory column's capacity without splitting a surrogate pair. Slicing at
+   * a raw UTF-16 index can land between the two halves of a supplementary character such as an emoji
+   * and leave a lone surrogate, which renders and saves as a replacement character.
+   */
+  _truncate(message) {
+    const cut = message.slice(0, ANNOUNCEMENT_MAX_LENGTH);
+    // An unpaired trailing high surrogate reads back as its own value, since the low half it needs
+    // in order to form a code point was removed by the cut. Drop it rather than store half a glyph.
+    const last = cut.codePointAt(cut.length - 1);
+    const orphaned = last >= 0xd800 && last <= 0xdbff;
+    return orphaned ? cut.slice(0, -1) : cut;
+  }
+
   _messageChanged(message) {
     if (typeof message === 'string' && message.length > ANNOUNCEMENT_MAX_LENGTH) {
       // `nuxeo-textarea` cannot carry a `maxlength`, so mirror here what the attribute does natively
       // on the link fields: the field never holds more than the directory column can store, which
       // also means turning the banner off is never blocked by a message that is too long.
-      this.set('_entry.message', message.slice(0, ANNOUNCEMENT_MAX_LENGTH));
+      this.set('_entry.message', this._truncate(message));
       return;
     }
     this._messageLength = (message || '').length;
