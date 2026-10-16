@@ -23,20 +23,20 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           # Honour an explicit workflow_call branch. Empty on pull_request, which leaves
           # checkout on the PR merge commit instead of the head branch.
           ref: ${{ inputs.branch }}
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
           node-version: 24
           scope: '@nuxeo'
 
       - name: Cache npm dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.npm
           key: npm-${{ runner.os }}-${{ hashFiles('package.json', 'packages/nuxeo-web-ui-ftest/package.json', 'packages/nuxeo-designer-catalog/package.json') }}
