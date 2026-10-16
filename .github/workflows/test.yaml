@@ -35,20 +35,20 @@ jobs:
         with:
           comment_on_pr: false
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           # Honour an explicit workflow_call branch. Empty on pull_request, which leaves
           # checkout on the PR merge commit instead of the head branch.
           ref: ${{ inputs.branch }}
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
           scope: '@nuxeo'
           node-version: 24
 
       - name: Cache npm dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.npm
           key: npm-${{ runner.os }}-${{ hashFiles('package.json', 'packages/nuxeo-web-ui-ftest/package.json', 'packages/nuxeo-designer-catalog/package.json') }}
@@ -118,7 +118,7 @@ jobs:
 
       - name: Checkout the nuxeo-elements repo
         if: ${{ github.event_name == 'pull_request' || startsWith(env.REFERENCE_BRANCH, 'develop-') }}
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: nuxeo/nuxeo-elements
           path: nuxeo-elements
