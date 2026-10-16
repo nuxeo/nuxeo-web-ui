@@ -24,7 +24,7 @@ Delete your branch once its PR is merged or closed: cross-repo CI pairs a Web UI
 Always follow this sequence when making changes:
 
 ```bash
-npm install                  # Install dependencies (Node ≥ 18)
+npm install                  # Install dependencies (Node ≥ 22.13)
 npm run format               # Auto-fix formatting (Prettier → ESLint)
 npm run lint                 # ESLint + Prettier check — must pass
 npm test                     # Web Test Runner unit tests — must pass
