@@ -102,6 +102,55 @@ suite('nuxeo-announcement-banner', () => {
     expect(element._linkLabel).to.equal('announcementBanner.moreDetails');
   });
 
+  test('retranslates the fallback label when the locale loads after the announcement', async () => {
+    await load({ enabled: true, message: 'Maintenance tonight', linkUrl: 'https://status.example.com/42' });
+    expect(element._linkLabel).to.equal('announcementBanner.moreDetails');
+    // Locale files load asynchronously, so translations can land after the response has been applied.
+    element.i18n = (key) => (key === 'announcementBanner.moreDetails' ? 'More details' : key);
+    document.dispatchEvent(new Event('i18n-locale-loaded'));
+    await flush();
+    expect(element._linkLabel).to.equal('More details');
+  });
+
+  test('keeps the administrator label when the locale loads late', async () => {
+    await load({
+      enabled: true,
+      message: 'Maintenance tonight',
+      linkUrl: 'https://status.example.com/42',
+      linkLabel: 'Read more',
+    });
+    element.i18n = (key) => (key === 'announcementBanner.moreDetails' ? 'More details' : key);
+    document.dispatchEvent(new Event('i18n-locale-loaded'));
+    await flush();
+    expect(element._linkLabel).to.equal('Read more');
+  });
+
+  test('stays below modal dialogs so one cannot be covered by a tall banner', async () => {
+    await load({ enabled: true, message: 'Maintenance tonight' });
+    // nuxeo-document-create-popup's dialog sits at 200; the banner may grow to its full allowance,
+    // so it has to lose the overlap rather than cover the dialog's tabs and controls.
+    expect(parseInt(getComputedStyle(element).zIndex, 10)).to.be.below(200);
+  });
+
+  test('bounds its height so the navigation stays on screen', async () => {
+    await load({ enabled: true, message: 'Maintenance tonight' });
+    const style = getComputedStyle(element.$.content);
+    expect(style.overflowY).to.equal('auto');
+    expect(style.maxHeight).to.match(/^\d+(\.\d+)?px$/);
+    expect(parseFloat(style.maxHeight)).to.be.below(window.innerHeight);
+  });
+
+  test('gives the region a tab stop only while it overflows', async () => {
+    await load({ enabled: true, message: 'Maintenance tonight' });
+    expect(element.$.content.hasAttribute('tabindex')).to.be.false;
+    element._scrollable = true;
+    await flush();
+    expect(element.$.content.getAttribute('tabindex')).to.equal('0');
+    element._scrollable = false;
+    await flush();
+    expect(element.$.content.hasAttribute('tabindex')).to.be.false;
+  });
+
   test('drops unsafe links', async () => {
     // eslint-disable-next-line no-script-url
     await load({ enabled: true, message: 'Maintenance tonight', linkUrl: 'javascript:alert(1)' });
