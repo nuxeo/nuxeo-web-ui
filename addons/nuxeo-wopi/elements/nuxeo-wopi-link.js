@@ -53,7 +53,7 @@ Polymer({
   },
 
   _appName() {
-    return this.blob && this.blob.wopi && this.blob.wopi.appName && this.blob.wopi.appName.toLowerCase();
+    return this.blob?.wopi?.appName?.toLowerCase();
   },
 
   _isAvailable() {
@@ -69,7 +69,7 @@ Polymer({
   },
 
   _wopiURL() {
-    const blobInfo = this.blob && this.blob.wopi;
+    const blobInfo = this.blob?.wopi;
     if (!blobInfo) {
       return null;
     }

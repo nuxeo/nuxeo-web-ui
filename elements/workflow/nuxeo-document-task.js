@@ -347,7 +347,7 @@ Polymer({
   },
 
   _hasActorType(actors, type) {
-    return actors && Array.isArray(actors) && actors.findIndex((actor) => actor['entity-type'] === type) >= 0;
+    return actors && Array.isArray(actors) && actors.some((actor) => actor['entity-type'] === type);
   },
 
   _getActorsByType(actors, type) {
