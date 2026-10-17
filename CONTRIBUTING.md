@@ -205,7 +205,8 @@ This starts:
 - The main development branch is the long-lived branch for the current LTS version `lts-2025`
 - Feature branches are created from and merged back to the `lts-2025` branch
 - PRs trigger lint and test workflows automatically
-- PRs tagged `preview` get ephemeral preview environments
+- PRs tagged `preview` publish a combined Nuxeo + Web UI image, which Flux rolls out to the shared
+  per-LTS preview environments (`nuxeo-web-ui-23` / `nuxeo-web-ui-25`) on `build.nuxeo.com`
 
 ## CI/CD
 
