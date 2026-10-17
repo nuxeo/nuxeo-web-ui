@@ -205,7 +205,8 @@ This starts:
 - The main development branch is `maintenance-3.1.x` (the long-lived branch for the current LTS version)
 - Feature branches are created from and merged back to `maintenance-3.1.x`
 - PRs trigger lint and test workflows automatically
-- PRs tagged `preview` get ephemeral preview environments
+- PRs tagged `preview` publish a combined Nuxeo + Web UI image, which Flux rolls out to the shared
+  per-LTS preview environments (`nuxeo-web-ui-23` / `nuxeo-web-ui-25`) on `build.nuxeo.com`
 
 ## CI/CD
 

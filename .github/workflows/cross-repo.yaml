@@ -9,11 +9,6 @@ on:
         description: 'The name of the branch to build.'
         type: string
         required: true
-      sauce_labs:
-        description: 'Run unit tests on Sauce Labs?'
-        default: false
-        type: boolean
-        required: false
       skip_ftests:
         description: 'Skip functional tests?'
         type: boolean
@@ -215,14 +210,7 @@ jobs:
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS}
 
       - name: Web UI Unit tests
-        if: ${{ github.event.inputs.skip_unit_tests == 'false' && github.event.inputs.sauce_labs == 'false' }}
-        run: npm run test
-
-      - name: Web UI Unit tests (Sauce Labs)
-        if: ${{ github.event.inputs.skip_unit_tests == 'false' && github.event.inputs.sauce_labs == 'true' }}
-        env:
-          SAUCE_USERNAME: nuxeo-web-ui
-          SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+        if: ${{ github.event.inputs.skip_unit_tests == 'false' }}
         run: npm run test
 
       - name: Nuxeo package build and Ftests
