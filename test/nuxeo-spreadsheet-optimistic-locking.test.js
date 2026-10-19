@@ -56,6 +56,33 @@ suite('nuxeo-spreadsheet optimistic locking', () => {
     expect(dirtyDocument._error).to.equal(error);
   });
 
+  // The spreadsheet does not go through `nuxeo-resource`, so the only rejection it ever sees is
+  // the `nuxeo` client's: an `Error` whose status lives on the untouched `response`. Asserting the
+  // flat `{ status }` shape alone let a conflict here be reported as a generic save failure.
+  test('marks a conflict reported the way the nuxeo client rejects', () => {
+    const dirtyDocument = { uid: 'doc-1' };
+    const error = Object.assign(new Error('Conflict'), { response: { status: 409 } });
+
+    expect(markSaveError(dirtyDocument, error)).to.be.true;
+    expect(dirtyDocument._error).to.equal(error);
+  });
+
+  test('leaves a non-conflict client rejection as a generic failure', () => {
+    const dirtyDocument = { uid: 'doc-1' };
+    const error = Object.assign(new Error('Internal Server Error'), { response: { status: 500 } });
+
+    expect(markSaveError(dirtyDocument, error)).to.be.false;
+    expect(dirtyDocument._error).to.equal(error);
+  });
+
+  test('treats a rejection with no status at all as a generic failure', () => {
+    const dirtyDocument = { uid: 'doc-1' };
+    const error = new Error('Failed to fetch');
+
+    expect(markSaveError(dirtyDocument, error)).to.be.false;
+    expect(dirtyDocument._error).to.equal(error);
+  });
+
   test('adopts the token the server returned for a saved row', () => {
     const row = { uid: 'doc-1', changeToken: '3-1' };
 

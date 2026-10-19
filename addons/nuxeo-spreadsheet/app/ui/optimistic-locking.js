@@ -45,9 +45,22 @@ export function applySavedChangeToken(document, response) {
   }
 }
 
+/**
+ * Reads the HTTP status off a failed save.
+ *
+ * The spreadsheet calls the REST API through the `nuxeo` client directly rather than through
+ * `nuxeo-resource`, and the two report a failure differently: the client rejects with an `Error`
+ * that carries only the raw `response`, while `nuxeo-resource` unwraps that into an object with a
+ * `status`. Only the first shape ever reaches here, so reading `response` is what makes a 409
+ * recognisable at all; `status` is kept for a caller that already unwrapped it.
+ */
+function saveErrorStatus(error) {
+  return error?.status || error?.response?.status;
+}
+
 export function markSaveError(dirtyDocument, error) {
   dirtyDocument._error = error;
-  return error?.status === CONFLICT_STATUS;
+  return saveErrorStatus(error) === CONFLICT_STATUS;
 }
 
 /**
