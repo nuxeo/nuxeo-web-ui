@@ -78,8 +78,8 @@ class Spreadsheet {
     // get schemas prefixes from columns
     const schemasPrefixes = [];
     for (const c of columns) {
-      const schema = c.field.indexOf(':') > -1 ? c.field.split(':')[0] : undefined;
-      if (schema && schemasPrefixes.indexOf(schema) === -1) {
+      const schema = c.field.includes(':') ? c.field.split(':')[0] : undefined;
+      if (schema && !schemasPrefixes.includes(schema)) {
         schemasPrefixes.push(schema);
       }
     }
@@ -94,7 +94,7 @@ class Spreadsheet {
 
         // get field definition from schemas map
         let field; // <- explicitly set field as undefined in each iteration
-        if (c.field.indexOf(':') > -1) {
+        if (c.field.includes(':')) {
           const [s, f] = c.field.split(':');
           field = schemas[s].fields[f] || undefined;
           field = typeof field === 'string' ? { type: field } : field;
@@ -117,7 +117,7 @@ class Spreadsheet {
                   column.widget.type = field.type === 'string[]' ? 'suggestManyDirectory' : 'suggestOneDirectory';
                   column.widget.properties = { dbl10n: true, directoryName: constraint.parameters.directory };
                   break;
-                case 'userManagerResolver':
+                case 'userManagerResolver': {
                   column.widget.type = field.type === 'string[]' ? 'multipleUsersSuggestion' : 'singleUserSuggestion';
                   let searchType;
                   if (constraint.parameters.includeGroups === 'true' && constraint.parameters.includeUsers === 'true') {
@@ -133,6 +133,7 @@ class Spreadsheet {
                     },
                   };
                   break;
+                }
               }
             }
           }
@@ -178,8 +179,8 @@ class Spreadsheet {
   createCell(row) {
     const cell = {};
     const doc = this.getDataAtRow(row);
-    const permissions = doc && doc.contextParameters && doc.contextParameters.permissions;
-    if (permissions && permissions.indexOf('Write') === -1) {
+    const permissions = doc?.contextParameters?.permissions;
+    if (permissions && !permissions.includes('Write')) {
       cell.readOnly = true;
     }
     return cell;
@@ -283,8 +284,7 @@ class Spreadsheet {
       return;
     }
     if (change !== null) {
-      for (let i = 0; i < change.length; i++) {
-        let [idx, field, oldV, newV] = change[i];
+      for (let [idx, field, oldV, newV] of change) {
         if (oldV === newV) {
           continue;
         }
@@ -349,7 +349,7 @@ class Spreadsheet {
         const formattedLabel = editor.formatter(dataEntry);
         if (!formattedLabel) {
           // resolved || unresolved (when just filled in)
-          const id = (dataEntry.properties && dataEntry.properties.id) || dataEntry;
+          const id = dataEntry.properties?.id || dataEntry;
           const cell = ht.getCellMeta(i, j);
           if (!cell._labels) {
             cell._labels = {};

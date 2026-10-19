@@ -3,18 +3,23 @@
 #
 # Usage:
 #   collect-diff.sh [base-ref]
-#   collect-diff.sh origin/maintenance-3.1.x
+#   collect-diff.sh origin/develop-2023
 set -euo pipefail
 
 BASE="${1:-}"
 
 if [ -z "$BASE" ]; then
-  git fetch --quiet origin lts-2025 maintenance-3.1.x 2>/dev/null || true
+  git fetch --quiet origin develop-2025 develop-2023 lts-2025 maintenance-3.1.x 2>/dev/null || true
   best_base=
   best_ts=0
-  for candidate in origin/lts-2025 origin/maintenance-3.1.x; do
+  # Dev branches first: they are the ticket PR bases. The release branches stay in the list for
+  # hotfix branches, which still target them.
+  for candidate in origin/develop-2025 origin/develop-2023 origin/lts-2025 origin/maintenance-3.1.x; do
     git rev-parse --verify --quiet "$candidate^{commit}" >/dev/null || continue
-    merge_base=$(git merge-base HEAD "$candidate")
+    # The two LTS lines have unrelated histories, so most candidates have no merge base with HEAD.
+    # Left unguarded under `set -e` this exits the whole script, which silently broke auto-detection
+    # entirely: no base, no output, exit 1. A missing merge base just means "not this candidate".
+    merge_base=$(git merge-base HEAD "$candidate" 2>/dev/null) || continue
     ts=$(git show -s --format=%ct "$merge_base")
     if [ "$ts" -gt "$best_ts" ]; then
       best_ts=$ts

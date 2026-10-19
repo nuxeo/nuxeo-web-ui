@@ -106,7 +106,7 @@ Polymer({
       return false;
     }
     const excludedDoctypes = ['Domain', 'SectionRoot', 'TemplateRoot', 'WorkspaceRoot', 'Forum', 'Collections'];
-    const isExcluded = excludedDoctypes.indexOf(this.document.type) !== -1;
+    const isExcluded = excludedDoctypes.includes(this.document.type);
     const isContainer = this.hasFacet(this.document, 'Collection') || this.hasFacet(this.document, 'Folderish');
     const isSyncRootCandidate = isContainer && !this.isTrashed(this.document);
     return !isExcluded && isSyncRootCandidate && !this.synchronizationRoot;
@@ -126,12 +126,12 @@ Polymer({
     if (!this.document || !roots) {
       return;
     }
-    this.synchronized = roots.indexOf(this.document.uid) !== -1;
+    this.synchronized = roots.includes(this.document.uid);
 
     // determine synchronization root (closest synchronized ancestor)
     const breadcrumb = this.document.contextParameters.breadcrumb.entries;
     for (let i = breadcrumb.length - 1; i >= 0; i--) {
-      if (roots.indexOf(breadcrumb[i].parentRef) !== -1) {
+      if (roots.includes(breadcrumb[i].parentRef)) {
         this.synchronizationRoot = breadcrumb[i].parentRef;
         return;
       }
