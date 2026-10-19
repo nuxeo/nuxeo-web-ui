@@ -58,7 +58,7 @@ jobs:
           registry-url: ${{ env.NPM_REPOSITORY }}
           always-auth: true
           scope: '@nuxeo'
-          node-version: 22
+          node-version: 24
 
       - name: Resolve JDK version
         id: jdk

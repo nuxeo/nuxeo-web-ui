@@ -523,7 +523,7 @@ Polymer({
         const listItems = this.view.$.list.items;
         return Array.isArray(listItems) ? listItems : [];
       }
-    } catch (e) {
+    } catch {
       /* Unsafe read during attach/refresh; treat as no rows yet */
       return [];
     }
@@ -1249,12 +1249,16 @@ Polymer({
       const decoded = textarea.value;
       const parsed = JSON.parse(decoded);
       return parsed;
-    } catch (e) {
+    } catch {
+      /* Stored preference values are user data and may predate the current format; fall back to defaults */
       return {};
     }
   },
 
   // Creates a JSON-safe deep copy of an object to avoid mutating cached/shared preference references.
+  // Deliberately not structuredClone (sonar javascript:S7784): the clone is persisted as JSON to the
+  // preference store, and the `{}` fallback below would turn a DataCloneError into a silent write of
+  // empty preferences, discarding the user's saved column layout instead of surfacing an error.
   _deepClone(obj) {
     try {
       return JSON.parse(JSON.stringify(obj || {}));
@@ -1443,7 +1447,7 @@ Polymer({
     try {
       const prefsMap = await this._getAllGlobalPreferencesOnce();
 
-      if (!Object.prototype.hasOwnProperty.call(prefsMap, providerName)) {
+      if (!Object.hasOwn(prefsMap, providerName)) {
         const empty = {};
         __globalPrefsCache.set(cacheKey, empty);
         this.globalPrefs = empty;
@@ -1452,7 +1456,12 @@ Polymer({
       const parsed = this._parsePrefMapValue(prefsMap[providerName]);
       __globalPrefsCache.set(cacheKey, parsed);
       this.globalPrefs = parsed;
-    } catch (e) {
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('Failed to load global results preferences, falling back to defaults', {
+        provider: providerName,
+        error,
+      });
       this.globalPrefs = {};
     }
   },
@@ -1521,13 +1530,12 @@ Polymer({
   // ------------------------------
 
   // Configures the nuxeo-resource instance to PUT doc-level preferences to /path/<docPath>/@preferences.
+  // The path is left unencoded on purpose: the Nuxeo JS client percent-encodes the whole request path
+  // when it builds the URL, so encoding it here would double-encode names holding a space or any other
+  // reserved character (`My Content` -> `My%2520Content`), which the server resolves to a missing document.
   _configureDocPreferencesResource(docPath) {
     const normalized = docPath.startsWith('/') ? docPath.substring(1) : docPath;
-    const encodedPath = normalized
-      .split('/')
-      .map((segment) => encodeURIComponent(segment))
-      .join('/');
-    this.$.preferences.path = `/path/${encodedPath}/@preferences`;
+    this.$.preferences.path = `/path/${normalized}/@preferences`;
     this.$.preferences.params = null;
     this.$.preferences.enrichers = {};
     this.$.preferences.headers = { accept: 'application/json' };
@@ -1608,7 +1616,8 @@ Polymer({
 
         const parsed = JSON.parse(decoded);
         return parsed;
-      } catch (e) {
+      } catch {
+        /* Stored preference values are user data and may predate the current format; fall back to defaults */
         return null;
       }
     }

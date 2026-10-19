@@ -51,6 +51,7 @@ import './nuxeo-app/nuxeo-page.js';
 import './nuxeo-app/nuxeo-page-item.js';
 import './nuxeo-app/nuxeo-offline-banner.js';
 import './nuxeo-app/nuxeo-expired-session.js';
+import './nuxeo-app/nuxeo-announcement-banner.js';
 import './nuxeo-document-creation/nuxeo-document-creation-behavior.js';
 import { NuxeoAppDrawerResizeBehavior } from './behaviors/nuxeo-app-drawer-resize-behavior.js';
 import { NuxeoAnonymousBehavior } from './behaviors/nuxeo-anonymous-behavior.js';
@@ -454,6 +455,11 @@ Polymer({
     <header role="banner">
       <a href="#mainContent" id="skipLink" class="skip-link">[[i18n('app.skiptoMainContent.message')]]</a>
       <nuxeo-suggester id="suggester"></nuxeo-suggester>
+
+      <!-- WEBUI-1786: administrator announcement. It is laid out in the flow, as the first thing in
+           the header, so it pushes the application down, and publishes its height as
+           --nuxeo-app-top so the viewport positioned chrome moves down with it. -->
+      <nuxeo-announcement-banner id="announcementBanner" user="[[currentUser]]"></nuxeo-announcement-banner>
 
       <nuxeo-offline-banner message="[[i18n('app.offlineBanner.message')]]"></nuxeo-offline-banner>
 
@@ -1257,8 +1263,8 @@ Polymer({
     this.show('diff');
     const params = [id1, id2];
     // let's keep current context only if it includes the ids already in the params
-    if (this.$.diff.docIds && params.every((el) => this.$.diff.docIds.indexOf(el) > -1)) {
-      const otherIds = this.$.diff.docIds.find((id) => params.indexOf(id) === -1);
+    if (this.$.diff.docIds && params.every((el) => this.$.diff.docIds.includes(el))) {
+      const otherIds = this.$.diff.docIds.find((id) => !params.includes(id));
       this.$.diff.docIds = null;
       this.$.diff.docIds = params.concat(otherIds).filter(Boolean);
     } else {
@@ -1272,61 +1278,81 @@ Polymer({
     this.$.diff.docIds = e.detail.documents.map((doc) => doc.uid);
   },
 
+  _browseTitle() {
+    const title = [];
+    if (this.currentDocument && this.currentDocument.title) {
+      // The repository root has no dc:title, so the server returns its uid as the title.
+      // Mirror the breadcrumb/clipboard behavior and show the localized root label instead
+      // of a raw UUID, so the browser tab title stays meaningful and consistent for
+      // screen-reader users navigating between tabs (WEBUI-1876).
+      title.push(this.currentDocument.type === 'Root' ? this.i18n('browse.root') : this.currentDocument.title);
+      if (this.currentDocument.type === 'Collections') {
+        title.push(this.i18n('app.title.collections'));
+      } else if (this.hasFacet(this.currentDocument, 'Collection')) {
+        title.push(
+          this.currentDocument.type === 'Favorites'
+            ? this.i18n('app.title.favorites')
+            : this.i18n('app.title.collection'),
+        );
+      }
+    }
+    return title;
+  },
+
+  _searchTitle() {
+    const title = [];
+    if (this.searchForm) {
+      if (this.searchForm.selectedSearch && this.searchForm.selectedSearch.title) {
+        title.push(this.searchForm.selectedSearch.title);
+      } else if (this.searchForm.searchName) {
+        title.push(this.i18n(`app.title.search.${this.searchForm.searchName}`));
+      }
+    }
+    title.push(this.i18n('app.title.search'));
+    return title;
+  },
+
+  _tasksTitle() {
+    if (this.currentTask) {
+      return [this.i18n(this.currentTask.workflowModelName), this.i18n(this.currentTask.name)];
+    }
+    return [this.i18n(`app.title.${this.page}`)];
+  },
+
+  _adminTitle() {
+    const title = [];
+    if (this.selectedAdminTab) {
+      title.push(this.i18n(`app.title.admin.${this.selectedAdminTab}`));
+    }
+    title.push(this.i18n(`app.title.${this.page}`));
+    return title;
+  },
+
   _updateTitle() {
     if (!this.page) return;
-    const title = [];
+    let title;
     switch (this.page) {
       case 'browse':
-        if (this.currentDocument && this.currentDocument.title) {
-          // The repository root has no dc:title, so the server returns its uid as the title.
-          // Mirror the breadcrumb/clipboard behavior and show the localized root label instead
-          // of a raw UUID, so the browser tab title stays meaningful and consistent for
-          // screen-reader users navigating between tabs (WEBUI-1876).
-          title.push(this.currentDocument.type === 'Root' ? this.i18n('browse.root') : this.currentDocument.title);
-          if (this.currentDocument.type === 'Collections') {
-            title.push(this.i18n('app.title.collections'));
-          } else if (this.hasFacet(this.currentDocument, 'Collection')) {
-            if (this.currentDocument.type === 'Favorites') {
-              title.push(this.i18n('app.title.favorites'));
-            } else {
-              title.push(this.i18n('app.title.collection'));
-            }
-          }
-        }
+        title = this._browseTitle();
         break;
-
       case 'search':
-        if (this.searchForm) {
-          if (this.searchForm.selectedSearch && this.searchForm.selectedSearch.title) {
-            title.push(this.searchForm.selectedSearch.title);
-          } else if (this.searchForm.searchName) {
-            title.push(this.i18n(`app.title.search.${this.searchForm.searchName}`));
-          }
-        }
-        title.push(this.i18n('app.title.search'));
+        title = this._searchTitle();
         break;
-
       case 'tasks':
-        if (this.currentTask) {
-          title.push(this.i18n(this.currentTask.workflowModelName));
-          title.push(this.i18n(this.currentTask.name));
-        } else {
-          title.push(this.i18n(`app.title.${this.page}`));
-        }
+        title = this._tasksTitle();
         break;
-
       case 'admin':
-        if (this.selectedAdminTab) {
-          title.push(this.i18n(`app.title.admin.${this.selectedAdminTab}`));
-        }
-        title.push(this.i18n(`app.title.${this.page}`));
+        title = this._adminTitle();
         break;
-
       default:
-        title.push(this.i18n(`app.title.${this.page}`));
+        title = [this.i18n(`app.title.${this.page}`)];
     }
+    // WEBUI-1119: `org.nuxeo.ecm.product.name` may be configured empty, in which case index.jsp
+    // renders `product-name=""` and that empty attribute overrides the 'Nuxeo' default. Joining a
+    // blank segment left the browser tab title with a dangling " - ", so drop blank segments
+    // instead of appending a separator with nothing after it.
     title.push(this.productName);
-    document.title = title.join(' - ');
+    document.title = title.filter((segment) => segment && String(segment).trim()).join(' - ');
   },
 
   _baseUrlChanged() {
@@ -1914,13 +1940,13 @@ Polymer({
         toast.__state = { dismissed: false, aborted: true };
         callback();
         // remove the toast if the action was aborted
-        toast.parentNode.removeChild(toast);
+        toast.remove();
       } else if (e.detail.reason === 'dismiss') {
         const state = toast.__state;
         if (state && state.ended) {
           toast.__state = null;
           // remove the toast if the action has ended
-          toast.parentNode.removeChild(toast);
+          toast.remove();
         } else {
           // do not remove the toast, otherwise it will show up before the end of the task
           toast.__state.dismissed = true;
