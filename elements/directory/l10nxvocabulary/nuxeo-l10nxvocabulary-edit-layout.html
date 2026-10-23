@@ -42,8 +42,12 @@ limitations under the License.
           display: inline-block;
           vertical-align: text-top;
           margin-left: 1.3em;
-          word-break: break-word;
+          /* `anywhere`, not `break-word`: only `anywhere` feeds break opportunities into
+             min-content sizing, which an inline-block needs to shrink around a long unbroken
+             value. It is what the deprecated `word-break: break-word` resolved to here. */
+          overflow-wrap: anywhere;
         }
+      ;
       }
 
       .node-name {
@@ -51,7 +55,8 @@ limitations under the License.
         display: inline-block;
         vertical-align: text-top;
         margin-left: 1.3em;
-        word-break: break-word;
+        /* see --nuxeo-tree-node-more-theme above: inline-block needs `anywhere`, not `break-word` */
+        overflow-wrap: anywhere;
       }
       iron-icon {
         opacity: 0.3;
@@ -65,7 +70,7 @@ limitations under the License.
       }
     </style>
 
-    <div role="widget">
+    <div data-widget>
       <span class="label" id="parent-label">[[i18n('vocabularyManagement.edit.parent')]]</span>
       <paper-button id="selectParent" class="text" on-tap="_toggleParent" aria-labelledby="parent-label selectParent"
         >[[_parentLabel]]</paper-button
@@ -95,7 +100,7 @@ limitations under the License.
     </div>
 
     <nuxeo-input
-      role="widget"
+      data-widget
       label="[[i18n('vocabularyManagement.edit.id')]]"
       name="id"
       value="{{entry.properties.id::change}}"
@@ -105,7 +110,7 @@ limitations under the License.
     </nuxeo-input>
 
     <nuxeo-input
-      role="widget"
+      data-widget
       label="[[i18n('vocabularyManagement.edit.label_en')]]"
       name="label"
       value="{{entry.properties.label_en::change}}"
@@ -113,14 +118,14 @@ limitations under the License.
     </nuxeo-input>
 
     <nuxeo-input
-      role="widget"
+      data-widget
       label="[[i18n('vocabularyManagement.edit.label_fr')]]"
       name="label"
       value="{{entry.properties.label_fr::change}}"
     >
     </nuxeo-input>
 
-    <div role="widget">
+    <div data-widget>
       <span class="label" id="obsolete-label">[[i18n('vocabularyManagement.edit.obsolete')]]</span>
       <paper-toggle-button
         checked$="[[_isObsolete(entry.properties.obsolete)]]"
@@ -132,7 +137,7 @@ limitations under the License.
     </div>
 
     <nuxeo-input
-      role="widget"
+      data-widget
       label="[[i18n('vocabularyManagement.edit.ordering')]]"
       name="ordering"
       type="number"
@@ -218,7 +223,7 @@ limitations under the License.
                 return !isNotLeaf && node.root !== true;
               }.bind(this),
             };
-            this.$.tree.open.apply(this.$.tree, ['root']);
+            this.$.tree.open('root');
           }
         }
       },
