@@ -24,13 +24,13 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-task328d-layout">
   <template>
-    <div role="widget">
+    <div data-widget>
       <span class="label" id="initiatorComment-label">[[i18n('wf.parallelDocumentReview.initiatorComment')]]</span>
       <div role="definition" aria-labelledby="initiatorComment-label">[[task.variables.initiatorComment]]</div>
     </div>
 
     <nuxeo-textarea
-      role="widget"
+      data-widget
       label="[[i18n('wf.parallelDocumentReview.comment')]]"
       value="{{task.variables.comment}}"
       always-float-label

@@ -28,7 +28,7 @@ export function parseParams() {
   for (const param of params) {
     // eslint-disable-next-line prefer-const
     let [k, v] = param.split('=');
-    v = v.replace(/\+/g, ' ');
+    v = v.replaceAll('+', ' ');
     parameters[k] = decodeURIComponent(v);
   }
   return parameters;
@@ -39,7 +39,7 @@ export function b64DecodeUnicode(str) {
   return decodeURIComponent(
     atob(str)
       .split('')
-      .map((c) => `%${`00${c.charCodeAt(0).toString(16)}`.slice(-2)}`)
+      .map((c) => `%${`00${c.codePointAt(0).toString(16)}`.slice(-2)}`)
       .join(''),
   );
 }
@@ -54,7 +54,9 @@ export function assign(obj, prop, value) {
 
   if (prop.length > 1) {
     const e = prop.shift();
-    assign((obj[e] = Object.prototype.toString.call(obj[e]) === '[object Object]' ? obj[e] : {}), prop, value);
+    const child = Object.prototype.toString.call(obj[e]) === '[object Object]' ? obj[e] : {};
+    obj[e] = child;
+    assign(child, prop, value);
   } else {
     obj[prop[0]] = value;
   }
@@ -67,7 +69,9 @@ export function hasProp(obj, prop) {
 
   if (prop.length > 1) {
     const e = prop.shift();
-    return hasProp((obj[e] = Object.prototype.toString.call(obj[e]) === '[object Object]' ? obj[e] : {}), prop);
+    const child = Object.prototype.toString.call(obj[e]) === '[object Object]' ? obj[e] : {};
+    obj[e] = child;
+    return hasProp(child, prop);
   }
   // eslint-disable-next-line no-prototype-builtins
   return obj.hasOwnProperty(prop[0]);

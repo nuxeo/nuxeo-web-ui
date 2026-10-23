@@ -25,18 +25,18 @@ limitations under the License.
   <template>
     <style include="nuxeo-styles"></style>
 
-    <div role="widget">
+    <div data-widget>
       <span class="label" id="title-label">[[i18n('label.dublincore.title')]]</span>
       <div role="definition" aria-labelledby="title-label" name="title">[[document.properties.dc:title]]</div>
     </div>
 
-    <div role="widget" hidden$="[[!document.properties.dc:description]]">
+    <div data-widget hidden$="[[!document.properties.dc:description]]">
       <span class="label" id="description-label">[[i18n('label.dublincore.description')]]</span>
       <!-- prettier-ignore -->
       <div role="definition" aria-labelledby="description-label" name="description" class="multiline">[[document.properties.dc:description]]</div>
     </div>
 
-    <div role="widget" hidden$="[[!document.properties.dc:nature]]">
+    <div data-widget hidden$="[[!document.properties.dc:nature]]">
       <span class="label" id="nature-label">[[i18n('label.dublincore.nature')]]</span>
       <div role="definition" aria-labelledby="nature-label" name="nature">
         [[formatDirectory(document.properties.dc:nature)]]
@@ -44,7 +44,7 @@ limitations under the License.
     </div>
 
     <nuxeo-directory-suggestion
-      role="widget"
+      data-widget
       name="subjects"
       label="[[i18n('label.dublincore.subjects')]]"
       directory-name="l10nsubjects"
@@ -56,14 +56,14 @@ limitations under the License.
     >
     </nuxeo-directory-suggestion>
 
-    <div role="widget" hidden$="[[!document.properties.dc:coverage]]">
+    <div data-widget hidden$="[[!document.properties.dc:coverage]]">
       <span class="label" id="coverage-label">[[i18n('label.dublincore.coverage')]]</span>
       <div role="definition" aria-labelledby="coverage-label" name="coverage">
         [[formatDirectory(document.properties.dc:coverage)]]
       </div>
     </div>
 
-    <div role="widget" hidden$="[[!document.properties.dc:expired]]">
+    <div data-widget hidden$="[[!document.properties.dc:expired]]">
       <span class="label" id="expire-label">[[i18n('label.dublincore.expire')]]</span>
       <nuxeo-date
         role="definition"

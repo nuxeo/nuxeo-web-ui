@@ -23,17 +23,17 @@ limitations under the License.
   <template>
     <style include="nuxeo-styles"></style>
 
-    <div role="widget">
+    <div data-widget>
       <span class="label" id="subject-label">[[i18n('label.mail.message.subject')]]</span>
       <div role="definition" aria-labelledby="subject-label" name="title">[[document.properties.dc:title]]</div>
     </div>
 
-    <div role="widget">
+    <div data-widget>
       <span class="label" id="sender-label">[[i18n('label.mail.message.sender')]]</span>
       <div role="definition" aria-labelledby="sender-label" name="title">[[document.properties.mail:sender]]</div>
     </div>
 
-    <div role="widget">
+    <div data-widget>
       <span class="label" id="sending_date-label">[[i18n('label.mail.message.sending_date')]]</span>
       <nuxeo-date
         role="definition"
@@ -42,7 +42,7 @@ limitations under the License.
       ></nuxeo-date>
     </div>
 
-    <div role="widget">
+    <div data-widget>
       <span class="label" id="importing_date-label">[[i18n('label.mail.message.importing_date')]]</span>
       <nuxeo-date
         role="definition"
@@ -51,7 +51,7 @@ limitations under the License.
       ></nuxeo-date>
     </div>
 
-    <div role="widget">
+    <div data-widget>
       <span class="label" id="recipients-label">[[i18n('label.mail.message.recipients')]]</span>
       <nuxeo-tags
         role="definition"
@@ -60,7 +60,7 @@ limitations under the License.
       ></nuxeo-tags>
     </div>
 
-    <div role="widget" hidden$="[[!document.properties.mail:cc_recipients.length]]">
+    <div data-widget hidden$="[[!document.properties.mail:cc_recipients.length]]">
       <span class="label" id="cc_recipients-label">[[i18n('label.mail.message.cc_recipients')]]</span>
       <nuxeo-tags
         role="definition"
@@ -69,7 +69,7 @@ limitations under the License.
       ></nuxeo-tags>
     </div>
 
-    <nuxeo-document-attachments role="widget" document="[[document]]"></nuxeo-document-attachments>
+    <nuxeo-document-attachments data-widget document="[[document]]"></nuxeo-document-attachments>
   </template>
   <script>
     Polymer({

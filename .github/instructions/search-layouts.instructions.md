@@ -33,9 +33,9 @@ elements/search/<name>/
     <style include="nuxeo-styles"></style>
 
     <!-- Widgets bound to params and aggregations -->
-    <nuxeo-input role="widget" value="{{searchTerm}}" label="[[i18n('...')]]"></nuxeo-input>
+    <nuxeo-input data-widget value="{{searchTerm}}" label="[[i18n('...')]]"></nuxeo-input>
 
-    <div role="widget">
+    <div data-widget>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.dc_modified_agg]]"
         value="{{params.dc_modified_agg}}"
@@ -92,7 +92,7 @@ a `<label>` with no `for` and no nested control is reported as SonarCloud `Web:S
 screen-reader user no relationship to the control beside it.
 
 ```html
-<div role="widget">
+<div data-widget>
   <span class="label" id="authors-label">[[i18n('defaultSearch.authors')]]</span>
   <nuxeo-dropdown-aggregation
     placeholder="[[i18n('defaultSearch.authors.placeholder')]]"
@@ -111,7 +111,7 @@ to give the inner input an accessible name.
 ## Key Patterns
 
 - **Aggregation widgets**: Bind `data` to `[[aggregations.<agg_name>]]` and `value` to `{{params.<agg_name>}}`
-- **Widget role**: Use `role="widget"` on form elements for layout discovery
+- **Widget marker**: Use `data-widget` on form elements for layout discovery. The older `role="widget"` marker is still supported but is not a valid ARIA role, so new layouts must use `data-widget` (see WEBUI-2229)
 - **i18n keys**: Search-specific keys follow `<searchName>Search.<field>` pattern (e.g., `defaultSearch.fullText`)
 - **Page provider**: Results use `<nuxeo-results>` bound to `nxProvider` with `<nuxeo-data-grid>` and `<nuxeo-data-table>` display modes
 - **Sort options**: Pass `sort-options` to `<nuxeo-results>` for sortable columns
@@ -127,7 +127,7 @@ to give the inner input an accessible name.
 
 - Follow naming: `nuxeo-<name>-search-form.html` and `nuxeo-<name>-search-results.html`
 - Always include `Nuxeo.LayoutBehavior`
-- Use `role="widget"` on all search form fields
+- Use `data-widget` on all search form fields
 - Use two-way binding (`{{...}}`) for `params` and `searchTerm` in forms
 - Use one-way binding (`[[...]]`) for `aggregations` data
 - Results must provide both grid and list display modes via `<nuxeo-data-grid>` and `<nuxeo-data-table>`

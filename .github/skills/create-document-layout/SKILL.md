@@ -67,7 +67,7 @@ limitations under the License.
         @apply --paper-card;
       }
     </style>
-    <nuxeo-document-viewer role="widget" document="[[document]]"></nuxeo-document-viewer>
+    <nuxeo-document-viewer data-widget document="[[document]]"></nuxeo-document-viewer>
   </template>
 
   <script>
@@ -99,19 +99,19 @@ The edit layout provides form widgets for editing document properties.
     </style>
 
     <nuxeo-input
-      role="widget"
+      data-widget
       label="[[i18n('label.dublincore.title')]]"
       value="{{document.properties.dc:title}}"
     ></nuxeo-input>
 
     <nuxeo-textarea
-      role="widget"
+      data-widget
       label="[[i18n('label.dublincore.description')]]"
       value="{{document.properties.dc:description}}"
     ></nuxeo-textarea>
 
     <nuxeo-directory-suggestion
-      role="widget"
+      data-widget
       label="[[i18n('label.dublincore.nature')]]"
       directory-name="nature"
       value="{{document.properties.dc:nature}}"
@@ -119,7 +119,7 @@ The edit layout provides form widgets for editing document properties.
     ></nuxeo-directory-suggestion>
 
     <nuxeo-tag-suggestion
-      role="widget"
+      data-widget
       label="[[i18n('label.dublincore.tags')]]"
       value="{{document.properties.nxtag:tags}}"
       allow-new-tags
@@ -155,18 +155,18 @@ SonarCloud `Web:S6853` finding and a real screen-reader defect.
   <template>
     <style include="nuxeo-styles"></style>
 
-    <div role="widget">
+    <div data-widget>
       <span class="label" id="title-label">[[i18n('label.dublincore.title')]]</span>
       <div role="definition" aria-labelledby="title-label" name="title">[[document.properties.dc:title]]</div>
     </div>
 
-    <div role="widget" hidden$="[[!document.properties.dc:description]]">
+    <div data-widget hidden$="[[!document.properties.dc:description]]">
       <span class="label" id="description-label">[[i18n('label.dublincore.description')]]</span>
       <!-- prettier-ignore -->
       <div role="definition" aria-labelledby="description-label" name="description" class="multiline">[[document.properties.dc:description]]</div>
     </div>
 
-    <div role="widget">
+    <div data-widget>
       <span class="label" id="created-label">[[i18n('label.dublincore.created')]]</span>
       <nuxeo-date
         role="definition"
@@ -176,7 +176,7 @@ SonarCloud `Web:S6853` finding and a real screen-reader defect.
       ></nuxeo-date>
     </div>
 
-    <div role="widget">
+    <div data-widget>
       <span class="label" id="contributors-label">[[i18n('label.dublincore.contributors')]]</span>
       <div role="definition" aria-labelledby="contributors-label" name="contributors">
         [[formatContributors(document.properties.dc:contributors)]]
@@ -213,14 +213,14 @@ The create layout provides a form for creating new documents of this type.
     </style>
 
     <nuxeo-input
-      role="widget"
+      data-widget
       label="[[i18n('label.dublincore.title')]]"
       value="{{document.properties.dc:title}}"
       required
     ></nuxeo-input>
 
     <nuxeo-textarea
-      role="widget"
+      data-widget
       label="[[i18n('label.dublincore.description')]]"
       value="{{document.properties.dc:description}}"
     ></nuxeo-textarea>
@@ -247,7 +247,7 @@ The create layout provides a form for creating new documents of this type.
 - Always include the **Hyland license header** as an HTML comment
 - Always use `Nuxeo.LayoutBehavior` (it includes I18nBehavior)
 - The `document` property with `@doctype` JSDoc tag is required
-- Use `role="widget"` on form widgets for layout rendering
+- Use `data-widget` on form widgets for layout rendering (the older `role="widget"` marker is still supported but is not a valid ARIA role, so new layouts must use `data-widget` — see WEBUI-2229)
 - Data binding: `[[…]]` for one-way (view/metadata), `{{…}}` for two-way (edit/create)
 - Never hand-roll a `<label>`: pass `label="…"` to widgets that accept one, otherwise use
   `<span class="label" id="…">` with `role="definition"` + `aria-labelledby` on the value element.

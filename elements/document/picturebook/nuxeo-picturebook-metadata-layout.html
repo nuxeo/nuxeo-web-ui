@@ -24,12 +24,12 @@ limitations under the License.
 <dom-module id="nuxeo-picturebook-metadata-layout">
   <template>
     <style include="nuxeo-styles"></style>
-    <div role="widget">
+    <div data-widget>
       <span class="label" id="title-label">Title</span>
       <div role="definition" aria-labelledby="title-label" name="title">[[document.properties.dc:title]]</div>
     </div>
 
-    <div role="widget">
+    <div data-widget>
       <span class="label" id="description-label">Description</span>
       <div role="definition" aria-labelledby="description-label" name="description">
         [[document.properties.dc:description]]
