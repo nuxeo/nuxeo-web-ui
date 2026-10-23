@@ -42,10 +42,6 @@ jobs:
           echo "Base branch: ${{ github.base_ref }}"
           echo "Ref: ${{ github.ref }}"
 
-      - uses: catchpoint/workflow-telemetry-action@94c3c3d9567a0205de6da68a76c428ce4e769af1 # v2
-        with:
-          comment_on_pr: false
-
       - name: Checkout code
         uses: actions/checkout@v6
         with:
@@ -99,7 +95,14 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y imagemagick poppler-utils libreoffice ffmpeg libwpd-tools ghostscript exiftool
-          sudo sed -i '/disable ghostscript format types/,+6d' /etc/ImageMagick-6/policy.xml
+          # ImageMagick 6 (Ubuntu 24.04) ships a policy that disables the Ghostscript formats
+          # (PS, EPS, PDF, XPS) the PDF/picture conversions need, so that block is removed.
+          # ImageMagick 7 (Ubuntu 26.04, installed since the runner image moved on 2026-10-19)
+          # keeps its policy in /etc/ImageMagick-7 and does not restrict those formats at all,
+          # so there is nothing to remove there.
+          if [ -f /etc/ImageMagick-6/policy.xml ]; then
+            sudo sed -i '/disable ghostscript format types/,+6d' /etc/ImageMagick-6/policy.xml
+          fi
           npm install -g --ignore-scripts bower@1.8.14 gulp-cli@3.1.0
 
       # Inlined rather than using ui-team-gh-actions/get-branch: that action interpolates its
