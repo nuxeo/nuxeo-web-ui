@@ -43,13 +43,13 @@ jobs:
           echo "Ref: ${{ github.ref }}"
 
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           # Honour an explicit workflow_call branch. Empty on pull_request, which leaves
           # checkout on the PR merge commit instead of the head branch.
           ref: ${{ inputs.branch }}
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           registry-url: ${{ env.NPM_REPOSITORY }}
           always-auth: true
@@ -74,7 +74,7 @@ jobs:
           esac
 
       - name: Setup Maven build
-        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@314c39e8c2e913db2dc63a31670612ccb2b6e569 # v0.10.4
+        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@512ea2928c9cfcb864c6cdaaf63c68ff45087497 # v0.26.1
         with:
           java-version: ${{ steps.jdk.outputs.version }}
 
@@ -82,7 +82,7 @@ jobs:
         run: rm -rf ~/.m2/repository/org/nuxeo
 
       - name: Cache npm dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.npm
           key: npm-${{ runner.os }}-${{ hashFiles('package.json', 'packages/nuxeo-web-ui-ftest/package.json', 'packages/nuxeo-designer-catalog/package.json') }}
@@ -142,7 +142,7 @@ jobs:
           popd
 
       - name: Checkout the nuxeo-elements repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: nuxeo/nuxeo-elements
           path: nuxeo-elements
@@ -175,7 +175,7 @@ jobs:
           RUN_ALL: false
           BAIL: 0
           HEADLESS: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'video') && 'false' || 'true' }}
-        uses: Alfresco/alfresco-build-tools/.github/actions/xvfb-record@157729461e042ea6cdcca867bed794bded85b303 # v17.6.2
+        uses: Alfresco/alfresco-build-tools/.github/actions/xvfb-record@5d33aec6cf9ffd70982c404ebf5ebadedd7405d9 # v19.5.0
         with:
           test_command: mvn -ntp install -Pftest -DskipInstall
           timeout_minutes: 120
