@@ -484,7 +484,7 @@ Polymer({
   },
 
   _sanitizeSearchTerm(term) {
-    return (term || '').replace(/"/g, encodeURIComponent('"')).trim();
+    return (term || '').replaceAll('"', encodeURIComponent('"')).trim();
   },
 
   _canShowResults() {

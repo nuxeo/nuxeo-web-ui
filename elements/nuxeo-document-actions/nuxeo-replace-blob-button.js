@@ -223,7 +223,7 @@ Polymer({
       let xpathArray = xpath.split(splitter);
 
       for (let i = 0; i < xpathArray.length; i++) {
-        if (!Number.isNaN(parseInt(xpathArray[i], 10))) {
+        if (!Number.isNaN(Number.parseInt(xpathArray[i], 10))) {
           xpathArray[i] = star;
         }
         transformedArray.push(xpathArray[i]);

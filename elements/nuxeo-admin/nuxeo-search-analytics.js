@@ -291,13 +291,7 @@ Polymer({
         if (!agg[i] || !agg[i].length) {
           return 0;
         }
-        // TODO: use Array.reduce once prototype.js is removed!
-        // return agg[i].reduce(function(a, b) { return a + b; });
-        let sum = 0;
-        agg[i].forEach((v) => {
-          sum += v;
-        });
-        return sum;
+        return agg[i].reduce((a, b) => a + b, 0);
       }),
     ];
   },

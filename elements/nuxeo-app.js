@@ -51,6 +51,7 @@ import './nuxeo-app/nuxeo-page.js';
 import './nuxeo-app/nuxeo-page-item.js';
 import './nuxeo-app/nuxeo-offline-banner.js';
 import './nuxeo-app/nuxeo-expired-session.js';
+import './nuxeo-app/nuxeo-announcement-banner.js';
 import './nuxeo-document-creation/nuxeo-document-creation-behavior.js';
 import { NuxeoAppDrawerResizeBehavior } from './behaviors/nuxeo-app-drawer-resize-behavior.js';
 import { NuxeoAnonymousBehavior } from './behaviors/nuxeo-anonymous-behavior.js';
@@ -178,8 +179,8 @@ Polymer({
         top: var(--nuxeo-app-top);
         z-index: 102;
         box-sizing: border-box;
+        outline: none;
         background-color: var(--nuxeo-sidebar-background);
-        display: block;
       }
 
       :host([dir='ltr']) #logo {
@@ -198,61 +199,36 @@ Polymer({
         left: auto;
       }
 
-      /* NXENG-527: Single scrollable container for home shortcut and menu below the pinned logo.
-         Prevents scrollbar overlap by keeping it within the column boundary. */
-      #menuContainer {
-        position: fixed;
-        top: calc(var(--nuxeo-app-top, 0px) + var(--nuxeo-drawer-header-height, 53px));
-        height: calc(
-          100vh - var(--nuxeo-drawer-header-height, 53px) - (var(--nuxeo-app-top, 0px) + var(--nuxeo-app-bottom, 0px))
-        );
-        width: var(--nuxeo-sidebar-width);
-        z-index: 100;
-        box-sizing: border-box;
-        overflow-x: hidden;
-        overflow-y: auto;
-        background-color: var(--nuxeo-sidebar-background);
-        display: flex;
-        flex-direction: column;
-      }
-
-      :host([dir='ltr']) #menuContainer {
-        left: 0;
-        right: auto;
-      }
-
-      :host([dir='rtl']) #menuContainer {
-        right: 0;
-        left: auto;
-      }
-
-      /* NXENG-527: home shortcut positioned outside paper-listbox (navigation only, no drawer)
-         but inside scroll area with other icons. */
-      .home-link {
-        position: relative;
-        width: var(--nuxeo-sidebar-width);
-        flex-shrink: 0;
-        margin-top: 43px;
-        background-color: var(--nuxeo-sidebar-background);
-        display: block;
-        text-decoration: none;
-      }
-
       /* menu */
       #menu {
         @apply --nuxeo-sidebar;
-        position: relative;
+        position: fixed;
         width: var(--nuxeo-sidebar-width);
+        height: calc(100vh - 54px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
         z-index: 100;
         padding: 0;
+        padding-top: 54px;
+        /* Icons are column-width, so a vertical scrollbar makes them overflow sideways. */
+        overflow-x: hidden;
+        overflow-y: auto;
         display: flex;
         flex-direction: column;
-        flex: 1 1 auto;
-        min-height: 0;
       }
 
-      #menu nuxeo-menu-icon {
-        flex-shrink: 0;
+      #logo:hover img {
+        background: rgba(0, 0, 0, 0.2);
+        color: var(--nuxeo-sidebar-menu-hover);
+      }
+
+      #logo:hover img {
+        filter: brightness(110%);
+        -webkit-filter: brightness(110%);
+      }
+
+      /* 'auto' is invisible on the dark themes, which define --nuxeo-focus-outline instead. */
+      #logo:focus-visible {
+        outline: var(--nuxeo-focus-outline, auto);
+        outline-offset: -2px;
       }
 
       /* Apply margin-top: auto to all settings and then reset them, except the first one */
@@ -480,6 +456,11 @@ Polymer({
       <a href="#mainContent" id="skipLink" class="skip-link">[[i18n('app.skiptoMainContent.message')]]</a>
       <nuxeo-suggester id="suggester"></nuxeo-suggester>
 
+      <!-- WEBUI-1786: administrator announcement. It is laid out in the flow, as the first thing in
+           the header, so it pushes the application down, and publishes its height as
+           --nuxeo-app-top so the viewport positioned chrome moves down with it. -->
+      <nuxeo-announcement-banner id="announcementBanner" user="[[currentUser]]"></nuxeo-announcement-banner>
+
       <nuxeo-offline-banner message="[[i18n('app.offlineBanner.message')]]"></nuxeo-offline-banner>
 
       <nuxeo-expired-session message="[[i18n('app.expiredSession.message')]]"></nuxeo-expired-session>
@@ -516,51 +497,39 @@ Polymer({
           hidden$="[[isDrawerHidden(isNarrow, drawerOpened)]]"
         >
           <div role="list">
-            <!-- Logo: decorative only, home navigation handled by menu shortcut below -->
-            <div id="logo">
+            <!-- WEBUI-2315: the logo is the Home link, in both branding modes. The image alt only
+                 describes the logo, so the anchor carries its own label naming the destination
+                 (WCAG 2.4.4 Link Purpose); it is a single Tab stop with no nested interactive. -->
+            <a id="logo" href$="[[urlFor('home')]]" aria-label$="[[i18n('app.home')]]" on-click="_resetTaskSelection">
               <img src$="[[_logo(baseUrl)]]" alt="[[i18n('accessibility.logo')]]" />
-            </div>
+            </a>
 
-            <!-- Scrollable container for home shortcut and menu (below pinned logo) -->
-            <div id="menuContainer">
-              <!-- Home shortcut: placed outside paper-listbox to navigate home without triggering
-                   the secondary-nav drawer. Focus and activation are managed by nuxeo-menu-icon. -->
+            <!-- menu -->
+            <paper-listbox
+              id="menu"
+              selected="{{selectedTab}}"
+              attr-for-selected="name"
+              selected-class="selected"
+              on-iron-activate="_toggleDrawer"
+              on-iron-items-changed="_updateDrawerItemsAria"
+              aria-label$="[[i18n('app.drawer')]]"
+            >
+              <nuxeo-slot name="DRAWER_ITEMS" model="[[actionContext]]"></nuxeo-slot>
               <nuxeo-menu-icon
-                class="home-link"
-                name="home"
-                route="home"
-                icon="nuxeo:home"
-                label="app.home"
-                on-click="_resetTaskSelection"
+                name="administration"
+                icon="nuxeo:admin"
+                label="app.administration"
+                class="settings"
+                hidden$="[[!hasAdministrationPermissions(currentUser)]]"
               ></nuxeo-menu-icon>
-
-              <!-- menu -->
-              <paper-listbox
-                id="menu"
-                selected="{{selectedTab}}"
-                attr-for-selected="name"
-                selected-class="selected"
-                on-iron-activate="_toggleDrawer"
-                on-iron-items-changed="_updateDrawerItemsAria"
-                aria-label$="[[i18n('app.drawer')]]"
-              >
-                <nuxeo-slot name="DRAWER_ITEMS" model="[[actionContext]]"></nuxeo-slot>
-                <nuxeo-menu-icon
-                  name="administration"
-                  icon="nuxeo:admin"
-                  label="app.administration"
-                  class="settings"
-                  hidden$="[[!hasAdministrationPermissions(currentUser)]]"
-                ></nuxeo-menu-icon>
-                <nuxeo-menu-icon
-                  name="profile"
-                  src="[[currentUser.contextParameters.userprofile.avatar.data]]"
-                  icon="nuxeo:user-settings"
-                  label="app.account"
-                  class="settings"
-                ></nuxeo-menu-icon>
-              </paper-listbox>
-            </div>
+              <nuxeo-menu-icon
+                name="profile"
+                src="[[currentUser.contextParameters.userprofile.avatar.data]]"
+                icon="nuxeo:user-settings"
+                label="app.account"
+                class="settings"
+              ></nuxeo-menu-icon>
+            </paper-listbox>
 
             <!-- drawer content -->
             <div id="drawer" style="width: {{drawerWidth}}">
@@ -898,7 +867,6 @@ Polymer({
   ready() {
     this.skipLinkEvent();
     this._checkRtl();
-    this.homeToMenuNavigation();
     this._updateIsNarrow();
 
     const main = this.$.mainContent;
@@ -960,18 +928,6 @@ Polymer({
 
     Performance.mark('nuxeo-app.ready');
 
-    // Remove interactive attributes from home link to fix accessibility issue.
-    // PaperItemBehavior adds role/tabindex/aria-disabled to the host, but the inner <a>
-    // already provides the interactive control. This causes nested-interactive violations
-    // and double Tab stops. Strip these attributes to make the host a plain container.
-    // The inner <a> carries its own aria-label (see nuxeo-menu-icon), so it stays named.
-    const homeLink = this.shadowRoot?.querySelector('.home-link');
-    if (homeLink) {
-      homeLink.removeAttribute('tabindex');
-      homeLink.removeAttribute('role');
-      homeLink.removeAttribute('aria-disabled');
-    }
-
     // fire resize event during drawer animation for elements that need to adapt to size changes (nuxeo-data-table etc)
     // Filter to transitions on the drawer element itself; descendant transitions
     // (e.g. resize-handle hover) bubble up and would otherwise spuriously start the resize loop.
@@ -1016,71 +972,6 @@ Polymer({
     );
   },
 
-  // Arrow-key navigation between the home shortcut and the menu. Handlers are named methods
-  // (not inline closures) so they can be unit-tested without firing key events at the listbox.
-  homeToMenuNavigation() {
-    const home = this.shadowRoot?.querySelector('.home-link');
-    const { menu } = this.$;
-    if (!home || !menu) {
-      return;
-    }
-    // Retain the bound handlers so detached() can remove them and re-adding is idempotent.
-    this._boundHomeShortcutKeydown = this._boundHomeShortcutKeydown || this._onHomeShortcutKeydown.bind(this);
-    this._boundMenuEdgeKeydown = this._boundMenuEdgeKeydown || this._onMenuEdgeKeydown.bind(this);
-    this._homeMenuNav = { home, menu };
-    home.addEventListener('keydown', this._boundHomeShortcutKeydown);
-    menu.addEventListener('keydown', this._boundMenuEdgeKeydown);
-  },
-
-  // Visible menu items, excluding hidden ones.
-  _homeMenuVisibleItems() {
-    const menu = this._homeMenuNav?.menu;
-    if (!menu) {
-      return [];
-    }
-    return Array.from(menu.querySelectorAll('nuxeo-menu-icon, [name]')).filter((el) => !el.hasAttribute('hidden'));
-  },
-
-  // Focus the home shortcut's inner link, falling back to the host.
-  _focusHomeShortcut() {
-    const home = this._homeMenuNav?.home;
-    if (!home) {
-      return;
-    }
-    const anchor = home.shadowRoot?.querySelector('a');
-    (anchor || home).focus();
-  },
-
-  // On home: ArrowDown focuses the first menu item, ArrowUp the last.
-  _onHomeShortcutKeydown(e) {
-    const items = this._homeMenuVisibleItems();
-    if (!items.length) {
-      return;
-    }
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      items[0].focus();
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      items[items.length - 1].focus();
-    }
-  },
-
-  // On menu edges: ArrowUp on the first item or ArrowDown on the last returns focus to home.
-  _onMenuEdgeKeydown(e) {
-    const items = this._homeMenuVisibleItems();
-    if (!items.length) {
-      return;
-    }
-    const first = items[0];
-    const last = items[items.length - 1];
-    const active = e.target;
-    if ((e.key === 'ArrowUp' && active === first) || (e.key === 'ArrowDown' && active === last)) {
-      e.preventDefault();
-      this._focusHomeShortcut();
-    }
-  },
-
   attached() {
     // WEBUI-1987: only re-arm after a real detach/re-attach cycle. ready() already did the initial
     // wiring, so re-running setup here on the first attach would issue a redundant keep-alive request
@@ -1089,9 +980,6 @@ Polymer({
       this._inactivityNeedsRearm = false;
       this._setupInactivityTimer();
       this._setupUnauthorizedRedirect();
-      // detached() removed the home<->menu arrow-key handlers; re-arm them here to mirror the
-      // inactivity timer. Re-adding is idempotent (bound handler refs are retained).
-      this.homeToMenuNavigation();
     }
   },
 
@@ -1100,10 +988,6 @@ Polymer({
       window.removeEventListener('resize', this._boundUpdateIsNarrow);
     }
     this.removeEventListener('nuxeo-layout-updated', this._onDescendantLayoutUpdated);
-    if (this._homeMenuNav) {
-      this._homeMenuNav.home.removeEventListener('keydown', this._boundHomeShortcutKeydown);
-      this._homeMenuNav.menu.removeEventListener('keydown', this._boundMenuEdgeKeydown);
-    }
     this._teardownInactivityTimer();
     this._teardownUnauthorizedRedirect();
     this._cancelPendingAnnouncement();
@@ -1379,8 +1263,8 @@ Polymer({
     this.show('diff');
     const params = [id1, id2];
     // let's keep current context only if it includes the ids already in the params
-    if (this.$.diff.docIds && params.every((el) => this.$.diff.docIds.indexOf(el) > -1)) {
-      const otherIds = this.$.diff.docIds.find((id) => params.indexOf(id) === -1);
+    if (this.$.diff.docIds && params.every((el) => this.$.diff.docIds.includes(el))) {
+      const otherIds = this.$.diff.docIds.find((id) => !params.includes(id));
       this.$.diff.docIds = null;
       this.$.diff.docIds = params.concat(otherIds).filter(Boolean);
     } else {
@@ -1394,61 +1278,81 @@ Polymer({
     this.$.diff.docIds = e.detail.documents.map((doc) => doc.uid);
   },
 
+  _browseTitle() {
+    const title = [];
+    if (this.currentDocument && this.currentDocument.title) {
+      // The repository root has no dc:title, so the server returns its uid as the title.
+      // Mirror the breadcrumb/clipboard behavior and show the localized root label instead
+      // of a raw UUID, so the browser tab title stays meaningful and consistent for
+      // screen-reader users navigating between tabs (WEBUI-1876).
+      title.push(this.currentDocument.type === 'Root' ? this.i18n('browse.root') : this.currentDocument.title);
+      if (this.currentDocument.type === 'Collections') {
+        title.push(this.i18n('app.title.collections'));
+      } else if (this.hasFacet(this.currentDocument, 'Collection')) {
+        title.push(
+          this.currentDocument.type === 'Favorites'
+            ? this.i18n('app.title.favorites')
+            : this.i18n('app.title.collection'),
+        );
+      }
+    }
+    return title;
+  },
+
+  _searchTitle() {
+    const title = [];
+    if (this.searchForm) {
+      if (this.searchForm.selectedSearch && this.searchForm.selectedSearch.title) {
+        title.push(this.searchForm.selectedSearch.title);
+      } else if (this.searchForm.searchName) {
+        title.push(this.i18n(`app.title.search.${this.searchForm.searchName}`));
+      }
+    }
+    title.push(this.i18n('app.title.search'));
+    return title;
+  },
+
+  _tasksTitle() {
+    if (this.currentTask) {
+      return [this.i18n(this.currentTask.workflowModelName), this.i18n(this.currentTask.name)];
+    }
+    return [this.i18n(`app.title.${this.page}`)];
+  },
+
+  _adminTitle() {
+    const title = [];
+    if (this.selectedAdminTab) {
+      title.push(this.i18n(`app.title.admin.${this.selectedAdminTab}`));
+    }
+    title.push(this.i18n(`app.title.${this.page}`));
+    return title;
+  },
+
   _updateTitle() {
     if (!this.page) return;
-    const title = [];
+    let title;
     switch (this.page) {
       case 'browse':
-        if (this.currentDocument && this.currentDocument.title) {
-          // The repository root has no dc:title, so the server returns its uid as the title.
-          // Mirror the breadcrumb/clipboard behavior and show the localized root label instead
-          // of a raw UUID, so the browser tab title stays meaningful and consistent for
-          // screen-reader users navigating between tabs (WEBUI-1876).
-          title.push(this.currentDocument.type === 'Root' ? this.i18n('browse.root') : this.currentDocument.title);
-          if (this.currentDocument.type === 'Collections') {
-            title.push(this.i18n('app.title.collections'));
-          } else if (this.hasFacet(this.currentDocument, 'Collection')) {
-            if (this.currentDocument.type === 'Favorites') {
-              title.push(this.i18n('app.title.favorites'));
-            } else {
-              title.push(this.i18n('app.title.collection'));
-            }
-          }
-        }
+        title = this._browseTitle();
         break;
-
       case 'search':
-        if (this.searchForm) {
-          if (this.searchForm.selectedSearch && this.searchForm.selectedSearch.title) {
-            title.push(this.searchForm.selectedSearch.title);
-          } else if (this.searchForm.searchName) {
-            title.push(this.i18n(`app.title.search.${this.searchForm.searchName}`));
-          }
-        }
-        title.push(this.i18n('app.title.search'));
+        title = this._searchTitle();
         break;
-
       case 'tasks':
-        if (this.currentTask) {
-          title.push(this.i18n(this.currentTask.workflowModelName));
-          title.push(this.i18n(this.currentTask.name));
-        } else {
-          title.push(this.i18n(`app.title.${this.page}`));
-        }
+        title = this._tasksTitle();
         break;
-
       case 'admin':
-        if (this.selectedAdminTab) {
-          title.push(this.i18n(`app.title.admin.${this.selectedAdminTab}`));
-        }
-        title.push(this.i18n(`app.title.${this.page}`));
+        title = this._adminTitle();
         break;
-
       default:
-        title.push(this.i18n(`app.title.${this.page}`));
+        title = [this.i18n(`app.title.${this.page}`)];
     }
+    // WEBUI-1119: `org.nuxeo.ecm.product.name` may be configured empty, in which case index.jsp
+    // renders `product-name=""` and that empty attribute overrides the 'Nuxeo' default. Joining a
+    // blank segment left the browser tab title with a dangling " - ", so drop blank segments
+    // instead of appending a separator with nothing after it.
     title.push(this.productName);
-    document.title = title.join(' - ');
+    document.title = title.filter((segment) => segment && String(segment).trim()).join(' - ');
   },
 
   _baseUrlChanged() {
@@ -2036,13 +1940,13 @@ Polymer({
         toast.__state = { dismissed: false, aborted: true };
         callback();
         // remove the toast if the action was aborted
-        toast.parentNode.removeChild(toast);
+        toast.remove();
       } else if (e.detail.reason === 'dismiss') {
         const state = toast.__state;
         if (state && state.ended) {
           toast.__state = null;
           // remove the toast if the action has ended
-          toast.parentNode.removeChild(toast);
+          toast.remove();
         } else {
           // do not remove the toast, otherwise it will show up before the end of the task
           toast.__state.dismissed = true;
