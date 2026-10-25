@@ -376,14 +376,43 @@ Polymer({
     return !!v?.readOnly;
   },
 
+  attached() {
+    this._vocabularyLocaleHandler = () => this._onLocaleLoaded();
+    document.addEventListener('i18n-locale-loaded', this._vocabularyLocaleHandler);
+  },
+
+  detached() {
+    document.removeEventListener('i18n-locale-loaded', this._vocabularyLocaleHandler);
+    this._vocabularyLocaleHandler = null;
+  },
+
+  // Translations can land after this page has rendered: `i18n/i18n.js` races the locale load
+  // against a five second timeout and boots the app untranslated when the load loses. Anything
+  // derived from a label at that point still holds the untranslated value, and unlike the
+  // picker's own binding it will not re-evaluate on its own — so re-derive the picker order,
+  // the Label cells and the filter buckets here. Mirrors `nuxeo-announcement-banner`, which
+  // listens for the same event rather than binding to `i18n`.
+  _onLocaleLoaded() {
+    if (this.vocabularies) {
+      this.vocabularies = this._sortedVocabularies(this.vocabularies);
+    }
+    if (this._allEntries && this._allEntries.length > 0) {
+      // A fresh reference re-runs `_computeAggregations`; `_applyFilters` re-stamps the rows.
+      this._allEntries = this._allEntries.slice();
+      this._applyFilters();
+    }
+  },
+
   _visibleChanged() {
     if (this.visible && !this.vocabularies) {
       this.$.directory.get().then((response) => {
-        this.vocabularies = response.entries.sort((a, b) =>
-          this._vocabularyLabel(a.name).localeCompare(this._vocabularyLabel(b.name)),
-        );
+        this.vocabularies = this._sortedVocabularies(response.entries);
       });
     }
+  },
+
+  _sortedVocabularies(entries) {
+    return entries.slice().sort((a, b) => this._vocabularyLabel(a.name).localeCompare(this._vocabularyLabel(b.name)));
   },
 
   // The `directory` entity carries no label, so a vocabulary is identified by its id.
