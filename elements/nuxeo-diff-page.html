@@ -28,6 +28,23 @@ limitations under the License.
         color: var(--nuxeo-link-hover_-_color);
       }
 
+      /*
+       * WEBUI-1491: nuxeo-page reserves the strips the app bar paints its fixed buttons over, but
+       * its ::slotted() rule is in another tree, so nuxeo-styles' .header wins and drops the
+       * padding to 16px. Restore it, or the titles run under the Search button and the drawer
+       * toggle. Logical properties keep RTL mirrored.
+       */
+      .header {
+        padding-inline-start: 16px;
+        padding-inline-end: 64px;
+      }
+
+      @media (max-width: 720px) {
+        .header {
+          padding-inline-start: 48px;
+        }
+      }
+
       .title {
         display: flex;
         align-items: center;
