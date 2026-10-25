@@ -118,6 +118,29 @@
   </template>
 </nuxeo-slot-content>
 
+<nuxeo-slot-content name="adminAnnouncementMenuItem" slot="ADMINISTRATION_MENU" order="70">
+  <template>
+    <nuxeo-filter user="[[user]]" expression="user.isAdministrator">
+      <template>
+        <nuxeo-menu-item
+          name="announcement"
+          label="announcementManagement.heading"
+          route="administration:announcement"
+        ></nuxeo-menu-item>
+      </template>
+    </nuxeo-filter>
+  </template>
+</nuxeo-slot-content>
+<nuxeo-slot-content name="adminAnnouncementPage" slot="ADMINISTRATION_PAGES" order="70">
+  <template>
+    <nuxeo-filter user="[[user]]" expression="user.isAdministrator">
+      <template>
+        <nuxeo-announcement-management name="announcement" id="announcement"></nuxeo-announcement-management>
+      </template>
+    </nuxeo-filter>
+  </template>
+</nuxeo-slot-content>
+
 <!-- ANALYTICS -->
 
 <nuxeo-slot-content name="analyticsDocumentDistributionItem" slot="ANALYTICS_ITEMS" order="10">
@@ -513,6 +536,7 @@
 <nuxeo-slot-content name="defaultSearchMenuPage" slot="DRAWER_PAGES">
   <template>
     <nuxeo-search-form
+      current-document="[[document]]"
       name="defaultSearch"
       search-name="default"
       auto
@@ -529,6 +553,7 @@
 <nuxeo-slot-content name="expiredSearchMenuPage" slot="DRAWER_PAGES">
   <template>
     <nuxeo-search-form
+      current-document="[[document]]"
       name="expiredSearch"
       search-name="expired"
       queue
@@ -549,6 +574,7 @@
 <nuxeo-slot-content name="damSearchMenuButtons" slot="DRAWER_PAGES">
   <template>
     <nuxeo-search-form
+      current-document="[[document]]"
       name="assetsSearch"
       search-name="assets"
       auto
@@ -638,6 +664,7 @@
 <nuxeo-slot-content name="trashMenuPage" slot="DRAWER_PAGES">
   <template>
     <nuxeo-search-form
+      current-document="[[document]]"
       name="trash"
       search-name="trash"
       auto
@@ -728,13 +755,25 @@
   </template>
 </nuxeo-slot-content>
 
-<nuxeo-slot-content name="hylandLightTheme" slot="THEMES" order="30">
+<nuxeo-slot-content name="kawaiiTheme" slot="THEMES" order="30">
+  <template>
+    <nuxeo-theme name="kawaii"></nuxeo-theme>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="lightTheme" slot="THEMES" order="40">
+  <template>
+    <nuxeo-theme name="light"></nuxeo-theme>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="hylandLightTheme" slot="THEMES" order="50">
   <template>
     <nuxeo-theme name="hyland-light"></nuxeo-theme>
   </template>
 </nuxeo-slot-content>
 
-<nuxeo-slot-content name="hylandDarkTheme" slot="THEMES" order="40">
+<nuxeo-slot-content name="hylandDarkTheme" slot="THEMES" order="60">
   <template>
     <nuxeo-theme name="hyland-dark"></nuxeo-theme>
   </template>

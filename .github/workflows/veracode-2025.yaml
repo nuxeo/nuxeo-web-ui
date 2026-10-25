@@ -33,9 +33,6 @@ jobs:
     runs-on:
       group: medium-4cpu-runners
     steps:
-      - uses: catchpoint/workflow-telemetry-action@94c3c3d9567a0205de6da68a76c428ce4e769af1 # v2
-        with:
-          comment_on_pr: false
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can
       # access it and copies all sources into ZIP file for submitting for
       # analysis. Replace this section with your applications build steps
@@ -47,7 +44,7 @@ jobs:
         with:
           registry-url: ${{ env.NPM_REPOSITORY }}
           always-auth: true
-          node-version: 18
+          node-version: 24
           scope: '@nuxeo'
 
       - name: Determine nuxeo-elements branch to link
@@ -96,10 +93,10 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS}
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" "nuxeo-elements/core/${ELEMENTS_CORE}"
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" "nuxeo-elements/ui/${ELEMENTS_UI}"
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" "nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}"
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" "nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS}"
       - name: Delete Node Modules
         run: |
           rm -rf node_modules
@@ -126,7 +123,7 @@ jobs:
       - name: Zip nuxeo-web-ui
         run: |
           echo nuxeo-web-ui-${{ steps.get-tag.outputs.TAG }}.zip
-          zip -r nuxeo-web-ui.zip *
+          zip -r nuxeo-web-ui.zip ./*
 
       - name: Upload ZIP as artifact
         uses: actions/upload-artifact@v7

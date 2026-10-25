@@ -56,7 +56,10 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
         }
 
         #table {
-          height: calc(100vh - 370px);
+          /* WEBUI-2314: stopped 23px short of clearing the card the table sits in, so History
+             always carried a scrollbar whose whole range was that gap. See
+             nuxeo-collapsible-document-page. */
+          height: calc(100vh - 402px - (var(--nuxeo-app-top, 0px) + var(--nuxeo-app-bottom, 0px)));
         }
       </style>
 
@@ -64,7 +67,7 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
 
       <nuxeo-card>
         <nuxeo-user-suggestion
-          role="widget"
+          data-widget
           value="{{principalName}}"
           label="[[i18n('audit.username')]]"
           placeholder="[[i18n('audit.usernamePlaceholder')]]"
@@ -72,14 +75,14 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
         ></nuxeo-user-suggestion>
         <div class="row-container">
           <nuxeo-date-picker
-            role="widget"
+            data-widget
             label="[[i18n('audit.from')]]"
             value="{{startDate}}"
             aria-label$="[[i18n('documentPage.process.start')]]"
           >
           </nuxeo-date-picker>
           <nuxeo-date-picker
-            role="widget"
+            data-widget
             label="[[i18n('audit.to')]]"
             value="{{endDate}}"
             aria-label$="[[i18n('wf.parallelDocumentReview.endDate')]]"
@@ -88,7 +91,7 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
         </div>
         <div class="row-container">
           <nuxeo-directory-suggestion
-            role="widget"
+            data-widget
             label="[[i18n('audit.eventTypes')]]"
             directory-name="eventTypes"
             value="{{events}}"
@@ -99,7 +102,7 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
           >
           </nuxeo-directory-suggestion>
           <nuxeo-directory-suggestion
-            role="widget"
+            data-widget
             label="[[i18n('audit.eventCategory')]]"
             directory-name="eventCategories"
             value="{{category}}"
@@ -291,9 +294,7 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
     if (moment(comment, moment.ISO_8601).isValid()) {
       return this.formatDateTime(comment);
     }
-    return clientReason && clientReason.toLowerCase().indexOf('view') > -1
-      ? `${this.i18n('command.view')}: [${comment}]`
-      : comment;
+    return clientReason?.toLowerCase().includes('view') ? `${this.i18n('command.view')}: [${comment}]` : comment;
   }
 }
 

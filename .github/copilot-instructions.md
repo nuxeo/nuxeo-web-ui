@@ -10,7 +10,7 @@
 Nuxeo Web UI is the standard web application for the Nuxeo content services platform, built with **Polymer 3** (mostly legacy `Polymer({…})` factory pattern) and backed by the **@nuxeo/nuxeo-elements** library of web components. Licensed Apache 2.0, owned by Hyland Software.
 
 - **Runtime**: Browser (no server-side JS in production)
-- **Node**: ≥ 18
+- **Node**: ≥ 22.13 (CI runs 24)
 - **Build**: Webpack 5
 - **Package manager**: npm (no yarn/pnpm)
 - **Java**: 17 (Maven wraps the frontend build for marketplace packaging)
@@ -33,7 +33,7 @@ elements/             → All Polymer web components
   nuxeo-results/      → Result list/grid display
 addons/               → Optional addon bundles (Drive, LiveConnect, CSV, Spreadsheet, etc.)
 i18n/                 → Localization JSON files (16 languages), merged at build time
-themes/               → Themeable CSS (default (light), dark, hyland-light, hyland-dark)
+themes/               → Themeable CSS (default (Nuxeo), dark, kawaii, light, hyland-light, hyland-dark)
 test/                 → Unit tests (@web/test-runner + Mocha + Chai + Sinon)
 ftest/                → Functional tests (Cucumber/Gherkin .feature files)
 packages/
@@ -130,7 +130,8 @@ See `.github/skills/link-nuxeo-elements/SKILL.md` for full details and custom pa
 
 ## CI / GitHub Actions
 
-- **Main branch flow (`maintenance-3.1.x`)**: lint → test → a11y → ftest → sonar → build (sequential gates)
+- **Dev branch flow (`develop-2025`, `develop-2023`)**: `develop.yaml` starts lint, test, a11y and ftest in parallel; Sonar and CodeQL trigger themselves on the same push. No publish step. Ticket PRs target these branches.
+- **Release branch flow (`lts-2025`, `maintenance-3.1.x`)**: `main.yaml` starts lint, test, a11y, ftest and sonar in parallel, then build, which depends on all five and does the tag and publish.
 - **Preview**: PRs tagged `preview` get ephemeral environments (cross-repo with nuxeo-elements)
 - **Registry**: `@nuxeo` packages come from `https://packages.nuxeo.com/repository/npm-public/`
 - **Lockfile**: `package-lock.json` is committed. CI workflows use `npm ci` for deterministic installs.

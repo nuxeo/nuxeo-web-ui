@@ -218,6 +218,15 @@ suite('nuxeo-document-create', () => {
       expect(sorted.map((s) => s.id)).to.deep.equal(['Folder', 'File']);
     });
 
+    test('should keep the unordered list and warn when a subtype has no id', () => {
+      const warnStub = sinon.stub(console, 'warn');
+      const subtypes = [{ id: 'File', type: 'File' }, { type: 'Folder' }];
+
+      expect(element._getSortedSubtypes(subtypes, 'File')).to.deep.equal(subtypes);
+      expect(warnStub).to.have.been.calledOnce;
+      warnStub.restore();
+    });
+
     test('should place unmentioned subtypes after ordered ones', () => {
       const subtypes = [
         { id: 'File', type: 'File' },
