@@ -864,6 +864,45 @@ suite('nuxeo-vocabulary-management', () => {
     });
   });
 
+  suite('_onLocaleLoaded', () => {
+    test('should re-sort the picker when translations arrive after the vocabularies', () => {
+      element.vocabularies = [{ name: 'alpha' }, { name: 'zeta' }];
+      // Translations land late and invert the order: `zeta` reads "Alpha" and has to move first.
+      const labels = { 'vocabulary.zeta': 'Alpha', 'vocabulary.alpha': 'Zeta' };
+      element.i18n.callsFake((key) => labels[key] || key);
+      element._onLocaleLoaded();
+      expect(element.vocabularies.map((v) => v.name)).to.deep.equal(['zeta', 'alpha']);
+    });
+
+    test('should re-derive Label cells and filter buckets when translations arrive late', () => {
+      element.colDef = [{ key: 'label' }];
+      element._allEntries = [{ properties: { id: 'europe', label: 'label.directories.continent.europe' } }];
+      // Buckets were built from the untranslated key before the locale landed.
+      expect(element._aggregations.label.extendedBuckets[0].key).to.equal('label.directories.continent.europe');
+
+      element.i18n.callsFake((key) => (key === 'label.directories.continent.europe' ? 'Europe' : key));
+      element._onLocaleLoaded();
+
+      expect(element._aggregations.label.extendedBuckets[0].key).to.equal('Europe');
+      expect(element._cellValue(element.entries[0], 'label')).to.equal('Europe');
+    });
+
+    test('should do nothing when neither vocabularies nor entries have loaded', () => {
+      element.vocabularies = undefined;
+      element._allEntries = [];
+      expect(() => element._onLocaleLoaded()).to.not.throw();
+    });
+  });
+
+  suite('_sortedVocabularies', () => {
+    test('should not mutate the array it is given', () => {
+      const entries = [{ name: 'zeta' }, { name: 'alpha' }];
+      const sorted = element._sortedVocabularies(entries);
+      expect(entries.map((v) => v.name)).to.deep.equal(['zeta', 'alpha']);
+      expect(sorted.map((v) => v.name)).to.deep.equal(['alpha', 'zeta']);
+    });
+  });
+
   suite('_refresh', () => {
     test('should build colDef and entries from directory response', async () => {
       element.selectedVocabulary = 'coverage';
