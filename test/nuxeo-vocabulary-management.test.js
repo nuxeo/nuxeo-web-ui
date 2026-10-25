@@ -295,6 +295,22 @@ suite('nuxeo-vocabulary-management', () => {
     test('should return N/A when prop is empty', () => {
       expect(element._cellValue({ properties: { id: 'entry1' } }, '')).to.equal('N/A');
     });
+
+    test('should translate a label that holds an i18n key', () => {
+      element.i18n.callsFake((key) => (key === 'label.directories.continent.europe' ? 'Europe' : key));
+      const item = { properties: { id: 'europe', label: 'label.directories.continent.europe' } };
+      expect(element._cellValue(item, 'label')).to.equal('Europe');
+    });
+
+    test('should leave a label that is already plain text untouched', () => {
+      // Vocabularies added through Studio usually store readable text rather than a key. `i18n`
+      // echoes an unknown key back, so those labels have to survive the lookup unchanged.
+      expect(element._cellValue({ properties: { label: 'Finance' } }, 'label')).to.equal('Finance');
+    });
+
+    test('should return an empty label as-is instead of translating it', () => {
+      expect(element._cellValue({ properties: { label: '' } }, 'label')).to.equal('');
+    });
   });
 
   suite('_formattedFilterableValue', () => {
@@ -314,6 +330,16 @@ suite('nuxeo-vocabulary-management', () => {
     test('should return i18n yes/no for obsolete', () => {
       expect(element._formattedFilterableValue({ properties: { obsolete: 1 } }, 'obsolete')).to.equal('label.yes');
       expect(element._formattedFilterableValue({ properties: { obsolete: 0 } }, 'obsolete')).to.equal('label.no');
+    });
+
+    test('should translate a label that holds an i18n key', () => {
+      element.i18n.callsFake((key) => (key === 'label.directories.continent.europe' ? 'Europe' : key));
+      const entry = { properties: { label: 'label.directories.continent.europe' } };
+      expect(element._formattedFilterableValue(entry, 'label')).to.equal('Europe');
+    });
+
+    test('should leave a label that is already plain text untouched', () => {
+      expect(element._formattedFilterableValue({ properties: { label: 'Finance' } }, 'label')).to.equal('Finance');
     });
   });
 
@@ -443,6 +469,15 @@ suite('nuxeo-vocabulary-management', () => {
     test('should return an empty object when inputs are not arrays', () => {
       expect(element._computeAggregations(null, [{ key: 'id' }])).to.deep.equal({});
       expect(element._computeAggregations([], null)).to.deep.equal({});
+    });
+
+    test('should bucket labels by their translation so the filter matches what the cells show', () => {
+      // Buckets and cells both go through `_formattedFilterableValue`. If they ever diverged,
+      // picking a bucket in the Label filter would match no row at all.
+      element.i18n.callsFake((key) => (key === 'label.directories.continent.europe' ? 'Europe' : key));
+      const entries = [{ properties: { label: 'label.directories.continent.europe' } }];
+      const aggs = element._computeAggregations(entries, [{ key: 'label' }]);
+      expect(aggs.label.extendedBuckets).to.deep.equal([{ key: 'Europe', label: 'Europe', docCount: 1 }]);
     });
   });
 
@@ -767,6 +802,65 @@ suite('nuxeo-vocabulary-management', () => {
       fresh._visibleChanged();
       await fresh.$.directory.get.returnValues[0];
       expect(fresh.vocabularies).to.deep.equal(entries);
+    });
+
+    test('should sort vocabularies by their label rather than by their id', async () => {
+      const fresh = await fixture(html`<nuxeo-vocabulary-management></nuxeo-vocabulary-management>`);
+      // `zeta` sorts last by id but first by label, so this order can only come from the label.
+      const labels = { 'vocabulary.zeta': 'Alpha', 'vocabulary.alpha': 'Zeta' };
+      sinon.stub(fresh, 'i18n').callsFake((key) => labels[key] || key);
+      const entries = [
+        { name: 'alpha', schema: 's', parent: '' },
+        { name: 'zeta', schema: 's', parent: '' },
+      ];
+      sinon.stub(fresh.$.directory, 'get').resolves({ entries });
+      fresh.visible = true;
+      fresh._visibleChanged();
+      await fresh.$.directory.get.returnValues[0];
+      expect(fresh.vocabularies.map((v) => v.name)).to.deep.equal(['zeta', 'alpha']);
+    });
+
+    test('should fall back to sorting by id when no label is contributed', async () => {
+      const fresh = await fixture(html`<nuxeo-vocabulary-management></nuxeo-vocabulary-management>`);
+      sinon.stub(fresh, 'i18n').callsFake((key) => key);
+      const entries = [
+        { name: 'zeta', schema: 's', parent: '' },
+        { name: 'alpha', schema: 's', parent: '' },
+      ];
+      sinon.stub(fresh.$.directory, 'get').resolves({ entries });
+      fresh.visible = true;
+      fresh._visibleChanged();
+      await fresh.$.directory.get.returnValues[0];
+      expect(fresh.vocabularies.map((v) => v.name)).to.deep.equal(['alpha', 'zeta']);
+    });
+  });
+
+  suite('_vocabularyLabel', () => {
+    test('should return the translation contributed for the vocabulary id', () => {
+      element.i18n.callsFake((key) => (key === 'vocabulary.l10ncoverage' ? 'Coverage' : key));
+      expect(element._vocabularyLabel('l10ncoverage')).to.equal('Coverage');
+    });
+
+    test('should fall back to the id when no translation is contributed', () => {
+      // Vocabularies added through Studio have no `vocabulary.<id>` key. Leaking the key itself
+      // into the dropdown would read worse than the id this change set out to replace.
+      expect(element._vocabularyLabel('myVocabulary')).to.equal('myVocabulary');
+    });
+
+    test('should return an empty string when there is no name', () => {
+      expect(element._vocabularyLabel('')).to.equal('');
+      expect(element._vocabularyLabel(undefined)).to.equal('');
+    });
+  });
+
+  suite('_translate', () => {
+    test('should return the translation when one is contributed', () => {
+      element.i18n.callsFake((key) => (key === 'some.key' ? 'Some label' : key));
+      expect(element._translate('some.key', 'fallback')).to.equal('Some label');
+    });
+
+    test('should return the fallback when i18n echoes the key back', () => {
+      expect(element._translate('some.key', 'fallback')).to.equal('fallback');
     });
   });
 
