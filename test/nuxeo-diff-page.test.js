@@ -19,6 +19,12 @@ import { fixture, flush, html } from '@nuxeo/testing-helpers';
 
 suite('nuxeo-diff-page header', () => {
   const LONG_TITLE = 'Quarterly Financial Reconciliation and Compliance Audit Report for the European Subsidiaries';
+  const OTHER_TITLE = 'Consolidated Financial Statements and Regulatory Compliance Review for Asia Pacific';
+  // Wider than any row these tests use, so the assertions below turn on the layout rather than on
+  // how the fixture's font happens to measure.
+  const SUFFIX = ' and the Associated Regional Entities, Revision 7, Final Approved Copy'.repeat(3);
+  const HUGE_TITLE = `${LONG_TITLE}${SUFFIX}`;
+  const HUGE_OTHER = `${OTHER_TITLE}${SUFFIX}`;
   let pageStyle;
   let style;
   let slotted;
@@ -67,11 +73,11 @@ suite('nuxeo-diff-page header', () => {
 
   // A flex row, so the header shrinks back to it instead of overflowing by its own padding, and
   // hides horizontal overflow, so anything the titles claim beyond it is cut off, not ellipsized.
-  const header = (width, title) =>
+  const header = (width, title, second = title) =>
     fixture(html`
       <div style="position: relative; display: flex; align-items: center; width: ${width}px; overflow-x: hidden;">
         <div class="header">
-          <span class="title"> Compare <a href="#">${title}</a> Vs. <a href="#">${title}</a> </span>
+          <span class="title"> Compare <a href="#">${title}</a> Vs. <a href="#">${second}</a> </span>
         </div>
         <div
           class="search-button"
@@ -131,6 +137,34 @@ suite('nuxeo-diff-page header', () => {
     expect(query, 'no .header rule below 720px').to.exist;
     const { paddingInlineStart } = [...query.cssRules].find((r) => r.selectorText === '.header').style;
     expect(parseFloat(paddingInlineStart), 'the leading label sits under the drawer toggle').to.be.at.least(48);
+  });
+
+  // A title should only be ellipsized because the row ran out, never because of a share it was
+  // held to while space next to it went unused.
+  [1920, 1280, 800].forEach((width) => {
+    test(`leaves no unused width beside the titles at ${width}px (WEBUI-1491)`, async () => {
+      const el = await header(width, HUGE_TITLE, HUGE_OTHER);
+      await flush();
+      const links = el.querySelectorAll('a');
+      links.forEach((l) =>
+        expect(l.scrollWidth, 'fixture title is not long enough to overflow').to.be.above(l.clientWidth),
+      );
+      const second = links[links.length - 1].getBoundingClientRect();
+      const button = el.querySelector('.search-button').getBoundingClientRect();
+      // 64px is reserved for a 60px button, so 4px of slack is the most that should be left over.
+      expect(button.left - second.right, 'titles ellipsized while width sat unused').to.be.at.most(6);
+    });
+  });
+
+  test('gives a long title the width a short one leaves (WEBUI-1491)', async () => {
+    const el = await header(1280, HUGE_TITLE, 'Report A');
+    await flush();
+    const [long, short] = el.querySelectorAll('a');
+    expect(short.scrollWidth, 'short title should not be ellipsized').to.be.at.most(short.clientWidth);
+    expect(long.scrollWidth, 'fixture long title does not overflow').to.be.above(long.clientWidth);
+    // The short title sits last, so the row is only full if the long one took what it left.
+    const button = el.querySelector('.search-button').getBoundingClientRect();
+    expect(button.left - short.getBoundingClientRect().right, 'long title was held to a fixed share').to.be.at.most(6);
   });
 
   test('mirrors the reserved strips in RTL (WEBUI-1491)', async () => {
