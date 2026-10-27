@@ -209,7 +209,10 @@ jobs:
         with:
           test_command: mvn -ntp install -Pftest -DskipInstall
           timeout_minutes: 120
-          video_name: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'video') && 'ftest-video' || '' }}
+          # Shard-suffixed for the same reason as the artifacts below: xvfb-record archives the
+          # recording itself, as `xvfbrecording-<video_name>`, so a name shared across the four
+          # shards would collide and fail them. An empty value still disables recording entirely.
+          video_name: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'video') && format('ftest-video-shard-{0}', matrix.shard) || '' }}
           max_attempts: 3
 
       # Every artifact name carries the shard: upload-artifact@v7 fails on a name another job in
