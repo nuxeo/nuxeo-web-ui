@@ -46,9 +46,11 @@ const specsFromEnv = (process.env.FTEST_SPECS || '')
   .map((spec) => spec.trim())
   .filter(Boolean);
 
-if (process.env.FTEST_SPECS && specsFromEnv.length === 0) {
-  // Set but empty means whatever produced it failed. Running the whole suite instead would hide
-  // that behind a shard that silently takes four times as long as it should.
+// Defined-but-empty, not just truthy: `FTEST_SPECS=` in $GITHUB_ENV arrives here as '', which is
+// falsy, so a truthiness test would fall through to the full-suite fallback below - every shard
+// running all 46 features, roughly quadrupling the work while every job still reported green.
+// Set but naming no feature means whatever produced the value failed, so fail loudly instead.
+if (process.env.FTEST_SPECS !== undefined && specsFromEnv.length === 0) {
   throw new Error('FTEST_SPECS is set but names no feature file. Unset it to run every feature.');
 }
 
