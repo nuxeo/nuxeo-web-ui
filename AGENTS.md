@@ -145,6 +145,13 @@ npm run ftest:dev           # Against localhost:8080 + localhost:5000
 - Page objects: `packages/nuxeo-web-ui-ftest/pages/`
 - Step defs: `packages/nuxeo-web-ui-ftest/features/step_definitions/`
 
+**Adding a feature file also means assigning it a CI shard.** `ftest.yaml` runs the suite as a
+4-way matrix, one Nuxeo server per shard, and `scripts/test/ftest/shards.js` says which feature
+goes where. `npm run lint` fails on a feature that is assigned to no shard or to more than one, so
+append the new file to the shard with the smallest total. WebdriverIO stays at `maxInstances: 1`:
+in-process workers would share one server, and `search.feature` asserts repo-wide absolute result
+counts. Run one shard locally with `FTEST_SPECS=$(node scripts/test/ftest/shards.js --specs 1)`.
+
 ## CI Workflow
 
 Push to a dev branch (`develop-2025`, `develop-2023`) runs `develop.yaml`, which starts **lint**, **test**, **a11y** and **ftest** in parallel — all must pass. Sonar and CodeQL trigger themselves on the same push. There is no publish step.
@@ -152,6 +159,10 @@ Push to a dev branch (`develop-2025`, `develop-2023`) runs `develop.yaml`, which
 Push to a release branch runs `main.yaml` for that line: those four plus **sonar**, again in parallel, then **build**, which depends on all five and does the tag and publish.
 
 PRs run lint and test workflows automatically.
+
+`ftest.yaml` fans out into four shard jobs plus an aggregating `ftests` job. Branch protection
+requires the `ftests` context, so the shards deliberately run under a different job id — a matrix
+job only ever reports `ftests (shard 1)` and never a bare `ftests`.
 
 - CI uses `npm ci` (not `npm install`) for deterministic, lockfile-based installs.
 - `package-lock.json` is committed and must be kept in sync with `package.json`.
