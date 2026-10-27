@@ -30,6 +30,32 @@ if (process.env.CUCUMBER_REQUIRES) {
   cucumberRequires.push(process.env.CUCUMBER_REQUIRES);
 }
 
+/*
+ * Which feature files to run. FTEST_SPECS takes a comma-separated list of paths relative to the
+ * ftest project being run, the same base `specs` has always resolved against; unset - the default
+ * locally and anywhere outside CI - runs every feature as before.
+ *
+ * CI sets it per shard from scripts/test/ftest/shards.js, which is how .github/workflows/ftest.yaml
+ * splits the suite across four runners. It goes through an environment variable rather than the
+ * `--features` CLI flag documented in scripts/test.js because that flag does nothing: test.js
+ * collects CLI arguments into an array but passes only `args[0]`, the config path, to
+ * `new CliLauncher(...)`, whose second parameter expects an options object rather than argv strings.
+ */
+const specsFromEnv = (process.env.FTEST_SPECS || '')
+  .split(',')
+  .map((spec) => spec.trim())
+  .filter(Boolean);
+
+if (process.env.FTEST_SPECS && specsFromEnv.length === 0) {
+  // Set but empty means whatever produced it failed. Running the whole suite instead would hide
+  // that behind a shard that silently takes four times as long as it should.
+  throw new Error('FTEST_SPECS is set but names no feature file. Unset it to run every feature.');
+}
+
+const specs = (specsFromEnv.length > 0 ? specsFromEnv : ['./features/*.feature']).map((spec) =>
+  path.join(process.cwd(), spec),
+);
+
 const reporters = ['spec'];
 
 const _workerStartTimes = new Map();
@@ -148,7 +174,7 @@ export const config = {
   // WebdriverIO allows it to run your tests in arbitrary locations (e.g. locally or
   // on a remote machine).
   runner: 'local',
-  specs: [path.join(process.cwd(), './features/*.feature')],
+  specs,
   // check http://webdriver.io/guide/testrunner/debugging.html for more info on debugging with wdio
   debug: process.env.DEBUG,
   execArgv: process.env.DEBUG ? ['--inspect'] : [],
