@@ -24,17 +24,18 @@
  * until the balance visibly drifts.
  *
  * Adding a feature: nothing to do by hand. `--place` runs as part of `npm run format`, appends any
- * feature that is on disk but on no shard to the shard with the smallest total, and rewrites this
- * file. It has no measurement for a new feature, so it writes the median of the measured ones and
+ * feature that is on disk, on no shard and named within PLACEABLE_NAME below to the shard with the
+ * smallest total, and rewrites this file. It has no measurement for a new feature, so it writes
+ * the median of the measured ones and
  * marks it `~Ns (est.)` - the estimate is what keeps successive additions spreading over shards
  * instead of all landing on whichever one was lightest first. Re-time and replace it if the
  * feature turns out to be an outlier.
  *
  * `--check` runs as part of `npm run lint` and only ever reports, so the two modes divide the way
- * prettier's do: lint reports, format repairs. Three drifts `--place` deliberately leaves to the
- * guard - a feature on two shards, an entry whose file is gone, and a filename this file cannot
- * carry - because each is an anomaly rather than a routine omission, and a mechanical "fix" for
- * either of the first two would drop coverage quietly where the guard drops it loudly.
+ * prettier's do: lint reports, format repairs. Two drifts `--place` deliberately leaves to the
+ * guard - a feature on two shards, and an entry whose file is gone - because both are anomalies
+ * rather than routine omissions, and either mechanical "fix" would drop coverage quietly where the
+ * guard drops it loudly.
  */
 
 const fs = require('fs');
@@ -43,6 +44,19 @@ const path = require('path');
 const REPO_ROOT = path.join(__dirname, '../../..');
 const FEATURES_DIR = path.join(REPO_ROOT, 'ftest/features');
 const WORKFLOW = path.join(REPO_ROOT, '.github/workflows/ftest.yaml');
+
+/*
+ * The filenames `--place` is willing to write, kept to an allowlist because two separate contracts
+ * have to hold and a list of known-bad characters missed one of them. An apostrophe would close the
+ * single-quoted literal early and leave this file a syntax error - and since the manifest and the
+ * code that reads it are the same file, that takes `--check` and `--specs` down with it, so
+ * `npm run format` would be the thing that broke the CI step it exists to serve. A comma survives
+ * JavaScript perfectly and still breaks `--specs`, whose output is comma-joined, by splitting one
+ * path into two that do not exist. Rather than enumerate the hazards, allow what all 46 features
+ * already use; `--check` keeps failing on anything else, so a name outside it costs a rename, never
+ * a feature that quietly stops running.
+ */
+const PLACEABLE_NAME = /^[\w.-]+\.feature$/;
 
 const SHARDS = [
   // shard 1 - 9m48s
@@ -104,15 +118,6 @@ const SHARDS = [
     'audit.feature', // 10.8s
   ],
 ];
-
-/*
- * What a feature filename may contain to be placeable. A name only ever reaches this file inside a
- * single-quoted literal, and SHARD_ENTRY below cannot read an apostrophe back out of one, so a name
- * carrying one is declined rather than escaped: `--place` skips it and `--check` says to rename it.
- * Writing it unescaped would make this file invalid JavaScript, which takes out `--specs` and with
- * it every shard's spec list. Every feature in ftest/features/ has always been well within this.
- */
-const WRITABLE_FEATURE_NAME = /^[\w.-]+\.feature$/;
 
 /**
  * The shard numbers the workflow matrix actually dispatches.
@@ -179,12 +184,12 @@ function check() {
     .filter((feature) => !shardsByFeature.has(feature))
     .forEach((feature) =>
       errors.push(
-        WRITABLE_FEATURE_NAME.test(feature)
-          ? `  ${feature} is assigned to no shard, so CI would not run it at all.\n` +
-              '    Run `npm run format` to append it to the shard with the smallest total.'
-          : `  ${feature} is assigned to no shard, and its name cannot be written to the manifest, so\n` +
-              '    `npm run format` will not place it either. Rename it using letters, digits, dots,\n' +
-              '    dashes and underscores only, then run `npm run format`.',
+        `  ${feature} is assigned to no shard, so CI would not run it at all.\n` +
+          (PLACEABLE_NAME.test(feature)
+            ? '    Run `npm run format` to append it to the shard with the smallest total.'
+            : '    `npm run format` will not place this name - rename it using only letters, digits,\n' +
+              '    underscore, hyphen and dot. An apostrophe would leave this manifest unparseable and a\n' +
+              '    comma would break the FTEST_SPECS list, so it has to be placed by hand otherwise.'),
       ),
     );
 
@@ -391,29 +396,33 @@ function place() {
   reportUnfixable(blocks);
 
   const assigned = new Set(blocks.flatMap((block) => block.entries.map((entry) => entry.feature)));
-  const candidates = fs
+  const unplaced = fs
     .readdirSync(FEATURES_DIR)
     .filter((entry) => entry.endsWith('.feature'))
     .filter((feature) => !assigned.has(feature))
     .sort();
 
-  /* The third drift reported rather than repaired; see WRITABLE_FEATURE_NAME for why not escaped. */
-  const unwritable = candidates.filter((feature) => !WRITABLE_FEATURE_NAME.test(feature));
+  /*
+   * Skipping is the same bargain the parse check above makes: `--check` still fails on the feature,
+   * so a rename costs someone a moment, where writing the name would cost the repo its tooling.
+   */
+  const unwritable = unplaced.filter((feature) => !PLACEABLE_NAME.test(feature));
   if (unwritable.length > 0) {
     console.warn(
-      'ftest shards: left unplaced because the manifest cannot quote these names - rename them\n' +
-        '  using letters, digits, dots, dashes and underscores, then run `npm run format` again:',
+      'ftest shards: not placed, because the name would break this manifest or the FTEST_SPECS list.\n' +
+        '  Rename using only letters, digits, underscore, hyphen and dot, then re-run `npm run format`\n' +
+        '  - or put it on a shard by hand. `npm run lint` keeps failing until it is on one:\n' +
+        unwritable.map((feature) => `    ${feature}`).join('\n'),
     );
-    console.warn(unwritable.map((feature) => `  ${feature}`).join('\n'));
   }
 
-  const unplaced = candidates.filter((feature) => WRITABLE_FEATURE_NAME.test(feature));
-  if (unplaced.length === 0) {
+  const placeable = unplaced.filter((feature) => PLACEABLE_NAME.test(feature));
+  if (placeable.length === 0) {
     return;
   }
 
   const estimate = estimatedSeconds(blocks);
-  unplaced.forEach((feature) => {
+  placeable.forEach((feature) => {
     /*
      * Recomputed after each placement, so several new features at once spread over several shards
      * instead of stacking on whichever one happened to be lightest to begin with. `reduce` with no
