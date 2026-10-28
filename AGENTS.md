@@ -150,8 +150,11 @@ you. `ftest.yaml` runs the suite as a 4-way matrix, one Nuxeo server per shard, 
 `scripts/test/ftest/shards.js` says which feature goes where. `npm run format` appends any
 unassigned feature to the shard with the smallest total, at an estimated weight marked
 `~Ns (est.)`; `npm run lint` fails if one is still unassigned, or is assigned to more than one
-shard, or names a file that no longer exists — those last two it reports but will not repair.
-WebdriverIO stays at `maxInstances: 1`: in-process workers would share one server, and
+shard, or names a file that no longer exists — those last two it reports but will not repair. Keep
+feature filenames to letters, digits, dots, dashes and underscores: an apostrophe would leave the
+manifest unparseable and a comma would break the `FTEST_SPECS` list, so a name outside that set is
+reported for you to rename rather than placed. WebdriverIO stays at `maxInstances: 1`: in-process
+workers would share one server, and
 `search.feature` asserts repo-wide absolute result counts. Run one shard locally with
 `FTEST_SPECS=$(node scripts/test/ftest/shards.js --specs 1)`.
 
