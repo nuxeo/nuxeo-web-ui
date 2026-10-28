@@ -31,10 +31,6 @@ jobs:
       contents: read
 
     steps:
-      - uses: catchpoint/workflow-telemetry-action@94c3c3d9567a0205de6da68a76c428ce4e769af1 # v2
-        with:
-          comment_on_pr: false
-
       - uses: actions/checkout@v6
         with:
           # Honour an explicit workflow_call branch. Empty on pull_request, which leaves
