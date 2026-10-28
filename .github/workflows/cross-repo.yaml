@@ -433,9 +433,19 @@ jobs:
       # via Ant <exec>. Neither <exec> sets newenvironment, so both inherit the step environment,
       # and scripts/test/ftest/runner.js spawns the runner without an explicit env either.
       #
-      # `-Pftest` is unconditional because the job itself is gated on skip_ftests above. There is
-      # no Xvfb wrapper as in ftest.yaml: `npm run ftest` passes --headless, so Chrome needs no
-      # display and this workflow has never recorded video.
+      # `-Pftest` is unconditional because the job itself is gated on skip_ftests above.
+      #
+      # Unlike ftest.yaml this step is a plain `run:`, with no xvfb-record wrapper, because this
+      # workflow has never recorded video. That is NOT the same as saying Xvfb is irrelevant here:
+      # @wdio/xvfb decides whether to wrap each worker in `xvfb-run` by looking at whether DISPLAY
+      # is set, not at whether Chrome needs a display - so `npm run ftest` passing --headless does
+      # not opt this step out. ftest.yaml escapes it only incidentally, because xvfb-record exports
+      # DISPLAY. With no DISPLAY, this step is exactly the case that WEBUI-2401 broke: xvfb-run
+      # 2:21.1.22 on the 26.04 image takes fd 3, which is Node's IPC channel, and because the
+      # wrapper is spawned rather than forked the worker's first process.send hits a closed
+      # descriptor and dies with EINVAL. `autoXvfb: false` in packages/nuxeo-web-ui-ftest/
+      # wdio.conf.js is what keeps that from happening; do not remove it on the assumption that a
+      # headless, video-less step cannot be affected.
       - name: Nuxeo package build and Ftests
         env:
           MVN_REPO_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
