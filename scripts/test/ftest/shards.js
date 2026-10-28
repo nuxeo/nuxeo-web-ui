@@ -25,17 +25,18 @@
  *
  * Adding a feature: nothing to do by hand. `--place` runs as part of `npm run format`, appends any
  * feature that is on disk, on no shard and named within PLACEABLE_NAME below to the shard with the
- * smallest total, and rewrites this file. It has no measurement for a new feature, so it writes
- * the median of the measured ones and
- * marks it `~Ns (est.)` - the estimate is what keeps successive additions spreading over shards
- * instead of all landing on whichever one was lightest first. Re-time and replace it if the
- * feature turns out to be an outlier.
+ * smallest total, and rewrites this file. It has no measurement for a new feature, so it writes the
+ * median of the measured ones and marks it `~Ns (est.)` - the estimate is what keeps successive
+ * additions spreading over shards instead of all landing on whichever one was lightest first.
+ * Re-time and replace it if the feature turns out to be an outlier.
  *
  * `--check` runs as part of `npm run lint` and only ever reports, so the two modes divide the way
- * prettier's do: lint reports, format repairs. Two drifts `--place` deliberately leaves to the
- * guard - a feature on two shards, and an entry whose file is gone - because both are anomalies
- * rather than routine omissions, and either mechanical "fix" would drop coverage quietly where the
- * guard drops it loudly.
+ * prettier's do: lint reports, format repairs. Three things `--place` reports and leaves to the
+ * guard rather than touch: a feature on two shards, an entry whose file is gone, and a name
+ * PLACEABLE_NAME rejects. The first two are anomalies rather than routine omissions, where a
+ * mechanical "fix" would drop coverage quietly; the third it cannot write without breaking this
+ * file. In all three `--check` keeps failing, so the cost is a manual edit rather than a feature
+ * that silently stops running.
  */
 
 const fs = require('fs');
