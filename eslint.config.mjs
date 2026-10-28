@@ -140,6 +140,20 @@ export default [
     },
   },
 
+  // Runs in the WebdriverIO worker process before the test runner starts, so it is plain Node
+  // rather than app code. Matched explicitly: the rest of plugin/a11y/test is specs.
+  {
+    files: ['plugin/a11y/test/wdio-worker-bootstrap.js'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+      parserOptions: {
+        sourceType: 'module',
+      },
+    },
+  },
+
   {
     files: ['scripts/**/*.{js,mjs}', '.github/scripts/**/*.{js,mjs}'],
     languageOptions: {
