@@ -167,6 +167,15 @@ jobs:
         with:
           java-version: '21'
 
+      # Lets Maven actually use the ~/.m2/repository that setup-maven-build just restored. See the
+      # copy of this step in the `ftests` job below for the full reasoning and the measurements; it
+      # is repeated here because the once-per-run package build pays the same cost.
+      - name: Reuse the restored Maven repository
+        run: |
+          [ -d ~/.m2/repository ] || exit 0
+          untracked=$(find ~/.m2/repository -name _remote.repositories -not -path '*SNAPSHOT*' -print -delete | wc -l | tr -d '[:space:]')
+          echo "Untracked $untracked cached release artifacts for local resolution"
+
       - name: Install Web UI
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
@@ -375,6 +384,32 @@ jobs:
         uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@314c39e8c2e913db2dc63a31670612ccb2b6e569 # v0.10.4
         with:
           java-version: '21'
+
+      # setup-maven-build already restores ~/.m2/repository from an actions/cache entry, and the
+      # restore succeeds - but Maven then re-fetches most of what it restored. Every cached artifact
+      # carries a _remote.repositories file naming the repository id it was first downloaded from,
+      # and when none of those ids is in the current build's repository list Maven goes back to the
+      # network to "verify that is downloadable" before using the copy it already has. That is where
+      # the per-shard Maven time goes: in run 40660645133 a shard logged 538 such artifacts and spent
+      # 6m27s on them in the Web Application module alone (serial, same image, same step: 50s), while
+      # the webpack bundle build inside that same module took 39s against serial's 26s. The bundle
+      # build is not the problem; re-verifying a warm cache over the network is.
+      #
+      # .github/mvn/settings.xml mirrors *,!nuxeo-studio onto the single maven-internal-build Nexus
+      # group, so there is only ever one remote to verify against and the tracking file cannot
+      # distinguish anything useful here. Dropping it leaves Maven treating those artifacts as
+      # locally installed, which is what the cache was restored for.
+      #
+      # Scoped to release versions on purpose. A release GAV is immutable, so trusting the restored
+      # copy is exactly as correct as downloading it again; a SNAPSHOT is not, and every repository
+      # in pom.xml sets updatePolicy=always for them. Version directories containing SNAPSHOT keep
+      # their tracking files, so snapshot resolution is untouched - and nothing is lost by that:
+      # of the 538 artifacts the measured shard re-verified, 0 were snapshots.
+      - name: Reuse the restored Maven repository
+        run: |
+          [ -d ~/.m2/repository ] || exit 0
+          untracked=$(find ~/.m2/repository -name _remote.repositories -not -path '*SNAPSHOT*' -print -delete | wc -l | tr -d '[:space:]')
+          echo "Untracked $untracked cached release artifacts for local resolution"
 
       # plugin/a11y is not installed here: its checks run once, in `build`.
       - name: Install Web UI
