@@ -24,8 +24,9 @@
  * until the balance visibly drifts.
  *
  * Adding a feature: nothing to do by hand. `--place` runs as part of `npm run format`, appends any
- * feature that is on disk but on no shard to the shard with the smallest total, and rewrites this
- * file. It has no measurement for a new feature, so it writes the median of the measured ones and
+ * feature that is on disk, on no shard and named within PLACEABLE_NAME below to the shard with the
+ * smallest total, and rewrites this file. It has no measurement for a new feature, so it writes
+ * the median of the measured ones and
  * marks it `~Ns (est.)` - the estimate is what keeps successive additions spreading over shards
  * instead of all landing on whichever one was lightest first. Re-time and replace it if the
  * feature turns out to be an outlier.
@@ -43,6 +44,19 @@ const path = require('path');
 const REPO_ROOT = path.join(__dirname, '../../..');
 const FEATURES_DIR = path.join(REPO_ROOT, 'ftest/features');
 const WORKFLOW = path.join(REPO_ROOT, '.github/workflows/ftest.yaml');
+
+/*
+ * The filenames `--place` is willing to write, kept to an allowlist because two separate contracts
+ * have to hold and a list of known-bad characters missed one of them. An apostrophe would close the
+ * single-quoted literal early and leave this file a syntax error - and since the manifest and the
+ * code that reads it are the same file, that takes `--check` and `--specs` down with it, so
+ * `npm run format` would be the thing that broke the CI step it exists to serve. A comma survives
+ * JavaScript perfectly and still breaks `--specs`, whose output is comma-joined, by splitting one
+ * path into two that do not exist. Rather than enumerate the hazards, allow what all 46 features
+ * already use; `--check` keeps failing on anything else, so a name outside it costs a rename, never
+ * a feature that quietly stops running.
+ */
+const PLACEABLE_NAME = /^[\w.-]+\.feature$/;
 
 const SHARDS = [
   // shard 1 - 9m48s
@@ -171,7 +185,11 @@ function check() {
     .forEach((feature) =>
       errors.push(
         `  ${feature} is assigned to no shard, so CI would not run it at all.\n` +
-          '    Run `npm run format` to append it to the shard with the smallest total.',
+          (PLACEABLE_NAME.test(feature)
+            ? '    Run `npm run format` to append it to the shard with the smallest total.'
+            : '    `npm run format` will not place this name - rename it using only letters, digits,\n' +
+              '    underscore, hyphen and dot. An apostrophe would leave this manifest unparseable and a\n' +
+              '    comma would break the FTEST_SPECS list, so it has to be placed by hand otherwise.'),
       ),
     );
 
@@ -383,12 +401,28 @@ function place() {
     .filter((entry) => entry.endsWith('.feature'))
     .filter((feature) => !assigned.has(feature))
     .sort();
-  if (unplaced.length === 0) {
+
+  /*
+   * Skipping is the same bargain the parse check above makes: `--check` still fails on the feature,
+   * so a rename costs someone a moment, where writing the name would cost the repo its tooling.
+   */
+  const unwritable = unplaced.filter((feature) => !PLACEABLE_NAME.test(feature));
+  if (unwritable.length > 0) {
+    console.warn(
+      'ftest shards: not placed, because the name would break this manifest or the FTEST_SPECS list.\n' +
+        '  Rename using only letters, digits, underscore, hyphen and dot, then re-run `npm run format`\n' +
+        '  - or put it on a shard by hand. `npm run lint` keeps failing until it is on one:\n' +
+        unwritable.map((feature) => `    ${feature}`).join('\n'),
+    );
+  }
+
+  const placeable = unplaced.filter((feature) => PLACEABLE_NAME.test(feature));
+  if (placeable.length === 0) {
     return;
   }
 
   const estimate = estimatedSeconds(blocks);
-  unplaced.forEach((feature) => {
+  placeable.forEach((feature) => {
     /*
      * Recomputed after each placement, so several new features at once spread over several shards
      * instead of stacking on whichever one happened to be lightest to begin with. `reduce` with no
