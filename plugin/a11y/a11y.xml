@@ -23,8 +23,31 @@
     <exec executable="${cmd.npm}" failonerror="true">
       <arg value="install" />
     </exec>
-    <exec executable="${cmd.npm}" failonerror="true">
+    <!--
+      Deliberately not failonerror: a non-zero exit here is a test failure, and the detail sits in
+      the per-worker WebdriverIO logs that `npm start` never prints. Letting Ant abort on the spot
+      left the build log saying only "exec returned: 1", which Maven then reduced to "There was a
+      timeout or other error in the fork". Capture the status, print the logs, then fail.
+    -->
+    <exec executable="${cmd.npm}" failonerror="false" resultproperty="a11y.exit.code">
       <arg value="start" />
     </exec>
+    <if>
+      <not>
+        <equals arg1="${a11y.exit.code}" arg2="0" />
+      </not>
+      <then>
+        <echo level="error">The a11y suite failed (npm start exited ${a11y.exit.code}).</echo>
+        <echo level="error">WebdriverIO worker logs from ${basedir}/target/wdio-logs follow.</echo>
+        <concat>
+          <fileset dir="${basedir}/target/wdio-logs" includes="*.log" erroronmissingdir="false" />
+          <header filtering="false">---------------- wdio worker logs ----------------
+</header>
+          <footer filtering="false">-------------- end wdio worker logs --------------
+</footer>
+        </concat>
+        <fail>The a11y suite failed: npm start exited ${a11y.exit.code}. See the WebdriverIO output above.</fail>
+      </then>
+    </if>
   </target>
 </project>
