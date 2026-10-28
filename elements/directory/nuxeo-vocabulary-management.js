@@ -396,6 +396,20 @@ Polymer({
     if (this.vocabularies) {
       this.vocabularies = this._sortedVocabularies(this.vocabularies);
     }
+    if (this._filters.label) {
+      // Label selections use translated text, so a previous locale's selection is no longer valid.
+      const filters = { ...this._filters };
+      delete filters.label;
+      this._filters = filters;
+      const table = this.$.table ?? this.$$('#table');
+      if (table) {
+        table.querySelectorAll('nuxeo-data-table-column').forEach((column) => {
+          if (column.key === 'label') {
+            column.filterValue = [];
+          }
+        });
+      }
+    }
     if (this._allEntries && this._allEntries.length > 0) {
       // A fresh reference re-runs `_computeAggregations`; `_applyFilters` re-stamps the rows.
       this._allEntries = this._allEntries.slice();

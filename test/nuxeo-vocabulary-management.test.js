@@ -892,6 +892,69 @@ suite('nuxeo-vocabulary-management', () => {
       element._allEntries = [];
       expect(() => element._onLocaleLoaded()).to.not.throw();
     });
+
+    test('should clear an active Label selection when translations arrive and preserve other filters', async () => {
+      sinon.stub(element, '_refresh');
+      element.selectedVocabulary = 'continent';
+      element.colDef = [
+        { key: 'id', name: 'ID' },
+        { key: 'label', name: 'Label' },
+      ];
+      const entries = [
+        { properties: { id: 'europe', label: 'label.directories.continent.europe' } },
+        { properties: { id: 'asia', label: 'label.directories.continent.asia' } },
+      ];
+      element._allEntries = entries;
+      element._applyFilters();
+      await flush();
+
+      const table = element.$$('#table');
+      const columns = Array.from(table.querySelectorAll('nuxeo-data-table-column'));
+      const labelColumn = columns.find((column) => column.key === 'label');
+      const idColumn = columns.find((column) => column.key === 'id');
+      idColumn.filterValue = ['europe'];
+      labelColumn.filterValue = ['label.directories.continent.europe'];
+      await flush();
+      expect(element._filters).to.deep.equal({
+        id: ['europe'],
+        label: ['label.directories.continent.europe'],
+      });
+      expect(element.entries).to.deep.equal([entries[0]]);
+      const labelDropdown = Array.from(table.querySelectorAll('nuxeo-dropdown-aggregation')).find(
+        (dropdown) => dropdown.closest('nuxeo-data-table-cell')?.column?.key === 'label',
+      );
+      expect(labelDropdown.value).to.deep.equal(['label.directories.continent.europe']);
+
+      element.i18n.callsFake((key) => (key === 'label.directories.continent.europe' ? 'Europe' : key));
+      element._onLocaleLoaded();
+      await flush();
+
+      expect(element._filters).to.deep.equal({ id: ['europe'] });
+      expect(labelColumn.filterValue).to.deep.equal([]);
+      expect(labelDropdown.value).to.deep.equal([]);
+      expect(idColumn.filterValue).to.deep.equal(['europe']);
+      expect(element.entries).to.deep.equal([entries[0]]);
+      expect(element._aggregations.label.extendedBuckets.some((bucket) => bucket.key === 'Europe')).to.be.true;
+      expect(entries[0].properties.label).to.equal('label.directories.continent.europe');
+
+      labelColumn.filterValue = ['Europe'];
+      await flush();
+      expect(element._filters.label).to.deep.equal(['Europe']);
+      expect(element.entries).to.deep.equal([entries[0]]);
+    });
+
+    test('should clear a Label text filter even when the table has not rendered', () => {
+      element._allEntries = [{ properties: { id: 'europe', label: 'label.directories.continent.europe' } }];
+      element._filters = { label: 'label.directories.continent' };
+      element._applyFilters();
+      expect(element.entries).to.have.lengthOf(1);
+
+      element.i18n.callsFake((key) => (key === 'label.directories.continent.europe' ? 'Europe' : key));
+      element._onLocaleLoaded();
+
+      expect(element._filters).to.deep.equal({});
+      expect(element.entries).to.have.lengthOf(1);
+    });
   });
 
   suite('_sortedVocabularies', () => {
