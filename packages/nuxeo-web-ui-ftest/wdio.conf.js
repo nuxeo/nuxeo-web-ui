@@ -176,6 +176,23 @@ export const config = {
   // WebdriverIO allows it to run your tests in arbitrary locations (e.g. locally or
   // on a remote machine).
   runner: 'local',
+  /*
+   * Spawn each worker with a plain `fork()` instead of letting WebdriverIO wrap it in `xvfb-run`.
+   * `plugin/a11y/wdio.conf.js` carries the full explanation; in short, `@wdio/xvfb` decides to wrap
+   * on "no DISPLAY is set" alone, the wrapper is `spawn`ed rather than `fork`ed so the IPC channel
+   * lands on fd 3, and `xvfb-run` 2:21.1.22 (ubuntu-26.04) reclaims fd 3 for Xvfb's diagnostics.
+   * Every worker then dies on its first `process.send` with `write EINVAL`, before running anything.
+   *
+   * This is a no-op for `ftest.yaml`, which runs the whole suite inside Alfresco's `xvfb-record`
+   * action: that sets DISPLAY, so the wrapper already declined and fd 3 already survived. It is the
+   * fix for `cross-repo.yaml`, which provisions no display on the reasoning that `--headless` Chrome
+   * needs none - true of Chrome, but the wrapping decision never looks at Chrome.
+   *
+   * The one thing it gives up: a headful run on a Linux box with no DISPLAY no longer gets a virtual
+   * display for free. Run `xvfb-run npm run ftest` there. CI is unaffected either way - headless in
+   * `cross-repo.yaml`, and a real display from `xvfb-record` on the `video` path in `ftest.yaml`.
+   */
+  autoXvfb: false,
   specs,
   // check http://webdriver.io/guide/testrunner/debugging.html for more info on debugging with wdio
   debug: process.env.DEBUG,
