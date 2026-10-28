@@ -12,6 +12,9 @@
   },
   "license": "Apache-2.0",
   "overrides": {
+    "get-uri": {
+      "basic-ftp": "6.2.3"
+    },
     "serialize-javascript": "^7.0.5",
     "tar-fs": "^3.0.9"
   },
