@@ -19,6 +19,13 @@ const debug = process.env.DEBUG;
 const debugTimeout = 24 * 60 * 60 * 1000;
 const timeout = 240000;
 
+/*
+ * Pushed into every worker's `execArgv` below so it is loaded before the runner's entry point.
+ * It makes a worker that loses its IPC channel to the launcher say so, instead of dying on an
+ * unhandled 'error' event that leaves nothing but `exec returned: 1` in the build log.
+ */
+const workerBootstrap = new URL('./test/wdio-worker-bootstrap.js', import.meta.url).href;
+
 import('@babel/register').then(({ default: register }) => {
   register({
     presets: [
@@ -59,7 +66,7 @@ if (process.env.HEADLESS) {
 capability['goog:chromeOptions'] = options;
 
 export const config = {
-  execArgv: debug ? ['--inspect'] : [],
+  execArgv: debug ? ['--import', workerBootstrap, '--inspect'] : ['--import', workerBootstrap],
   //
   // ====================
   // Runner Configuration
@@ -68,6 +75,25 @@ export const config = {
   // WebdriverIO allows it to run your tests in arbitrary locations (e.g. locally or
   // on a remote machine).
   runner: 'local',
+  /*
+   * Spawn each worker with a plain `fork()` instead of letting WebdriverIO wrap it in `xvfb-run`.
+   *
+   * `@wdio/local-runner` hands worker creation to `@wdio/xvfb`, which wraps the worker whenever
+   * `XvfbManager.shouldRun()` says so. On Linux that is "no DISPLAY is set" - the capability check
+   * that would notice these specs are headless never runs, because `ProcessFactory` calls
+   * `shouldRun()` with no capabilities at all. CI has no DISPLAY, so every worker got wrapped.
+   *
+   * The wrapper is `spawn`ed rather than `fork`ed, which leaves the worker's IPC channel on fd 3,
+   * and `xvfb-run` 2:21.1.22 - the version on the ubuntu-26.04 runner image - takes fd 3 for
+   * Xvfb's own diagnostics (`exec 3>&1`, `exec 3>>"$ERRORFILE"`) and runs its command with `3>&-`.
+   * The worker's first `process.send` then fails with `write EINVAL` and it dies before running a
+   * single spec. 2:21.1.12 on ubuntu-24.04 left fd 3 alone, which is why this broke the moment
+   * `ubuntu-latest` rolled over to 26.04 and not before.
+   *
+   * These specs drive headless Chrome and have never needed a virtual display, so the wrapper was
+   * only ever a liability here.
+   */
+  autoXvfb: false,
   //
   // ==================
   // Specify Test Files
@@ -111,6 +137,11 @@ export const config = {
   // ===================
   // Define all options that are relevant for the WebdriverIO instance here
   //
+  // Gives each worker a `WDIO_LOG_PATH`, so driver and service errors land in
+  // `target/wdio-logs/<spec>-<cid>.log` instead of being thrown away. `a11y.xml` prints these when
+  // the suite fails; without them a failed run says only `exec returned: 1`. This does not
+  // redirect worker stdout/stderr - that is `groupLogsByTestSpec`, which stays off.
+  outputDir: 'target/wdio-logs',
   // Level of logging verbosity: trace | debug | info | warn | error | silent
   logLevel: 'warn',
   //
