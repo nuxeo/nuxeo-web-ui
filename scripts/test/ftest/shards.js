@@ -343,7 +343,7 @@ function headerFor(block) {
   return `${block.indent}// shard ${block.number} - ${formatTotal(totalOf(block))}${note}`;
 }
 
-/** The two drifts `--place` reports but will not repair; see the file header for why. */
+/** Two of the three the file header lists; the third, a name it cannot write, is in `place()`. */
 function reportUnfixable(blocks) {
   const shardsByFeature = new Map();
   blocks.forEach((block) =>
