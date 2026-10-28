@@ -31,10 +31,10 @@
  * feature turns out to be an outlier.
  *
  * `--check` runs as part of `npm run lint` and only ever reports, so the two modes divide the way
- * prettier's do: lint reports, format repairs. Two drifts `--place` deliberately leaves to the
- * guard - a feature on two shards, and an entry whose file is gone - because both are anomalies
- * rather than routine omissions, and either mechanical "fix" would drop coverage quietly where the
- * guard drops it loudly.
+ * prettier's do: lint reports, format repairs. Three drifts `--place` deliberately leaves to the
+ * guard - a feature on two shards, an entry whose file is gone, and a filename this file cannot
+ * carry - because each is an anomaly rather than a routine omission, and a mechanical "fix" for
+ * either of the first two would drop coverage quietly where the guard drops it loudly.
  */
 
 const fs = require('fs');
@@ -105,6 +105,15 @@ const SHARDS = [
   ],
 ];
 
+/*
+ * What a feature filename may contain to be placeable. A name only ever reaches this file inside a
+ * single-quoted literal, and SHARD_ENTRY below cannot read an apostrophe back out of one, so a name
+ * carrying one is declined rather than escaped: `--place` skips it and `--check` says to rename it.
+ * Writing it unescaped would make this file invalid JavaScript, which takes out `--specs` and with
+ * it every shard's spec list. Every feature in ftest/features/ has always been well within this.
+ */
+const WRITABLE_FEATURE_NAME = /^[\w.-]+\.feature$/;
+
 /**
  * The shard numbers the workflow matrix actually dispatches.
  *
@@ -170,8 +179,12 @@ function check() {
     .filter((feature) => !shardsByFeature.has(feature))
     .forEach((feature) =>
       errors.push(
-        `  ${feature} is assigned to no shard, so CI would not run it at all.\n` +
-          '    Run `npm run format` to append it to the shard with the smallest total.',
+        WRITABLE_FEATURE_NAME.test(feature)
+          ? `  ${feature} is assigned to no shard, so CI would not run it at all.\n` +
+              '    Run `npm run format` to append it to the shard with the smallest total.'
+          : `  ${feature} is assigned to no shard, and its name cannot be written to the manifest, so\n` +
+              '    `npm run format` will not place it either. Rename it using letters, digits, dots,\n' +
+              '    dashes and underscores only, then run `npm run format`.',
       ),
     );
 
@@ -378,11 +391,23 @@ function place() {
   reportUnfixable(blocks);
 
   const assigned = new Set(blocks.flatMap((block) => block.entries.map((entry) => entry.feature)));
-  const unplaced = fs
+  const candidates = fs
     .readdirSync(FEATURES_DIR)
     .filter((entry) => entry.endsWith('.feature'))
     .filter((feature) => !assigned.has(feature))
     .sort();
+
+  /* The third drift reported rather than repaired; see WRITABLE_FEATURE_NAME for why not escaped. */
+  const unwritable = candidates.filter((feature) => !WRITABLE_FEATURE_NAME.test(feature));
+  if (unwritable.length > 0) {
+    console.warn(
+      'ftest shards: left unplaced because the manifest cannot quote these names - rename them\n' +
+        '  using letters, digits, dots, dashes and underscores, then run `npm run format` again:',
+    );
+    console.warn(unwritable.map((feature) => `  ${feature}`).join('\n'));
+  }
+
+  const unplaced = candidates.filter((feature) => WRITABLE_FEATURE_NAME.test(feature));
   if (unplaced.length === 0) {
     return;
   }
