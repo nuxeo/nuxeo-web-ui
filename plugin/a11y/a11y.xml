@@ -38,9 +38,9 @@
       </not>
       <then>
         <echo level="error">The a11y suite failed (npm start exited ${a11y.exit.code}).</echo>
-        <echo level="error">WebdriverIO worker logs from ${basedir}/target/wdio-logs follow.</echo>
+        <echo level="error">WebdriverIO worker logs from ${out.dir}/wdio-logs follow.</echo>
         <concat>
-          <fileset dir="${basedir}/target/wdio-logs" includes="*.log" erroronmissingdir="false" />
+          <fileset dir="${out.dir}/wdio-logs" includes="*.log" erroronmissingdir="false" />
           <header filtering="false">---------------- wdio worker logs ----------------
 </header>
           <footer filtering="false">-------------- end wdio worker logs --------------
