@@ -13,6 +13,7 @@
     "node": ">=22.13.0"
   },
   "overrides": {
+    "@puppeteer/browsers": "3.2.6",
     "get-uri": {
       "basic-ftp": "6.2.3"
     },

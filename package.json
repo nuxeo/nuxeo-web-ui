@@ -13,6 +13,7 @@
     "workboxCli": "7.4.1"
   },
   "overrides": {
+    "@puppeteer/browsers": "3.2.6",
     "get-uri": {
       "basic-ftp": "6.2.3"
     },
