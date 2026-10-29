@@ -1807,7 +1807,7 @@ Polymer({
     if (prefsScope === 'document') {
       return '';
     }
-    const layout = prefsLayout || (document && document.type);
+    const layout = prefsLayout || document?.type;
     return layout ? `layoutPrefs.${layout}` : '';
   },
 
