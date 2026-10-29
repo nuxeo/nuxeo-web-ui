@@ -1300,6 +1300,40 @@ suite('nuxeo-app', () => {
       expect(document.title).to.include('wf');
       expect(document.title).to.include('step');
     });
+
+    // WEBUI-1119: an empty `org.nuxeo.ecm.product.name` reaches the element as product-name="",
+    // which used to leave the tab title ending with a dangling " - ".
+    test('omits the trailing separator when productName is empty (WEBUI-1119)', () => {
+      app.page = 'home';
+      app.productName = '';
+      app._updateTitle();
+      expect(document.title).to.equal('app.title.home');
+      expect(document.title).to.not.match(/ - $/);
+    });
+
+    test('omits the trailing separator when productName is blank (WEBUI-1119)', () => {
+      app.page = 'home';
+      app.productName = '   ';
+      app._updateTitle();
+      expect(document.title).to.equal('app.title.home');
+    });
+
+    test('still appends productName when it is configured (WEBUI-1119)', () => {
+      app.page = 'home';
+      app.productName = 'Nuxeo';
+      app._updateTitle();
+      expect(document.title).to.equal('app.title.home - Nuxeo');
+    });
+
+    test('joins document and productName without a dangling separator on browse (WEBUI-1119)', () => {
+      sinon.stub(app, 'hasFacet').returns(false);
+      app.page = 'browse';
+      app.currentDocument = { title: 'My Doc', type: 'File' };
+      app.productName = '';
+      app._updateTitle();
+      expect(document.title).to.equal('My Doc');
+      app.hasFacet.restore();
+    });
   });
 
   suite('keyboard shortcuts and wizards', () => {
@@ -2037,6 +2071,52 @@ suite('nuxeo-app', () => {
       expect(toast.getAttribute('id')).to.equal('snack_bulkedit');
       app.$.snackbarPanel.querySelector.restore();
       append.restore();
+    });
+
+    suite('_newToast MDCSnackbar:closed handling', () => {
+      function closedToast(id, callback, state) {
+        const toast = app._newToast(id, callback);
+        document.body.appendChild(toast);
+        if (state !== undefined) {
+          toast.__state = state;
+        }
+        return toast;
+      }
+
+      function close(toast, reason) {
+        toast.dispatchEvent(new CustomEvent('MDCSnackbar:closed', { detail: { reason } }));
+      }
+
+      test('detaches the toast and runs the callback when the action aborts the command', () => {
+        const callback = sinon.spy();
+        const toast = closedToast('snack_abort', callback);
+
+        close(toast, 'action');
+
+        expect(callback).to.have.been.calledOnce;
+        expect(toast.__state).to.deep.equal({ dismissed: false, aborted: true });
+        expect(toast.parentNode).to.be.null;
+      });
+
+      test('detaches the toast when it is dismissed after the command has ended', () => {
+        const toast = closedToast('snack_ended', undefined, { ended: true });
+
+        close(toast, 'dismiss');
+
+        expect(toast.__state).to.be.null;
+        expect(toast.parentNode).to.be.null;
+      });
+
+      test('keeps the toast attached when dismissed while the command is still running', () => {
+        // Removing it here would make the snackbar reappear before the task finishes.
+        const toast = closedToast('snack_running', undefined, { ended: false });
+
+        close(toast, 'dismiss');
+
+        expect(toast.__state.dismissed).to.be.true;
+        expect(toast.parentNode).to.equal(document.body);
+        toast.remove();
+      });
     });
 
     test('_notify shows message on command toast', () => {

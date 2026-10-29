@@ -202,8 +202,7 @@ Polymer({
     if (this.selectedTemplate.properties['tmpl:allowOverride'] && this._templateData) {
       if (this.document.properties['nxts:bindings']) {
         let binding;
-        for (let i = 0; i < this.document.properties['nxts:bindings'].length; i++) {
-          const b = this.document.properties['nxts:bindings'][i];
+        for (const b of this.document.properties['nxts:bindings']) {
           if (b.templateName === this.selectedTemplate.properties['tmpl:templateName']) {
             binding = b;
           }
@@ -251,8 +250,8 @@ Polymer({
           }
         }),
       )
-      .catch((response) => {
-        this._toast(this.i18n('renderTemplateButton.toast.render.error', response.message));
+      .catch((error) => {
+        this._toast(this.i18n('renderTemplateButton.toast.render.error', error.message));
       });
   },
 
@@ -331,7 +330,7 @@ Polymer({
           a.href = URL.createObjectURL(blob);
           document.body.appendChild(a);
           a.click();
-          document.body.removeChild(a);
+          a.remove();
           URL.revokeObjectURL(a.href);
         }
       });
