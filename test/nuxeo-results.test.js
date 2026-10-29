@@ -1775,6 +1775,39 @@ suite('nuxeo-results', () => {
       stub.restore();
     });
 
+    test('_getAllGlobalPreferencesOnce retries after the preferences request failed', async () => {
+      // Module-level __allGlobalPrefsPromise is shared across all nuxeo-results tests; clear caches first.
+      results._connectedUserChanged('prefs-test-user-d', 'prefs-test-user-c');
+      sinon.stub(console, 'error');
+      const getStub = sinon.stub(results.$.preferences, 'get');
+      getStub.onFirstCall().rejects({ status: 500 });
+      getStub.onSecondCall().resolves({ preferences: { default_search: '{}' } });
+
+      const failed = await results._getAllGlobalPreferencesOnce();
+      expect(failed).to.deep.equal({});
+      expect(results._isUnavailablePrefsMap(failed)).to.be.true;
+
+      const prefs = await results._getAllGlobalPreferencesOnce();
+      expect(getStub).to.have.been.calledTwice;
+      expect(prefs).to.deep.equal({ default_search: '{}' });
+      expect(results._isUnavailablePrefsMap(prefs)).to.be.false;
+    });
+
+    test('_loadGlobalPrefs does not cache the defaults used while the preferences request fails', async () => {
+      results._connectedUserChanged('prefs-test-user-f', 'prefs-test-user-e');
+      sinon.stub(console, 'error');
+      const getStub = sinon.stub(results.$.preferences, 'get');
+      getStub.onFirstCall().rejects({ status: 500 });
+      getStub.onSecondCall().resolves({ preferences: { default_search: '{"order":["dc:title"]}' } });
+      results.document = null;
+
+      await results._loadGlobalPrefs(true, { provider: 'default_search' }, 'retry-user');
+      expect(results.globalPrefs).to.deep.equal({});
+
+      await results._loadGlobalPrefs(true, { provider: 'default_search' }, 'retry-user');
+      expect(results.globalPrefs).to.deep.equal({ order: ['dc:title'] });
+    });
+
     test('_putGlobalPreference writes plain text payload', async () => {
       const putStub = sinon.stub(results.$.preferences, 'put').resolves();
       await results._putGlobalPreference('default_search', { order: ['dc:title'] });
@@ -2120,6 +2153,23 @@ suite('nuxeo-results', () => {
         await results._loadDocPrefs(true, doc, 'layout-user-3', 'layoutPrefs.Folder');
         expect(results.docPrefs).to.deep.equal({ order: ['dc:created'] });
         expect(warnStub).to.have.been.called;
+      });
+
+      test('_loadDocPrefs retries the layout prefs after the preferences request failed', async () => {
+        // Module-level preference caches are shared across all nuxeo-results tests; clear them first.
+        results._connectedUserChanged('layout-retry-user-b', 'layout-retry-user-a');
+        sinon.stub(console, 'error');
+        const getStub = sinon.stub(results.$.preferences, 'get');
+        getStub.onFirstCall().rejects({ status: 500 });
+        getStub.onSecondCall().resolves({ preferences: { 'layoutPrefs.Folder': '{"order":["dc:title"]}' } });
+        const doc = { path: '/default-domain/a', type: 'Folder' };
+
+        await results._loadDocPrefs(true, doc, 'layout-retry-user', 'layoutPrefs.Folder');
+        expect(results.docPrefs).to.deep.equal({});
+
+        await results._loadDocPrefs(true, doc, 'layout-retry-user', 'layoutPrefs.Folder');
+        expect(getStub).to.have.been.calledTwice;
+        expect(results.docPrefs).to.deep.equal({ order: ['dc:title'] });
       });
 
       test('_loadDocPrefs ignores a layout prefs load superseded by a newer context', async () => {

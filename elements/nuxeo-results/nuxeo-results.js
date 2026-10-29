@@ -44,6 +44,8 @@ const hasSelectAllEnabled = config.get('selection.selectAllEnabled', false);
 const __globalPrefsCache = new Map();
 // session-only GET /me/preferences promise
 let __allGlobalPrefsPromise = null;
+// empty maps standing in for a failed GET /me/preferences: never cached, so a later load retries the request
+const __unavailablePrefsMaps = new WeakSet();
 
 // doc prefs cache
 const __docPrefsCache = new Map();
@@ -1062,7 +1064,8 @@ Polymer({
                 key: layoutKey || docKey,
                 error,
               });
-              // Fallback: save to localStorage even if backend fails
+              // Fallback: save to localStorage even if backend fails. The local copy is kept per document (`name`),
+              // so with layout scope a failed save applies to this document only, until a later save succeeds.
               this.set('_settings.table', settings);
               this.saveSettings();
             });
@@ -1418,21 +1421,34 @@ Polymer({
       return (raw && raw.preferences) || {};
     } catch (error) {
       console.error('[nuxeo-results] Failed to fetch global preferences', error);
-      return {}; // ← graceful degradation
+      const unavailable = {}; // ← graceful degradation
+      __unavailablePrefsMaps.add(unavailable);
+      return unavailable;
     }
   },
 
   // Returns a cached in-flight promise for GET /me/preferences so multiple loads share one request per session.
+  // A failed request is not kept, so the next load retries it.
   async _getAllGlobalPreferencesOnce() {
     if (!__allGlobalPrefsPromise) {
       __allGlobalPrefsPromise = this._getAllGlobalPreferences();
     }
+    const promise = __allGlobalPrefsPromise;
     try {
-      return await __allGlobalPrefsPromise;
+      const prefsMap = await promise;
+      if (this._isUnavailablePrefsMap(prefsMap) && __allGlobalPrefsPromise === promise) {
+        __allGlobalPrefsPromise = null;
+      }
+      return prefsMap;
     } catch (e) {
       __allGlobalPrefsPromise = null;
       throw e;
     }
+  },
+
+  // Whether a preferences map stands in for a failed GET /me/preferences, and so must not be cached.
+  _isUnavailablePrefsMap(prefsMap) {
+    return __unavailablePrefsMaps.has(prefsMap);
   },
 
   // Configures the nuxeo-resource instance to PUT a single global preference key at /me/preferences/<key>.
@@ -1487,6 +1503,12 @@ Polymer({
 
     try {
       const prefsMap = await this._getAllGlobalPreferencesOnce();
+
+      // preferences could not be fetched: use the defaults now, without caching them, so the next load retries
+      if (this._isUnavailablePrefsMap(prefsMap)) {
+        this.globalPrefs = {};
+        return;
+      }
 
       if (!Object.hasOwn(prefsMap, providerName)) {
         const empty = {};
@@ -1733,6 +1755,10 @@ Polymer({
         // A save completed while the GET was pending holds newer prefs than this response
         if (__globalPrefsCache.has(cacheKey)) {
           return __globalPrefsCache.get(cacheKey);
+        }
+        // preferences could not be fetched: fall back to the document prefs without caching, so the next load retries
+        if (this._isUnavailablePrefsMap(prefsMap)) {
+          return {};
         }
         const prefs = Object.hasOwn(prefsMap, layoutPrefsKey) ? this._parsePrefMapValue(prefsMap[layoutPrefsKey]) : {};
         __globalPrefsCache.set(cacheKey, prefs);
