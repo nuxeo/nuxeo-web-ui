@@ -46,20 +46,28 @@ const template = html`
           @apply --layout-flex-none;
         }
 
+        /*
+         * WEBUI-1491: break inside a word only when the word cannot fit on a line of its own, so
+         * ordinary values read normally instead of being chopped mid-word. It has to be
+         * overflow-wrap: anywhere rather than break-word, because only anywhere contributes
+         * its break opportunities to the min-content size - and these values sit in flex items,
+         * whose width is driven by exactly that. With break-word a single unbroken value (a URL,
+         * a path, a hash) keeps its whole length as a minimum and overflows the compare pane.
+         */
         span {
-          word-break: break-all;
+          overflow-wrap: anywhere;
         }
 
         span.added {
           display: inline;
-          word-break: break-all;
+          overflow-wrap: anywhere;
           background-color: var(--nuxeo-diff-added-color, #b4efcb);
           @apply --nuxeo-string-diff-added;
         }
 
         span.deleted {
           display: inline;
-          word-break: break-all;
+          overflow-wrap: anywhere;
           background-color: var(--nuxeo-diff-deleted-color, #e6b1b1);
           @apply --nuxeo-string-diff-deleted;
         }
@@ -107,7 +115,7 @@ const template = html`
         }
 
         .text.diff {
-          word-break: break-all;
+          overflow-wrap: anywhere;
         }
 
         .array.complex {
