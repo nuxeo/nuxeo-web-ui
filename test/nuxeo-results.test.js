@@ -2006,22 +2006,24 @@ suite('nuxeo-results', () => {
     });
 
     suite('Layout-scoped prefs (WEBUI-1380)', () => {
-      test('_computeLayoutPrefsKey keys prefs by layout unless document scope is requested', () => {
+      test('_computeLayoutPrefsKey keys prefs by document type and table unless overridden', () => {
         const folder = { type: 'Folder' };
         expect(results._computeLayoutPrefsKey('layout', undefined, folder, 'nuxeo-document-content.results')).to.equal(
-          'layoutPrefs.nuxeo-document-content.results',
+          'layoutPrefs.Folder.nuxeo-document-content.results',
         );
         expect(results._computeLayoutPrefsKey('layout', undefined, folder, '')).to.equal('layoutPrefs.Folder');
         expect(results._computeLayoutPrefsKey('layout', 'case-notes', { type: 'Case' }, 'x-case.notes')).to.equal(
           'layoutPrefs.case-notes',
         );
-        expect(results._computeLayoutPrefsKey('layout', undefined, { path: '/default-domain' }, '')).to.equal('');
+        expect(
+          results._computeLayoutPrefsKey('layout', undefined, { path: '/default-domain' }, 'x-case.notes'),
+        ).to.equal('');
         expect(results._computeLayoutPrefsKey('document', 'case-notes', { type: 'Case' }, '')).to.equal('');
         // not resolved until attached
         expect(results._computeLayoutPrefsKey('layout', undefined, folder, undefined)).to.be.undefined;
       });
 
-      test('keys prefs by the hosting layout so document types reusing it share them and distinct tables do not', () => {
+      test('keys prefs per document type and per table of the hosting layout', () => {
         if (!customElements.get('x-webui-1380-layout')) {
           customElements.define('x-webui-1380-layout', class extends HTMLElement {});
         }
@@ -2036,10 +2038,13 @@ suite('nuxeo-results', () => {
         try {
           notes.document = { path: '/default-domain/case-1', type: 'Case' };
           files.document = { path: '/default-domain/case-1', type: 'Case' };
-          expect(notes._layoutPrefsKey).to.equal('layoutPrefs.x-webui-1380-layout.notes');
-          expect(files._layoutPrefsKey).to.equal('layoutPrefs.x-webui-1380-layout.files');
+          expect(notes._layoutPrefsKey).to.equal('layoutPrefs.Case.x-webui-1380-layout.notes');
+          expect(files._layoutPrefsKey).to.equal('layoutPrefs.Case.x-webui-1380-layout.files');
+          // another document of the same type shares the key; another type does not
+          notes.document = { path: '/default-domain/case-2', type: 'Case' };
+          expect(notes._layoutPrefsKey).to.equal('layoutPrefs.Case.x-webui-1380-layout.notes');
           notes.document = { path: '/default-domain/folder-1', type: 'Folder' };
-          expect(notes._layoutPrefsKey).to.equal('layoutPrefs.x-webui-1380-layout.notes');
+          expect(notes._layoutPrefsKey).to.equal('layoutPrefs.Folder.x-webui-1380-layout.notes');
         } finally {
           host.remove();
         }
