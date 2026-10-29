@@ -1029,28 +1029,31 @@ Polymer({
 
       // ---- doc level (content views) ----
       if (isSettingsView && this.document && this.document.path) {
+        // Snapshot the context now: the view may restore another document's prefs before the debounce fires
         const layoutKey = this._layoutPrefsKey;
         const docKey = this._getDocResultsPrefsKey();
+        const docPath = this.document.path;
+        const settings = this._deepClone(this.view.settings);
         this._debounceSave('_docPrefsSaveDebouncer', () => {
           // Save to backend (primary): shared by the layout, or specific to the document when opted in
           const save = layoutKey
-            ? this.saveLayoutPrefs(layoutKey, this.view.settings)
-            : this.saveDocPrefs(this.document.path, docKey, this.view.settings);
+            ? this.saveLayoutPrefs(layoutKey, settings)
+            : this.saveDocPrefs(docPath, docKey, settings);
           save
             .then(() => {
               // Sync to localStorage on success (fallback cache)
-              this.set(`_settings.${this.displayMode}`, this.view.settings);
+              this.set('_settings.table', settings);
               this.saveSettings();
             })
             .catch((error) => {
               // eslint-disable-next-line no-console
               console.warn('Failed to save document results preferences to backend, syncing to localStorage only', {
-                path: this.document && this.document.path,
+                path: docPath,
                 key: layoutKey || docKey,
                 error,
               });
               // Fallback: save to localStorage even if backend fails
-              this.set(`_settings.${this.displayMode}`, this.view.settings);
+              this.set('_settings.table', settings);
               this.saveSettings();
             });
         });
@@ -1626,7 +1629,10 @@ Polymer({
     await this._putGlobalPreference(key, cloned);
 
     __globalPrefsCache.set(this._cacheKey(userId, key), cloned);
-    this.docPrefs = cloned;
+    // Only apply to the view if it still shows a document with this layout for this user
+    if (this.document?.path && this._layoutPrefsKey === key && this._getUserId() === userId) {
+      this.docPrefs = cloned;
+    }
   },
 
   // Returns the stable preference key used to store/retrieve results table prefs on a document.
@@ -1709,6 +1715,10 @@ Polymer({
     const loadId = this.__docPrefsLoadId;
     return this._getAllGlobalPreferencesOnce()
       .then((prefsMap) => {
+        // A save completed while the GET was pending holds newer prefs than this response
+        if (__globalPrefsCache.has(cacheKey)) {
+          return __globalPrefsCache.get(cacheKey);
+        }
         const prefs = Object.hasOwn(prefsMap, layoutPrefsKey) ? this._parsePrefMapValue(prefsMap[layoutPrefsKey]) : {};
         __globalPrefsCache.set(cacheKey, prefs);
         return prefs;
@@ -1719,7 +1729,7 @@ Polymer({
           key: layoutPrefsKey,
           error,
         });
-        return {};
+        return __globalPrefsCache.get(cacheKey) || {};
       })
       .then((prefs) => {
         if (loadId === this.__docPrefsLoadId) {

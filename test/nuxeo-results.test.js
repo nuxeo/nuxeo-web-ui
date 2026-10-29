@@ -617,6 +617,31 @@ suite('nuxeo-results', () => {
       results.prefsScope = 'layout';
       results.document = null;
     });
+
+    test('_saveViewSettings saves the settings and context captured before the debounce', async () => {
+      results._isRestoring = false;
+      results.displayMode = 'table';
+      results._settings = {};
+      sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+      results.document = { path: '/default-domain/a', type: 'Folder' };
+      results.view = createMockView();
+      results.view.settings = { order: ['dc:title'] };
+      let pending;
+      sinon.stub(results, '_debounceSave').callsFake((_, fn) => {
+        pending = fn;
+      });
+      const saveLayoutStub = sinon.stub(results, 'saveLayoutPrefs').resolves();
+
+      results._saveViewSettings();
+      // another document's prefs are restored before the debounce fires
+      results.document = { path: '/default-domain/ws', type: 'Workspace' };
+      results.view.settings = { order: ['dc:created'] };
+      pending();
+      await Promise.resolve();
+
+      expect(saveLayoutStub).to.have.been.calledOnceWith('layoutPrefs.Folder', { order: ['dc:title'] });
+      results.document = null;
+    });
   });
 
   suite('Column Management', () => {
@@ -2082,13 +2107,62 @@ suite('nuxeo-results', () => {
           .catch((err) => expect(err.message).to.contain('missing user id'));
 
         const putStub = sinon.stub(results, '_putGlobalPreference').resolves();
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
         results._connectedUserId = 'layout-user-5';
+        results.document = { path: '/default-domain/a', type: 'Folder' };
+        await Promise.resolve();
         await results.saveLayoutPrefs('layoutPrefs.Folder', { order: ['dc:title'] });
         expect(putStub).to.have.been.calledWith('layoutPrefs.Folder', { order: ['dc:title'] });
         expect(results.docPrefs).to.deep.equal({ order: ['dc:title'] });
 
         // another document of the same layout picks the saved prefs from the session cache
         results._loadDocPrefs(true, { path: '/default-domain/other' }, 'layout-user-5', 'layoutPrefs.Folder');
+        expect(results.docPrefs).to.deep.equal({ order: ['dc:title'] });
+        results.document = null;
+      });
+
+      test('saveLayoutPrefs completing after a layout switch does not override the new layout prefs', async () => {
+        let resolvePut;
+        sinon.stub(results, '_putGlobalPreference').returns(
+          new Promise((resolve) => {
+            resolvePut = resolve;
+          }),
+        );
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results._connectedUserId = 'layout-user-6';
+        results.document = { path: '/default-domain/a', type: 'Folder' };
+        const save = results.saveLayoutPrefs('layoutPrefs.Folder', { order: ['dc:title'] });
+
+        // switch to a document of another layout while the PUT is pending
+        results.document = { path: '/default-domain/ws', type: 'Workspace' };
+        results.docPrefs = { order: ['dc:created'] };
+        resolvePut();
+        await save;
+
+        expect(results.docPrefs).to.deep.equal({ order: ['dc:created'] });
+        // the saved layout still has its prefs cached for the next document of that layout
+        results._loadDocPrefs(true, { path: '/default-domain/b' }, 'layout-user-6', 'layoutPrefs.Folder');
+        expect(results.docPrefs).to.deep.equal({ order: ['dc:title'] });
+        results.document = null;
+      });
+
+      test('a pending initial load does not overwrite layout prefs saved meanwhile', async () => {
+        let resolveGet;
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').returns(
+          new Promise((resolve) => {
+            resolveGet = resolve;
+          }),
+        );
+        sinon.stub(results, '_putGlobalPreference').resolves();
+        results._connectedUserId = 'layout-user-7';
+        const load = results._loadDocPrefs(true, { path: '/default-domain/a' }, 'layout-user-7', 'layoutPrefs.Folder');
+
+        await results.saveLayoutPrefs('layoutPrefs.Folder', { order: ['dc:title'] });
+        resolveGet({ 'layoutPrefs.Folder': '{"order":["dc:created"]}' });
+        await load;
+
+        expect(results.docPrefs).to.deep.equal({ order: ['dc:title'] });
+        results._loadDocPrefs(true, { path: '/default-domain/b' }, 'layout-user-7', 'layoutPrefs.Folder');
         expect(results.docPrefs).to.deep.equal({ order: ['dc:title'] });
       });
     });
