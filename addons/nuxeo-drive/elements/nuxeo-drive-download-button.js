@@ -204,17 +204,17 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
     const segments = firstPart.split('/');
     const scheme = segments[0] === 'https' ? 1 : 0;
     const server = segments.slice(1, -1).join('/');
-    const firstUuid = segments[segments.length - 1].replace(/-/g, '');
+    const firstUuid = segments[segments.length - 1].replaceAll('-', '');
 
     const allUuidHex = [firstUuid];
     for (let i = 1; i < parts.length; i++) {
-      allUuidHex.push(parts[i].trim().replace(/-/g, ''));
+      allUuidHex.push(parts[i].trim().replaceAll('-', ''));
     }
 
     const uuidBinary = [];
     allUuidHex.forEach((hexStr) => {
       for (let i = 0; i < hexStr.length; i += 2) {
-        uuidBinary.push(parseInt(hexStr.substr(i, 2), 16));
+        uuidBinary.push(Number.parseInt(hexStr.substr(i, 2), 16));
       }
     });
 

@@ -39,7 +39,7 @@ function setupUI() {
   log = new Log($('#console'));
 
   $('#close').click(() => {
-    if (window.parent.jQuery && window.parent.jQuery.fancybox) {
+    if (window.parent.jQuery?.fancybox) {
       window.parent.jQuery.fancybox.close();
     }
   });
@@ -100,7 +100,7 @@ function run({ baseURL = '/nuxeo', resultColumns, pageProviderName, queryParamet
 
   return nx.connect().then(() => {
     // Setup the language
-    const language = (navigator.language && navigator.language.slice(0, 2)) || 'en';
+    const language = navigator.language?.slice(0, 2) || 'en';
 
     // default columns
     if (!resultColumns || resultColumns.length === 0) {
@@ -126,7 +126,7 @@ function run({ baseURL = '/nuxeo', resultColumns, pageProviderName, queryParamet
       for (const k in searchDocument.properties) {
         const v = searchDocument.properties[k];
         // skip empty values
-        if (typeof v.length !== 'undefined' && v.length === 0) {
+        if (v.length !== undefined && v.length === 0) {
           continue;
         }
         namedParameters[k] = typeof v === 'string' ? v : JSON.stringify(v);

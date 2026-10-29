@@ -178,6 +178,28 @@ suite('nuxeo-document-create-popup', () => {
       });
       expect(getStub).to.not.have.been.called;
     });
+
+    test('should not update when parentPath differs only by a trailing slash', () => {
+      element.parent = { path: '/same/path' };
+      element.parentPath = '/same/path';
+      const getStub = sinon.stub(element.$.defaultDoc, 'get');
+      element._parentPathChanged({
+        detail: { isValidTargetPath: true, parentPath: '/same/path/', suggesterChildren: [] },
+      });
+      expect(getStub).to.not.have.been.called;
+    });
+
+    // "/" must survive the trailing-slash strip, otherwise the root parent never
+    // matches itself and the popup refetches the default document on every change.
+    test('should not update when parentPath is the repository root', () => {
+      element.parent = { path: '/' };
+      element.parentPath = '/';
+      const getStub = sinon.stub(element.$.defaultDoc, 'get');
+      element._parentPathChanged({
+        detail: { isValidTargetPath: true, parentPath: '/', suggesterChildren: [] },
+      });
+      expect(getStub).to.not.have.been.called;
+    });
   });
 
   suite('dialog dismissal configuration', () => {

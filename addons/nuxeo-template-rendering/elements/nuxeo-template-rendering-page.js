@@ -192,8 +192,8 @@ Polymer({
   _documentChanged() {
     if (this.document) {
       this.set('document.properties.tmpl:templateType', this.document.properties['tmpl:templateType'] || 'auto');
-      this.set('editedDocument', this._parseJSON(this.document));
-      if (this.originalDocument === undefined) this.originalDocument = this._parseJSON(this.document);
+      this.set('editedDocument', this._deepClone(this.document));
+      if (this.originalDocument === undefined) this.originalDocument = this._deepClone(this.document);
     }
   },
 
@@ -218,7 +218,7 @@ Polymer({
   },
 
   _resetConfig() {
-    this.set('editedDocument', this._parseJSON(this.document));
+    this.set('editedDocument', this._deepClone(this.document));
   },
 
   _findChangedValues(originalDocument, modifiedDocument) {
@@ -232,18 +232,18 @@ Polymer({
     );
   },
 
-  _parseJSON(obj) {
-    return JSON.parse(JSON.stringify(obj));
+  _deepClone(obj) {
+    return structuredClone(obj);
   },
 
   _save() {
-    const modified = this._parseJSON(this.editedDocument.properties);
-    const originalDocument = this._parseJSON(this.originalDocument.properties);
+    const modified = this._deepClone(this.editedDocument.properties);
+    const originalDocument = this._deepClone(this.originalDocument.properties);
     const changedvalue = this._findChangedValues(originalDocument, modified);
 
     this.editedDocument.properties = changedvalue;
     return this.$.doc.put().then(() => {
-      this.originalDocument = this._parseJSON(this.editedDocument);
+      this.originalDocument = this._deepClone(this.editedDocument);
     });
   },
 

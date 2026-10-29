@@ -90,7 +90,7 @@ jobs:
           registry-url: ${{ env.NPM_REPOSITORY }}
           always-auth: true
           scope: '@nuxeo'
-          node-version: 22
+          node-version: 24
 
       # get-branch returns default-branch without checking that it exists, so the fallback has
       # to name a branch both repositories actually have. A dispatch from any other ref would
