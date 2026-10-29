@@ -212,7 +212,7 @@
     "jsplumb": "2.15.6",
     "lit-element": "^3.2.2",
     "nuxeo": "^4.0.3",
-    "select2": "~4.0.13",
+    "select2": "~4.1.0",
     "three": "^0.184.0",
     "uuid": "^13.0.0",
     "web-animations-js": "^2.3.1"
