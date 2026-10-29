@@ -590,6 +590,33 @@ suite('nuxeo-results', () => {
       saveSpy.restore();
       results.document = null;
     });
+
+    test('_saveViewSettings saves layout prefs by default and doc prefs when document scope is requested', async () => {
+      results._isRestoring = false;
+      results.displayMode = 'table';
+      results._settings = {};
+      sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+      results.document = { path: '/default-domain/a', type: 'Folder' };
+      results.view = createMockView();
+      results.view.settings = { order: ['dc:title'] };
+      sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+      const saveLayoutStub = sinon.stub(results, 'saveLayoutPrefs').resolves();
+      const saveDocStub = sinon.stub(results, 'saveDocPrefs').resolves();
+
+      results._saveViewSettings();
+      await Promise.resolve();
+      expect(saveLayoutStub).to.have.been.calledOnceWith('layoutPrefs.Folder', { order: ['dc:title'] });
+      expect(saveDocStub).to.not.have.been.called;
+
+      results.prefsScope = 'document';
+      results._saveViewSettings();
+      await Promise.resolve();
+      expect(saveDocStub).to.have.been.calledOnce;
+      expect(saveLayoutStub).to.have.been.calledOnce;
+
+      results.prefsScope = 'layout';
+      results.document = null;
+    });
   });
 
   suite('Column Management', () => {
@@ -1951,6 +1978,119 @@ suite('nuxeo-results', () => {
       results._loadDocPrefs(true, doc, 'user-2');
       results._loadDocPrefs(true, doc, 'user-2');
       expect(results.docPrefs).to.deep.equal({});
+    });
+
+    suite('Layout-scoped prefs (WEBUI-1380)', () => {
+      test('_computeLayoutPrefsKey keys prefs by layout unless document scope is requested', () => {
+        expect(results._computeLayoutPrefsKey('layout', undefined, { type: 'Folder' })).to.equal('layoutPrefs.Folder');
+        expect(results._computeLayoutPrefsKey('layout', 'case-notes', { type: 'Case' })).to.equal(
+          'layoutPrefs.case-notes',
+        );
+        expect(results._computeLayoutPrefsKey('layout', undefined, { path: '/default-domain' })).to.equal('');
+        expect(results._computeLayoutPrefsKey('document', 'case-notes', { type: 'Case' })).to.equal('');
+      });
+
+      test('defaults to layout scope keyed by the document type', () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results.document = { path: '/default-domain/workspaces/a', type: 'Folder' };
+        expect(results.prefsScope).to.equal('layout');
+        expect(results._layoutPrefsKey).to.equal('layoutPrefs.Folder');
+        results.prefsScope = 'document';
+        expect(results._layoutPrefsKey).to.equal('');
+        results.prefsScope = 'layout';
+        results.document = null;
+      });
+
+      test('_loadDocPrefs applies the layout prefs shared by every document of the layout', async () => {
+        const allPrefsStub = sinon
+          .stub(results, '_getAllGlobalPreferencesOnce')
+          .resolves({ 'layoutPrefs.Folder': '{"order":["dc:title"]}' });
+        const docA = {
+          path: '/default-domain/a',
+          contextParameters: {
+            userPreferences: { preferences: { 'documentPrefs.table': '{"order":["dc:created"]}' } },
+          },
+        };
+        results.name = 'table';
+
+        await results._loadDocPrefs(true, docA, 'layout-user-1', 'layoutPrefs.Folder');
+        expect(results.docPrefs).to.deep.equal({ order: ['dc:title'] });
+        expect(results.__hasBackendDocPrefs).to.be.true;
+
+        // a second document of the same layout reuses the cached layout prefs synchronously
+        results._loadDocPrefs(true, { path: '/default-domain/b' }, 'layout-user-1', 'layoutPrefs.Folder');
+        expect(results.docPrefs).to.deep.equal({ order: ['dc:title'] });
+        expect(allPrefsStub).to.have.been.calledOnce;
+      });
+
+      test('_loadDocPrefs falls back to the document prefs when the layout has none yet', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results.name = 'table';
+        const doc = {
+          path: '/default-domain/legacy',
+          contextParameters: {
+            userPreferences: { preferences: { 'documentPrefs.table': '{"order":["dc:created"]}' } },
+          },
+        };
+
+        await results._loadDocPrefs(true, doc, 'layout-user-2', 'layoutPrefs.Folder');
+        expect(results.docPrefs).to.deep.equal({ order: ['dc:created'] });
+        expect(results.__hasBackendDocPrefs).to.be.true;
+      });
+
+      test('_loadDocPrefs falls back to the document prefs when the layout prefs cannot be loaded', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').rejects(new Error('boom'));
+        const warnStub = sinon.stub(console, 'warn');
+        results.name = 'table';
+        const doc = {
+          path: '/default-domain/legacy',
+          contextParameters: {
+            userPreferences: { preferences: { 'documentPrefs.table': '{"order":["dc:created"]}' } },
+          },
+        };
+
+        await results._loadDocPrefs(true, doc, 'layout-user-3', 'layoutPrefs.Folder');
+        expect(results.docPrefs).to.deep.equal({ order: ['dc:created'] });
+        expect(warnStub).to.have.been.called;
+      });
+
+      test('_loadDocPrefs ignores a layout prefs load superseded by a newer context', async () => {
+        let resolveFirst;
+        const allPrefsStub = sinon.stub(results, '_getAllGlobalPreferencesOnce');
+        allPrefsStub.onFirstCall().returns(
+          new Promise((resolve) => {
+            resolveFirst = resolve;
+          }),
+        );
+        const first = results._loadDocPrefs(true, { path: '/default-domain/a' }, 'layout-user-4', 'layoutPrefs.A');
+        results._loadDocPrefs(true, { path: '/default-domain/b' }, 'layout-user-4', '');
+        resolveFirst({ 'layoutPrefs.A': '{"order":["dc:title"]}' });
+        await first;
+        expect(results.docPrefs).to.deep.equal({});
+      });
+
+      test('saveLayoutPrefs validates inputs, persists to user preferences and updates state', async () => {
+        await results
+          .saveLayoutPrefs('', {})
+          .then(() => assert.fail('should fail when key missing'))
+          .catch((err) => expect(err.message).to.contain('missing key'));
+
+        results._connectedUserId = null;
+        await results
+          .saveLayoutPrefs('layoutPrefs.Folder', {})
+          .then(() => assert.fail('should fail when user id is missing'))
+          .catch((err) => expect(err.message).to.contain('missing user id'));
+
+        const putStub = sinon.stub(results, '_putGlobalPreference').resolves();
+        results._connectedUserId = 'layout-user-5';
+        await results.saveLayoutPrefs('layoutPrefs.Folder', { order: ['dc:title'] });
+        expect(putStub).to.have.been.calledWith('layoutPrefs.Folder', { order: ['dc:title'] });
+        expect(results.docPrefs).to.deep.equal({ order: ['dc:title'] });
+
+        // another document of the same layout picks the saved prefs from the session cache
+        results._loadDocPrefs(true, { path: '/default-domain/other' }, 'layout-user-5', 'layoutPrefs.Folder');
+        expect(results.docPrefs).to.deep.equal({ order: ['dc:title'] });
+      });
     });
 
     test('_applyDocPrefsImpl falls back from backend to local settings', () => {
