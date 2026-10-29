@@ -291,6 +291,24 @@ Polymer({
     name: String,
 
     /**
+     * Scope of the table preferences (column visibility, order, width, sort) persisted for a document
+     * context:
+     * - `layout` (default): shared by every document displayed with the same layout (see `prefsLayout`),
+     *   so customizing the columns of one folder applies to all folders of the same type.
+     * - `document`: specific to the current document.
+     */
+    prefsScope: {
+      type: String,
+      value: 'layout',
+    },
+
+    /**
+     * Identifier of the layout sharing table preferences when `prefsScope` is `layout`.
+     * Defaults to the document type. Set it to share preferences across document types reusing the same layout.
+     */
+    prefsLayout: String,
+
+    /**
      * Active display mode. If no `displayMode` is specified, it will fallback to the first display mode found.
      */
     displayMode: {
@@ -460,6 +478,12 @@ Polymer({
       computed: '_computeShouldUseGlobalPrefs(document, nxProvider)',
     },
 
+    // user preference key holding layout-scoped table prefs; empty when prefs are document-scoped
+    _layoutPrefsKey: {
+      type: String,
+      computed: '_computeLayoutPrefsKey(prefsScope, prefsLayout, document)',
+    },
+
     __hasBackendDocPrefs: {
       type: Boolean,
       value: false,
@@ -471,7 +495,7 @@ Polymer({
     '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns.*, document, view.*)',
 
     // doc prefs (auto)
-    '_loadDocPrefs(_shouldUseDocPrefs, document, _connectedUserId)',
+    '_loadDocPrefs(_shouldUseDocPrefs, document, _connectedUserId, _layoutPrefsKey)',
     '_applyDocPrefs(_shouldUseDocPrefs, docPrefs, view)',
 
     // global prefs (auto)
@@ -1005,10 +1029,14 @@ Polymer({
 
       // ---- doc level (content views) ----
       if (isSettingsView && this.document && this.document.path) {
+        const layoutKey = this._layoutPrefsKey;
         const docKey = this._getDocResultsPrefsKey();
         this._debounceSave('_docPrefsSaveDebouncer', () => {
-          // Save to backend (primary)
-          this.saveDocPrefs(this.document.path, docKey, this.view.settings)
+          // Save to backend (primary): shared by the layout, or specific to the document when opted in
+          const save = layoutKey
+            ? this.saveLayoutPrefs(layoutKey, this.view.settings)
+            : this.saveDocPrefs(this.document.path, docKey, this.view.settings);
+          save
             .then(() => {
               // Sync to localStorage on success (fallback cache)
               this.set(`_settings.${this.displayMode}`, this.view.settings);
@@ -1018,7 +1046,7 @@ Polymer({
               // eslint-disable-next-line no-console
               console.warn('Failed to save document results preferences to backend, syncing to localStorage only', {
                 path: this.document && this.document.path,
-                key: docKey,
+                key: layoutKey || docKey,
                 error,
               });
               // Fallback: save to localStorage even if backend fails
@@ -1582,6 +1610,25 @@ Polymer({
     this.docPrefs = cloned;
   },
 
+  // Persists layout-scoped results prefs (PUT /me/preferences/<key>) shared by every document with the same layout,
+  // and updates the in-session cache/state so the UI reflects it immediately.
+  async saveLayoutPrefs(key, value) {
+    if (!key) {
+      throw new Error('Cannot save layout prefs: missing key');
+    }
+    const userId = this._getUserId();
+    if (!userId) {
+      throw new Error('Cannot save layout prefs: missing user id');
+    }
+
+    const cloned = this._deepClone(value);
+
+    await this._putGlobalPreference(key, cloned);
+
+    __globalPrefsCache.set(this._cacheKey(userId, key), cloned);
+    this.docPrefs = cloned;
+  },
+
   // Returns the stable preference key used to store/retrieve results table prefs on a document.
   _getDocResultsPrefsKey() {
     // Use this.name as primary identifier (includes context like -trashed suffix)
@@ -1629,21 +1676,70 @@ Polymer({
     return null;
   },
 
-  // Loads doc prefs from in-session cache or from the document enricher (defaults if none exist).
-  _loadDocPrefs(enabled, document, connectedUserId) {
+  // Loads table prefs for a document context: the layout-scoped prefs shared by every document with the same
+  // layout win; otherwise the document's own prefs apply (document scope, or customizations saved before prefs
+  // were layout-scoped); otherwise the defaults.
+  _loadDocPrefs(enabled, document, connectedUserId, layoutPrefsKey) {
+    // Invalidate any in-flight layout prefs load started for a previous document or layout
+    this.__docPrefsLoadId = (this.__docPrefsLoadId || 0) + 1;
     // Reset state and trigger observer with empty prefs first
     this.__hasBackendDocPrefs = false;
     this.docPrefs = {};
 
     if (!enabled || !document || !document.path) {
-      return;
+      return undefined;
     }
 
     const userId = connectedUserId || this._getUserId();
     if (!userId) {
-      return;
+      return undefined;
     }
 
+    if (!layoutPrefsKey) {
+      this._loadDocumentPrefs(document, userId);
+      return undefined;
+    }
+
+    const cacheKey = this._cacheKey(userId, layoutPrefsKey);
+    if (__globalPrefsCache.has(cacheKey)) {
+      this._useLayoutPrefs(__globalPrefsCache.get(cacheKey), document, userId);
+      return undefined;
+    }
+
+    const loadId = this.__docPrefsLoadId;
+    return this._getAllGlobalPreferencesOnce()
+      .then((prefsMap) => {
+        const prefs = Object.hasOwn(prefsMap, layoutPrefsKey) ? this._parsePrefMapValue(prefsMap[layoutPrefsKey]) : {};
+        __globalPrefsCache.set(cacheKey, prefs);
+        return prefs;
+      })
+      .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.warn('Failed to load layout results preferences, falling back to document preferences', {
+          key: layoutPrefsKey,
+          error,
+        });
+        return {};
+      })
+      .then((prefs) => {
+        if (loadId === this.__docPrefsLoadId) {
+          this._useLayoutPrefs(prefs, document, userId);
+        }
+      });
+  },
+
+  // Applies the layout-scoped prefs, or falls back to the document's own prefs when the layout has none yet.
+  _useLayoutPrefs(prefs, document, userId) {
+    if (prefs && Object.keys(prefs).length > 0) {
+      this.docPrefs = prefs;
+      this.__hasBackendDocPrefs = true;
+      return;
+    }
+    this._loadDocumentPrefs(document, userId);
+  },
+
+  // Loads the document's own prefs from the in-session cache or from the document enricher.
+  _loadDocumentPrefs(document, userId) {
     const prefKey = this._getDocResultsPrefsKey();
     const cacheKey = this._docCacheKey(userId, document.path, prefKey);
 
@@ -1703,6 +1799,16 @@ Polymer({
   // Doc prefs are used for any browse/document context (including Collections), regardless of provider presence.
   _computeShouldUseDocPrefs(document) {
     return Boolean(document && document.path);
+  },
+
+  // Layout-scoped prefs are keyed by the layout (the document type unless `prefsLayout` is set);
+  // an empty key means the prefs are stored on the document itself.
+  _computeLayoutPrefsKey(prefsScope, prefsLayout, document) {
+    if (prefsScope === 'document') {
+      return '';
+    }
+    const layout = prefsLayout || (document && document.type);
+    return layout ? `layoutPrefs.${layout}` : '';
   },
 
   // Global prefs are ONLY for non-document contexts (e.g. search pages), so require "no document".
