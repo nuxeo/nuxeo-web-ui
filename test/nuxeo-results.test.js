@@ -2007,12 +2007,50 @@ suite('nuxeo-results', () => {
 
     suite('Layout-scoped prefs (WEBUI-1380)', () => {
       test('_computeLayoutPrefsKey keys prefs by layout unless document scope is requested', () => {
-        expect(results._computeLayoutPrefsKey('layout', undefined, { type: 'Folder' })).to.equal('layoutPrefs.Folder');
-        expect(results._computeLayoutPrefsKey('layout', 'case-notes', { type: 'Case' })).to.equal(
+        const folder = { type: 'Folder' };
+        expect(results._computeLayoutPrefsKey('layout', undefined, folder, 'nuxeo-document-content.results')).to.equal(
+          'layoutPrefs.nuxeo-document-content.results',
+        );
+        expect(results._computeLayoutPrefsKey('layout', undefined, folder, '')).to.equal('layoutPrefs.Folder');
+        expect(results._computeLayoutPrefsKey('layout', 'case-notes', { type: 'Case' }, 'x-case.notes')).to.equal(
           'layoutPrefs.case-notes',
         );
-        expect(results._computeLayoutPrefsKey('layout', undefined, { path: '/default-domain' })).to.equal('');
-        expect(results._computeLayoutPrefsKey('document', 'case-notes', { type: 'Case' })).to.equal('');
+        expect(results._computeLayoutPrefsKey('layout', undefined, { path: '/default-domain' }, '')).to.equal('');
+        expect(results._computeLayoutPrefsKey('document', 'case-notes', { type: 'Case' }, '')).to.equal('');
+        // not resolved until attached
+        expect(results._computeLayoutPrefsKey('layout', undefined, folder, undefined)).to.be.undefined;
+      });
+
+      test('keys prefs by the hosting layout so document types reusing it share them and distinct tables do not', () => {
+        if (!customElements.get('x-webui-1380-layout')) {
+          customElements.define('x-webui-1380-layout', class extends HTMLElement {});
+        }
+        const host = document.createElement('x-webui-1380-layout');
+        const root = host.attachShadow({ mode: 'open' });
+        const notes = document.createElement('nuxeo-results');
+        notes.id = 'notes';
+        const files = document.createElement('nuxeo-results');
+        files.id = 'files';
+        root.append(notes, files);
+        document.body.appendChild(host);
+        try {
+          notes.document = { path: '/default-domain/case-1', type: 'Case' };
+          files.document = { path: '/default-domain/case-1', type: 'Case' };
+          expect(notes._layoutPrefsKey).to.equal('layoutPrefs.x-webui-1380-layout.notes');
+          expect(files._layoutPrefsKey).to.equal('layoutPrefs.x-webui-1380-layout.files');
+          notes.document = { path: '/default-domain/folder-1', type: 'Folder' };
+          expect(notes._layoutPrefsKey).to.equal('layoutPrefs.x-webui-1380-layout.notes');
+        } finally {
+          host.remove();
+        }
+      });
+
+      test('_loadDocPrefs waits for the layout to be resolved', () => {
+        const enricherStub = sinon.stub(results, '_getDocPrefsFromEnricher');
+        results._prefsHost = undefined;
+        results._loadDocPrefs(true, { path: '/default-domain/a' }, 'layout-user-0', undefined);
+        expect(enricherStub).to.not.have.been.called;
+        results._prefsHost = '';
       });
 
       test('defaults to layout scope keyed by the document type', () => {
