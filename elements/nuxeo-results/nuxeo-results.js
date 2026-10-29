@@ -294,7 +294,7 @@ Polymer({
      * Scope of the table preferences (column visibility, order, width, sort) persisted for a document
      * context:
      * - `layout` (default): shared by every document displayed with the same layout (see `prefsLayout`),
-     *   so customizing the columns of one folder applies to every document rendering that same table.
+     *   so customizing the columns of one folder applies to all folders of the same type.
      * - `document`: specific to the current document.
      */
     prefsScope: {
@@ -304,9 +304,9 @@ Polymer({
 
     /**
      * Identifier of the layout sharing table preferences when `prefsScope` is `layout`.
-     * Defaults to the element hosting this `nuxeo-results` (plus its `id`), so every document type reusing a layout
-     * shares its preferences while distinct tables keep their own; falls back to the document type when there is no
-     * host element. Set it to share preferences between different layouts or to split a reused one.
+     * Defaults to the document type combined with the element hosting this `nuxeo-results` (plus its `id`), so every
+     * document of a type shares its preferences while distinct tables keep their own. Set it to share preferences
+     * across document types reusing the same layout (e.g. a layout block).
      */
     prefsLayout: String,
 
@@ -1826,17 +1826,24 @@ Polymer({
     return Boolean(document && document.path);
   },
 
-  // Layout-scoped prefs are keyed by the layout: `prefsLayout`, else the hosting element, else the document type.
+  // Layout-scoped prefs are keyed by `prefsLayout` when set, otherwise by the document type and the table hosting
+  // them, so every document of a type shares them while distinct tables (e.g. the trash listing) keep their own.
   // An empty key means the prefs are stored on the document itself; `undefined` means the host is not resolved yet.
   _computeLayoutPrefsKey(prefsScope, prefsLayout, document, prefsHost) {
     if (prefsScope === 'document') {
       return '';
     }
-    if (!prefsLayout && prefsHost === undefined) {
+    if (prefsLayout) {
+      return `layoutPrefs.${prefsLayout}`;
+    }
+    if (prefsHost === undefined) {
       return undefined;
     }
-    const layout = prefsLayout || prefsHost || document?.type;
-    return layout ? `layoutPrefs.${layout}` : '';
+    const type = document?.type;
+    if (!type) {
+      return '';
+    }
+    return prefsHost ? `layoutPrefs.${type}.${prefsHost}` : `layoutPrefs.${type}`;
   },
 
   // Global prefs are ONLY for non-document contexts (e.g. search pages), so require "no document".
