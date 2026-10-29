@@ -16,7 +16,7 @@
     "get-uri": {
       "basic-ftp": "6.2.3"
     },
-    "serialize-javascript": "^7.0.5",
+    "serialize-javascript": "^7.1.4",
     "tar-fs": "^3.0.9",
     "deepmerge-ts": "^8.0.0"
   },
