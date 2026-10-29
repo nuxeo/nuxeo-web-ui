@@ -106,7 +106,6 @@ Polymer({
       id="results"
       display-mode="table"
       name="[[document.uid]]-trashed"
-      prefs-layout="[[document.type]]-trashed"
       nx-provider="[[nxProvider]]"
       selected-items="{{selectedItems}}"
       document="[[document]]"

@@ -294,7 +294,7 @@ Polymer({
      * Scope of the table preferences (column visibility, order, width, sort) persisted for a document
      * context:
      * - `layout` (default): shared by every document displayed with the same layout (see `prefsLayout`),
-     *   so customizing the columns of one folder applies to all folders of the same type.
+     *   so customizing the columns of one folder applies to every document rendering that same table.
      * - `document`: specific to the current document.
      */
     prefsScope: {
@@ -304,7 +304,9 @@ Polymer({
 
     /**
      * Identifier of the layout sharing table preferences when `prefsScope` is `layout`.
-     * Defaults to the document type. Set it to share preferences across document types reusing the same layout.
+     * Defaults to the element hosting this `nuxeo-results` (plus its `id`), so every document type reusing a layout
+     * shares its preferences while distinct tables keep their own; falls back to the document type when there is no
+     * host element. Set it to share preferences between different layouts or to split a reused one.
      */
     prefsLayout: String,
 
@@ -478,10 +480,13 @@ Polymer({
       computed: '_computeShouldUseGlobalPrefs(document, nxProvider)',
     },
 
+    // identity of the table defining layout (host element + id), resolved on attach; '' when there is no host
+    _prefsHost: String,
+
     // user preference key holding layout-scoped table prefs; empty when prefs are document-scoped
     _layoutPrefsKey: {
       type: String,
-      computed: '_computeLayoutPrefsKey(prefsScope, prefsLayout, document)',
+      computed: '_computeLayoutPrefsKey(prefsScope, prefsLayout, document, _prefsHost)',
     },
 
     __hasBackendDocPrefs: {
@@ -522,6 +527,11 @@ Polymer({
       this._connectedUserId = user && (user.id || user.uid || user.username);
       this._updateStorage();
     });
+  },
+
+  attached() {
+    const host = this.getRootNode()?.host;
+    this._prefsHost = host ? [host.localName, this.id].filter(Boolean).join('.') : '';
   },
 
   /**
@@ -1696,6 +1706,11 @@ Polymer({
       return undefined;
     }
 
+    // wait for the layout to be resolved on attach, so the prefs are not loaded under the wrong key first
+    if (layoutPrefsKey === undefined && this._prefsHost === undefined) {
+      return undefined;
+    }
+
     const userId = connectedUserId || this._getUserId();
     if (!userId) {
       return undefined;
@@ -1811,13 +1826,16 @@ Polymer({
     return Boolean(document && document.path);
   },
 
-  // Layout-scoped prefs are keyed by the layout (the document type unless `prefsLayout` is set);
-  // an empty key means the prefs are stored on the document itself.
-  _computeLayoutPrefsKey(prefsScope, prefsLayout, document) {
+  // Layout-scoped prefs are keyed by the layout: `prefsLayout`, else the hosting element, else the document type.
+  // An empty key means the prefs are stored on the document itself; `undefined` means the host is not resolved yet.
+  _computeLayoutPrefsKey(prefsScope, prefsLayout, document, prefsHost) {
     if (prefsScope === 'document') {
       return '';
     }
-    const layout = prefsLayout || document?.type;
+    if (!prefsLayout && prefsHost === undefined) {
+      return undefined;
+    }
+    const layout = prefsLayout || prefsHost || document?.type;
     return layout ? `layoutPrefs.${layout}` : '';
   },
 
