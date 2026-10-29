@@ -1,0 +1,140 @@
+# Forces the Maven repository cache to be rebuilt periodically.
+#
+# Every workflow that builds Java here goes through
+# nuxeo/gh-build-tools/.github/actions/setup-maven-build, which delegates to
+# Alfresco/alfresco-build-tools/.github/actions/setup-java-build, which caches ~/.m2/repository as:
+#
+#   key:          ${{ runner.os }}-${{ inputs.cache-key-prefix }}-${{ hashFiles('**/pom.xml') }}
+#   restore-keys: ${{ runner.os }}-${{ inputs.cache-key-prefix }}-
+#
+# actions/cache never overwrites an existing key, and it only saves when the primary key MISSED. The
+# prefix is always `maven` (see the note below) and the hash only moves when a pom changes, so once
+# a ref has an entry under that key it hits forever, never re-saves, and never picks up anything
+# downloaded since. An entry is only evicted after 7 days without a read, and these are read on
+# every build, so in practice they never expire either: `refs/heads/develop-2025` was still serving
+# a snapshot taken on 2026-10-12 sixteen days later.
+#
+# That matters beyond disk staleness. Each artifact in a local repository carries a
+# _remote.repositories file naming the repository id it was first downloaded from. When none of
+# those ids is in the current build's repository list, Maven goes back to the network to "verify
+# that is downloadable" before using the copy it already has. A frozen entry accumulates ids from
+# whatever configuration wrote it, so the re-verification never stops:
+#
+#   lts-2025        cache written 2026-10-28   0 artifacts re-verified
+#   develop-2025    cache written 2026-10-12   904
+#   develop-2023    cache written 2026-10-12   1064 on a 2025 build, 2090 on a 2023 one
+#
+# Deleting an entry makes the next build on that ref miss its primary key, which is the only thing
+# that makes actions/cache save a fresh one. One build per ref per period pays for the refresh; the
+# `restore-keys` fallback means that build still starts from another ref's entry rather than from
+# nothing.
+#
+# Rotating the cache key would be the more direct fix and is not available from this repository:
+# `setup-maven-build` declares a `cache-key-prefix` input and then does not pass it to
+# `setup-java-build`, so it has no effect. That holds in the pinned v0.10.4 and still holds on
+# gh-build-tools' default branch (v0.28.0), so bumping the pin does not help. Forwarding that one
+# input upstream would let every workflow here put a rotating component in the key and would make
+# this workflow unnecessary.
+name: Refresh Maven cache
+
+on:
+  schedule:
+    # 02:00 UTC, ahead of the European morning CI wave, so the first build of the day is the one
+    # that re-saves rather than a developer waiting on a PR.
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      max_age_days:
+        description: 'Delete Maven cache entries older than this many days.'
+        default: '7'
+        required: false
+      dry_run:
+        description: 'Only list what would be deleted.'
+        type: boolean
+        default: true
+        required: false
+
+# actions: write is what the cache REST API requires to delete an entry. contents is not needed -
+# this workflow never checks the repository out.
+permissions:
+  actions: write
+
+# A second run while one is in flight would race on the same entries, and re-listing is cheap.
+concurrency:
+  group: maven-cache-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    name: Expire stale Maven cache entries
+    runs-on: ubuntu-latest
+
+    steps:
+      # Deletes nothing on a manual run unless dry_run is explicitly turned off, so that poking this
+      # by hand shows you the list first. On the schedule there is no inputs object at all, so both
+      # fallbacks below apply and it deletes for real.
+      - name: Expire stale Maven cache entries
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          MAX_AGE_DAYS: ${{ github.event.inputs.max_age_days || '7' }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+        run: |
+          set -euo pipefail
+
+          case "$MAX_AGE_DAYS" in
+            '' | *[!0-9]*) echo "max_age_days must be a whole number, got '$MAX_AGE_DAYS'" >&2; exit 1 ;;
+          esac
+          cutoff=$(date -u -d "$MAX_AGE_DAYS days ago" +%s)
+          echo "Deleting Linux-maven-* cache entries created before $(date -u -d "@$cutoff" '+%Y-%m-%dT%H:%M:%SZ')"
+          [ "$DRY_RUN" = 'true' ] && echo "DRY RUN - nothing will be deleted"
+
+          # id, key, ref, created_at, size are tab separated; the key is matched on the `maven`
+          # prefix the action hardcodes, so the npm-* entries that ftest.yaml keeps are left alone.
+          gh api --paginate "repos/$REPO/actions/caches?per_page=100" \
+            --jq '.actions_caches[] | [.id, .key, .ref, .created_at, .size_in_bytes] | @tsv' > caches.tsv
+
+          stale=0 kept=0 freed=0
+          {
+            echo "| action | key | ref | created | size |"
+            echo "| --- | --- | --- | --- | --- |"
+          } > summary.md
+
+          while IFS=$'\t' read -r id key ref created size; do
+            case "$key" in "$RUNNER_OS"-maven-*) ;; *) continue ;; esac
+            age=$(date -u -d "$created" +%s)
+            if [ "$age" -ge "$cutoff" ]; then
+              kept=$((kept + 1))
+              echo "keep   $key $ref $created"
+              echo "| keep | \`$key\` | $ref | $created | $size |" >> summary.md
+              continue
+            fi
+            if [ "$DRY_RUN" = 'true' ]; then
+              echo "would delete $key $ref $created"
+              echo "| would delete | \`$key\` | $ref | $created | $size |" >> summary.md
+            else
+              # A 404 here means something else deleted it between the list and now, which is not a
+              # failure: the entry is gone either way.
+              if gh api -X DELETE "repos/$REPO/actions/caches/$id" >/dev/null 2>&1; then
+                echo "deleted $key $ref $created"
+                echo "| deleted | \`$key\` | $ref | $created | $size |" >> summary.md
+              else
+                echo "already gone $key $ref $created"
+                echo "| already gone | \`$key\` | $ref | $created | $size |" >> summary.md
+              fi
+            fi
+            stale=$((stale + 1))
+            freed=$((freed + size))
+          done < caches.tsv
+
+          {
+            echo "## Maven cache refresh"
+            echo
+            echo "Older than **$MAX_AGE_DAYS days**, dry run: **$DRY_RUN**."
+            echo
+            echo "**$stale** stale, **$kept** fresh, **$((freed / 1024 / 1024)) MB** reclaimable."
+            echo
+            cat summary.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          echo "$stale stale, $kept fresh, $((freed / 1024 / 1024)) MB"
