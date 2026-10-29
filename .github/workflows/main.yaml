@@ -20,7 +20,6 @@ jobs:
       contents: read
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-      SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
     with:
       branch: maintenance-3.1.x
 
