@@ -157,7 +157,7 @@ Polymer({
           >
             <template is="dom-repeat" items="[[vocabularies]]" as="vocabulary">
               <paper-item name$="[[vocabulary.name]]"
-                ><span title="[[vocabulary.name]]">[[vocabulary.name]]</span></paper-item
+                ><span title="[[vocabulary.name]]">[[_vocabularyLabel(vocabulary.name, i18n)]]</span></paper-item
               >
             </template>
           </nuxeo-select>
@@ -376,12 +376,73 @@ Polymer({
     return !!v?.readOnly;
   },
 
+  attached() {
+    this._vocabularyLocaleHandler = () => this._onLocaleLoaded();
+    document.addEventListener('i18n-locale-loaded', this._vocabularyLocaleHandler);
+  },
+
+  detached() {
+    document.removeEventListener('i18n-locale-loaded', this._vocabularyLocaleHandler);
+    this._vocabularyLocaleHandler = null;
+  },
+
+  // Translations can land after this page has rendered: `i18n/i18n.js` races the locale load
+  // against a five second timeout and boots the app untranslated when the load loses. Anything
+  // derived from a label at that point still holds the untranslated value, and unlike the
+  // picker's own binding it will not re-evaluate on its own — so re-derive the picker order,
+  // the Label cells and the filter buckets here. Mirrors `nuxeo-announcement-banner`, which
+  // listens for the same event rather than binding to `i18n`.
+  _onLocaleLoaded() {
+    if (this.vocabularies) {
+      this.vocabularies = this._sortedVocabularies(this.vocabularies);
+    }
+    if (this._filters.label) {
+      // Label selections use translated text, so a previous locale's selection is no longer valid.
+      const filters = { ...this._filters };
+      delete filters.label;
+      this._filters = filters;
+      const table = this.$.table ?? this.$$('#table');
+      if (table) {
+        table.querySelectorAll('nuxeo-data-table-column').forEach((column) => {
+          if (column.key === 'label') {
+            column.filterValue = [];
+          }
+        });
+      }
+    }
+    if (this._allEntries && this._allEntries.length > 0) {
+      // A fresh reference re-runs `_computeAggregations`; `_applyFilters` re-stamps the rows.
+      this._allEntries = this._allEntries.slice();
+      this._applyFilters();
+    }
+  },
+
   _visibleChanged() {
     if (this.visible && !this.vocabularies) {
       this.$.directory.get().then((response) => {
-        this.vocabularies = response.entries.sort((a, b) => a.name.localeCompare(b.name));
+        this.vocabularies = this._sortedVocabularies(response.entries);
       });
     }
+  },
+
+  _sortedVocabularies(entries) {
+    return entries.slice().sort((a, b) => this._vocabularyLabel(a.name).localeCompare(this._vocabularyLabel(b.name)));
+  },
+
+  // The `directory` entity carries no label, so a vocabulary is identified by its id.
+  // Display a translation when the deployment contributes one under `vocabulary.<id>`
+  // and keep showing the id otherwise. The template passes `i18n` as a second argument that
+  // this function never reads, so that the binding re-evaluates once the locale has loaded.
+  // Same pattern as `_computeLabel` in `nuxeo-xvocabulary-edit-layout.html`.
+  _vocabularyLabel(name) {
+    return name ? this._translate(`vocabulary.${name}`, name) : '';
+  },
+
+  // Only earns its keep where the key and the fallback differ: `i18n` already returns the
+  // key itself when the deployment contributes no translation for it.
+  _translate(key, fallback) {
+    const label = this.i18n(key);
+    return label === key ? fallback : label;
   },
 
   /**
@@ -479,6 +540,9 @@ Polymer({
     if (key === 'obsolete') {
       return val > 0 ? this.i18n('label.yes') : this.i18n('label.no');
     }
+    if (key === 'label') {
+      return this.i18n(String(val));
+    }
     return String(val);
   },
 
@@ -561,6 +625,11 @@ Polymer({
     if (item?.properties && prop) {
       if (prop === 'obsolete') {
         return item.properties[prop] > 0 ? this.i18n('label.yes') : this.i18n('label.no');
+      }
+      // Entries store an i18n key in their label field (e.g. `label.directories.continent.europe`).
+      // `i18n` returns the key unchanged when nothing is contributed for it, which is the fallback we want.
+      if (prop === 'label' && item.properties[prop]) {
+        return this.i18n(item.properties[prop]);
       }
       return item.properties[prop];
     }
