@@ -12,6 +12,10 @@
   },
   "license": "Apache-2.0",
   "overrides": {
+    "@puppeteer/browsers": "3.2.6",
+    "get-uri": {
+      "basic-ftp": "6.2.3"
+    },
     "serialize-javascript": "^7.0.5",
     "tar-fs": "^3.0.9",
     "deepmerge-ts": "^8.0.0"
