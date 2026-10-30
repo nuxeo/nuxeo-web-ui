@@ -492,6 +492,18 @@ Polymer({
       computed: '_computeLayoutPrefsKey(prefsScope, prefsLayout, document, _prefsHost)',
     },
 
+    // whether the user can choose where column changes apply: only when prefs are shared by the layout
+    _settingsScopeEnabled: {
+      type: Boolean,
+      computed: '_computeSettingsScopeEnabled(_layoutPrefsKey)',
+    },
+
+    // where the user's column changes apply: 'all' documents of the layout, or this 'document' only
+    _settingsScope: {
+      type: String,
+      value: 'all',
+    },
+
     __hasBackendDocPrefs: {
       type: Boolean,
       value: false,
@@ -505,6 +517,7 @@ Polymer({
     // doc prefs (auto)
     '_loadDocPrefs(_shouldUseDocPrefs, document, _connectedUserId, _layoutPrefsKey)',
     '_applyDocPrefs(_shouldUseDocPrefs, docPrefs, view)',
+    '_updateViewSettingsScope(view, _settingsScopeEnabled, _settingsScope)',
 
     // global prefs (auto)
     '_loadGlobalPrefs(_shouldUseGlobalPrefs, nxProvider, _connectedUserId)',
@@ -598,6 +611,7 @@ Polymer({
       this.unlisten(this.view, 'columns-changed', '_columnsChanged');
       this.unlisten(this.view, 'selected-items-changed', '_selectedItemsChanged');
       this.unlisten(this.view, 'settings-changed', '_saveViewSettings');
+      this.unlisten(this.view, 'settings-scope-selected', '_onSettingsScopeSelected');
     }
 
     // flush pending debounced preference save BEFORE clearing the view
@@ -736,6 +750,7 @@ Polymer({
     this.unlisten(oldView, 'columns-changed', '_columnsChanged');
     this.unlisten(oldView, 'selected-items-changed', '_selectedItemsChanged');
     this.unlisten(oldView, 'settings-changed', '_saveViewSettings');
+    this.unlisten(oldView, 'settings-scope-selected', '_onSettingsScopeSelected');
     this.unlisten(oldView, 'items-changed', '_itemsChanged');
     this.unlisten(oldView, 'quick-filters-changed', '_handleViewQuickFiltersSync');
     this.unlisten(oldView, 'select-all-active-changed', '_selectAllActiveChanged');
@@ -765,6 +780,7 @@ Polymer({
     // listen for columns, settings and selection changed
     this.listen(view, 'selected-items-changed', '_selectedItemsChanged');
     this.listen(view, 'settings-changed', '_saveViewSettings');
+    this.listen(view, 'settings-scope-selected', '_onSettingsScopeSelected');
     this.listen(view, 'items-changed', '_itemsChanged');
     this.listen(view, 'quick-filters-changed', '_handleViewQuickFiltersSync');
     this.listen(view, 'select-all-active-changed', '_selectAllActiveChanged');
@@ -1044,15 +1060,21 @@ Polymer({
       if (isSettingsView && this.document && this.document.path) {
         // Snapshot the context now: the view may restore another document's prefs before the debounce fires
         const layoutKey = this._layoutPrefsKey;
+        const documentOnly = Boolean(layoutKey) && this._settingsScope === 'document';
         const docKey = this._getDocResultsPrefsKey();
         const docPath = this.document.path;
         const storageName = this._localStorageName;
         const settings = this._deepClone(this.view.settings);
         this._debounceSave('_docPrefsSaveDebouncer', () => {
-          // Save to backend (primary): shared by the layout, or specific to the document when opted in
-          const save = layoutKey
-            ? this.saveLayoutPrefs(layoutKey, settings)
-            : this.saveDocPrefs(docPath, docKey, settings);
+          // Save to backend (primary): for this document only when the user chose so, otherwise shared by the layout
+          let save;
+          if (documentOnly) {
+            save = this.saveDocPrefs(docPath, docKey, this._markDocumentOnly(settings));
+          } else if (layoutKey) {
+            save = this.saveLayoutPrefs(layoutKey, settings);
+          } else {
+            save = this.saveDocPrefs(docPath, docKey, settings);
+          }
           save
             .then(() => {
               this._columnSettingsSaved();
@@ -1681,7 +1703,10 @@ Polymer({
     // update in-session cache
     const cacheKey = this._docCacheKey(userId, docPath, key);
     __docPrefsCache.set(cacheKey, cloned);
-    this.docPrefs = cloned;
+    // Only apply to the view if the user has not moved to another document meanwhile
+    if (!this.document?.path || this.document.path === docPath) {
+      this.docPrefs = cloned;
+    }
   },
 
   // Persists layout-scoped results prefs (PUT /me/preferences/<key>) shared by every document with the same layout,
@@ -1753,15 +1778,18 @@ Polymer({
     return null;
   },
 
-  // Loads table prefs for a document context: the layout-scoped prefs shared by every document with the same
-  // layout win; otherwise the document's own prefs apply (document scope, or customizations saved before prefs
-  // were layout-scoped); otherwise the defaults.
+  // Loads table prefs for a document context, in this order:
+  // 1. the document's own prefs, when the user chose "This document only" for it;
+  // 2. the layout-scoped prefs shared by every document with the same layout;
+  // 3. the document's own prefs saved before prefs were layout-scoped (or with document scope);
+  // 4. the defaults.
   _loadDocPrefs(enabled, document, connectedUserId, layoutPrefsKey) {
     // Invalidate any in-flight layout prefs load started for a previous document or layout
     this.__docPrefsLoadId = (this.__docPrefsLoadId || 0) + 1;
     // Reset state and trigger observer with empty prefs first
     this.__hasBackendDocPrefs = false;
     this.docPrefs = {};
+    this._settingsScope = 'all';
 
     if (!enabled || !document || !document.path) {
       return undefined;
@@ -1779,6 +1807,14 @@ Polymer({
 
     if (!layoutPrefsKey) {
       this._loadDocumentPrefs(document, userId);
+      return undefined;
+    }
+
+    const ownPrefs = this._getDocumentPrefs(document, userId);
+    if (this._isDocumentOnly(ownPrefs)) {
+      this._settingsScope = 'document';
+      this.docPrefs = ownPrefs;
+      this.__hasBackendDocPrefs = true;
       return undefined;
     }
 
@@ -1830,24 +1866,88 @@ Polymer({
 
   // Loads the document's own prefs from the in-session cache or from the document enricher.
   _loadDocumentPrefs(document, userId) {
+    const cached = __docPrefsCache.has(this._docCacheKey(userId, document.path, this._getDocResultsPrefsKey()));
+    const prefs = this._getDocumentPrefs(document, userId);
+    if (prefs) {
+      this.docPrefs = prefs;
+      // Mark that we have backend prefs: always when read from the document, only if not empty when cached
+      this.__hasBackendDocPrefs = !cached || Object.keys(prefs).length > 0;
+    }
+  },
+
+  // Returns the document's own prefs from the in-session cache or from the document enricher, or null.
+  _getDocumentPrefs(document, userId) {
     const prefKey = this._getDocResultsPrefsKey();
     const cacheKey = this._docCacheKey(userId, document.path, prefKey);
 
     if (__docPrefsCache.has(cacheKey)) {
-      const cached = __docPrefsCache.get(cacheKey);
-      this.docPrefs = cached;
-      // Mark that we have backend prefs if cache has data
-      this.__hasBackendDocPrefs = Object.keys(cached).length > 0;
-      return;
+      return __docPrefsCache.get(cacheKey);
     }
 
     // read from document enricher if present
     const enricherPrefs = this._getDocPrefsFromEnricher(document, prefKey);
     if (enricherPrefs) {
       __docPrefsCache.set(cacheKey, enricherPrefs);
-      this.docPrefs = enricherPrefs;
-      this.__hasBackendDocPrefs = true;
     }
+    return enricherPrefs;
+  },
+
+  // Prefs saved for one document only are marked, so they are told apart from prefs saved per document before
+  // prefs were shared by the layout.
+  _markDocumentOnly(settings) {
+    return { ...settings, scope: 'document' };
+  },
+
+  _isDocumentOnly(prefs) {
+    return Boolean(prefs) && prefs.scope === 'document';
+  },
+
+  _computeSettingsScopeEnabled(layoutPrefsKey) {
+    return Boolean(layoutPrefsKey);
+  },
+
+  // Shows the "Apply column changes to" choice in the column settings, when the view supports it.
+  _updateViewSettingsScope(view, enabled, scope) {
+    if (!view || !('settingsScope' in view)) {
+      return;
+    }
+    view.settingsScopeEnabled = Boolean(enabled);
+    view.settingsScope = scope || 'all';
+  },
+
+  // The user chose where column changes apply, in the column settings.
+  _onSettingsScopeSelected(e) {
+    const scope = e.detail && e.detail.scope;
+    if (!this._settingsScopeEnabled || !this.document?.path || !this.view || scope === this._settingsScope) {
+      return;
+    }
+    const docPath = this.document.path;
+    const docKey = this._getDocResultsPrefsKey();
+    this._settingsScope = scope;
+    let save;
+    if (scope === 'document') {
+      // keep the current columns for this document only
+      save = this.saveDocPrefs(docPath, docKey, this._markDocumentOnly(this._deepClone(this.view.settings)));
+    } else {
+      // stop using this document's own columns, and show the ones shared by the layout again
+      if (this._settings) {
+        // the browser copy holds this document's own columns: drop it so they cannot come back
+        this.set('_settings.table', null);
+        this.saveSettings();
+      }
+      save = this.saveDocPrefs(docPath, docKey, {}).then(() => {
+        if (this.document?.path === docPath) {
+          this._loadDocPrefs(true, this.document, this._connectedUserId, this._layoutPrefsKey);
+        }
+      });
+    }
+    save
+      .then(() => this._columnSettingsSaved())
+      .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.warn('Failed to save where column changes apply', { path: docPath, scope, error });
+        this._notifyColumnSettingsSaveFailed();
+      });
   },
 
   _applyDocPrefs(enabled, prefs, view) {
