@@ -492,12 +492,6 @@ Polymer({
       computed: '_computeLayoutPrefsKey(prefsScope, prefsLayout, document, _prefsHost)',
     },
 
-    // whether the user can choose where column changes apply: only when prefs are shared by the layout
-    _settingsScopeEnabled: {
-      type: Boolean,
-      computed: '_computeSettingsScopeEnabled(_layoutPrefsKey)',
-    },
-
     // where the user's column changes apply: 'all' documents of the layout, or this 'document' only
     _settingsScope: {
       type: String,
@@ -517,7 +511,7 @@ Polymer({
     // doc prefs (auto)
     '_loadDocPrefs(_shouldUseDocPrefs, document, _connectedUserId, _layoutPrefsKey)',
     '_applyDocPrefs(_shouldUseDocPrefs, docPrefs, view)',
-    '_updateViewSettingsScope(view, _settingsScopeEnabled, _settingsScope)',
+    '_updateViewSettingsScope(view, _layoutPrefsKey, _settingsScope)',
 
     // global prefs (auto)
     '_loadGlobalPrefs(_shouldUseGlobalPrefs, nxProvider, _connectedUserId)',
@@ -1902,23 +1896,20 @@ Polymer({
     return Boolean(prefs) && prefs.scope === 'document';
   },
 
-  _computeSettingsScopeEnabled(layoutPrefsKey) {
-    return Boolean(layoutPrefsKey);
-  },
-
   // Shows the "Apply column changes to" choice in the column settings, when the view supports it.
-  _updateViewSettingsScope(view, enabled, scope) {
+  // It is offered only when column settings are shared by the layout.
+  _updateViewSettingsScope(view, layoutPrefsKey, scope) {
     if (!view || !('settingsScope' in view)) {
       return;
     }
-    view.settingsScopeEnabled = Boolean(enabled);
+    view.settingsScopeEnabled = Boolean(layoutPrefsKey);
     view.settingsScope = scope || 'all';
   },
 
   // The user chose where column changes apply, in the column settings.
   _onSettingsScopeSelected(e) {
-    const scope = e.detail && e.detail.scope;
-    if (!this._settingsScopeEnabled || !this.document?.path || !this.view || scope === this._settingsScope) {
+    const scope = e.detail?.scope;
+    if (!this._layoutPrefsKey || !this.document?.path || !this.view || scope === this._settingsScope) {
       return;
     }
     const docPath = this.document.path;
