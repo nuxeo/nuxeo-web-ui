@@ -1488,12 +1488,22 @@ Polymer({
     this.$.preferences.data = null;
   },
 
+  // Runs requests on the shared `preferences` resource one at a time: the resource cancels a request still pending
+  // when the next one starts, and reads its path only once the request is sent.
+  _preferencesRequest(send) {
+    const request = (this.__preferencesRequest || Promise.resolve()).catch(() => {}).then(send);
+    this.__preferencesRequest = request;
+    return request;
+  },
+
   // Fetches all global preferences once from the server and returns the raw preferences map { key: value, ... }.
   async _getAllGlobalPreferences() {
-    this._configureAllGlobalPreferencesResource();
-    this.$.preferences.contentType = 'application/json';
     try {
-      const raw = await this.$.preferences.get();
+      const raw = await this._preferencesRequest(() => {
+        this._configureAllGlobalPreferencesResource();
+        this.$.preferences.contentType = 'application/json';
+        return this.$.preferences.get();
+      });
       return (raw && raw.preferences) || {};
     } catch (error) {
       console.error('[nuxeo-results] Failed to fetch global preferences', error);
@@ -1543,10 +1553,12 @@ Polymer({
   // Saves (PUT) a single global preference object under /me/preferences/<key> using a text/plain JSON payload.
   async _putGlobalPreference(prefKey, obj) {
     const payload = JSON.stringify(obj || {});
-    this._configureGlobalPreferencesResource(prefKey);
-    this.$.preferences.contentType = 'text/plain';
-    this.$.preferences.data = payload;
-    await this.$.preferences.put();
+    await this._preferencesRequest(() => {
+      this._configureGlobalPreferencesResource(prefKey);
+      this.$.preferences.contentType = 'text/plain';
+      this.$.preferences.data = payload;
+      return this.$.preferences.put();
+    });
   },
 
   // Loads global preferences for the current provider from the /me/preferences map and caches them per user+provider.
@@ -1687,19 +1699,19 @@ Polymer({
 
   // Saves (PUT) one doc preference key by sending a userPreferences payload to /path/<docPath>/@preferences.
   async _putDocPreference(docPath, key, obj) {
-    this._configureDocPreferencesResource(docPath);
-    this.$.preferences.contentType = 'application/json';
-
     const prefs = {};
     // store as JSON string so it matches enricher map format (string -> parse)
     prefs[key] = JSON.stringify(obj || {});
 
-    this.$.preferences.data = {
-      'entity-type': 'userPreferences',
-      preferences: prefs,
-    };
-
-    await this.$.preferences.put();
+    await this._preferencesRequest(() => {
+      this._configureDocPreferencesResource(docPath);
+      this.$.preferences.contentType = 'application/json';
+      this.$.preferences.data = {
+        'entity-type': 'userPreferences',
+        preferences: prefs,
+      };
+      return this.$.preferences.put();
+    });
   },
 
   // Persists doc-level results prefs (PUT) and updates in-session cache/state so the UI reflects it immediately.
@@ -2032,9 +2044,11 @@ Polymer({
 
   // Deletes a single document preference (DELETE /path/<doc>/@preferences/<key>).
   async _removeDocPreference(docPath, key) {
-    this._configureDocPreferencesResource(docPath);
-    this.$.preferences.path = `${this.$.preferences.path}/${encodeURIComponent(key)}`;
-    await this.$.preferences.remove();
+    await this._preferencesRequest(() => {
+      this._configureDocPreferencesResource(docPath);
+      this.$.preferences.path = `${this.$.preferences.path}/${encodeURIComponent(key)}`;
+      return this.$.preferences.remove();
+    });
   },
 
   // Column filters stay with the document they were set on, even when the columns are shared by the layout.
