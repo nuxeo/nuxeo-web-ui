@@ -2790,6 +2790,24 @@ suite('nuxeo-results', () => {
         await results._saveDocFilters('/default-domain/filters-d', 'documentPrefs.table.filters', filters);
         expect(putDoc).to.have.been.calledTwice;
       });
+
+      test('switching to all documents with column changes pending keeps them, to be saved for all on close', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results.document = { path: '/default-domain/scope-q', type: 'Folder' };
+        results.view = createMockView();
+        results._settings = {};
+        results._settingsScope = 'document';
+        sinon.stub(results, '_removeDocPreference').resolves();
+        sinon.stub(results, '_putDocPreference').resolves();
+        const loadStub = sinon.stub(results, '_loadDocPrefs');
+
+        results._onSettingsScopeSelected({ detail: { scope: 'all', pendingChanges: true } });
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(results._settingsScope).to.equal('all');
+        // the shared columns are not reloaded over the user's pending changes
+        expect(loadStub).to.not.have.been.called;
+      });
     });
 
     test('_applyDocPrefsImpl falls back from backend to local settings', () => {
