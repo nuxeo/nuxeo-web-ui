@@ -8,9 +8,9 @@
  * packages/nuxeo-web-ui-ftest/wdio.conf.js - and has to stay that way: every worker would share
  * the single Nuxeo server the job starts, while search.feature asserts repo-wide absolute result
  * counts and the fixture `After` hooks delete users and groups globally. So the parallelism lives
- * at job level instead: .github/workflows/ftest.yaml runs a matrix where each shard is its own
- * runner with its own server, which makes cross-feature collisions impossible by construction and
- * needs no changes to the tests themselves.
+ * at job level instead: .github/workflows/ftest.yaml and .github/workflows/cross-repo.yaml each run
+ * a matrix where every shard is its own runner with its own server, which makes cross-feature
+ * collisions impossible by construction and needs no changes to the tests themselves.
  *
  * Usage:
  *   node scripts/test/ftest/shards.js --specs 2   # the FTEST_SPECS value for shard 2
@@ -32,7 +32,13 @@ const path = require('path');
 
 const REPO_ROOT = path.join(__dirname, '../../..');
 const FEATURES_DIR = path.join(REPO_ROOT, 'ftest/features');
-const WORKFLOW = path.join(REPO_ROOT, '.github/workflows/ftest.yaml');
+
+/**
+ * Every workflow that dispatches a shard matrix over this manifest. All of them have to agree with
+ * it: a shard the manifest defines but one of these never dispatches means that shard's features
+ * simply stop running in that workflow, with every job still green.
+ */
+const WORKFLOWS = ['.github/workflows/ftest.yaml', '.github/workflows/cross-repo.yaml'];
 
 const SHARDS = [
   // shard 1 - 9m47s
@@ -96,15 +102,15 @@ const SHARDS = [
 ];
 
 /**
- * The shard numbers the workflow matrix actually dispatches.
+ * The shard numbers one workflow's matrix actually dispatches.
  *
  * Read back out of the YAML rather than trusted, because the manifest having a shard the matrix
  * never dispatches is the one drift this script exists to catch: those features would simply stop
  * running, with every job still green. Both YAML list styles are accepted so that reformatting the
  * workflow cannot fail the lint on its own.
  */
-function matrixShards() {
-  const lines = fs.readFileSync(WORKFLOW, 'utf8').split('\n');
+function matrixShards(workflow) {
+  const lines = fs.readFileSync(path.join(REPO_ROOT, workflow), 'utf8').split('\n');
   const start = lines.findIndex((line) => /^\s*shard:/.test(line));
   if (start === -1) {
     return null;
@@ -178,29 +184,31 @@ function check() {
       errors.push(`  ${feature} is assigned to a shard but does not exist in ftest/features/; remove it.`),
     );
 
-  const dispatched = matrixShards();
-  if (!dispatched) {
-    errors.push(
-      '  Could not read the `shard:` matrix list from .github/workflows/ftest.yaml, so the manifest\n' +
-        '    could not be checked against the shards CI actually runs. Check both by hand.',
-    );
-  } else {
-    const expected = SHARDS.map((_, index) => index + 1);
+  const expected = SHARDS.map((_, index) => index + 1);
+  WORKFLOWS.forEach((workflow) => {
+    const dispatched = matrixShards(workflow);
+    if (!dispatched) {
+      errors.push(
+        `  Could not read the \`shard:\` matrix list from ${workflow}, so the manifest\n` +
+          '    could not be checked against the shards CI actually runs. Check both by hand.',
+      );
+      return;
+    }
     const missing = expected.filter((shard) => !dispatched.includes(shard));
     const extra = dispatched.filter((shard) => !expected.includes(shard));
     if (missing.length > 0) {
       errors.push(
         `  Shard(s) ${missing.join(', ')} exist in the manifest but are not in the \`shard:\` matrix in\n` +
-          '    .github/workflows/ftest.yaml, so their features would never run.',
+          `    ${workflow}, so their features would never run there.`,
       );
     }
     if (extra.length > 0) {
       errors.push(
-        `  The \`shard:\` matrix in .github/workflows/ftest.yaml dispatches shard(s) ${extra.join(', ')}, which\n` +
+        `  The \`shard:\` matrix in ${workflow} dispatches shard(s) ${extra.join(', ')}, which\n` +
           '    the manifest does not define; those jobs would fail to resolve a spec list.',
       );
     }
-  }
+  });
 
   if (errors.length > 0) {
     console.error('The ftest shard manifest and ftest/features/ have drifted apart:\n');

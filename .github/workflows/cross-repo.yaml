@@ -45,10 +45,12 @@ on:
         required: false
 
 # Cancel a superseded in-flight run for the same source branch when a newer commit is dispatched, so
-# rapid pushes don't stack multiple ~1h ftest runs (previously done by manually cancelling old runs).
+# rapid pushes don't stack multiple full ftest runs (previously done by manually cancelling old runs).
 # Keyed by BOTH the target base branch (github.ref_name, e.g. lts-2025 vs maintenance-3.1.x — the bare
 # name, without the refs/heads/ prefix) and the dispatching source branch, so parallel runs for
 # different bases never cancel each other even when they share the same branch_name.
+# Still workflow-level, and deliberately unchanged by the ftest sharding below: cancelling a run
+# cancels all of its jobs, which is exactly what is wanted for a superseded dispatch.
 concurrency:
   group: cross-repo-${{ github.ref_name }}-${{ github.event.inputs.branch_name }}
   cancel-in-progress: true
@@ -62,6 +64,13 @@ env:
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
 
 jobs:
+  # The ONLY job name the Elements side depends on. nuxeo/ui-team-gh-actions/trigger-workflow
+  # identifies the run it just dispatched by polling every candidate run's job list for a job named
+  # exactly `Remote Caller ID <caller_id>`; renaming this job would make the Elements check fail
+  # with "No run was found for id ..." after a 4 minute timeout. Having found the run it then waits
+  # on the WORKFLOW RUN's own status/conclusion (actions.getWorkflowRun), not on any named job —
+  # which is why splitting the former `build` monolith into the two jobs below is safe. See the
+  # comment on `ftests` for the full reasoning.
   id:
     name: Remote Caller ID ${{ github.event.inputs.caller_id }}
     runs-on: ubuntu-latest
@@ -72,6 +81,11 @@ jobs:
           CALLER_ID: ${{ github.event.inputs.caller_id }}
         run: echo "run identifier $CALLER_ID"
 
+  # Everything that must happen exactly once per run: lint, unit tests, the Nuxeo package build,
+  # the optional metrics report and the a11y checks. The functional tests used to run here too, in
+  # the same `mvn` invocation as the package build; they now fan out across the `ftests` matrix
+  # below. Putting the matrix on this job instead would have run the unit tests, the a11y checks
+  # and the metrics report four times each.
   build:
     name: Build
     needs: id
@@ -221,28 +235,21 @@ jobs:
           SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
         run: npm run test
 
-      - name: Nuxeo package build and Ftests
+      # The `ftest` profile moved to the `ftests` matrix below; only `metrics` is left to toggle
+      # here. The two were never coupled - `ftest` adds plugin/itests/* and ftest/ to the reactor
+      # while `metrics` adds plugin/metrics, which stands up its own Nuxeo server and reads none of
+      # the ftest output - so running them in separate jobs changes nothing about either. Keeping
+      # `metrics` on this once-per-run job is what stops it being generated four times over.
+      - name: Nuxeo package build
         env:
           MVN_REPO_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
           MVN_REPO_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
-          RUN_ALL: ${{ github.event.inputs.run_all }}
-          BAIL: ${{ github.event.inputs.bail }}
-          SKIP_FTESTS: ${{ github.event.inputs.skip_ftests }}
           GENERATE_METRICS: ${{ github.event.inputs.generate_metrics }}
         run: |
-          profiles=()
-          if [ "$SKIP_FTESTS" = "false" ]
-          then
-            profiles+=('ftest')
-          fi
+          active_profiles=""
           if [ "$GENERATE_METRICS" = "true" ]
           then
-            profiles+=('metrics')
-          fi
-          active_profiles=""
-          if [ ${#profiles[@]} -gt 0 ]
-          then
-            active_profiles="-P$(printf -v active_profiles '%s,' "${profiles[@]}" && echo "${active_profiles%,}")"
+            active_profiles="-Pmetrics"
           fi
           mvn install -ntp $active_profiles -DskipInstall
 
@@ -253,34 +260,233 @@ jobs:
           MVN_REPO_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
         run: mvn -B -nsu -f plugin/a11y -ntp install
 
+      # Unsuffixed: this job runs once, so there is nothing to collide with. The cucumber reports
+      # and screenshots are produced only under the `ftest` profile and so are uploaded by the
+      # shards instead. Server logs can still appear here, but only from the Nuxeo instance the
+      # `metrics` profile starts - hence `ignore` rather than the default `warn`, which would
+      # otherwise print a "no files were found" warning on every run that does not ask for metrics.
+      - name: Archive logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: logs
+          if-no-files-found: ignore
+          path: |
+            **/log/*.log
+            **/nxserver/config/distribution.properties
+
+      # Only the Web UI marketplace package: plugin/itests/marketplace is a module of the `ftest`
+      # profile, so its zip is not built in this job at all. It is archived per shard, below.
+      - name: Archive packages
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: packages
+          path: plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
+
+  # The 46 feature files are split across four runners, each with its own Nuxeo server, because
+  # WebdriverIO itself has to stay serial (maxInstances: 1): every in-process worker would share
+  # the one server this job starts, while search.feature asserts repo-wide absolute result counts
+  # and the fixture `After` hooks delete users and groups globally. The shard -> feature mapping
+  # lives in scripts/test/ftest/shards.js, shared with .github/workflows/ftest.yaml, and `npm run
+  # lint` fails when a feature is assigned to no shard or to more than one, or when this matrix and
+  # the manifest disagree about which shards exist.
+  #
+  # No aggregating job gates these, unlike the `ftests` job in ftest.yaml. That one exists purely
+  # to report a status check named exactly `ftests` for branch protection, which a matrix job never
+  # does. This workflow is dispatch-only and is not a required check anywhere; the Elements side
+  # consumes it through nuxeo/ui-team-gh-actions/trigger-workflow, which waits on the workflow
+  # run's own conclusion (see the `id` job above). A run is only `success` when every job in it
+  # succeeded or was skipped, so a failing shard already fails the Elements check on its own and an
+  # aggregator would add nothing but a job to maintain.
+  ftests:
+    name: Ftests (shard ${{ matrix.shard }})
+    needs: id
+    # `== 'false'`, not `!= 'true'`, to preserve exactly when the functional tests used to run: the
+    # shell above assembled the `ftest` profile under `[ "$SKIP_FTESTS" = "false" ]`, so an absent
+    # or malformed input meant no functional tests rather than running them. Skipped jobs count as
+    # success towards the run conclusion, so `skip_ftests: true` leaves the run green.
+    if: ${{ github.event.inputs.skip_ftests == 'false' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      # One shard failing must not cancel the rest: the remaining shards cover three quarters of
+      # the suite, and losing their results turns one known failure into an unknown amount of them.
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+
+    steps:
+      - uses: actions/setup-node@v6
+        with:
+          registry-url: ${{ env.NPM_REPOSITORY }}
+          always-auth: true
+          scope: '@nuxeo'
+          node-version: 24
+
+      # Duplicated from `build` rather than shared: there is no composite action in this repository
+      # to hang it on, and a reusable workflow cannot be called from a job that also needs a matrix
+      # over its own steps. ftest.yaml repeats the same setup from main.yaml for the same reason.
+      - name: Resolve the line to pair on
+        env:
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          case "$REF_NAME" in
+            maintenance-3.1.x | lts-20[0-9][0-9] | develop-20[0-9][0-9]) ;;
+            *) REF_NAME=maintenance-3.1.x ;;
+          esac
+          echo "REFERENCE_BRANCH=$REF_NAME" >> "$GITHUB_ENV"
+
+      - name: Determine nuxeo-web-ui branch to use
+        id: pick_nuxeo_web_ui_branch
+        env:
+          CANDIDATE: ${{ github.event.inputs.branch_name }}
+          FALLBACK: ${{ env.REFERENCE_BRANCH }}
+        run: |
+          BRANCH="$FALLBACK"
+          case "$CANDIDATE" in sync/*) CANDIDATE="" ;; esac
+          if [ -n "$CANDIDATE" ] && git ls-remote --exit-code --heads \
+               https://github.com/nuxeo/nuxeo-web-ui "refs/heads/$CANDIDATE" >/dev/null 2>&1; then
+            BRANCH="$CANDIDATE"
+          fi
+          echo "Using nuxeo/nuxeo-web-ui branch: $BRANCH"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+
+      - name: Determine nuxeo-elements branch to use
+        id: pick_nuxeo_elements_branch
+        env:
+          CANDIDATE: ${{ github.event.inputs.branch_name }}
+          FALLBACK: ${{ env.REFERENCE_BRANCH }}
+        run: |
+          BRANCH="$FALLBACK"
+          if [ -n "$CANDIDATE" ] && git ls-remote --exit-code --heads \
+               https://github.com/nuxeo/nuxeo-elements "refs/heads/$CANDIDATE" >/dev/null 2>&1; then
+            BRANCH="$CANDIDATE"
+          fi
+          echo "Using nuxeo/nuxeo-elements branch: $BRANCH"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout nuxeo-web-ui repo
+        uses: actions/checkout@v6
+        with:
+          repository: nuxeo/nuxeo-web-ui
+          ref: ${{ steps.pick_nuxeo_web_ui_branch.outputs.branch }}
+
+      - name: Setup Maven build
+        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@314c39e8c2e913db2dc63a31670612ccb2b6e569 # v0.10.4
+        with:
+          java-version: '17'
+
+      # plugin/a11y is not installed here: its checks run once, in `build`.
+      - name: Install Web UI
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+        run: |
+          npm ci --ignore-scripts
+          pushd packages/nuxeo-web-ui-ftest
+          npm ci --ignore-scripts
+          popd
+          pushd packages/nuxeo-designer-catalog
+          npm ci --ignore-scripts
+          popd
+
+      - name: Checkout the nuxeo-elements repo
+        uses: actions/checkout@v6
+        with:
+          repository: nuxeo/nuxeo-elements
+          path: nuxeo-elements
+          fetch-depth: 1
+          ref: ${{ steps.pick_nuxeo_elements_branch.outputs.branch }}
+
+      - name: Pack Elements modules
+        run: |
+          pushd nuxeo-elements
+          for d in core ui dataviz testing-helpers; do
+            pushd $d
+            echo "ELEMENTS_$(echo $d | tr 'a-z-' 'A-Z_')=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+            popd
+          done
+          popd
+
+      - name: Link elements to Web UI
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+        run: |
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_TESTING_HELPERS}
+
+      # Resolved in its own step rather than inline below so that the shard -> feature mapping has
+      # exactly one home, which the same script can then guard against drift.
+      - name: Resolve this shard's feature files
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: |
+          SPECS=$(node scripts/test/ftest/shards.js --specs "$SHARD")
+          echo "Shard $SHARD runs: $SPECS"
+          echo "FTEST_SPECS=$SPECS" >> "$GITHUB_ENV"
+
+      # FTEST_SPECS reaches WebdriverIO through $GITHUB_ENV rather than this step's env block:
+      # mvn -Pftest binds ftest/itests.xml, whose `run-tests` target shells out to `npm run ftest`
+      # via Ant <exec>. Neither <exec> sets newenvironment, so both inherit the step environment,
+      # and scripts/test/ftest/runner.js spawns the runner without an explicit env either.
+      #
+      # `-Pftest` is unconditional because the job itself is gated on skip_ftests above.
+      #
+      # Unlike ftest.yaml this step is a plain `run:`, with no xvfb-record wrapper, because this
+      # workflow has never recorded video. That is NOT the same as saying Xvfb is irrelevant here:
+      # @wdio/xvfb decides whether to wrap each worker in `xvfb-run` by looking at whether DISPLAY
+      # is set, not at whether Chrome needs a display - so `npm run ftest` passing --headless does
+      # not opt this step out. ftest.yaml escapes it only incidentally, because xvfb-record exports
+      # DISPLAY. With no DISPLAY, this step is exactly the case that WEBUI-2401 broke: xvfb-run
+      # 2:21.1.22 on the 26.04 image takes fd 3, which is Node's IPC channel, and because the
+      # wrapper is spawned rather than forked the worker's first process.send hits a closed
+      # descriptor and dies with EINVAL. `autoXvfb: false` in packages/nuxeo-web-ui-ftest/
+      # wdio.conf.js is what keeps that from happening; do not remove it on the assumption that a
+      # headless, video-less step cannot be affected.
+      - name: Nuxeo package build and Ftests
+        env:
+          MVN_REPO_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
+          MVN_REPO_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
+          RUN_ALL: ${{ github.event.inputs.run_all }}
+          BAIL: ${{ github.event.inputs.bail }}
+        run: mvn install -ntp -Pftest -DskipInstall
+
+      # Every artifact name carries the shard: upload-artifact@v7 fails on a name another job in
+      # the same run already used, so the four shards would otherwise collide on all of these.
       - name: Archive cucumber reports
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: cucumber-reports
+          name: cucumber-reports-shard-${{ matrix.shard }}
           path: ftest/target/cucumber-reports/
 
       - name: Archive screenshots
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: screenshots
+          name: screenshots-shard-${{ matrix.shard }}
           path: ftest/target/screenshots/
 
       - name: Archive logs
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: logs
+          name: logs-shard-${{ matrix.shard }}
           path: |
             **/log/*.log
             **/nxserver/config/distribution.properties
 
-      - name: Archive packages
+      # Named packages-ftest-* to keep the unsuffixed `packages` from `build` distinct. Carries the
+      # itests marketplace zip, which only the `ftest` profile builds and which `build` therefore
+      # cannot archive.
+      - name: Archive packages-ftest
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: packages
+          name: packages-ftest-shard-${{ matrix.shard }}
           path: |
             plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
             plugin/itests/marketplace/target/nuxeo-web-ui-marketplace-itests-*.zip
