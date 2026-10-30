@@ -1058,11 +1058,16 @@ Polymer({
         const docKey = this._getDocResultsPrefsKey();
         const docPath = this.document.path;
         const storageName = this._localStorageName;
+        const scopeVersion = this._getScopeVersion(docPath, docKey);
         const settings = this._deepClone(this.view.settings);
         this._debounceSave('_docPrefsSaveDebouncer', () => {
           // Save to backend (primary): for this document only when the user chose so, otherwise shared by the layout
           let save;
           if (documentOnly) {
+            if (this._getScopeVersion(docPath, docKey) !== scopeVersion) {
+              // the user changed where column changes apply since then: don't bring the document's own columns back
+              return;
+            }
             save = this.saveDocPrefs(docPath, docKey, this._markDocumentOnly(settings));
           } else if (layoutKey) {
             save = this.saveLayoutPrefs(layoutKey, settings);
@@ -1691,11 +1696,22 @@ Polymer({
     }
 
     const cloned = this._deepClone(value);
+    const cacheKey = this._docCacheKey(userId, docPath, key);
 
-    await this._putDocPreference(docPath, key, cloned);
+    // Writes for the same document run one after another, so an older write never lands after a newer one
+    this.__docPrefsWrites = this.__docPrefsWrites || new Map();
+    const previous = this.__docPrefsWrites.get(cacheKey) || Promise.resolve();
+    const write = previous.catch(() => {}).then(() => this._putDocPreference(docPath, key, cloned));
+    this.__docPrefsWrites.set(cacheKey, write);
+    try {
+      await write;
+    } finally {
+      if (this.__docPrefsWrites.get(cacheKey) === write) {
+        this.__docPrefsWrites.delete(cacheKey);
+      }
+    }
 
     // update in-session cache
-    const cacheKey = this._docCacheKey(userId, docPath, key);
     __docPrefsCache.set(cacheKey, cloned);
     // Only apply to the view if the user has not moved to another document meanwhile
     if (!this.document?.path || this.document.path === docPath) {
@@ -1719,8 +1735,13 @@ Polymer({
     await this._putGlobalPreference(key, cloned);
 
     __globalPrefsCache.set(this._cacheKey(userId, key), cloned);
-    // Only apply to the view if it still shows a document with this layout for this user
-    if (this.document?.path && this._layoutPrefsKey === key && this._getUserId() === userId) {
+    // Only apply to the view if it still shows a document with this layout, for this user, using the shared columns
+    if (
+      this.document?.path &&
+      this._layoutPrefsKey === key &&
+      this._getUserId() === userId &&
+      this._settingsScope !== 'document'
+    ) {
       this.docPrefs = cloned;
     }
   },
@@ -1906,6 +1927,16 @@ Polymer({
     view.settingsScope = scope || 'all';
   },
 
+  // Counts the user's scope changes per document, so saves queued before a change can tell they are out of date.
+  _getScopeVersion(docPath, docKey) {
+    return this.__scopeVersions?.get(`${docPath}|${docKey}`) || 0;
+  },
+
+  _bumpScopeVersion(docPath, docKey) {
+    this.__scopeVersions = this.__scopeVersions || new Map();
+    this.__scopeVersions.set(`${docPath}|${docKey}`, this._getScopeVersion(docPath, docKey) + 1);
+  },
+
   // The user chose where column changes apply, in the column settings.
   _onSettingsScopeSelected(e) {
     const scope = e.detail?.scope;
@@ -1915,6 +1946,9 @@ Polymer({
     const docPath = this.document.path;
     const docKey = this._getDocResultsPrefsKey();
     this._settingsScope = scope;
+    // The choice wins over what started before it: queued saves for this document and loads still in progress
+    this._bumpScopeVersion(docPath, docKey);
+    this.__docPrefsLoadId = (this.__docPrefsLoadId || 0) + 1;
     let save;
     if (scope === 'document') {
       // keep the current columns for this document only
