@@ -541,7 +541,8 @@ Polymer({
 
   attached() {
     const host = this.getRootNode()?.host;
-    this._prefsHost = host ? [host.localName, this.id].filter(Boolean).join('.') : '';
+    // the hosting element and its own id tell apart two tables of the same kind in one layout
+    this._prefsHost = host ? [host.localName, host.id, this.id].filter(Boolean).join('.') : '';
   },
 
   /**
@@ -1060,6 +1061,7 @@ Polymer({
         const storageName = this._localStorageName;
         const scopeVersion = this._getScopeVersion(docPath, docKey);
         const settings = this._deepClone(this.view.settings);
+        const savedFilters = this._getDocFilters(this.document, this._getUserId());
         this._debounceSave('_docPrefsSaveDebouncer', () => {
           // Save to backend (primary): for this document only when the user chose so, otherwise shared by the layout
           let save;
@@ -1070,7 +1072,12 @@ Polymer({
             }
             save = this.saveDocPrefs(docPath, docKey, this._markDocumentOnly(settings));
           } else if (layoutKey) {
-            save = this.saveLayoutPrefs(layoutKey, settings);
+            // columns are shared by the layout; column filters stay with this document
+            const { shared, filters } = this._splitFilters(settings);
+            save = Promise.all([
+              this._sharedPrefsChanged(layoutKey, shared) ? this.saveLayoutPrefs(layoutKey, shared) : null,
+              this._saveDocFilters(docPath, `${docKey}.filters`, filters, savedFilters),
+            ]);
           } else {
             save = this.saveDocPrefs(docPath, docKey, settings);
           }
@@ -1373,7 +1380,7 @@ Polymer({
 
   // Applies preferences to view by either clearing to defaults or applying saved settings.
   // Note: view.settings is a JS getter/setter, not a Polymer property, so we handle empty case explicitly.
-  _applyPrefsToView(view, prefs) {
+  _applyPrefsToView(view, prefs, { clearMissingFilters = false } = {}) {
     if (!view) {
       return;
     }
@@ -1446,6 +1453,16 @@ Polymer({
           view.sortOrder = [];
         }
       } else {
+        if (clearMissingFilters && view.columns) {
+          // Filters belong to one document: clear the ones these settings don't have, so they don't carry over
+          view.columns.forEach((column, idx) => {
+            const key = column.field ? column.field : `col-${idx}`;
+            const saved = newSettings.columns && newSettings.columns[key];
+            if (column.filterValue && !(saved && saved.filterValue)) {
+              view.set(`columns.${idx}.filterValue`, '');
+            }
+          });
+        }
         // Apply settings via the setter
         view.settings = newSettings;
       }
@@ -1481,7 +1498,11 @@ Polymer({
       return (raw && raw.preferences) || {};
     } catch (error) {
       console.error('[nuxeo-results] Failed to fetch global preferences', error);
-      const unavailable = {}; // ← graceful degradation
+      // the endpoint is missing (older platform) or forbidden: that won't change during the session, so keep it
+      if (error && (error.status === 404 || error.status === 403)) {
+        return {};
+      }
+      const unavailable = {}; // ← graceful degradation: retried by the next load
       __unavailablePrefsMaps.add(unavailable);
       return unavailable;
     }
@@ -1698,18 +1719,7 @@ Polymer({
     const cloned = this._deepClone(value);
     const cacheKey = this._docCacheKey(userId, docPath, key);
 
-    // Writes for the same document run one after another, so an older write never lands after a newer one
-    this.__docPrefsWrites = this.__docPrefsWrites || new Map();
-    const previous = this.__docPrefsWrites.get(cacheKey) || Promise.resolve();
-    const write = previous.catch(() => {}).then(() => this._putDocPreference(docPath, key, cloned));
-    this.__docPrefsWrites.set(cacheKey, write);
-    try {
-      await write;
-    } finally {
-      if (this.__docPrefsWrites.get(cacheKey) === write) {
-        this.__docPrefsWrites.delete(cacheKey);
-      }
-    }
+    await this._queueDocWrite(cacheKey, () => this._putDocPreference(docPath, key, cloned));
 
     // update in-session cache
     __docPrefsCache.set(cacheKey, cloned);
@@ -1730,7 +1740,7 @@ Polymer({
       throw new Error('Cannot save layout prefs: missing user id');
     }
 
-    const cloned = this._deepClone(value);
+    const cloned = this._splitFilters(value).shared;
 
     await this._putGlobalPreference(key, cloned);
 
@@ -1742,7 +1752,7 @@ Polymer({
       this._getUserId() === userId &&
       this._settingsScope !== 'document'
     ) {
-      this.docPrefs = cloned;
+      this.docPrefs = this._withDocFilters(cloned, this._getDocFilters(this.document, userId));
     }
   },
 
@@ -1801,6 +1811,7 @@ Polymer({
   _loadDocPrefs(enabled, document, connectedUserId, layoutPrefsKey) {
     // Invalidate any in-flight layout prefs load started for a previous document or layout
     this.__docPrefsLoadId = (this.__docPrefsLoadId || 0) + 1;
+    this.__docPrefsPending = false;
     // Reset state and trigger observer with empty prefs first
     this.__hasBackendDocPrefs = false;
     this.docPrefs = {};
@@ -1840,6 +1851,8 @@ Polymer({
     }
 
     const loadId = this.__docPrefsLoadId;
+    // apply nothing until the shared prefs are known, so other columns don't show briefly first
+    this.__docPrefsPending = true;
     return this._getAllGlobalPreferencesOnce()
       .then((prefsMap) => {
         // A save completed while the GET was pending holds newer prefs than this response
@@ -1864,7 +1877,9 @@ Polymer({
       })
       .then((prefs) => {
         if (loadId === this.__docPrefsLoadId) {
+          this.__docPrefsPending = false;
           this._useLayoutPrefs(prefs, document, userId);
+          this._applyDocPrefs(true, this.docPrefs, this.view);
         }
       });
   },
@@ -1872,7 +1887,7 @@ Polymer({
   // Applies the layout-scoped prefs, or falls back to the document's own prefs when the layout has none yet.
   _useLayoutPrefs(prefs, document, userId) {
     if (prefs && Object.keys(prefs).length > 0) {
-      this.docPrefs = prefs;
+      this.docPrefs = this._withDocFilters(prefs, this._getDocFilters(document, userId));
       this.__hasBackendDocPrefs = true;
       return;
     }
@@ -1945,10 +1960,13 @@ Polymer({
     }
     const docPath = this.document.path;
     const docKey = this._getDocResultsPrefsKey();
+    const previousScope = this._settingsScope;
+    const previousLocal = this._settings && this._settings.table;
     this._settingsScope = scope;
     // The choice wins over what started before it: queued saves for this document and loads still in progress
     this._bumpScopeVersion(docPath, docKey);
     this.__docPrefsLoadId = (this.__docPrefsLoadId || 0) + 1;
+    this.__docPrefsPending = false;
     let save;
     if (scope === 'document') {
       // keep the current columns for this document only
@@ -1960,7 +1978,12 @@ Polymer({
         this.set('_settings.table', null);
         this.saveSettings();
       }
-      save = this.saveDocPrefs(docPath, docKey, {}).then(() => {
+      const { filters } = this._splitFilters(this.view.settings);
+      const deleteAndKeepFilters = Promise.all([
+        this._deleteDocPrefs(docPath, docKey),
+        this._saveDocFilters(docPath, `${docKey}.filters`, filters),
+      ]);
+      save = deleteAndKeepFilters.then(() => {
         if (this.document?.path === docPath) {
           this._loadDocPrefs(true, this.document, this._connectedUserId, this._layoutPrefsKey);
         }
@@ -1971,8 +1994,115 @@ Polymer({
       .catch((error) => {
         // eslint-disable-next-line no-console
         console.warn('Failed to save where column changes apply', { path: docPath, scope, error });
+        // nothing was saved: go back to the previous choice, so the screen matches what is stored
+        if (this.document?.path === docPath) {
+          this._settingsScope = previousScope;
+          if (this._settings && previousLocal !== undefined) {
+            this.set('_settings.table', previousLocal);
+            this.saveSettings();
+          }
+        }
         this._notifyColumnSettingsSaveFailed();
       });
+  },
+
+  // Runs writes to the same document preference one after another, so an older write never lands after a newer one.
+  async _queueDocWrite(cacheKey, write) {
+    this.__docPrefsWrites = this.__docPrefsWrites || new Map();
+    const previous = this.__docPrefsWrites.get(cacheKey) || Promise.resolve();
+    const next = previous.catch(() => {}).then(write);
+    this.__docPrefsWrites.set(cacheKey, next);
+    try {
+      await next;
+    } finally {
+      if (this.__docPrefsWrites.get(cacheKey) === next) {
+        this.__docPrefsWrites.delete(cacheKey);
+      }
+    }
+  },
+
+  // Removes the document's own table prefs (DELETE /path/<doc>/@preferences/<key>).
+  async _deleteDocPrefs(docPath, key) {
+    const cacheKey = this._docCacheKey(this._getUserId(), docPath, key);
+    await this._queueDocWrite(cacheKey, () => this._removeDocPreference(docPath, key));
+    __docPrefsCache.set(cacheKey, {});
+  },
+
+  // Deletes a single document preference (DELETE /path/<doc>/@preferences/<key>).
+  async _removeDocPreference(docPath, key) {
+    this._configureDocPreferencesResource(docPath);
+    this.$.preferences.path = `${this.$.preferences.path}/${encodeURIComponent(key)}`;
+    await this.$.preferences.remove();
+  },
+
+  // Column filters stay with the document they were set on, even when the columns are shared by the layout.
+  _splitFilters(settings) {
+    const shared = this._deepClone(settings || {});
+    const filters = {};
+    Object.entries(shared.columns || {}).forEach(([key, column]) => {
+      if (column && column.filterValue) {
+        filters[key] = { filterValue: column.filterValue };
+        if (column.filterExpression) {
+          filters[key].filterExpression = column.filterExpression;
+        }
+      }
+      if (column) {
+        delete column.filterValue;
+        delete column.filterExpression;
+      }
+    });
+    return { shared, filters };
+  },
+
+  _withDocFilters(prefs, filters) {
+    const { shared } = this._splitFilters(prefs);
+    Object.entries(filters || {}).forEach(([key, filter]) => {
+      shared.columns = shared.columns || {};
+      shared.columns[key] = { ...(shared.columns[key] || {}), ...filter };
+    });
+    return shared;
+  },
+
+  _getDocFiltersKey() {
+    return `${this._getDocResultsPrefsKey()}.filters`;
+  },
+
+  // The document's own column filters, from the in-session cache or the document enricher.
+  _getDocFilters(document, userId) {
+    if (!document?.path) {
+      return {};
+    }
+    const key = this._getDocFiltersKey();
+    const cacheKey = this._docCacheKey(userId, document.path, key);
+    if (__docPrefsCache.has(cacheKey)) {
+      return __docPrefsCache.get(cacheKey);
+    }
+    const filters = this._getDocPrefsFromEnricher(document, key) || {};
+    __docPrefsCache.set(cacheKey, filters);
+    return filters;
+  },
+
+  // Saves the document's own column filters, only when they changed.
+  async _saveDocFilters(docPath, key, filters, savedFilters) {
+    const cacheKey = this._docCacheKey(this._getUserId(), docPath, key);
+    const current = savedFilters || __docPrefsCache.get(cacheKey) || {};
+    if (JSON.stringify(current) === JSON.stringify(filters)) {
+      return;
+    }
+    __docPrefsCache.set(cacheKey, filters);
+    try {
+      await this._queueDocWrite(cacheKey, () => this._putDocPreference(docPath, key, filters));
+    } catch (error) {
+      // not saved: forget the cached copy, so the next change writes the filters again
+      __docPrefsCache.delete(cacheKey);
+      throw error;
+    }
+  },
+
+  // Whether the shared columns differ from what is already stored, so unchanged columns aren't written again.
+  _sharedPrefsChanged(layoutKey, shared) {
+    const cached = __globalPrefsCache.get(this._cacheKey(this._getUserId(), layoutKey));
+    return !cached || JSON.stringify(cached) !== JSON.stringify(shared);
   },
 
   _applyDocPrefs(enabled, prefs, view) {
@@ -1983,7 +2113,7 @@ Polymer({
   },
 
   _applyDocPrefsImpl(enabled, prefs, view) {
-    if (!enabled || !view) {
+    if (!enabled || !view || this.__docPrefsPending) {
       return;
     }
 
@@ -2005,7 +2135,7 @@ Polymer({
       return;
     }
 
-    this._applyPrefsToView(view, filteredSettings);
+    this._applyPrefsToView(view, filteredSettings, { clearMissingFilters: true });
   },
   // -------------------------
   // Mode decision functions
