@@ -23,6 +23,7 @@ import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
 import { config } from '@nuxeo/nuxeo-elements';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
@@ -276,7 +277,7 @@ Polymer({
   `,
 
   is: 'nuxeo-results',
-  behaviors: [RoutingBehavior, FormatBehavior, NuxeoScrollRestoreBehavior],
+  behaviors: [RoutingBehavior, FormatBehavior, NotifyBehavior, NuxeoScrollRestoreBehavior],
 
   properties: {
     /**
@@ -1053,6 +1054,7 @@ Polymer({
             : this.saveDocPrefs(docPath, docKey, settings);
           save
             .then(() => {
+              this._columnSettingsSaved();
               // Sync to localStorage on success (fallback cache)
               this.set('_settings.table', settings);
               this.saveSettings();
@@ -1068,6 +1070,7 @@ Polymer({
               // so with layout scope a failed save applies to this document only, until a later save succeeds.
               this.set('_settings.table', settings);
               this.saveSettings();
+              this._notifyColumnSettingsSaveFailed();
             });
         });
         return;
@@ -1079,6 +1082,7 @@ Polymer({
           // Save to backend (primary)
           this.saveGlobalResultsPrefs(this.view.settings)
             .then(() => {
+              this._columnSettingsSaved();
               // Sync to localStorage on success (fallback cache)
               this.set(`_settings.${this.displayMode}`, this.view.settings);
               this.saveSettings();
@@ -1089,6 +1093,7 @@ Polymer({
               // Fallback: save to localStorage even if backend fails
               this.set(`_settings.${this.displayMode}`, this.view.settings);
               this.saveSettings();
+              this._notifyColumnSettingsSaveFailed();
             });
         });
         return;
@@ -1099,6 +1104,20 @@ Polymer({
       this.set(`_settings.${this.displayMode}`, this.view.settings);
       this.saveSettings();
     }
+  },
+
+  // Tells the user once that column changes were not saved to the server, rather than on every change while it fails.
+  _notifyColumnSettingsSaveFailed() {
+    if (this.__columnSettingsSaveFailed) {
+      return;
+    }
+    this.__columnSettingsSaveFailed = true;
+    this.notify({ message: this.i18n('results.columnSettings.saveFailed') });
+  },
+
+  // A successful save ends a failure streak, so the next failure is reported again.
+  _columnSettingsSaved() {
+    this.__columnSettingsSaveFailed = false;
   },
 
   _providerChanged(provider, oldProvider) {

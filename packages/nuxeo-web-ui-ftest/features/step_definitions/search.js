@@ -315,27 +315,6 @@ Then('I edit the results columns to show {string}', async function (heading) {
   isColumnExist.should.be.true;
 });
 
-Then('I can see the {string} results column', async function (heading) {
-  // saved column preferences are applied asynchronously, after the table first renders with its defaults
-  await driver.waitUntil(
-    async () => {
-      const results = await this.ui.results;
-      return results.isResultsColumnVisible(heading);
-    },
-    { timeout: 10000, interval: 500, timeoutMsg: `Expected the "${heading}" results column to be displayed` },
-  );
-});
-
-Then('I cannot see the {string} results column', async function (heading) {
-  const results = await this.ui.results;
-  // let any saved column preferences be applied before checking they do not display the column
-  await driver.pause(1000);
-  const isVisible = await results.isResultsColumnVisible(heading);
-  if (isVisible) {
-    throw new Error(`Expected the "${heading}" results column not to be displayed`);
-  }
-});
-
 Then(/^I save my search as "(.+)"$/, async function (searchName) {
   const searchResults = await this.ui.searchResults;
   const saveAsButton = await searchResults.saveSearchAsButton;

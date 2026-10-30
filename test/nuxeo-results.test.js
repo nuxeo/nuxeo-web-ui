@@ -642,6 +642,58 @@ suite('nuxeo-results', () => {
       expect(saveLayoutStub).to.have.been.calledOnceWith('layoutPrefs.Folder', { order: ['dc:title'] });
       results.document = null;
     });
+
+    test('_saveViewSettings notifies once per failure streak when column settings cannot be saved', async () => {
+      const settle = () => new Promise((resolve) => setTimeout(resolve));
+      results._isRestoring = false;
+      results.displayMode = 'table';
+      results._settings = {};
+      sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+      sinon.stub(console, 'warn');
+      results.document = { path: '/default-domain/a', type: 'Folder' };
+      results.view = createMockView();
+      results.view.settings = { order: ['dc:title'] };
+      sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+      const saveLayoutStub = sinon.stub(results, 'saveLayoutPrefs').rejects({ status: 404 });
+      const notifyStub = sinon.stub(results, 'notify');
+
+      results._saveViewSettings();
+      await settle();
+      results._saveViewSettings();
+      await settle();
+      expect(notifyStub).to.have.been.calledOnceWith({ message: results.i18n('results.columnSettings.saveFailed') });
+
+      // a successful save ends the streak, so the next failure is reported again
+      saveLayoutStub.resolves();
+      results._saveViewSettings();
+      await settle();
+      saveLayoutStub.rejects({ status: 500 });
+      results._saveViewSettings();
+      await settle();
+      expect(notifyStub).to.have.been.calledTwice;
+      results.document = null;
+    });
+
+    test('_saveViewSettings notifies when search column settings cannot be saved', async () => {
+      results._isRestoring = false;
+      results.displayMode = 'table';
+      results._settings = {};
+      sinon.stub(console, 'warn');
+      results.document = null;
+      const provider = createMockProvider();
+      provider.provider = 'default_search';
+      results.nxProvider = provider;
+      expect(results._shouldUseGlobalPrefs).to.be.true;
+      results.view = createMockView();
+      results.view.settings = { order: ['dc:title'] };
+      sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+      sinon.stub(results, 'saveGlobalResultsPrefs').rejects({ status: 404 });
+      const notifyStub = sinon.stub(results, 'notify');
+
+      results._saveViewSettings();
+      await new Promise((resolve) => setTimeout(resolve));
+      expect(notifyStub).to.have.been.calledOnceWith({ message: results.i18n('results.columnSettings.saveFailed') });
+    });
   });
 
   suite('Column Management', () => {
