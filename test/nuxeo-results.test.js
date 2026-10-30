@@ -643,6 +643,60 @@ suite('nuxeo-results', () => {
       results.document = null;
     });
 
+    [
+      ['succeeds', (stub) => stub.resolves()],
+      ['fails', (stub) => stub.rejects({ status: 500 })],
+    ].forEach(([outcome, configure]) => {
+      test(`_saveViewSettings keeps local settings per document when a save ${outcome} after navigating`, async () => {
+        const originKey = 'webui-1380-test-nuxeo-results-folder-a';
+        const destinationKey = 'webui-1380-test-nuxeo-results-workspace-b';
+        const destinationSettings = { displayMode: 'table', table: { order: ['dc:created'] } };
+        const settle = async () => {
+          await flush();
+          await new Promise((resolve) => setTimeout(resolve));
+        };
+        window.localStorage.setItem(originKey, JSON.stringify({ displayMode: 'table' }));
+        window.localStorage.setItem(destinationKey, JSON.stringify(destinationSettings));
+        try {
+          results._isRestoring = false;
+          results.displayMode = 'table';
+          sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+          sinon.stub(console, 'warn');
+          sinon.stub(results, 'notify');
+          results.document = { path: '/default-domain/a', type: 'Folder' };
+          results._localStorageName = originKey;
+          await settle();
+          results.view = createMockView();
+          results.view.settings = { order: ['dc:title'] };
+          let pending;
+          sinon.stub(results, '_debounceSave').callsFake((_, fn) => {
+            pending = fn;
+          });
+          configure(sinon.stub(results, 'saveLayoutPrefs'));
+
+          results._saveViewSettings();
+          // navigate to another document, whose local settings get loaded, before the save finishes
+          results.document = { path: '/default-domain/b', type: 'Workspace' };
+          results._localStorageName = destinationKey;
+          await settle();
+          expect(results._settings).to.deep.equal(destinationSettings);
+          pending();
+          await settle();
+
+          expect(results._settings).to.deep.equal(destinationSettings);
+          expect(JSON.parse(window.localStorage.getItem(destinationKey))).to.deep.equal(destinationSettings);
+          expect(JSON.parse(window.localStorage.getItem(originKey))).to.deep.equal({
+            displayMode: 'table',
+            table: { order: ['dc:title'] },
+          });
+        } finally {
+          window.localStorage.removeItem(originKey);
+          window.localStorage.removeItem(destinationKey);
+          results.document = null;
+        }
+      });
+    });
+
     test('_saveViewSettings notifies once per failure streak when column settings cannot be saved', async () => {
       const settle = () => new Promise((resolve) => setTimeout(resolve));
       results._isRestoring = false;

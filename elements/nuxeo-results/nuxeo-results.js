@@ -1046,6 +1046,7 @@ Polymer({
         const layoutKey = this._layoutPrefsKey;
         const docKey = this._getDocResultsPrefsKey();
         const docPath = this.document.path;
+        const storageName = this._localStorageName;
         const settings = this._deepClone(this.view.settings);
         this._debounceSave('_docPrefsSaveDebouncer', () => {
           // Save to backend (primary): shared by the layout, or specific to the document when opted in
@@ -1056,8 +1057,7 @@ Polymer({
             .then(() => {
               this._columnSettingsSaved();
               // Sync to localStorage on success (fallback cache)
-              this.set('_settings.table', settings);
-              this.saveSettings();
+              this._syncTableSettings(storageName, settings);
             })
             .catch((error) => {
               // eslint-disable-next-line no-console
@@ -1068,8 +1068,7 @@ Polymer({
               });
               // Fallback: save to localStorage even if backend fails. The local copy is kept per document (`name`),
               // so with layout scope a failed save applies to this document only, until a later save succeeds.
-              this.set('_settings.table', settings);
-              this.saveSettings();
+              this._syncTableSettings(storageName, settings);
               this._notifyColumnSettingsSaveFailed();
             });
         });
@@ -1103,6 +1102,27 @@ Polymer({
       // This branch runs when neither doc nor global prefs are applicable
       this.set(`_settings.${this.displayMode}`, this.view.settings);
       this.saveSettings();
+    }
+  },
+
+  // Keeps a browser copy of the table settings for the document they were changed on.
+  // If the user has already moved to another document, that document's copy is left alone.
+  _syncTableSettings(storageName, settings) {
+    if (storageName === this._localStorageName) {
+      this.set('_settings.table', settings);
+      this.saveSettings();
+      return;
+    }
+    if (!storageName) {
+      return;
+    }
+    try {
+      const stored = JSON.parse(window.localStorage.getItem(storageName)) || {};
+      stored.table = settings;
+      window.localStorage.setItem(storageName, JSON.stringify(stored));
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('Failed to sync results preferences to localStorage', { key: storageName, error });
     }
   },
 
