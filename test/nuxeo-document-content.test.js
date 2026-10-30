@@ -35,6 +35,17 @@ suite('nuxeo-document-content', () => {
     server.restore();
   });
 
+  suite('table preference options (WEBUI-1380)', () => {
+    test('passes prefs-scope and prefs-layout to the results table', () => {
+      const results = element.shadowRoot.querySelector('nuxeo-results');
+      expect(results.prefsScope).to.equal('layout');
+      element.prefsScope = 'document';
+      element.prefsLayout = 'case-notes';
+      expect(results.prefsScope).to.equal('document');
+      expect(results.prefsLayout).to.equal('case-notes');
+    });
+  });
+
   suite('initial state', () => {
     test('should default provider to advanced_document_content', () => {
       expect(element.provider).to.equal('advanced_document_content');

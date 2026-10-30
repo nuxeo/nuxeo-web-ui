@@ -105,6 +105,8 @@ Polymer({
     <nuxeo-results
       id="results"
       display-mode="table"
+      prefs-scope="[[prefsScope]]"
+      prefs-layout="[[prefsLayout]]"
       name="[[document.uid]]-trashed"
       nx-provider="[[nxProvider]]"
       selected-items="{{selectedItems}}"
@@ -300,6 +302,19 @@ Polymer({
   behaviors: [NotifyBehavior, DocumentContentBehavior],
 
   properties: {
+    /**
+     * Where table preferences are kept: `layout` (default, shared by every document of the type) or `document`
+     * (per document). Passed to `nuxeo-results`.
+     */
+    prefsScope: {
+      type: String,
+      value: 'layout',
+    },
+    /**
+     * Shares table preferences across document types using the same key (e.g. a layout block). Passed to
+     * `nuxeo-results`.
+     */
+    prefsLayout: String,
     /**
      * The name of the page provider to be used.
      */

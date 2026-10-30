@@ -23,6 +23,7 @@ import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
 import { config } from '@nuxeo/nuxeo-elements';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
@@ -44,6 +45,8 @@ const hasSelectAllEnabled = config.get('selection.selectAllEnabled', false);
 const __globalPrefsCache = new Map();
 // session-only GET /me/preferences promise
 let __allGlobalPrefsPromise = null;
+// empty maps standing in for a failed GET /me/preferences: never cached, so a later load retries the request
+const __unavailablePrefsMaps = new WeakSet();
 
 // doc prefs cache
 const __docPrefsCache = new Map();
@@ -274,7 +277,7 @@ Polymer({
   `,
 
   is: 'nuxeo-results',
-  behaviors: [RoutingBehavior, FormatBehavior, NuxeoScrollRestoreBehavior],
+  behaviors: [RoutingBehavior, FormatBehavior, NotifyBehavior, NuxeoScrollRestoreBehavior],
 
   properties: {
     /**
@@ -289,6 +292,26 @@ Polymer({
      * Used as key for settings in local storage. Without a `name`, no settings are saved/restored.
      */
     name: String,
+
+    /**
+     * Scope of the table preferences (column visibility, order, width, sort) persisted for a document
+     * context:
+     * - `layout` (default): shared by every document displayed with the same layout (see `prefsLayout`),
+     *   so customizing the columns of one folder applies to all folders of the same type.
+     * - `document`: specific to the current document.
+     */
+    prefsScope: {
+      type: String,
+      value: 'layout',
+    },
+
+    /**
+     * Identifier of the layout sharing table preferences when `prefsScope` is `layout`.
+     * Defaults to the document type combined with the element hosting this `nuxeo-results` (plus its `id`), so every
+     * document of a type shares its preferences while distinct tables keep their own. Set it to share preferences
+     * across document types reusing the same layout (e.g. a layout block).
+     */
+    prefsLayout: String,
 
     /**
      * Active display mode. If no `displayMode` is specified, it will fallback to the first display mode found.
@@ -460,6 +483,21 @@ Polymer({
       computed: '_computeShouldUseGlobalPrefs(document, nxProvider)',
     },
 
+    // identity of the table defining layout (host element + id), resolved on attach; '' when there is no host
+    _prefsHost: String,
+
+    // user preference key holding layout-scoped table prefs; empty when prefs are document-scoped
+    _layoutPrefsKey: {
+      type: String,
+      computed: '_computeLayoutPrefsKey(prefsScope, prefsLayout, document, _prefsHost)',
+    },
+
+    // where the user's column changes apply: 'all' documents of the layout, or this 'document' only
+    _settingsScope: {
+      type: String,
+      value: 'all',
+    },
+
     __hasBackendDocPrefs: {
       type: Boolean,
       value: false,
@@ -471,8 +509,9 @@ Polymer({
     '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns.*, document, view.*)',
 
     // doc prefs (auto)
-    '_loadDocPrefs(_shouldUseDocPrefs, document, _connectedUserId)',
+    '_loadDocPrefs(_shouldUseDocPrefs, document, _connectedUserId, _layoutPrefsKey)',
     '_applyDocPrefs(_shouldUseDocPrefs, docPrefs, view)',
+    '_updateViewSettingsScope(view, _layoutPrefsKey, _settingsScope)',
 
     // global prefs (auto)
     '_loadGlobalPrefs(_shouldUseGlobalPrefs, nxProvider, _connectedUserId)',
@@ -498,6 +537,12 @@ Polymer({
       this._connectedUserId = user && (user.id || user.uid || user.username);
       this._updateStorage();
     });
+  },
+
+  attached() {
+    const host = this.getRootNode()?.host;
+    // the hosting element and its own id tell apart two tables of the same kind in one layout
+    this._prefsHost = host ? [host.localName, host.id, this.id].filter(Boolean).join('.') : '';
   },
 
   /**
@@ -561,6 +606,7 @@ Polymer({
       this.unlisten(this.view, 'columns-changed', '_columnsChanged');
       this.unlisten(this.view, 'selected-items-changed', '_selectedItemsChanged');
       this.unlisten(this.view, 'settings-changed', '_saveViewSettings');
+      this.unlisten(this.view, 'settings-scope-selected', '_onSettingsScopeSelected');
     }
 
     // flush pending debounced preference save BEFORE clearing the view
@@ -699,6 +745,7 @@ Polymer({
     this.unlisten(oldView, 'columns-changed', '_columnsChanged');
     this.unlisten(oldView, 'selected-items-changed', '_selectedItemsChanged');
     this.unlisten(oldView, 'settings-changed', '_saveViewSettings');
+    this.unlisten(oldView, 'settings-scope-selected', '_onSettingsScopeSelected');
     this.unlisten(oldView, 'items-changed', '_itemsChanged');
     this.unlisten(oldView, 'quick-filters-changed', '_handleViewQuickFiltersSync');
     this.unlisten(oldView, 'select-all-active-changed', '_selectAllActiveChanged');
@@ -728,6 +775,7 @@ Polymer({
     // listen for columns, settings and selection changed
     this.listen(view, 'selected-items-changed', '_selectedItemsChanged');
     this.listen(view, 'settings-changed', '_saveViewSettings');
+    this.listen(view, 'settings-scope-selected', '_onSettingsScopeSelected');
     this.listen(view, 'items-changed', '_itemsChanged');
     this.listen(view, 'quick-filters-changed', '_handleViewQuickFiltersSync');
     this.listen(view, 'select-all-active-changed', '_selectAllActiveChanged');
@@ -1005,25 +1053,51 @@ Polymer({
 
       // ---- doc level (content views) ----
       if (isSettingsView && this.document && this.document.path) {
+        // Snapshot the context now: the view may restore another document's prefs before the debounce fires
+        const layoutKey = this._layoutPrefsKey;
+        const documentOnly = Boolean(layoutKey) && this._settingsScope === 'document';
         const docKey = this._getDocResultsPrefsKey();
+        const docPath = this.document.path;
+        const storageName = this._localStorageName;
+        const scopeVersion = this._getScopeVersion(docPath, docKey);
+        const settings = this._deepClone(this.view.settings);
+        const savedFilters = this._getDocFilters(this.document, this._getUserId());
         this._debounceSave('_docPrefsSaveDebouncer', () => {
-          // Save to backend (primary)
-          this.saveDocPrefs(this.document.path, docKey, this.view.settings)
+          // Save to backend (primary): for this document only when the user chose so, otherwise shared by the layout
+          let save;
+          if (documentOnly) {
+            if (this._getScopeVersion(docPath, docKey) !== scopeVersion) {
+              // the user changed where column changes apply since then: don't bring the document's own columns back
+              return;
+            }
+            save = this.saveDocPrefs(docPath, docKey, this._markDocumentOnly(settings));
+          } else if (layoutKey) {
+            // columns are shared by the layout; column filters stay with this document
+            const { shared, filters } = this._splitFilters(settings);
+            save = Promise.all([
+              this._sharedPrefsChanged(layoutKey, shared) ? this.saveLayoutPrefs(layoutKey, shared) : null,
+              this._saveDocFilters(docPath, `${docKey}.filters`, filters, savedFilters),
+            ]);
+          } else {
+            save = this.saveDocPrefs(docPath, docKey, settings);
+          }
+          save
             .then(() => {
+              this._columnSettingsSaved();
               // Sync to localStorage on success (fallback cache)
-              this.set(`_settings.${this.displayMode}`, this.view.settings);
-              this.saveSettings();
+              this._syncTableSettings(storageName, settings);
             })
             .catch((error) => {
               // eslint-disable-next-line no-console
               console.warn('Failed to save document results preferences to backend, syncing to localStorage only', {
-                path: this.document && this.document.path,
-                key: docKey,
+                path: docPath,
+                key: layoutKey || docKey,
                 error,
               });
-              // Fallback: save to localStorage even if backend fails
-              this.set(`_settings.${this.displayMode}`, this.view.settings);
-              this.saveSettings();
+              // Fallback: save to localStorage even if backend fails. The local copy is kept per document (`name`),
+              // so with layout scope a failed save applies to this document only, until a later save succeeds.
+              this._syncTableSettings(storageName, settings);
+              this._notifyColumnSettingsSaveFailed();
             });
         });
         return;
@@ -1035,6 +1109,7 @@ Polymer({
           // Save to backend (primary)
           this.saveGlobalResultsPrefs(this.view.settings)
             .then(() => {
+              this._columnSettingsSaved();
               // Sync to localStorage on success (fallback cache)
               this.set(`_settings.${this.displayMode}`, this.view.settings);
               this.saveSettings();
@@ -1045,6 +1120,7 @@ Polymer({
               // Fallback: save to localStorage even if backend fails
               this.set(`_settings.${this.displayMode}`, this.view.settings);
               this.saveSettings();
+              this._notifyColumnSettingsSaveFailed();
             });
         });
         return;
@@ -1055,6 +1131,41 @@ Polymer({
       this.set(`_settings.${this.displayMode}`, this.view.settings);
       this.saveSettings();
     }
+  },
+
+  // Keeps a browser copy of the table settings for the document they were changed on.
+  // If the user has already moved to another document, that document's copy is left alone.
+  _syncTableSettings(storageName, settings) {
+    if (storageName === this._localStorageName) {
+      this.set('_settings.table', settings);
+      this.saveSettings();
+      return;
+    }
+    if (!storageName) {
+      return;
+    }
+    try {
+      const stored = JSON.parse(window.localStorage.getItem(storageName)) || {};
+      stored.table = settings;
+      window.localStorage.setItem(storageName, JSON.stringify(stored));
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('Failed to sync results preferences to localStorage', { key: storageName, error });
+    }
+  },
+
+  // Tells the user once that column changes were not saved to the server, rather than on every change while it fails.
+  _notifyColumnSettingsSaveFailed() {
+    if (this.__columnSettingsSaveFailed) {
+      return;
+    }
+    this.__columnSettingsSaveFailed = true;
+    this.notify({ message: this.i18n('results.columnSettings.saveFailed') });
+  },
+
+  // A successful save ends a failure streak, so the next failure is reported again.
+  _columnSettingsSaved() {
+    this.__columnSettingsSaveFailed = false;
   },
 
   _providerChanged(provider, oldProvider) {
@@ -1269,7 +1380,7 @@ Polymer({
 
   // Applies preferences to view by either clearing to defaults or applying saved settings.
   // Note: view.settings is a JS getter/setter, not a Polymer property, so we handle empty case explicitly.
-  _applyPrefsToView(view, prefs) {
+  _applyPrefsToView(view, prefs, { clearMissingFilters = false } = {}) {
     if (!view) {
       return;
     }
@@ -1342,6 +1453,15 @@ Polymer({
           view.sortOrder = [];
         }
       } else {
+        if (clearMissingFilters && view.columns) {
+          // Filters belong to one document: clear the ones these settings don't have, so they don't carry over
+          view.columns.forEach((column, idx) => {
+            const key = column.field ? column.field : `col-${idx}`;
+            if (column.filterValue && !newSettings.columns?.[key]?.filterValue) {
+              view.set(`columns.${idx}.filterValue`, '');
+            }
+          });
+        }
         // Apply settings via the setter
         view.settings = newSettings;
       }
@@ -1368,30 +1488,57 @@ Polymer({
     this.$.preferences.data = null;
   },
 
+  // Runs requests on the shared `preferences` resource one at a time: the resource cancels a request still pending
+  // when the next one starts, and reads its path only once the request is sent.
+  _preferencesRequest(send) {
+    const request = (this.__preferencesRequest || Promise.resolve()).catch(() => {}).then(send);
+    this.__preferencesRequest = request;
+    return request;
+  },
+
   // Fetches all global preferences once from the server and returns the raw preferences map { key: value, ... }.
   async _getAllGlobalPreferences() {
-    this._configureAllGlobalPreferencesResource();
-    this.$.preferences.contentType = 'application/json';
     try {
-      const raw = await this.$.preferences.get();
+      const raw = await this._preferencesRequest(() => {
+        this._configureAllGlobalPreferencesResource();
+        this.$.preferences.contentType = 'application/json';
+        return this.$.preferences.get();
+      });
       return (raw && raw.preferences) || {};
     } catch (error) {
       console.error('[nuxeo-results] Failed to fetch global preferences', error);
-      return {}; // ← graceful degradation
+      // the endpoint is missing (older platform) or forbidden: that won't change during the session, so keep it
+      if (error && (error.status === 404 || error.status === 403)) {
+        return {};
+      }
+      const unavailable = {}; // ← graceful degradation: retried by the next load
+      __unavailablePrefsMaps.add(unavailable);
+      return unavailable;
     }
   },
 
   // Returns a cached in-flight promise for GET /me/preferences so multiple loads share one request per session.
+  // A failed request is not kept, so the next load retries it.
   async _getAllGlobalPreferencesOnce() {
     if (!__allGlobalPrefsPromise) {
       __allGlobalPrefsPromise = this._getAllGlobalPreferences();
     }
+    const promise = __allGlobalPrefsPromise;
     try {
-      return await __allGlobalPrefsPromise;
+      const prefsMap = await promise;
+      if (this._isUnavailablePrefsMap(prefsMap) && __allGlobalPrefsPromise === promise) {
+        __allGlobalPrefsPromise = null;
+      }
+      return prefsMap;
     } catch (e) {
       __allGlobalPrefsPromise = null;
       throw e;
     }
+  },
+
+  // Whether a preferences map stands in for a failed GET /me/preferences, and so must not be cached.
+  _isUnavailablePrefsMap(prefsMap) {
+    return __unavailablePrefsMaps.has(prefsMap);
   },
 
   // Configures the nuxeo-resource instance to PUT a single global preference key at /me/preferences/<key>.
@@ -1406,10 +1553,12 @@ Polymer({
   // Saves (PUT) a single global preference object under /me/preferences/<key> using a text/plain JSON payload.
   async _putGlobalPreference(prefKey, obj) {
     const payload = JSON.stringify(obj || {});
-    this._configureGlobalPreferencesResource(prefKey);
-    this.$.preferences.contentType = 'text/plain';
-    this.$.preferences.data = payload;
-    await this.$.preferences.put();
+    await this._preferencesRequest(() => {
+      this._configureGlobalPreferencesResource(prefKey);
+      this.$.preferences.contentType = 'text/plain';
+      this.$.preferences.data = payload;
+      return this.$.preferences.put();
+    });
   },
 
   // Loads global preferences for the current provider from the /me/preferences map and caches them per user+provider.
@@ -1446,6 +1595,12 @@ Polymer({
 
     try {
       const prefsMap = await this._getAllGlobalPreferencesOnce();
+
+      // preferences could not be fetched: use the defaults now, without caching them, so the next load retries
+      if (this._isUnavailablePrefsMap(prefsMap)) {
+        this.globalPrefs = {};
+        return;
+      }
 
       if (!Object.hasOwn(prefsMap, providerName)) {
         const empty = {};
@@ -1544,19 +1699,19 @@ Polymer({
 
   // Saves (PUT) one doc preference key by sending a userPreferences payload to /path/<docPath>/@preferences.
   async _putDocPreference(docPath, key, obj) {
-    this._configureDocPreferencesResource(docPath);
-    this.$.preferences.contentType = 'application/json';
-
     const prefs = {};
     // store as JSON string so it matches enricher map format (string -> parse)
     prefs[key] = JSON.stringify(obj || {});
 
-    this.$.preferences.data = {
-      'entity-type': 'userPreferences',
-      preferences: prefs,
-    };
-
-    await this.$.preferences.put();
+    await this._preferencesRequest(() => {
+      this._configureDocPreferencesResource(docPath);
+      this.$.preferences.contentType = 'application/json';
+      this.$.preferences.data = {
+        'entity-type': 'userPreferences',
+        preferences: prefs,
+      };
+      return this.$.preferences.put();
+    });
   },
 
   // Persists doc-level results prefs (PUT) and updates in-session cache/state so the UI reflects it immediately.
@@ -1573,13 +1728,43 @@ Polymer({
     }
 
     const cloned = this._deepClone(value);
+    const cacheKey = this._docCacheKey(userId, docPath, key);
 
-    await this._putDocPreference(docPath, key, cloned);
+    await this._queueDocWrite(cacheKey, () => this._putDocPreference(docPath, key, cloned));
 
     // update in-session cache
-    const cacheKey = this._docCacheKey(userId, docPath, key);
     __docPrefsCache.set(cacheKey, cloned);
-    this.docPrefs = cloned;
+    // Only apply to the view if the user has not moved to another document meanwhile
+    if (!this.document?.path || this.document.path === docPath) {
+      this.docPrefs = cloned;
+    }
+  },
+
+  // Persists layout-scoped results prefs (PUT /me/preferences/<key>) shared by every document with the same layout,
+  // and updates the in-session cache/state so the UI reflects it immediately.
+  async saveLayoutPrefs(key, value) {
+    if (!key) {
+      throw new Error('Cannot save layout prefs: missing key');
+    }
+    const userId = this._getUserId();
+    if (!userId) {
+      throw new Error('Cannot save layout prefs: missing user id');
+    }
+
+    const cloned = this._splitFilters(value).shared;
+
+    await this._putGlobalPreference(key, cloned);
+
+    __globalPrefsCache.set(this._cacheKey(userId, key), cloned);
+    // Only apply to the view if it still shows a document with this layout, for this user, using the shared columns
+    if (
+      this.document?.path &&
+      this._layoutPrefsKey === key &&
+      this._getUserId() === userId &&
+      this._settingsScope !== 'document'
+    ) {
+      this.docPrefs = this._withDocFilters(cloned, this._getDocFilters(this.document, userId));
+    }
   },
 
   // Returns the stable preference key used to store/retrieve results table prefs on a document.
@@ -1629,39 +1814,311 @@ Polymer({
     return null;
   },
 
-  // Loads doc prefs from in-session cache or from the document enricher (defaults if none exist).
-  _loadDocPrefs(enabled, document, connectedUserId) {
+  // Loads table prefs for a document context, in this order:
+  // 1. the document's own prefs, when the user chose "This document only" for it;
+  // 2. the layout-scoped prefs shared by every document with the same layout;
+  // 3. the document's own prefs saved before prefs were layout-scoped (or with document scope);
+  // 4. the defaults.
+  _loadDocPrefs(enabled, document, connectedUserId, layoutPrefsKey) {
+    // Invalidate any in-flight layout prefs load started for a previous document or layout
+    this.__docPrefsLoadId = (this.__docPrefsLoadId || 0) + 1;
+    this.__docPrefsPending = false;
     // Reset state and trigger observer with empty prefs first
     this.__hasBackendDocPrefs = false;
     this.docPrefs = {};
+    this._settingsScope = 'all';
 
     if (!enabled || !document || !document.path) {
-      return;
+      return undefined;
+    }
+
+    // wait for the layout to be resolved on attach, so the prefs are not loaded under the wrong key first
+    if (layoutPrefsKey === undefined && this._prefsHost === undefined) {
+      return undefined;
     }
 
     const userId = connectedUserId || this._getUserId();
     if (!userId) {
-      return;
+      return undefined;
     }
 
+    if (!layoutPrefsKey) {
+      this._loadDocumentPrefs(document, userId);
+      return undefined;
+    }
+
+    const ownPrefs = this._getDocumentPrefs(document, userId);
+    if (this._isDocumentOnly(ownPrefs)) {
+      this._settingsScope = 'document';
+      this.docPrefs = ownPrefs;
+      this.__hasBackendDocPrefs = true;
+      return undefined;
+    }
+
+    const cacheKey = this._cacheKey(userId, layoutPrefsKey);
+    if (__globalPrefsCache.has(cacheKey)) {
+      this._useLayoutPrefs(__globalPrefsCache.get(cacheKey), document, userId);
+      return undefined;
+    }
+
+    const loadId = this.__docPrefsLoadId;
+    // apply nothing until the shared prefs are known, so other columns don't show briefly first
+    this.__docPrefsPending = true;
+    return this._getAllGlobalPreferencesOnce()
+      .then((prefsMap) => {
+        // A save completed while the GET was pending holds newer prefs than this response
+        if (__globalPrefsCache.has(cacheKey)) {
+          return __globalPrefsCache.get(cacheKey);
+        }
+        // preferences could not be fetched: fall back to the document prefs without caching, so the next load retries
+        if (this._isUnavailablePrefsMap(prefsMap)) {
+          return {};
+        }
+        const prefs = Object.hasOwn(prefsMap, layoutPrefsKey) ? this._parsePrefMapValue(prefsMap[layoutPrefsKey]) : {};
+        __globalPrefsCache.set(cacheKey, prefs);
+        return prefs;
+      })
+      .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.warn('Failed to load layout results preferences, falling back to document preferences', {
+          key: layoutPrefsKey,
+          error,
+        });
+        return __globalPrefsCache.get(cacheKey) || {};
+      })
+      .then((prefs) => {
+        if (loadId === this.__docPrefsLoadId) {
+          this.__docPrefsPending = false;
+          this._useLayoutPrefs(prefs, document, userId);
+          this._applyDocPrefs(true, this.docPrefs, this.view);
+        }
+      });
+  },
+
+  // Applies the layout-scoped prefs, or falls back to the document's own prefs when the layout has none yet.
+  _useLayoutPrefs(prefs, document, userId) {
+    if (prefs && Object.keys(prefs).length > 0) {
+      this.docPrefs = this._withDocFilters(prefs, this._getDocFilters(document, userId));
+      this.__hasBackendDocPrefs = true;
+      return;
+    }
+    this._loadDocumentPrefs(document, userId);
+  },
+
+  // Loads the document's own prefs from the in-session cache or from the document enricher.
+  _loadDocumentPrefs(document, userId) {
+    const cached = __docPrefsCache.has(this._docCacheKey(userId, document.path, this._getDocResultsPrefsKey()));
+    const prefs = this._getDocumentPrefs(document, userId);
+    if (prefs) {
+      this.docPrefs = prefs;
+      // Mark that we have backend prefs: always when read from the document, only if not empty when cached
+      this.__hasBackendDocPrefs = !cached || Object.keys(prefs).length > 0;
+    }
+  },
+
+  // Returns the document's own prefs from the in-session cache or from the document enricher, or null.
+  _getDocumentPrefs(document, userId) {
     const prefKey = this._getDocResultsPrefsKey();
     const cacheKey = this._docCacheKey(userId, document.path, prefKey);
 
     if (__docPrefsCache.has(cacheKey)) {
-      const cached = __docPrefsCache.get(cacheKey);
-      this.docPrefs = cached;
-      // Mark that we have backend prefs if cache has data
-      this.__hasBackendDocPrefs = Object.keys(cached).length > 0;
-      return;
+      return __docPrefsCache.get(cacheKey);
     }
 
     // read from document enricher if present
     const enricherPrefs = this._getDocPrefsFromEnricher(document, prefKey);
     if (enricherPrefs) {
       __docPrefsCache.set(cacheKey, enricherPrefs);
-      this.docPrefs = enricherPrefs;
-      this.__hasBackendDocPrefs = true;
     }
+    return enricherPrefs;
+  },
+
+  // Prefs saved for one document only are marked, so they are told apart from prefs saved per document before
+  // prefs were shared by the layout.
+  _markDocumentOnly(settings) {
+    return { ...settings, scope: 'document' };
+  },
+
+  _isDocumentOnly(prefs) {
+    return Boolean(prefs) && prefs.scope === 'document';
+  },
+
+  // Shows the "Apply column changes to" choice in the column settings, when the view supports it.
+  // It is offered only when column settings are shared by the layout.
+  _updateViewSettingsScope(view, layoutPrefsKey, scope) {
+    if (!view || !('settingsScope' in view)) {
+      return;
+    }
+    view.settingsScopeEnabled = Boolean(layoutPrefsKey);
+    view.settingsScope = scope || 'all';
+  },
+
+  // Counts the user's scope changes per document, so saves queued before a change can tell they are out of date.
+  _getScopeVersion(docPath, docKey) {
+    return this.__scopeVersions?.get(`${docPath}|${docKey}`) || 0;
+  },
+
+  _bumpScopeVersion(docPath, docKey) {
+    this.__scopeVersions = this.__scopeVersions || new Map();
+    this.__scopeVersions.set(`${docPath}|${docKey}`, this._getScopeVersion(docPath, docKey) + 1);
+  },
+
+  // The user chose where column changes apply, in the column settings.
+  _onSettingsScopeSelected(e) {
+    const scope = e.detail?.scope;
+    if (!this._layoutPrefsKey || !this.document?.path || !this.view || scope === this._settingsScope) {
+      return;
+    }
+    const docPath = this.document.path;
+    const docKey = this._getDocResultsPrefsKey();
+    const previousScope = this._settingsScope;
+    const previousLocal = this._settings?.table;
+    this._settingsScope = scope;
+    // The choice wins over what started before it: queued saves for this document and loads still in progress
+    this._bumpScopeVersion(docPath, docKey);
+    this.__docPrefsLoadId = (this.__docPrefsLoadId || 0) + 1;
+    this.__docPrefsPending = false;
+    let save;
+    if (scope === 'document') {
+      // keep the current columns for this document only
+      save = this.saveDocPrefs(docPath, docKey, this._markDocumentOnly(this._deepClone(this.view.settings)));
+    } else {
+      // stop using this document's own columns, and show the ones shared by the layout again
+      if (this._settings) {
+        // the browser copy holds this document's own columns: drop it so they cannot come back
+        this.set('_settings.table', null);
+        this.saveSettings();
+      }
+      const { filters } = this._splitFilters(this.view.settings);
+      const deleteAndKeepFilters = Promise.all([
+        this._deleteDocPrefs(docPath, docKey),
+        this._saveDocFilters(docPath, `${docKey}.filters`, filters),
+      ]);
+      // With column changes pending in the open dialog, keep what is shown: closing it saves those columns for all
+      // documents of the type. Otherwise show the shared columns again.
+      const keepShown = Boolean(e.detail?.pendingChanges);
+      save = deleteAndKeepFilters.then(() => {
+        if (!keepShown && this.document?.path === docPath) {
+          this._loadDocPrefs(true, this.document, this._connectedUserId, this._layoutPrefsKey);
+        }
+      });
+    }
+    save
+      .then(() => this._columnSettingsSaved())
+      .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.warn('Failed to save where column changes apply', { path: docPath, scope, error });
+        // nothing was saved: go back to the previous choice, so the screen matches what is stored
+        if (this.document?.path === docPath) {
+          this._settingsScope = previousScope;
+          if (this._settings && previousLocal !== undefined) {
+            this.set('_settings.table', previousLocal);
+            this.saveSettings();
+          }
+        }
+        this._notifyColumnSettingsSaveFailed();
+      });
+  },
+
+  // Runs writes to the same document preference one after another, so an older write never lands after a newer one.
+  async _queueDocWrite(cacheKey, write) {
+    this.__docPrefsWrites = this.__docPrefsWrites || new Map();
+    const previous = this.__docPrefsWrites.get(cacheKey) || Promise.resolve();
+    const next = previous.catch(() => {}).then(write);
+    this.__docPrefsWrites.set(cacheKey, next);
+    try {
+      await next;
+    } finally {
+      if (this.__docPrefsWrites.get(cacheKey) === next) {
+        this.__docPrefsWrites.delete(cacheKey);
+      }
+    }
+  },
+
+  // Removes the document's own table prefs (DELETE /path/<doc>/@preferences/<key>).
+  async _deleteDocPrefs(docPath, key) {
+    const cacheKey = this._docCacheKey(this._getUserId(), docPath, key);
+    await this._queueDocWrite(cacheKey, () => this._removeDocPreference(docPath, key));
+    __docPrefsCache.set(cacheKey, {});
+  },
+
+  // Deletes a single document preference (DELETE /path/<doc>/@preferences/<key>).
+  async _removeDocPreference(docPath, key) {
+    await this._preferencesRequest(() => {
+      this._configureDocPreferencesResource(docPath);
+      this.$.preferences.path = `${this.$.preferences.path}/${encodeURIComponent(key)}`;
+      return this.$.preferences.remove();
+    });
+  },
+
+  // Column filters stay with the document they were set on, even when the columns are shared by the layout.
+  _splitFilters(settings) {
+    const shared = this._deepClone(settings || {});
+    const filters = {};
+    Object.entries(shared.columns || {}).forEach(([key, column]) => {
+      if (column?.filterValue) {
+        filters[key] = { filterValue: column.filterValue };
+        if (column.filterExpression) {
+          filters[key].filterExpression = column.filterExpression;
+        }
+      }
+      if (column) {
+        delete column.filterValue;
+        delete column.filterExpression;
+      }
+    });
+    return { shared, filters };
+  },
+
+  _withDocFilters(prefs, filters) {
+    const { shared } = this._splitFilters(prefs);
+    Object.entries(filters || {}).forEach(([key, filter]) => {
+      shared.columns = shared.columns || {};
+      shared.columns[key] = { ...shared.columns[key], ...filter };
+    });
+    return shared;
+  },
+
+  _getDocFiltersKey() {
+    return `${this._getDocResultsPrefsKey()}.filters`;
+  },
+
+  // The document's own column filters, from the in-session cache or the document enricher.
+  _getDocFilters(document, userId) {
+    if (!document?.path) {
+      return {};
+    }
+    const key = this._getDocFiltersKey();
+    const cacheKey = this._docCacheKey(userId, document.path, key);
+    if (__docPrefsCache.has(cacheKey)) {
+      return __docPrefsCache.get(cacheKey);
+    }
+    const filters = this._getDocPrefsFromEnricher(document, key) || {};
+    __docPrefsCache.set(cacheKey, filters);
+    return filters;
+  },
+
+  // Saves the document's own column filters, only when they changed.
+  async _saveDocFilters(docPath, key, filters, savedFilters) {
+    const cacheKey = this._docCacheKey(this._getUserId(), docPath, key);
+    const current = savedFilters || __docPrefsCache.get(cacheKey) || {};
+    if (JSON.stringify(current) === JSON.stringify(filters)) {
+      return;
+    }
+    __docPrefsCache.set(cacheKey, filters);
+    try {
+      await this._queueDocWrite(cacheKey, () => this._putDocPreference(docPath, key, filters));
+    } catch (error) {
+      // not saved: forget the cached copy, so the next change writes the filters again
+      __docPrefsCache.delete(cacheKey);
+      throw error;
+    }
+  },
+
+  // Whether the shared columns differ from what is already stored, so unchanged columns aren't written again.
+  _sharedPrefsChanged(layoutKey, shared) {
+    const cached = __globalPrefsCache.get(this._cacheKey(this._getUserId(), layoutKey));
+    return !cached || JSON.stringify(cached) !== JSON.stringify(shared);
   },
 
   _applyDocPrefs(enabled, prefs, view) {
@@ -1672,7 +2129,7 @@ Polymer({
   },
 
   _applyDocPrefsImpl(enabled, prefs, view) {
-    if (!enabled || !view) {
+    if (!enabled || !view || this.__docPrefsPending) {
       return;
     }
 
@@ -1694,7 +2151,7 @@ Polymer({
       return;
     }
 
-    this._applyPrefsToView(view, filteredSettings);
+    this._applyPrefsToView(view, filteredSettings, { clearMissingFilters: true });
   },
   // -------------------------
   // Mode decision functions
@@ -1703,6 +2160,26 @@ Polymer({
   // Doc prefs are used for any browse/document context (including Collections), regardless of provider presence.
   _computeShouldUseDocPrefs(document) {
     return Boolean(document && document.path);
+  },
+
+  // Layout-scoped prefs are keyed by `prefsLayout` when set, otherwise by the document type and the table hosting
+  // them, so every document of a type shares them while distinct tables (e.g. the trash listing) keep their own.
+  // An empty key means the prefs are stored on the document itself; `undefined` means the host is not resolved yet.
+  _computeLayoutPrefsKey(prefsScope, prefsLayout, document, prefsHost) {
+    if (prefsScope === 'document') {
+      return '';
+    }
+    if (prefsLayout) {
+      return `layoutPrefs.${prefsLayout}`;
+    }
+    if (prefsHost === undefined) {
+      return undefined;
+    }
+    const type = document?.type;
+    if (!type) {
+      return '';
+    }
+    return prefsHost ? `layoutPrefs.${type}.${prefsHost}` : `layoutPrefs.${type}`;
   },
 
   // Global prefs are ONLY for non-document contexts (e.g. search pages), so require "no document".
