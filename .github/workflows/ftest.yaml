@@ -28,11 +28,26 @@ env:
   REFERENCE_BRANCH: ${{ github.base_ref || inputs.branch || github.ref_name }}
 
 jobs:
-  ftests:
+  # The 46 feature files are split across four runners, each with its own Nuxeo server, because
+  # WebdriverIO itself has to stay serial (maxInstances: 1): every in-process worker would share
+  # the one server this job starts, while search.feature asserts repo-wide absolute result counts
+  # and the fixture `After` hooks delete users and groups globally. Sharding at job level makes
+  # those collisions impossible by construction and needs no changes to the tests.
+  #
+  # scripts/test/ftest/shards.js owns the shard -> feature mapping and, via `npm run lint`, fails
+  # CI when a feature file is assigned to no shard or to more than one.
+  ftests-shard:
+    name: ftests (shard ${{ matrix.shard }})
     runs-on:
       group: medium-4cpu-runners
     permissions:
       contents: read
+    strategy:
+      # One shard failing must not cancel the rest: the remaining shards cover three quarters of
+      # the suite, and losing their results turns one known failure into an unknown amount of them.
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
 
     steps:
       - name: Debug
@@ -41,6 +56,7 @@ jobs:
           echo "Actor: ${{ github.actor }}"
           echo "Base branch: ${{ github.base_ref }}"
           echo "Ref: ${{ github.ref }}"
+          echo "Shard: ${{ matrix.shard }}"
 
       - name: Checkout code
         uses: actions/checkout@v6
@@ -118,7 +134,12 @@ jobs:
           # Both repositories generate sync/<release>-to-<dev> from the same template, so a match
           # on that name means "a workflow made one here too", not "the paired work lives here".
           # Pairing on it would test the merged dev work against the other repo's release snapshot.
-          case "$HEAD_REF" in sync/*) HEAD_REF="" ;; esac
+          # The `*)` branch is a deliberate no-op — any other ref is paired on as-is — and is
+          # spelled out because a `case` with no default trips Sonar's githubactions:S131.
+          case "$HEAD_REF" in
+            sync/*) HEAD_REF="" ;;
+            *) ;;
+          esac
           # Queried as a full ref: ls-remote matches patterns against the tail of a ref name,
           # so a bare "fix/foo" would also match a branch called "feature/fix/foo" and we would
           # then try to check out a branch that does not exist.
@@ -168,6 +189,20 @@ jobs:
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_TESTING_HELPERS}
 
+      # Resolved in its own step rather than inline below so that the shard -> feature mapping has
+      # exactly one home, which the same script can then guard against drift.
+      - name: Resolve this shard's feature files
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: |
+          SPECS=$(node scripts/test/ftest/shards.js --specs "$SHARD")
+          echo "Shard $SHARD runs: $SPECS"
+          echo "FTEST_SPECS=$SPECS" >> "$GITHUB_ENV"
+
+      # FTEST_SPECS reaches WebdriverIO through $GITHUB_ENV rather than this step's env block:
+      # mvn -Pftest binds ftest/itests.xml, whose `run-tests` target shells out to `npm run ftest`
+      # via Ant <exec>. Neither <exec> sets newenvironment, so both inherit the step environment,
+      # and scripts/test/ftest/runner.js spawns the runner without an explicit env either.
       - name: Functional tests
         env:
           MVN_REPO_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
@@ -179,28 +214,33 @@ jobs:
         with:
           test_command: mvn -ntp install -Pftest -DskipInstall
           timeout_minutes: 120
-          video_name: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'video') && 'ftest-video' || '' }}
+          # Shard-suffixed for the same reason as the artifacts below: xvfb-record archives the
+          # recording itself, as `xvfbrecording-<video_name>`, so a name shared across the four
+          # shards would collide and fail them. An empty value still disables recording entirely.
+          video_name: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'video') && format('ftest-video-shard-{0}', matrix.shard) || '' }}
           max_attempts: 3
 
+      # Every artifact name carries the shard: upload-artifact@v7 fails on a name another job in
+      # the same run already used, so the four shards would otherwise collide on all of these.
       - name: Archive cucumber reports
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: cucumber-reports
+          name: cucumber-reports-shard-${{ matrix.shard }}
           path: ftest/target/cucumber-reports/
 
       - name: Archive screenshots
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: screenshots
+          name: screenshots-shard-${{ matrix.shard }}
           path: ftest/target/screenshots/
 
       - name: Archive logs
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: logs
+          name: logs-shard-${{ matrix.shard }}
           path: |
             **/log/*.log
             **/nxserver/config/distribution.properties
@@ -209,7 +249,34 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: packages-ftest
+          name: packages-ftest-shard-${{ matrix.shard }}
           path: |
             plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
             plugin/itests/marketplace/target/nuxeo-web-ui-marketplace-itests-*.zip
+
+  # Branch protection on maintenance-3.1.x, lts-2025, develop-2023 and develop-2025 requires a
+  # status check named exactly `ftests`. A matrix job reports `ftests (shard 1)`, `ftests (shard 2)`
+  # and so on but never a bare `ftests`, so moving the matrix onto a job of that name would leave
+  # the required check pending forever and block every pull request. Keeping the shards under their
+  # own job id and gating on them here means `ftests` is still reported, passing only when all four
+  # shards passed, and no branch protection setting has to change.
+  ftests:
+    needs: ftests-shard
+    # always(), not success(): a skipped required check counts as satisfied for branch protection,
+    # so this job has to run and fail explicitly on a shard that failed or was cancelled.
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check shard results
+        env:
+          # The aggregate over the whole matrix - success only when every shard succeeded.
+          RESULT: ${{ needs.ftests-shard.result }}
+        run: |
+          echo "Functional test shards: $RESULT"
+          if [ "$RESULT" != "success" ]; then
+            echo "::error::At least one functional test shard did not pass (result: $RESULT)."
+            exit 1
+          fi
