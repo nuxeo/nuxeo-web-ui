@@ -92,14 +92,6 @@ export default class Results extends BasePage {
     }
   }
 
-  async isResultsColumnVisible(heading) {
-    const ele = await this.el;
-    const row = await ele.$('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
-    await row.waitForVisible();
-    const titles = await row.$$('nuxeo-data-table-cell:not([hidden])').map((cell) => cell.getText());
-    return titles.includes(heading);
-  }
-
   async getResultsColumn(heading) {
     const ele = await this.el;
     await ele.$('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]').waitForVisible();

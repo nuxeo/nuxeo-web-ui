@@ -1319,6 +1319,7 @@
   "repositoryAnalytics.topDownloads.file": "File",
   "repositoryAnalytics.topDownloads.heading": "Top Downloads",
   "repositoryAnalytics.topNCreators.heading": "Top {0} Creators",
+  "results.columnSettings.saveFailed": "Failed to save column changes. They'll only apply to this view in this browser.",
   "results.heading.count": "{0} result(s)",
   "results.heading.count.unknown": "Many results",
   "results.sortBy": "Sort by",
