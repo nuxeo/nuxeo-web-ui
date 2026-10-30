@@ -2086,6 +2086,45 @@ suite('nuxeo-results', () => {
       putStub.restore();
     });
 
+    test('preference requests run one at a time, each on its own path (WEBUI-1380)', async () => {
+      // the shared resource cancels a pending request when the next one starts: a request must wait for the previous one
+      const sent = [];
+      let finishDelete;
+      const removeStub = sinon.stub(results.$.preferences, 'remove').callsFake(() => {
+        sent.push(`DELETE ${results.$.preferences.path}`);
+        return new Promise((resolve) => {
+          finishDelete = resolve;
+        });
+      });
+      const putStub = sinon.stub(results.$.preferences, 'put').callsFake(() => {
+        sent.push(`PUT ${results.$.preferences.path}`);
+        return Promise.resolve();
+      });
+      const remove = results._removeDocPreference('/default-domain/F2', 'documentPrefs.k');
+      const put = results._putGlobalPreference('layoutPrefs.Folder', { columns: {} });
+      await flush();
+      expect(sent).to.deep.equal(['DELETE /path/default-domain/F2/@preferences/documentPrefs.k']);
+      finishDelete();
+      await Promise.all([remove, put]);
+      expect(sent).to.deep.equal([
+        'DELETE /path/default-domain/F2/@preferences/documentPrefs.k',
+        'PUT /me/preferences/layoutPrefs.Folder',
+      ]);
+      removeStub.restore();
+      putStub.restore();
+    });
+
+    test('a failed preference request does not block the next one (WEBUI-1380)', async () => {
+      const removeStub = sinon.stub(results.$.preferences, 'remove').rejects(new Error('offline'));
+      const putStub = sinon.stub(results.$.preferences, 'put').resolves();
+      const removeError = results._removeDocPreference('/default-domain/F2', 'documentPrefs.k').catch((err) => err);
+      await results._putGlobalPreference('layoutPrefs.Folder', { columns: {} });
+      expect((await removeError).message).to.equal('offline');
+      expect(putStub).to.have.been.calledOnce;
+      removeStub.restore();
+      putStub.restore();
+    });
+
     test('saveDocPrefs validates inputs and updates docPrefs', async () => {
       await results
         .saveDocPrefs('', 'k', {})
