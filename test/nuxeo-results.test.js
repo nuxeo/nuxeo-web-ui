@@ -2385,19 +2385,23 @@ suite('nuxeo-results', () => {
       });
 
       test('the choice is offered only when column settings are shared by the layout', () => {
-        expect(results._computeSettingsScopeEnabled('layoutPrefs.Folder')).to.be.true;
-        expect(results._computeSettingsScopeEnabled('')).to.be.false;
-        expect(results._computeSettingsScopeEnabled(undefined)).to.be.false;
+        const table = createMockView({ settingsScopeEnabled: false, settingsScope: 'all' });
+        results._updateViewSettingsScope(table, 'layoutPrefs.Folder', 'all');
+        expect(table.settingsScopeEnabled).to.be.true;
+        results._updateViewSettingsScope(table, '', 'all');
+        expect(table.settingsScopeEnabled).to.be.false;
+        results._updateViewSettingsScope(table, undefined, 'all');
+        expect(table.settingsScopeEnabled).to.be.false;
       });
 
       test('passes the choice to a table that supports it, and leaves other views alone', () => {
         const table = createMockView({ settingsScopeEnabled: false, settingsScope: 'all' });
-        results._updateViewSettingsScope(table, true, 'document');
+        results._updateViewSettingsScope(table, 'layoutPrefs.Folder', 'document');
         expect(table.settingsScopeEnabled).to.be.true;
         expect(table.settingsScope).to.equal('document');
 
         const grid = createMockView();
-        results._updateViewSettingsScope(grid, true, 'document');
+        results._updateViewSettingsScope(grid, 'layoutPrefs.Folder', 'document');
         expect(grid.settingsScopeEnabled).to.be.undefined;
       });
 
