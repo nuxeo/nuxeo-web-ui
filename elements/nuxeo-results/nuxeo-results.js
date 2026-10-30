@@ -1457,8 +1457,7 @@ Polymer({
           // Filters belong to one document: clear the ones these settings don't have, so they don't carry over
           view.columns.forEach((column, idx) => {
             const key = column.field ? column.field : `col-${idx}`;
-            const saved = newSettings.columns && newSettings.columns[key];
-            if (column.filterValue && !(saved && saved.filterValue)) {
+            if (column.filterValue && !newSettings.columns?.[key]?.filterValue) {
               view.set(`columns.${idx}.filterValue`, '');
             }
           });
@@ -1961,7 +1960,7 @@ Polymer({
     const docPath = this.document.path;
     const docKey = this._getDocResultsPrefsKey();
     const previousScope = this._settingsScope;
-    const previousLocal = this._settings && this._settings.table;
+    const previousLocal = this._settings?.table;
     this._settingsScope = scope;
     // The choice wins over what started before it: queued saves for this document and loads still in progress
     this._bumpScopeVersion(docPath, docKey);
@@ -1983,8 +1982,11 @@ Polymer({
         this._deleteDocPrefs(docPath, docKey),
         this._saveDocFilters(docPath, `${docKey}.filters`, filters),
       ]);
+      // With column changes pending in the open dialog, keep what is shown: closing it saves those columns for all
+      // documents of the type. Otherwise show the shared columns again.
+      const keepShown = Boolean(e.detail?.pendingChanges);
       save = deleteAndKeepFilters.then(() => {
-        if (this.document?.path === docPath) {
+        if (!keepShown && this.document?.path === docPath) {
           this._loadDocPrefs(true, this.document, this._connectedUserId, this._layoutPrefsKey);
         }
       });
@@ -2040,7 +2042,7 @@ Polymer({
     const shared = this._deepClone(settings || {});
     const filters = {};
     Object.entries(shared.columns || {}).forEach(([key, column]) => {
-      if (column && column.filterValue) {
+      if (column?.filterValue) {
         filters[key] = { filterValue: column.filterValue };
         if (column.filterExpression) {
           filters[key].filterExpression = column.filterExpression;
@@ -2058,7 +2060,7 @@ Polymer({
     const { shared } = this._splitFilters(prefs);
     Object.entries(filters || {}).forEach(([key, filter]) => {
       shared.columns = shared.columns || {};
-      shared.columns[key] = { ...(shared.columns[key] || {}), ...filter };
+      shared.columns[key] = { ...shared.columns[key], ...filter };
     });
     return shared;
   },
