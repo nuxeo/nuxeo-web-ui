@@ -229,6 +229,10 @@
     "*.{js,html}": [
       "prettier --write",
       "eslint --fix"
+    ],
+    "ftest/features/*.feature": [
+      "node scripts/test/ftest/shards.js --place",
+      "git add scripts/test/ftest/shards.js"
     ]
   }
 }
