@@ -2531,6 +2531,101 @@ suite('nuxeo-results', () => {
 
         expect(results.docPrefs).to.deep.equal({ order: ['dc:created'] });
       });
+
+      test('a late shared save does not replace the columns of a document using its own', async () => {
+        let finishPut;
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        sinon.stub(results, '_putGlobalPreference').returns(
+          new Promise((resolve) => {
+            finishPut = resolve;
+          }),
+        );
+        results.document = { path: '/default-domain/scope-j', type: 'Folder' };
+        const save = results.saveLayoutPrefs('layoutPrefs.Folder', { order: ['dc:title'] });
+        // move to a folder of the same type that uses its own columns, before the save finishes
+        results.document = {
+          path: '/default-domain/scope-k',
+          type: 'Folder',
+          ...ownPrefs({ order: ['dc:created'], scope: 'document' }),
+        };
+        expect(results._settingsScope).to.equal('document');
+        finishPut();
+        await save;
+
+        expect(results.docPrefs).to.deep.equal({ order: ['dc:created'], scope: 'document' });
+      });
+
+      test('a late shared load does not replace the columns just kept for this document', async () => {
+        let resolveGet;
+        results._connectedUserId = 'scope-user-late-load';
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').returns(
+          new Promise((resolve) => {
+            resolveGet = resolve;
+          }),
+        );
+        sinon.stub(results, '_putDocPreference').resolves();
+        results.view = createMockView();
+        results.view.settings = { order: ['dc:title'] };
+        // the shared columns are still loading when the user picks "This document only"
+        results.document = { path: '/default-domain/scope-m', type: 'Folder' };
+        results._onSettingsScopeSelected({ detail: { scope: 'document' } });
+        await new Promise((resolve) => setTimeout(resolve));
+        resolveGet({ 'layoutPrefs.Folder': '{"order":["dc:modified"]}' });
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(results._settingsScope).to.equal('document');
+        expect(results.docPrefs).to.deep.equal({ order: ['dc:title'], scope: 'document' });
+      });
+
+      test('a queued change does not bring back the columns dropped by choosing all documents', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        const putStub = sinon.stub(results, '_putDocPreference').resolves();
+        results.view = createMockView();
+        results.view.settings = { order: ['dc:title'] };
+        results.document = { path: '/default-domain/scope-n', type: 'Folder' };
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        results._settingsScope = 'document';
+        let pending;
+        sinon.stub(results, '_debounceSave').callsFake((_, fn) => {
+          pending = fn;
+        });
+
+        // a column change under "This document only", then "All documents of this type" before it is saved
+        results._saveViewSettings();
+        results._onSettingsScopeSelected({ detail: { scope: 'all' } });
+        pending();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(putStub).to.have.been.calledOnceWith('/default-domain/scope-n', 'documentPrefs.table', {});
+      });
+
+      test('saves for the same document run in order, so an older one never lands last', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        const written = [];
+        let finishFirst;
+        sinon.stub(results, '_putDocPreference').callsFake((path, key, value) => {
+          written.push(value);
+          return written.length === 1
+            ? new Promise((resolve) => {
+                finishFirst = resolve;
+              })
+            : Promise.resolve();
+        });
+        results.document = { path: '/default-domain/scope-o', type: 'Folder' };
+
+        const first = results.saveDocPrefs('/default-domain/scope-o', 'documentPrefs.table', { scope: 'document' });
+        const second = results.saveDocPrefs('/default-domain/scope-o', 'documentPrefs.table', {});
+        await new Promise((resolve) => setTimeout(resolve));
+        // the second save waits for the first one to finish
+        expect(written).to.have.length(1);
+
+        finishFirst();
+        await Promise.all([first, second]);
+        expect(written).to.deep.equal([{ scope: 'document' }, {}]);
+        expect(results.docPrefs).to.deep.equal({});
+      });
     });
 
     test('_applyDocPrefsImpl falls back from backend to local settings', () => {
