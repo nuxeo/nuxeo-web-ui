@@ -1089,7 +1089,8 @@ Polymer({
                 this.document?.path === docPath &&
                 this._layoutPrefsKey === layoutKey &&
                 this._getUserId() === userId &&
-                this._settingsScope !== 'document'
+                this._settingsScope !== 'document' &&
+                !this._viewChangedSince(settings)
               ) {
                 this.docPrefs = this._withDocFilters(shared, filters);
               }
@@ -1756,13 +1757,17 @@ Polymer({
     }
   },
 
-  // Whether the table settings differ from saved ones (the "This document only" mark aside).
-  _viewChangedSince(saved) {
+  // Whether the table settings differ from saved ones (the "This document only" mark aside, and the column filters
+  // with `ignoreFilters`). Column changes in the open settings dialog count, as the table shows them at once.
+  _viewChangedSince(saved, ignoreFilters) {
     if (!this.view?.settings) {
       return false;
     }
-    const withoutScope = (settings) => JSON.stringify({ ...settings, scope: undefined });
-    return withoutScope(saved) !== withoutScope(this._deepClone(this.view.settings));
+    const comparable = (settings) => {
+      const kept = ignoreFilters ? this._splitFilters(settings).shared : settings;
+      return JSON.stringify({ ...kept, scope: undefined });
+    };
+    return comparable(saved) !== comparable(this._deepClone(this.view.settings));
   },
 
   // Persists layout-scoped results prefs (PUT /me/preferences/<key>) shared by every document with the same layout,
@@ -1781,12 +1786,14 @@ Polymer({
     await this._putGlobalPreference(key, cloned);
 
     __globalPrefsCache.set(this._cacheKey(userId, key), cloned);
-    // Only apply to the view if it still shows a document with this layout, for this user, using the shared columns
+    // Only apply to the view if it still shows a document with this layout, for this user, using the shared columns,
+    // and the columns were not changed meanwhile
     if (
       this.document?.path &&
       this._layoutPrefsKey === key &&
       this._getUserId() === userId &&
-      this._settingsScope !== 'document'
+      this._settingsScope !== 'document' &&
+      !this._viewChangedSince(cloned, true)
     ) {
       this.docPrefs = this._withDocFilters(cloned, this._getDocFilters(this.document, userId));
     }
@@ -2019,22 +2026,20 @@ Polymer({
         this.saveSettings();
       }
       const { filters } = this._splitFilters(this.view.settings);
-      const deleteAndKeepFilters = Promise.all([
+      // With column changes pending in the open dialog, keep what is shown: closing it saves those columns for all
+      // documents of the type. Otherwise show the shared columns again, once the document's own columns are removed,
+      // even if its filters could not be saved. The dialog is asked again then, as the user may have changed a column.
+      const source = e.composedPath?.()[0];
+      const keepShown = () => Boolean(e.detail?.pendingChanges || source?.pendingChanges);
+      save = Promise.all([
         this._deleteDocPrefs(docPath, docKey).then(() => {
           ownRemoved = true;
+          if (!keepShown() && isLatest() && this.document?.path === docPath) {
+            this._loadDocPrefs(true, this.document, this._connectedUserId, this._layoutPrefsKey);
+          }
         }),
         this._saveDocFilters(docPath, `${docKey}.filters`, filters),
       ]);
-      // With column changes pending in the open dialog, keep what is shown: closing it saves those columns for all
-      // documents of the type. Otherwise show the shared columns again. The dialog is asked again once the
-      // document's own columns are removed, as the user may have changed a column meanwhile.
-      const source = e.composedPath?.()[0];
-      const keepShown = () => Boolean(e.detail?.pendingChanges || source?.pendingChanges);
-      save = deleteAndKeepFilters.then(() => {
-        if (!keepShown() && isLatest() && this.document?.path === docPath) {
-          this._loadDocPrefs(true, this.document, this._connectedUserId, this._layoutPrefsKey);
-        }
-      });
     }
     save
       .then(() => this._columnSettingsSaved())
