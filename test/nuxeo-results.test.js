@@ -3033,6 +3033,30 @@ suite('nuxeo-results', () => {
         expect(load).to.have.been.calledWith(true, results.document);
       });
 
+      test('a column changed and saved while switching to all documents is not replaced by the shared columns', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results.document = { path: '/default-domain/scope-x', type: 'Folder' };
+        results.view = createMockView();
+        results.view.settings = { columns: { 'dc:title': { hidden: false } } };
+        results._settingsScope = 'document';
+        let finishDelete;
+        sinon.stub(results, '_removeDocPreference').returns(
+          new Promise((resolve) => {
+            finishDelete = resolve;
+          }),
+        );
+        sinon.stub(results, '_putDocPreference').resolves();
+        const load = sinon.spy(results, '_loadDocPrefs');
+
+        // nothing pending when picked; the column is changed and the dialog closed before the delete ends
+        results._onSettingsScopeSelected({ detail: { scope: 'all', pendingChanges: false } });
+        results.view.settings = { columns: { 'dc:title': { hidden: true } } };
+        finishDelete();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(load).to.not.have.been.calledWith(true);
+      });
+
       test('a shared save finishing after a newer column change does not undo it', async () => {
         sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
         results._isRestoring = false;
