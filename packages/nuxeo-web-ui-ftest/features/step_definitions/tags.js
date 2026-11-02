@@ -15,6 +15,10 @@ When('I paste {string} in the document tags', async function (text) {
     input,
     text,
   );
+  // The chips show up right away; the success toast only opens once the tags are saved.
+  await driver.waitUntil(() => driver.execute((el) => el.$.toast.opened, tags), {
+    timeoutMsg: 'The pasted tags were not saved',
+  });
 });
 
 Then('I can see the document has the tags {string}', async function (expected) {
