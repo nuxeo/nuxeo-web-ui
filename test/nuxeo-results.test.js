@@ -3015,6 +3015,85 @@ suite('nuxeo-results', () => {
         expect(results.docPrefs).to.equal(before);
       });
 
+      test('switching to all documents shows the shared columns even when only the filters could not be saved', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        sinon.stub(console, 'warn');
+        sinon.stub(results, 'notify');
+        results.document = { path: '/default-domain/scope-v', type: 'Folder' };
+        results.view = createMockView();
+        results.view.settings = { columns: { 'dc:title': { hidden: false, filterValue: 'invoice' } } };
+        results._settingsScope = 'document';
+        sinon.stub(results, '_removeDocPreference').resolves();
+        sinon.stub(results, '_putDocPreference').rejects({ status: 500 });
+        const load = sinon.spy(results, '_loadDocPrefs');
+
+        results._onSettingsScopeSelected({ detail: { scope: 'all' } });
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(load).to.have.been.calledWith(true, results.document);
+      });
+
+      test('a shared save finishing after a newer column change does not undo it', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        results.document = { path: '/default-domain/scope-w', type: 'Folder' };
+        results._settingsScope = 'all';
+        results.view = createMockView();
+        results.view.settings = { columns: { 'dc:title': { hidden: true } } };
+        sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+        let finishPut;
+        sinon.stub(results, '_putGlobalPreference').returns(
+          new Promise((resolve) => {
+            finishPut = resolve;
+          }),
+        );
+        sinon.stub(results, '_putDocPreference').resolves();
+        const before = results.docPrefs;
+
+        results._saveViewSettings();
+        // the dialog is opened again and another column changed before the save ends
+        results.view.settings = { columns: { 'dc:title': { hidden: true }, 'dc:creator': { hidden: true } } };
+        finishPut();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(results.docPrefs).to.equal(before);
+      });
+
+      test('a filters-only save finishing after a newer column change does not undo it', async () => {
+        results._connectedUserChanged('filters-only-d', 'filters-only-c');
+        results._connectedUserId = 'filters-only-late';
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        results.document = { path: '/default-domain/filters-late', type: 'Folder' };
+        results._settingsScope = 'all';
+        results.view = createMockView();
+        results.view.settings = { columns: { 'dc:title': { hidden: false } } };
+        sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+        sinon.stub(results, '_putGlobalPreference').resolves();
+        const putDoc = sinon.stub(results, '_putDocPreference').resolves();
+        results._saveViewSettings();
+        await new Promise((resolve) => setTimeout(resolve));
+        let finishPut;
+        putDoc.returns(
+          new Promise((resolve) => {
+            finishPut = resolve;
+          }),
+        );
+        const before = results.docPrefs;
+
+        results.view.settings = { columns: { 'dc:title': { hidden: false, filterValue: 'report' } } };
+        results._saveViewSettings();
+        results.view.settings = { columns: { 'dc:title': { hidden: true, filterValue: 'report' } } };
+        finishPut();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(results.docPrefs).to.equal(before);
+      });
+
       test('with no shared or own columns, the default columns still get the document filters', () => {
         sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
         results.document = {
