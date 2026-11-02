@@ -71,12 +71,17 @@ suite('nuxeo-diff-page header', () => {
     .header { font-size: 1rem; height: 53px; padding: 0 16px; }
   `;
 
+  // The page reserves 48px for the drawer toggle below a 720px viewport. A fixture cannot narrow the
+  // viewport, so apply that reservation to the fixtures that are 720px or narrower.
+  const DRAWER_TOGGLE_RESERVATION = 48;
+  const NARROW_WIDTH = 720;
+
   // A flex row, so the header shrinks back to it instead of overflowing by its own padding, and
   // hides horizontal overflow, so anything the titles claim beyond it is cut off, not ellipsized.
   const header = (width, title, second = title) =>
     fixture(html`
       <div style="position: relative; display: flex; align-items: center; width: ${width}px; overflow-x: hidden;">
-        <div class="header">
+        <div class="header" style="${width <= NARROW_WIDTH ? `padding-left: ${DRAWER_TOGGLE_RESERVATION}px;` : ''}">
           <span class="title"> Compare <a href="#">${title}</a> Vs. <a href="#">${second}</a> </span>
         </div>
         <div
