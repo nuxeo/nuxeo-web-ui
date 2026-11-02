@@ -2028,9 +2028,12 @@ Polymer({
       const { filters } = this._splitFilters(this.view.settings);
       // With column changes pending in the open dialog, keep what is shown: closing it saves those columns for all
       // documents of the type. Otherwise show the shared columns again, once the document's own columns are removed,
-      // even if its filters could not be saved. The dialog is asked again then, as the user may have changed a column.
+      // even if its filters could not be saved. The dialog and the table are checked again then, as the user may have
+      // changed a column meanwhile, and even closed the dialog.
       const source = e.composedPath?.()[0];
-      const keepShown = () => Boolean(e.detail?.pendingChanges || source?.pendingChanges);
+      const shown = this._deepClone(this.view.settings);
+      const keepShown = () =>
+        Boolean(e.detail?.pendingChanges || source?.pendingChanges) || this._viewChangedSince(shown);
       save = Promise.all([
         this._deleteDocPrefs(docPath, docKey).then(() => {
           ownRemoved = true;
