@@ -2847,6 +2847,200 @@ suite('nuxeo-results', () => {
         // the shared columns are not reloaded over the user's pending changes
         expect(loadStub).to.not.have.been.called;
       });
+
+      test('an older switch to all documents finishing late does not undo a newer "This document only"', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results.document = { path: '/default-domain/scope-r', type: 'Folder' };
+        results.view = createMockView();
+        results._settings = {};
+        results._settingsScope = 'document';
+        let finishDelete;
+        sinon.stub(results, '_removeDocPreference').returns(
+          new Promise((resolve) => {
+            finishDelete = resolve;
+          }),
+        );
+        sinon.stub(results, '_putDocPreference').resolves();
+        const loadStub = sinon.stub(results, '_loadDocPrefs');
+
+        results._onSettingsScopeSelected({ detail: { scope: 'all' } });
+        results._onSettingsScopeSelected({ detail: { scope: 'document' } });
+        finishDelete();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(results._settingsScope).to.equal('document');
+        expect(loadStub).to.not.have.been.called;
+      });
+
+      test('switching to all documents keeps the choice when only the filters could not be saved', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        sinon.stub(console, 'warn');
+        sinon.stub(results, 'notify');
+        results.document = { path: '/default-domain/scope-s', type: 'Folder' };
+        results.view = createMockView();
+        results.view.settings = { columns: { 'dc:title': { hidden: false, filterValue: 'invoice' } } };
+        results._settings = {};
+        results._settingsScope = 'document';
+        sinon.stub(results, '_removeDocPreference').resolves();
+        sinon.stub(results, '_putDocPreference').rejects({ status: 500 });
+
+        results._onSettingsScopeSelected({ detail: { scope: 'all' } });
+        await new Promise((resolve) => setTimeout(resolve));
+
+        // the document's own columns are gone: the screen must not claim "This document only"
+        expect(results._settingsScope).to.equal('all');
+        expect(results.notify).to.have.been.calledOnce;
+      });
+
+      test('a column changed while switching to all documents is not replaced by the shared columns', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results.document = { path: '/default-domain/scope-u', type: 'Folder' };
+        results.view = createMockView();
+        results._settings = {};
+        results._settingsScope = 'document';
+        let finishDelete;
+        sinon.stub(results, '_removeDocPreference').returns(
+          new Promise((resolve) => {
+            finishDelete = resolve;
+          }),
+        );
+        sinon.stub(results, '_putDocPreference').resolves();
+        const loadStub = sinon.stub(results, '_loadDocPrefs');
+        const dialog = { pendingChanges: false };
+
+        results._onSettingsScopeSelected({
+          detail: { scope: 'all', pendingChanges: false },
+          composedPath: () => [dialog],
+        });
+        dialog.pendingChanges = true;
+        finishDelete();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(loadStub).to.not.have.been.called;
+      });
+
+      test("a document's filters saved before they had their own entry stay once shared columns exist", () => {
+        const shared = { columns: { 'dc:title': { hidden: false } } };
+        const legacy = {
+          path: '/default-domain/filters-e',
+          type: 'Folder',
+          ...ownPrefs({ columns: { 'dc:title': { hidden: true, filterValue: 'report' } } }),
+        };
+        results._useLayoutPrefs(shared, legacy, 'filters-user-3');
+        expect(results.docPrefs).to.deep.equal({ columns: { 'dc:title': { hidden: false, filterValue: 'report' } } });
+
+        // filters cleared since then win over the old ones
+        const cleared = {
+          path: '/default-domain/filters-f',
+          type: 'Folder',
+          contextParameters: {
+            userPreferences: {
+              preferences: {
+                'documentPrefs.table': JSON.stringify({ columns: { 'dc:title': { filterValue: 'report' } } }),
+                'documentPrefs.table.filters': '{}',
+              },
+            },
+          },
+        };
+        results._useLayoutPrefs(shared, cleared, 'filters-user-3');
+        expect(results.docPrefs).to.deep.equal(shared);
+      });
+
+      test('a filters-only change is kept when the table is shown again, e.g. after the grid view', async () => {
+        results._connectedUserChanged('filters-only-b', 'filters-only-a');
+        results._connectedUserId = 'filters-only';
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        results.document = { path: '/default-domain/filters-h', type: 'Folder' };
+        results._settingsScope = 'all';
+        results.view = createMockView();
+        results.view.settings = { columns: { 'dc:title': { hidden: false } } };
+        sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+        const putGlobal = sinon.stub(results, '_putGlobalPreference').resolves();
+        sinon.stub(results, '_putDocPreference').resolves();
+        results._saveViewSettings();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        results.view.settings = { columns: { 'dc:title': { hidden: false, filterValue: 'report' } } };
+        results._saveViewSettings();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(putGlobal).to.have.been.calledOnce;
+        expect(results.docPrefs).to.deep.equal({ columns: { 'dc:title': { hidden: false, filterValue: 'report' } } });
+      });
+
+      test('a failed filter save does not drop the newer filters queued after it', async () => {
+        const path = '/default-domain/filters-i';
+        const key = 'documentPrefs.table.filters';
+        let failFirst;
+        const putDoc = sinon.stub(results, '_putDocPreference');
+        putDoc.onFirstCall().returns(
+          new Promise((resolve, reject) => {
+            failFirst = reject;
+          }),
+        );
+        putDoc.onSecondCall().resolves();
+        const newer = { 'dc:title': { filterValue: 'newer' } };
+
+        const older = results._saveDocFilters(path, key, { 'dc:title': { filterValue: 'older' } }).catch(() => {});
+        const saved = results._saveDocFilters(path, key, newer);
+        failFirst({ status: 500 });
+        await older;
+        await saved;
+
+        expect(results._getDocFilters({ path }, results._getUserId())).to.deep.equal(newer);
+      });
+
+      test('a "This document only" save finishing after a newer column change does not undo it', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results.document = { path: '/default-domain/scope-t', type: 'Folder' };
+        results.view = createMockView();
+        results.view.settings = { columns: { 'dc:title': { hidden: false } } };
+        results._settingsScope = 'all';
+        let finishPut;
+        sinon.stub(results, '_putDocPreference').returns(
+          new Promise((resolve) => {
+            finishPut = resolve;
+          }),
+        );
+        const before = results.docPrefs;
+
+        results._onSettingsScopeSelected({ detail: { scope: 'document' } });
+        results.view.settings = { columns: { 'dc:title': { hidden: false }, 'dc:creator': { hidden: false } } };
+        finishPut();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(results.docPrefs).to.equal(before);
+      });
+
+      test('with no shared or own columns, the default columns still get the document filters', () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results.document = {
+          path: '/default-domain/filters-g',
+          type: 'Folder',
+          contextParameters: {
+            userPreferences: {
+              preferences: { 'documentPrefs.table.filters': JSON.stringify({ 'dc:title': { filterValue: 'report' } }) },
+            },
+          },
+        };
+        results._settingsScope = 'all';
+        results._settings = {};
+        results.__docPrefsPending = false;
+        const view = createMockView();
+        view.settings = { columns: { 'dc:title': { hidden: false } } };
+        sinon.stub(results, '_filterSettingsByCapabilities').returnsArg(1);
+        const applyStub = sinon.stub(results, '_applyPrefsToView');
+
+        results._applyDocPrefsImpl(true, {}, view);
+
+        expect(applyStub).to.have.been.calledTwice;
+        expect(applyStub.lastCall.args[1]).to.deep.equal({
+          columns: { 'dc:title': { hidden: false, filterValue: 'report' } },
+        });
+      });
     });
 
     test('_applyDocPrefsImpl falls back from backend to local settings', () => {
