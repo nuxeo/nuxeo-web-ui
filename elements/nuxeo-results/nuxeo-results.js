@@ -1061,7 +1061,8 @@ Polymer({
         const storageName = this._localStorageName;
         const scopeVersion = this._getScopeVersion(docPath, docKey);
         const settings = this._deepClone(this.view.settings);
-        const savedFilters = this._getDocFilters(this.document, this._getUserId());
+        const userId = this._getUserId();
+        const savedFilters = this._getDocFilters(this.document, userId);
         this._debounceSave('_docPrefsSaveDebouncer', () => {
           // Save to backend (primary): for this document only when the user chose so, otherwise shared by the layout
           let save;
@@ -1074,10 +1075,25 @@ Polymer({
           } else if (layoutKey) {
             // columns are shared by the layout; column filters stay with this document
             const { shared, filters } = this._splitFilters(settings);
+            const sharedChanged = this._sharedPrefsChanged(layoutKey, shared);
+            const saveId = (this.__docFiltersSaveId || 0) + 1;
+            this.__docFiltersSaveId = saveId;
             save = Promise.all([
-              this._sharedPrefsChanged(layoutKey, shared) ? this.saveLayoutPrefs(layoutKey, shared) : null,
+              sharedChanged ? this.saveLayoutPrefs(layoutKey, shared) : null,
               this._saveDocFilters(docPath, `${docKey}.filters`, filters, savedFilters),
-            ]);
+            ]).then(() => {
+              // a filters-only change doesn't save the shared columns: keep the applied prefs in step with the filters
+              if (
+                !sharedChanged &&
+                saveId === this.__docFiltersSaveId &&
+                this.document?.path === docPath &&
+                this._layoutPrefsKey === layoutKey &&
+                this._getUserId() === userId &&
+                this._settingsScope !== 'document'
+              ) {
+                this.docPrefs = this._withDocFilters(shared, filters);
+              }
+            });
           } else {
             save = this.saveDocPrefs(docPath, docKey, settings);
           }
@@ -1734,10 +1750,19 @@ Polymer({
 
     // update in-session cache
     __docPrefsCache.set(cacheKey, cloned);
-    // Only apply to the view if the user has not moved to another document meanwhile
-    if (!this.document?.path || this.document.path === docPath) {
+    // Only apply to the view if the user has not moved to another document, nor changed the columns, meanwhile
+    if ((!this.document?.path || this.document.path === docPath) && !this._viewChangedSince(cloned)) {
       this.docPrefs = cloned;
     }
+  },
+
+  // Whether the table settings differ from saved ones (the "This document only" mark aside).
+  _viewChangedSince(saved) {
+    if (!this.view?.settings) {
+      return false;
+    }
+    const withoutScope = (settings) => JSON.stringify({ ...settings, scope: undefined });
+    return withoutScope(saved) !== withoutScope(this._deepClone(this.view.settings));
   },
 
   // Persists layout-scoped results prefs (PUT /me/preferences/<key>) shared by every document with the same layout,
@@ -1978,6 +2003,10 @@ Polymer({
     this._bumpScopeVersion(docPath, docKey);
     this.__docPrefsLoadId = (this.__docPrefsLoadId || 0) + 1;
     this.__docPrefsPending = false;
+    const version = this._getScopeVersion(docPath, docKey);
+    // a newer choice for this document wins over what this one still has to do
+    const isLatest = () => this._getScopeVersion(docPath, docKey) === version;
+    let ownRemoved = false;
     let save;
     if (scope === 'document') {
       // keep the current columns for this document only
@@ -1991,14 +2020,18 @@ Polymer({
       }
       const { filters } = this._splitFilters(this.view.settings);
       const deleteAndKeepFilters = Promise.all([
-        this._deleteDocPrefs(docPath, docKey),
+        this._deleteDocPrefs(docPath, docKey).then(() => {
+          ownRemoved = true;
+        }),
         this._saveDocFilters(docPath, `${docKey}.filters`, filters),
       ]);
       // With column changes pending in the open dialog, keep what is shown: closing it saves those columns for all
-      // documents of the type. Otherwise show the shared columns again.
-      const keepShown = Boolean(e.detail?.pendingChanges);
+      // documents of the type. Otherwise show the shared columns again. The dialog is asked again once the
+      // document's own columns are removed, as the user may have changed a column meanwhile.
+      const source = e.composedPath?.()[0];
+      const keepShown = () => Boolean(e.detail?.pendingChanges || source?.pendingChanges);
       save = deleteAndKeepFilters.then(() => {
-        if (!keepShown && this.document?.path === docPath) {
+        if (!keepShown() && isLatest() && this.document?.path === docPath) {
           this._loadDocPrefs(true, this.document, this._connectedUserId, this._layoutPrefsKey);
         }
       });
@@ -2008,8 +2041,9 @@ Polymer({
       .catch((error) => {
         // eslint-disable-next-line no-console
         console.warn('Failed to save where column changes apply', { path: docPath, scope, error });
-        // nothing was saved: go back to the previous choice, so the screen matches what is stored
-        if (this.document?.path === docPath) {
+        // the choice was not saved: go back to the previous one, so the screen matches what is stored. Not when a newer
+        // choice was made since, or when the document's own columns are already removed (only its filters failed).
+        if (isLatest() && !ownRemoved && this.document?.path === docPath) {
           this._settingsScope = previousScope;
           if (this._settings && previousLocal !== undefined) {
             this.set('_settings.table', previousLocal);
@@ -2093,7 +2127,10 @@ Polymer({
     if (__docPrefsCache.has(cacheKey)) {
       return __docPrefsCache.get(cacheKey);
     }
-    const filters = this._getDocPrefsFromEnricher(document, key) || {};
+    // prefs saved before filters had their own entry keep them in the document's own prefs
+    const filters =
+      this._getDocPrefsFromEnricher(document, key) ||
+      this._splitFilters(this._getDocumentPrefs(document, userId)).filters;
     __docPrefsCache.set(cacheKey, filters);
     return filters;
   },
@@ -2109,8 +2146,10 @@ Polymer({
     try {
       await this._queueDocWrite(cacheKey, () => this._putDocPreference(docPath, key, filters));
     } catch (error) {
-      // not saved: forget the cached copy, so the next change writes the filters again
-      __docPrefsCache.delete(cacheKey);
+      // not saved: forget the cached copy, so the next change writes the filters again (unless a newer write replaced it)
+      if (__docPrefsCache.get(cacheKey) === filters) {
+        __docPrefsCache.delete(cacheKey);
+      }
       throw error;
     }
   },
@@ -2152,6 +2191,14 @@ Polymer({
     }
 
     this._applyPrefsToView(view, filteredSettings, { clearMissingFilters: true });
+
+    // no shared or own columns yet: the default columns still get this document's own filters
+    if (Object.keys(filteredSettings).length === 0 && this._layoutPrefsKey && this._settingsScope !== 'document') {
+      const filters = this._getDocFilters(this.document, this._getUserId());
+      if (Object.keys(filters).length > 0 && view.settings) {
+        this._applyPrefsToView(view, this._withDocFilters(view.settings, filters));
+      }
+    }
   },
   // -------------------------
   // Mode decision functions
