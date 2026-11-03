@@ -77,13 +77,26 @@ jobs:
           tag_name: v${{ env.VERSION }}
           release_name: Release ${{ env.VERSION }}
 
+      # 3.1.x is lower than the 2025.x versions already published, and npm refuses to apply the
+      # implicit "latest" tag then. Always publish with an explicit tag: "latest" stays on 2025.x.
+      - name: Resolve the npm dist-tag
+        run: |
+          case "$VERSION" in
+            2025.*) echo "NPM_TAG=latest" >> $GITHUB_ENV ;;
+            3.1.*) echo "NPM_TAG=lts-2023" >> $GITHUB_ENV ;;
+            *)
+              echo "::error::No npm dist-tag is mapped for version $VERSION"
+              exit 1
+              ;;
+          esac
+
       - name: Publish Nuxeo Web UI FTest ${{ env.VERSION }}
         if: ${{ github.event.inputs.dryRun == 'false' }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
           pushd packages/nuxeo-web-ui-ftest/
-          npm publish --@nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/
+          npm publish --tag "$NPM_TAG" --@nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/
           popd
 
       - name: Promote Web UI ${{ github.event.inputs.version }} to ${{ env.VERSION }}
