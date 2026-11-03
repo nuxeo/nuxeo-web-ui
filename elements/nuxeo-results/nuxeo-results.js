@@ -817,7 +817,18 @@ Polymer({
     this.saveSettings();
     const settings = this._filterSettingsByCapabilities(view, this._settings[this.displayMode]);
     if (settings !== undefined) {
+      this._restoreLocalSettings(view, settings);
+    }
+  },
+
+  // Restores the browser copy of the settings. It may be older than the columns shared by the layout, so it is not
+  // taken as a change of the columns shown by the user.
+  _restoreLocalSettings(view, settings) {
+    this.__restoringLocal = true;
+    try {
       view.settings = settings;
+    } finally {
+      this.__restoringLocal = false;
     }
   },
 
@@ -841,7 +852,7 @@ Polymer({
       if (this._settings && view.settings) {
         const settings = this._filterSettingsByCapabilities(view, this._settings[name]);
         if (settings !== undefined) {
-          view.settings = settings;
+          this._restoreLocalSettings(view, settings);
         }
       }
       if (name === this.displayMode) {
@@ -1061,17 +1072,10 @@ Polymer({
         const storageName = this._localStorageName;
         const scopeVersion = this._getScopeVersion(docPath, docKey);
         const settings = this._deepClone(this.view.settings);
-        // only a change of the columns shown is shared: a resize, reorder, sort or filter is not
-        const visibility = JSON.stringify(this._visibilityOnly(settings));
-        const shown = this.__shownVisibility;
-        // compared only with what was shown for this document: otherwise it is not known what the user changed
-        if (shown?.path === docPath && shown.value !== visibility) {
-          this.__visibilityChanged = true;
-        }
-        this.__shownVisibility = { path: docPath, value: visibility };
+        this._trackShownVisibility(docPath, settings);
         this._debounceSave('_docPrefsSaveDebouncer', () => {
-          const visibilityChanged = this.__visibilityChanged;
-          this.__visibilityChanged = false;
+          const visibilityChanged = this.__visibilityChanged === docPath;
+          this.__visibilityChanged = null;
           // Save to backend (primary): for this document only when the user chose so, otherwise shared by the layout
           if (layoutKey && this._getScopeVersion(docPath, docKey) !== scopeVersion) {
             // the user changed where column changes apply since then, which saved the columns shown at that time
@@ -1119,7 +1123,6 @@ Polymer({
           // Save to backend (primary)
           this.saveGlobalResultsPrefs(this.view.settings)
             .then(() => {
-              this._columnSettingsSaved();
               // Sync to localStorage on success (fallback cache)
               this.set(`_settings.${this.displayMode}`, this.view.settings);
               this.saveSettings();
@@ -1130,7 +1133,6 @@ Polymer({
               // Fallback: save to localStorage even if backend fails
               this.set(`_settings.${this.displayMode}`, this.view.settings);
               this.saveSettings();
-              this._notifyColumnSettingsSaveFailed();
             });
         });
         return;
@@ -1141,6 +1143,23 @@ Polymer({
       this.set(`_settings.${this.displayMode}`, this.view.settings);
       this.saveSettings();
     }
+  },
+
+  // Only a change of the columns shown is shared: a resize, reorder, sort or filter is not. It is told by comparing with
+  // what was shown for this document; otherwise it is not known what the user changed.
+  _trackShownVisibility(docPath, settings) {
+    if (this.__restoringLocal) {
+      // the restored settings replace a change still to be saved, which is then not shared either
+      this.__visibilityChanged = null;
+      return;
+    }
+    const visibility = JSON.stringify(this._visibilityOnly(settings));
+    const shown = this.__shownVisibility;
+    if (shown?.path === docPath && shown.value !== visibility) {
+      // kept with the document, so a save for another one queued meanwhile doesn't take it as its own change
+      this.__visibilityChanged = docPath;
+    }
+    this.__shownVisibility = { path: docPath, value: visibility };
   },
 
   // Keeps a browser copy of the table settings for the document they were changed on.
@@ -1390,7 +1409,9 @@ Polymer({
 
   // Applies preferences to view by either clearing to defaults or applying saved settings.
   // Note: view.settings is a JS getter/setter, not a Polymer property, so we handle empty case explicitly.
-  _applyPrefsToView(view, prefs, { clearMissingFilters = false } = {}) {
+  // `fromDefaults`: the settings are the table defaults (with the columns shown by the layout), applied in place of the
+  // reset to defaults below, so filters and the sort are cleared as that reset does.
+  _applyPrefsToView(view, prefs, { fromDefaults = false } = {}) {
     if (!view) {
       return;
     }
@@ -1449,8 +1470,7 @@ Polymer({
           view.sortOrder = [];
         }
       } else {
-        if (clearMissingFilters && view.columns) {
-          // Filters belong to one document: clear the ones these settings don't have, so they don't carry over
+        if (fromDefaults && view.columns) {
           view.columns.forEach((column, idx) => {
             const key = column.field || `col-${idx}`;
             if (column.filterValue && !newSettings.columns?.[key]?.filterValue) {
@@ -1460,6 +1480,9 @@ Polymer({
         }
         // Apply settings via the setter
         view.settings = newSettings;
+        if (fromDefaults && view.sortOrder && view.sortOrder.length > 0) {
+          view.sortOrder = [];
+        }
       }
     } finally {
       this._isRestoring = false;
@@ -2114,9 +2137,7 @@ Polymer({
     return settings;
   },
 
-  // The table's default settings, as restored when there are no prefs (see `_applyPrefsToView`). A sort left from
-  // another document is cleared; otherwise the sort is left alone, so the document's default sort (e.g. the manual
-  // order of an Orderable folder) is kept.
+  // The table's default columns, as restored when there are no prefs (see `_applyPrefsToView`).
   _defaultSettings(view) {
     this._rememberDeclaredWidths(view);
     const columns = {};
@@ -2128,7 +2149,7 @@ Polymer({
         resized: false,
       };
     });
-    return view.sortOrder?.length > 0 ? { columns, sortOrder: [] } : { columns };
+    return { columns };
   },
 
   // Whether the shared columns differ from the latest ones stored or being stored, so unchanged columns aren't written
@@ -2174,17 +2195,19 @@ Polymer({
     }
 
     let settings = filteredSettings;
+    let fromDefaults = false;
     if (view.columns && this._isVisibilityOnly(filteredSettings)) {
       // only the columns shown by the layout, as the document has no prefs of its own on the server: show them with the
       // document's browser copy when there is one, otherwise with the table defaults
       const local = this._settings?.[this.displayMode];
       const hasLocal = Boolean(local) && Object.keys(local).length > 0;
-      const base = (hasLocal && this._filterSettingsByCapabilities(view, local)) || this._defaultSettings(view);
-      settings = this._withSharedColumns(base, filteredSettings);
+      const localSettings = hasLocal && this._filterSettingsByCapabilities(view, local);
+      fromDefaults = !localSettings;
+      settings = this._withSharedColumns(localSettings || this._defaultSettings(view), filteredSettings);
     }
     const path = this.document?.path;
     const before = JSON.stringify(this._visibilityOnly(view.settings));
-    this._applyPrefsToView(view, settings, { clearMissingFilters: true });
+    this._applyPrefsToView(view, settings, { fromDefaults });
     // What a later save compares with, to tell whether the user changed the columns shown. Applying the columns already
     // shown for this document (e.g. once a save is stored) keeps it, so a change still to be saved is not forgotten.
     // A view without columns (e.g. the grid) shows none, so it leaves it as is.
