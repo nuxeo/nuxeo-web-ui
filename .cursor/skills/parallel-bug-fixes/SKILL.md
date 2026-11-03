@@ -76,8 +76,8 @@ The workspace script ships with the single-ticket skill, because a solo run need
 once per ticket and base:
 
 ```bash
-bash .cursor/skills/fix-nuxeo-web-ui-bug/scripts/new-ticket-workspace.sh <TICKET-ID> lts-2025
-bash .cursor/skills/fix-nuxeo-web-ui-bug/scripts/new-ticket-workspace.sh <TICKET-ID> maintenance-3.1.x
+bash .cursor/skills/fix-nuxeo-web-ui-bug/scripts/new-ticket-workspace.sh <TICKET-ID> develop-2025
+bash .cursor/skills/fix-nuxeo-web-ui-bug/scripts/new-ticket-workspace.sh <TICKET-ID> develop-2023
 ```
 
 Each workspace is a full clone with its own `nuxeo-elements` clone, `node_modules`, Docker container
@@ -87,8 +87,8 @@ name, host port, build dirs and evidence folder — nothing shared. Layout:
 WebUI/
   nuxeo-web-ui/                         # reference clone — agents never write here
   nuxeo-elements/                       # reference clone
-  worktrees/WEBUI-2170/lts-2025/        # web-ui/ + elements/ + env.sh
-  worktrees/WEBUI-2170/maintenance-3.1.x/
+  worktrees/WEBUI-2170/develop-2025/    # web-ui/ + elements/ + env.sh
+  worktrees/WEBUI-2170/develop-2023/
 ```
 
 Override the location with `NX_TICKETS_ROOT`, but keep it **outside** the repo — a nested workspace
@@ -164,11 +164,11 @@ The script picks a deterministic starting port so re-runs for the same ticket te
 one, and the bases of a ticket never collide:
 
 ```
-PORT_START = 8100 + (<ticket-number> % 250) * 3 + <base-offset>
-# lts-2025 0, maintenance-3.1.x 1, maintenance-3.0.x 2
+PORT_START = 8100 + (<ticket-number> % 150) * 5 + <base-offset>
+# develop-2025 0, develop-2023 1, lts-2025 2, maintenance-3.1.x 3, maintenance-3.0.x 4
 ```
 
-Three consecutive ports per ticket, one per base, keeps every starting port inside `8100..8849`.
+Five consecutive ports per ticket, one per base, keeps every starting port inside `8100..8849`.
 
 From there it scans upward for a port that is both **genuinely free** (a real `bind`) and
 **unclaimed** by a sibling workspace's `env.sh` — a container that has not started yet still owns its
@@ -245,12 +245,12 @@ These are the three things that actually go wrong when you point this skill at a
 
 - **Empty `fixVersions` doubles the batch.** Children of an epic often have **no** `fixVersions`, and
   the core skill's rule is "every fix ships on **both** bases". An agent handed an empty
-  `fixVersions` therefore targets `lts-2025` *and* `maintenance-3.1.x` — 2 workspaces and 2 PRs per
+  `fixVersions` therefore targets `develop-2025` *and* `develop-2023` — 2 workspaces and 2 PRs per
   ticket, i.e. **50 workspaces for 25 tickets**. Resolve `fixVersions` per ticket (or state the
   intended bases explicitly in each agent's prompt) **before** fanning out.
 - **`ELEMENTS-*` children live in a different repo.** e.g. `ELEMENTS-1611` lands in
   **`nuxeo/nuxeo-elements`**, not `nuxeo-web-ui`, and its fixVersions are named differently — a
-  `3.x` line rather than `lts-2025` / `maintenance-3.1.x`. Only the **`3.1.x`** line is in scope;
+  `3.x` line rather than `develop-2025` / `develop-2023`. Only the **`3.1.x`** line is in scope;
   **`3.0.x` is deprecated**, so ignore that fixVersion rather than opening a branch for it. The
   script clones elements per ticket, so isolation still holds, but the branch naming, PR target repo
   and backport pair all differ — say so in the agent's prompt instead of letting it assume

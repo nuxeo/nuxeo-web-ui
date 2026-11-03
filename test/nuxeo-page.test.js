@@ -19,23 +19,74 @@ import { fixture, flush, html } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-app/nuxeo-page.js';
 
 suite('nuxeo-page', () => {
-  const contentStyle = (el) => getComputedStyle(el.shadowRoot.querySelector('#content'));
+  // The reserve is settled on an animation frame after the resize observer reports, so give the
+  // element a few frames rather than asserting straight off the fixture.
+  const contentStyle = async (el) => {
+    await flush();
+    for (let i = 0; i < 5; i++) {
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+    }
+    return getComputedStyle(el.shadowRoot.querySelector('#content'));
+  };
+
+  // Tall enough that the region scrolls further than the strip the button covers, which is where
+  // reserving it is what makes the end of the content reachable.
+  const page = (content) =>
+    fixture(html`<nuxeo-page style="--nuxeo-page-content-safe-area-bottom: 120px;">${content}</nuxeo-page>`);
 
   test('reserves no bottom space when nothing floats over the content region', async () => {
-    const el = await fixture(html`<nuxeo-page><div>content</div></nuxeo-page>`);
-    await flush();
-    const style = contentStyle(el);
+    const el = await fixture(html`<nuxeo-page><div style="height: 400vh;">content</div></nuxeo-page>`);
+    const style = await contentStyle(el);
     expect(style.paddingBottom).to.equal('0px');
     expect(style.scrollPaddingBottom).to.equal('0px');
   });
 
   test('reserves the create button safe area so the last row can be scrolled clear of it', async () => {
-    const el = await fixture(
-      html`<nuxeo-page style="--nuxeo-page-content-safe-area-bottom: 120px;"><div>content</div></nuxeo-page>`,
-    );
-    await flush();
-    const style = contentStyle(el);
+    const el = await page(html`<div style="height: 400vh;">content</div>`);
+    const style = await contentStyle(el);
     expect(style.paddingBottom).to.equal('120px');
     expect(style.scrollPaddingBottom).to.equal('120px');
+  });
+
+  // WEBUI-2314
+  test('hands the strip back to a region that already shows all of its content', async () => {
+    const el = await page(html`<div>content</div>`);
+    const style = await contentStyle(el);
+    expect(style.paddingBottom).to.equal('0px');
+    // the alignment hint is kept because it costs no space; with no scroll range here there is
+    // nothing for it to act on, so this asserts only that it is retained
+    expect(style.scrollPaddingBottom).to.equal('120px');
+  });
+
+  // WEBUI-1320: however little it overflows by, the last rows land under the button and only the
+  // reserve creates the range to scroll them clear.
+  test('keeps the strip for a region that overflows by less than the strip itself', async () => {
+    const el = await page(html`<div style="height: calc(100vh + 20px);">content</div>`);
+    const style = await contentStyle(el);
+    expect(style.paddingBottom).to.equal('120px');
+    expect(style.scrollPaddingBottom).to.equal('120px');
+  });
+
+  // The decision has to survive a tab swapping its layout in and out, not just the first paint.
+  test('re-decides when slotted content grows and shrinks', async () => {
+    const el = await page(html`<div>content</div>`);
+    const child = el.querySelector('div');
+    expect((await contentStyle(el)).paddingBottom).to.equal('0px');
+
+    child.style.height = '400vh';
+    expect((await contentStyle(el)).paddingBottom).to.equal('120px');
+
+    child.style.height = '';
+    expect((await contentStyle(el)).paddingBottom).to.equal('0px');
+  });
+
+  test('stops observing the content region once detached', async () => {
+    const el = await page(html`<div>content</div>`);
+    await contentStyle(el);
+    const spy = sinon.spy(el._contentObserver, 'disconnect');
+    el.parentNode.removeChild(el);
+    await flush();
+    expect(spy.called).to.be.true;
   });
 });

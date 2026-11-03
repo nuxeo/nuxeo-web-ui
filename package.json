@@ -7,17 +7,22 @@
   "license": "Apache-2.0",
   "vendor": "Nuxeo",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.13.0"
   },
   "config": {
     "workboxCli": "7.4.1"
   },
   "overrides": {
+    "@puppeteer/browsers": "3.2.6",
+    "get-uri": {
+      "basic-ftp": "6.2.3"
+    },
     "tar-fs": "^3.0.9",
     "marked": "^4.0.17",
     "serialize-javascript": "^7.0.5",
     "tmp": "^0.2.4",
     "cross-spawn": "^7.0.6",
+    "deepmerge-ts": "^8.0.0",
     "qs": "^6.14.1",
     "@nuxeo/page": {
       "path-to-regexp": "^8.4.0"
@@ -32,9 +37,9 @@
     "replace": {
       "minimatch": "^3.1.4"
     },
-    "launch-editor": "^2.14.1",
+    "launch-editor": "^2.14.2",
     "nuxeo": {
-      "brace-expansion": "^2.1.4"
+      "brace-expansion": "^2.1.7"
     }
   },
   "devDependencies": {
@@ -46,6 +51,7 @@
     "@web/dev-server-rollup": "^0.6.4",
     "@web/test-runner": "^0.20.2",
     "@web/test-runner-chrome": "^0.18.1",
+    "@web/test-runner-commands": "^0.9.0",
     "@web/test-runner-mocha": "^0.9.0",
     "@webcomponents/webcomponentsjs": "^2.0.0",
     "babel-plugin-transform-rename-import": "^2.3.0",

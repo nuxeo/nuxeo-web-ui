@@ -10,9 +10,16 @@
 #
 # Usage:
 #   dual-branch-up.sh <TICKET-ID> --target <ref> --fixed <ref> [options]
-#   dual-branch-up.sh WEBUI-1234 --target lts-2025 --fixed fix-WEBUI-1234-foo-lts-2025
-#   dual-branch-up.sh WEBUI-1234 --target lts-2025~1 --fixed lts-2025      # fix already merged
-#   dual-branch-up.sh WEBUI-1234 --target lts-2025 --fixed-pr 3259
+#   # open PR: the "before" side is the merge base, never the live dev tip, which has moved on.
+#   # Fetching a PR head creates origin/<branch> only, so both refs are remote-qualified.
+#   git fetch -q origin develop-2025 fix-WEBUI-1234-foo-develop-2025
+#   BEFORE=$(git merge-base origin/develop-2025 origin/fix-WEBUI-1234-foo-develop-2025)
+#   dual-branch-up.sh WEBUI-1234 --target "$BEFORE" --fixed origin/fix-WEBUI-1234-foo-develop-2025
+#   # fix already merged: compare the merge commit against its first parent. Not
+#   # develop-2025~1, which stops naming the fix's parent as soon as another ticket lands.
+#   SHA=$(gh pr view 3259 --repo nuxeo/nuxeo-web-ui --json mergeCommit --jq .mergeCommit.oid)
+#   dual-branch-up.sh WEBUI-1234 --target "$SHA^" --fixed "$SHA"
+#   dual-branch-up.sh WEBUI-1234 --target "$BEFORE" --fixed-pr 3259
 #   dual-branch-up.sh WEBUI-1234 --print
 #   dual-branch-up.sh WEBUI-1234 --remove
 #

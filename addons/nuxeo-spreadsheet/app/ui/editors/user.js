@@ -173,7 +173,9 @@ class UserEditor extends Select2Editor {
   }
 
   get cellLabels() {
-    return (this.cellMeta._labels = this.cellMeta._labels || {});
+    const meta = this.cellMeta;
+    meta._labels = meta._labels || {};
+    return meta._labels;
   }
 }
 

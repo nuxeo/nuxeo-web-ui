@@ -147,7 +147,7 @@ Polymer({
   },
 
   _isEasyshare(document) {
-    return document && document.type === 'EasyShareFolder';
+    return document?.type === 'EasyShareFolder';
   },
 
   _buildPermalink(document) {
@@ -174,21 +174,28 @@ Polymer({
     const link = shareButton.previousElementSibling;
 
     const otherShareButton = shareButton.id === 'easyShareIcon' ? this.$.permalinkIcon : this.$$('#easyShareIcon');
-    if (
-      otherShareButton &&
-      otherShareButton.display !== 'none' &&
-      otherShareButton._debouncer &&
-      otherShareButton._debouncer.isActive()
-    ) {
+    if (otherShareButton && otherShareButton.display !== 'none' && otherShareButton._debouncer?.isActive()) {
       otherShareButton._debouncer = otherShareButton._debouncer.flush();
     }
 
-    // Select Link
-    link.$.paperInput.$.nativeInput.select();
-    if (!window.document.execCommand('copy')) {
-      return;
+    // Select the link: it is the visual cue that the copy happened, and the user's way out when
+    // the clipboard write is refused.
+    const input = link.$.paperInput.$.nativeInput;
+    input.select();
+
+    // navigator.clipboard is only exposed in a secure context, so it is undefined over plain HTTP.
+    if (!navigator.clipboard) {
+      this.notify({ message: this.i18n('easyshare.copy.unavailable'), duration: 4000 });
+      return Promise.resolve();
     }
 
+    return navigator.clipboard.writeText(input.value).then(
+      () => this._onLinkCopied(shareButton, link),
+      () => this.notify({ message: this.i18n('easyshare.copy.error'), duration: 4000 }),
+    );
+  },
+
+  _onLinkCopied(shareButton, link) {
     shareButton._debouncer = Debouncer.debounce(shareButton._debouncer, timeOut.after(2000), () => {
       // Unselect Link
       link.$.paperInput.$.nativeInput.setSelectionRange(0, 0);

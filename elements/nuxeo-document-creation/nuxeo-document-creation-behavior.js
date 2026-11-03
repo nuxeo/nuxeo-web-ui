@@ -115,7 +115,7 @@ export const DocumentCreationBehavior = [
 
     _parentChanged() {
       if (this.parent) {
-        if (!this.targetPath || this.targetPath.replace(/(.+)\/$/, '$1') !== this.parent.path) {
+        if (!this.targetPath || this.targetPath.replace(/(.)\/$/, '$1') !== this.parent.path) {
           this.set('targetPath', this.parent.path);
         }
         const subtypes =
@@ -128,31 +128,29 @@ export const DocumentCreationBehavior = [
         const filteredSubtypes = [];
         if (this._canCreateIn(this.parent)) {
           subtypes.forEach((type) => {
-            if (type.facets.indexOf('HiddenInCreation') === -1) {
+            if (!type.facets.includes('HiddenInCreation')) {
               filteredSubtypes.push(type);
             }
           });
         }
-        this.set(
-          'subtypes',
-          filteredSubtypes.sort((a, b) => {
-            if (a.id < b.id) {
-              return -1;
-            }
-            if (a.id > b.id) {
-              return 1;
-            }
-            return 0;
-          }),
-        );
+        filteredSubtypes.sort((a, b) => {
+          if (a.id < b.id) {
+            return -1;
+          }
+          if (a.id > b.id) {
+            return 1;
+          }
+          return 0;
+        });
+        this.set('subtypes', filteredSubtypes);
       }
       this._validateLocation();
     },
 
     _suggesterChildrenChanged() {
       const valid =
-        (this.parent ? this.targetPath.replace(/(.+)\/$/, '$1') === this.parent.path : false) ||
-        (this.suggesterParent ? this.targetPath.replace(/(.+)\/$/, '$1') === this.suggesterParent.path : false) ||
+        (this.parent ? this.targetPath.replace(/(.)\/$/, '$1') === this.parent.path : false) ||
+        (this.suggesterParent ? this.targetPath.replace(/(.)\/$/, '$1') === this.suggesterParent.path : false) ||
         (this.suggesterChildren ? this.suggesterChildren.some((child) => this.targetPath === child.path) : false);
       this.set('isValidTargetPath', valid);
       this.fire('nx-document-creation-suggester-parent-changed', {
@@ -205,7 +203,7 @@ export const DocumentCreationBehavior = [
 
     _canCreateIn(document) {
       if (document && document.contextParameters && document.contextParameters.permissions) {
-        return document.contextParameters.permissions.indexOf('AddChildren') > -1;
+        return document.contextParameters.permissions.includes('AddChildren');
       }
       return false;
     },
@@ -215,11 +213,7 @@ export const DocumentCreationBehavior = [
     },
 
     _isValidType(type) {
-      return (
-        type &&
-        this.subtypes &&
-        this.subtypes.findIndex((t) => t._id === type._id && t.type === type.type && t.icon === type.icon) > -1
-      );
+      return type && this.subtypes?.some((t) => t._id === type._id && t.type === type.type && t.icon === type.icon);
     },
 
     _getTypeLabel(type) {

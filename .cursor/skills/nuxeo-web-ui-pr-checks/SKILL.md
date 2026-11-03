@@ -55,7 +55,8 @@ the lint gate, then commit the formatting changes.
 bash .cursor/skills/nuxeo-web-ui-pr-checks/scripts/pr-checks.sh && git push --force-with-lease origin HEAD
 ```
 
-Never force-push to `lts-2025` / `maintenance-3.1.x` themselves — only to the PR's feature branch.
+Never force-push to a shared branch (`develop-2025`, `develop-2023`, `lts-2025`, `maintenance-3.1.x`)
+— only to the PR's feature branch.
 
 ## Common local gotchas
 
@@ -97,8 +98,8 @@ npm run update-coverage-imports && npm run update-test-load-all \
 
 ## Optional: reproduce the A11y check locally
 
-Only when a change might affect accessibility/build. Requires Java (21 for `lts-2025`,
-17 for `maintenance-3.1.x`) and `@nuxeo` npm/Maven auth configured:
+Only when a change might affect accessibility/build. Requires Java (21 for the 2025 line,
+17 for the 2023 line) and `@nuxeo` npm/Maven auth configured:
 
 ```bash
 mvn -B -ntp install
