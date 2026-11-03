@@ -13,11 +13,16 @@
     "workboxCli": "7.4.1"
   },
   "overrides": {
+    "@puppeteer/browsers": "3.2.6",
+    "get-uri": {
+      "basic-ftp": "6.2.3"
+    },
     "tar-fs": "^3.0.9",
     "marked": "^4.0.17",
     "serialize-javascript": "^7.0.5",
     "tmp": "^0.2.4",
     "cross-spawn": "^7.0.6",
+    "deepmerge-ts": "^8.0.0",
     "qs": "^6.14.1",
     "@nuxeo/page": {
       "path-to-regexp": "^8.4.0"
@@ -32,9 +37,9 @@
     "replace": {
       "minimatch": "^3.1.4"
     },
-    "launch-editor": "^2.14.1",
+    "launch-editor": "^2.14.2",
     "nuxeo": {
-      "brace-expansion": "^2.1.4"
+      "brace-expansion": "^2.1.7"
     }
   },
   "devDependencies": {
