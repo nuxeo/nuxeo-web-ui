@@ -2931,6 +2931,33 @@ suite('nuxeo-results', () => {
         expect(loadStub).to.not.have.been.called;
       });
 
+      test('switching to all documents with column changes pending shares the columns shown on close, even if undone', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results.document = { path: '/default-domain/scope-undo', type: 'Folder' };
+        results.view = createMockView();
+        results._settings = {};
+        results._settingsScope = 'document';
+        // the document's own columns, different from the shared ones
+        const own = { columns: { 'dc:title': { hidden: true } } };
+        results.view.settings = own;
+        markShown(results, '/default-domain/scope-undo', own);
+        sinon.stub(results, '_putDocPreference').resolves();
+        sinon.stub(results, '_loadDocPrefs');
+        sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+        const saveLayoutStub = sinon.stub(results, 'saveLayoutPrefs').resolves();
+
+        // a column was toggled, then all documents picked, then the toggle undone before Done
+        results._onSettingsScopeSelected({ detail: { scope: 'all', pendingChanges: true } });
+        await new Promise((resolve) => setTimeout(resolve));
+        results._saveViewSettings();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(saveLayoutStub.calledOnce).to.equal(true);
+        expect(saveLayoutStub.firstCall.args[1]).to.deep.equal(own);
+      });
+
       test('an older switch to all documents finishing late does not undo a newer "This document only"', async () => {
         sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
         results.document = { path: '/default-domain/scope-r', type: 'Folder' };
