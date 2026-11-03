@@ -2187,8 +2187,9 @@ Polymer({
     this._applyPrefsToView(view, settings, { clearMissingFilters: true });
     // What a later save compares with, to tell whether the user changed the columns shown. Applying the columns already
     // shown for this document (e.g. once a save is stored) keeps it, so a change still to be saved is not forgotten.
+    // A view without columns (e.g. the grid) shows none, so it leaves it as is.
     const value = JSON.stringify(this._visibilityOnly(view.settings));
-    if (this.__shownVisibility?.path !== path || value !== before) {
+    if (view.columns && (this.__shownVisibility?.path !== path || value !== before)) {
       this.__shownVisibility = { path, value };
     }
   },
