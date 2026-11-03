@@ -2054,6 +2054,10 @@ Polymer({
       // documents of the type. Otherwise show the shared columns again once saved. The dialog and the table are
       // checked again then, as the user may have changed a column meanwhile, and even closed the dialog.
       const source = e.composedPath?.()[0];
+      if (e.detail?.pendingChanges) {
+        // the columns shown when the dialog closes are shared, even if the change is undone meanwhile
+        this.__visibilityChanged = docPath;
+      }
       const shown = this._deepClone(this.view.settings);
       const keepShown = () =>
         Boolean(e.detail?.pendingChanges || source?.pendingChanges) || this._viewChangedSince(shown);
