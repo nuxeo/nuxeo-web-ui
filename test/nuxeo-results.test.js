@@ -3351,6 +3351,38 @@ suite('nuxeo-results', () => {
         expect(put).to.not.have.been.called;
       });
 
+      test('a column changed under "This document only" and kept when choosing all documents is shared on Done, after the choice is saved', async () => {
+        results._connectedUserChanged('pending-share-b', 'pending-share-a');
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        sinon.stub(results, 'restoreSettings');
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        const path = '/default-domain/pending-share';
+        results.document = { path, type: 'Folder' };
+        results.view = createMockView();
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        // set after the connection has settled, which may reset it
+        results._connectedUserId = 'pending-share';
+        results._settingsScope = 'document';
+        markShown(results, path, { columns: { 'dc:title': { hidden: false } } });
+        const putGlobal = sinon.stub(results, '_putGlobalPreference').resolves();
+        sinon.stub(results, '_putDocPreference').resolves();
+        sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+
+        // in the open dialog: hide Title, then pick "All documents of this type"
+        results.view.settings = { columns: { 'dc:title': { hidden: true } } };
+        results._onSettingsScopeSelected({ detail: { scope: 'all', pendingChanges: true } });
+        // the choice is saved and the shown columns applied again before Done
+        await new Promise((resolve) => setTimeout(resolve, 80));
+        results._saveViewSettings();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(putGlobal).to.have.been.calledOnceWith('layoutPrefs.Folder', {
+          columns: { 'dc:title': { hidden: true } },
+        });
+      });
+
       test('a save finishing while the grid is shown is applied when the table shows again', async () => {
         // only the save is under test: no prefs load, nor display mode restored from the browser, meanwhile
         sinon.stub(results, '_loadDocPrefs');
