@@ -26,7 +26,7 @@ limitations under the License.
     <style include="nuxeo-styles"></style>
 
     <nuxeo-input
-      role="widget"
+      data-widget
       id="searchInput"
       type="search"
       label="[[i18n('defaultSearch.fullText')]]"
@@ -41,11 +41,11 @@ limitations under the License.
     <nuxeo-path-suggestion
       value="{{_path}}"
       label="[[i18n('defaultSearch.path')]]"
-      role="widget"
+      data-widget
       aria-label$="[[i18n('defaultSearch.path')]]"
     ></nuxeo-path-suggestion>
 
-    <div role="widget">
+    <div data-widget>
       <label>[[i18n('defaultSearch.authors')]]</label>
       <nuxeo-dropdown-aggregation
         placeholder="[[i18n('defaultSearch.authors.placeholder')]]"
@@ -58,7 +58,7 @@ limitations under the License.
       </nuxeo-dropdown-aggregation>
     </div>
 
-    <div role="widget">
+    <div data-widget>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.common_size_agg]]"
         value="{{params.common_size_agg}}"

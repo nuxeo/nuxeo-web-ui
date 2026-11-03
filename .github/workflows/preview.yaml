@@ -62,7 +62,7 @@ jobs:
     steps:
       - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
           scope: '@nuxeo'
 
@@ -140,7 +140,7 @@ jobs:
           # from the same template, so matching it would pair against Elements' release snapshot.
           # A manual dispatch names its branch deliberately, so it is left alone.
           if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
-            case "$CANDIDATE" in sync/*) CANDIDATE="" ;; esac
+            case "$CANDIDATE" in sync/*) CANDIDATE="" ;; *) ;; esac
           fi
           if [ -n "$CANDIDATE" ] && git ls-remote --exit-code --heads \
                https://github.com/nuxeo/nuxeo-elements "refs/heads/$CANDIDATE" >/dev/null 2>&1; then

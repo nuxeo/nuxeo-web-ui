@@ -3,6 +3,7 @@ import { importHTML, importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js'
 import { setFallbackNotificationTarget } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import { loadTheme } from './themes/loader.js';
 import { installGlobalFocusRing } from './themes/dark-theme-focus-ring.js';
+import { i18nReady } from './i18n/i18n.js';
 
 // Install the themeable keyboard-focus ring before any custom element attaches its shadow root,
 // so every root gets the rule from first paint. Dark themes make the ring visible; other themes
@@ -86,6 +87,12 @@ ready
   // Apply the theme early (before the app element loads) to avoid a flash of the wrong theme.
   // loadTheme() is invoked explicitly here rather than as a themes/loader.js import side effect.
   .then(loadTheme)
+  // Wait for the translations before loading the app element. Elements resolve their
+  // `[[i18n(...)]]` bindings on first render, so a locale that arrives later paints raw keys such as
+  // `defaultSearch.collections.placeholder` until `i18n-locale-loaded` refreshes those bindings,
+  // which is long enough for a user to see and act on (WEBUI-1570). i18n/i18n.js issues the request
+  // at import time, so this gate usually resolves without adding any latency.
+  .then(() => i18nReady)
   .then(loadApp)
   .then(loadLegacy)
   .then(loadBundle)

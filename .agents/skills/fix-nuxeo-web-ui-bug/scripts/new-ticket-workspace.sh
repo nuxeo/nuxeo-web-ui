@@ -16,11 +16,11 @@
 #
 # Usage:
 #   new-ticket-workspace.sh <TICKET-ID> [base] [options]
-#   new-ticket-workspace.sh WEBUI-2170                     # base defaults to lts-2025
-#   new-ticket-workspace.sh WEBUI-2170 maintenance-3.1.x
-#   new-ticket-workspace.sh WEBUI-2170 lts-2025 --branch fix-WEBUI-2170-foo-lts-2025
-#   new-ticket-workspace.sh WEBUI-2170 lts-2025 --print     # just re-print env.sh
-#   new-ticket-workspace.sh WEBUI-2170 lts-2025 --remove    # tear down (keeps evidence)
+#   new-ticket-workspace.sh WEBUI-2170                     # base defaults to develop-2025
+#   new-ticket-workspace.sh WEBUI-2170 develop-2023
+#   new-ticket-workspace.sh WEBUI-2170 develop-2025 --branch fix-WEBUI-2170-foo-develop-2025
+#   new-ticket-workspace.sh WEBUI-2170 develop-2025 --print     # just re-print env.sh
+#   new-ticket-workspace.sh WEBUI-2170 develop-2025 --remove    # tear down (keeps evidence)
 #
 # Options:
 #   --branch <name>   Create and check out this feature branch off origin/<base>.
@@ -38,7 +38,9 @@
 
 set -euo pipefail
 
-BASES="lts-2025 maintenance-3.1.x maintenance-3.0.x"
+# Ticket work targets the dev branches. The release branches stay accepted so an
+# already-merged fix or a hotfix can be reproduced against the code that actually shipped.
+BASES="develop-2025 develop-2023 lts-2025 maintenance-3.1.x maintenance-3.0.x"
 
 die() {
   printf 'error: %s\n' "$*" >&2
@@ -59,7 +61,7 @@ shift
 [[ $TICKET =~ ^[A-Z][A-Z0-9]*-[0-9]+$ ]] ||
   die "'$TICKET' is not a ticket id (expected e.g. WEBUI-2170 or ELEMENTS-1595)"
 
-BASE=lts-2025
+BASE=develop-2025
 if [ $# -ge 1 ]; then
   case "$1" in
     --*) ;;
@@ -170,11 +172,13 @@ allocate_port() {
 ticket_num=$(printf '%s' "$TICKET" | tr -cd '[:digit:]')
 base_offset=0
 case "$BASE" in
-  maintenance-3.1.x) base_offset=1 ;;
-  maintenance-3.0.x) base_offset=2 ;;
+  develop-2023) base_offset=1 ;;
+  lts-2025) base_offset=2 ;;
+  maintenance-3.1.x) base_offset=3 ;;
+  maintenance-3.0.x) base_offset=4 ;;
 esac
-# Three consecutive ports per ticket (one per base), kept inside 8100..8849.
-PORT_START=$((8100 + (${ticket_num:-0} % 250) * 3 + base_offset))
+# Five consecutive ports per ticket (one per base), kept inside 8100..8849.
+PORT_START=$((8100 + (${ticket_num:-0} % 150) * 5 + base_offset))
 
 # --------------------------------------------------------------------- output
 
@@ -286,8 +290,23 @@ MAIN_ELEMENTS=$PARENT/nuxeo-elements
 ELEMENTS_TARGET=
 if [ "$WITH_ELEMENTS" = 1 ] && [ -d "$MAIN_ELEMENTS/.git" ]; then
   el_base=$BASE
-  git -C "$MAIN_ELEMENTS" rev-parse --verify --quiet "refs/remotes/origin/$el_base" >/dev/null ||
-    el_base=lts-2025
+  if ! git -C "$MAIN_ELEMENTS" rev-parse --verify --quiet "refs/remotes/origin/$el_base" >/dev/null; then
+    # clone_repo re-points origin at the real remote and fetches the base, so a branch this
+    # reference clone has never fetched is still usable. Ask the remote rather than trust a stale
+    # cache: the dev branches are new, and a clone missing origin/develop-2023 would otherwise
+    # pair a 2023 Web UI workspace with 2025 Elements without saying so.
+    ls_remote_status=0
+    git -C "$MAIN_ELEMENTS" ls-remote --exit-code --heads origin "$el_base" >/dev/null 2>&1 ||
+      ls_remote_status=$?
+    case $ls_remote_status in
+      0) ;;
+      # 2 is ls-remote's "no matching ref" and the only status that actually means absent. Any
+      # other status is a failed query - network, auth, bad URL - which is not an answer; falling
+      # back on it would quietly build the mismatched pair a later fetch then makes look valid.
+      2) el_base=develop-2025 ;;
+      *) die "could not reach origin to look up nuxeo-elements branch '$el_base' (git ls-remote exited $ls_remote_status)" ;;
+    esac
+  fi
   step "Cloning nuxeo-elements @ $el_base"
   clone_repo "$MAIN_ELEMENTS" "$EL" "$el_base"
   note "$EL"

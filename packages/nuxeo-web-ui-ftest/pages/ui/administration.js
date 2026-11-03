@@ -2,6 +2,7 @@ import BasePage from '../base.js';
 import Vocabulary from './admin/vocabulary.js';
 import CloudServices from './admin/cloudServices.js';
 import Audit from './admin/audit.js';
+import Announcement from './admin/announcement.js';
 import { url } from '../helpers.js';
 
 export default class Administration extends BasePage {
@@ -66,5 +67,17 @@ export default class Administration extends BasePage {
       await url(process.env.NUXEO_URL ? '#!/admin/cloud-services' : 'ui/#!/admin/cloud-services');
     }
     return this.cloudServices;
+  }
+
+  get announcement() {
+    return new Announcement('nuxeo-announcement-management');
+  }
+
+  async goToAnnouncement() {
+    const browserUrl = await browser.getUrl();
+    if (!browserUrl.endsWith('announcement')) {
+      await url(process.env.NUXEO_URL ? '#!/admin/announcement' : 'ui/#!/admin/announcement');
+    }
+    return this.announcement;
   }
 }

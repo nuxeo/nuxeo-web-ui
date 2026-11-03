@@ -368,7 +368,7 @@ Polymer({
 
     // clear when re-rendering
     while (this.$.container.firstChild) {
-      this.$.container.removeChild(this.$.container.firstChild);
+      this.$.container.firstChild.remove();
     }
     this._jsPlumbInstance.reset();
 
@@ -378,8 +378,7 @@ Polymer({
       element.style.left = `${node.x}px`;
       element.style.top = `${node.y}px`;
 
-      element.classList.add('workflow_node');
-      element.classList.add(this._nodeClass(node));
+      element.classList.add('workflow_node', this._nodeClass(node));
       if (node.state === 'suspended') {
         element.classList.add('workflow_node_suspended');
       }

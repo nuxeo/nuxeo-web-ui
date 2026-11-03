@@ -137,18 +137,23 @@ const template = html`
         }
 
         /* layouts */
-        div[role='widget'] > div.multiline {
+        /* data-widget is the supported marker; role="widget" is kept for layouts authored against
+           the previous guidance, including customer-authored ones. See WEBUI-2229. */
+        div[role='widget'] > div.multiline,
+        div[data-widget] > div.multiline {
           white-space: pre-line;
         }
 
-        div[role='widget'] > div {
+        div[role='widget'] > div,
+        div[data-widget] > div {
           word-wrap: break-word;
           overflow-wrap: break-word;
           word-break: break-word;
           hyphens: auto;
         }
 
-        *[role='widget'] {
+        *[role='widget'],
+        *[data-widget] {
           @apply --nuxeo-widget;
         }
       </style>
@@ -290,8 +295,13 @@ const template = html`
         /*
          * Geometry of the floating document create button. The offset is the inset it keeps from
          * the edges of the app; the safe area is the strip it paints over the page content — the
-         * button itself plus that same inset above and below it. Scrollable content regions
-         * reserve the safe area so nothing ends up permanently underneath the button.
+         * button itself plus that same inset above and below it. A scrollable content region
+         * reserves the safe area while it overflows, so whatever runs under the button can be
+         * scrolled clear of it. A region that already shows everything it has does not: there the
+         * reserve would be the only thing left to scroll to, which is the blank strip WEBUI-2314
+         * reports. Content can still sit under the button in that case, as it did before
+         * WEBUI-1320; reaching it properly needs the reserve inside each view's own scroller
+         * rather than on the page, which is a separate change.
          */
         --nuxeo-document-create-button-offset: 32px;
         --nuxeo-document-create-button-safe-area: calc(

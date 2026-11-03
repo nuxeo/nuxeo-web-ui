@@ -63,7 +63,7 @@ need not open the parent to understand it.>
 
 ### Fix delivered
 <Root cause in one line + what changed and why it is safe.>
-PR(s): <links, one per base — lts-2025 / maintenance-3.1.x>
+PR(s): <links, one per base — develop-2025 / develop-2023>
 
 ### How to verify
 1. <Environment / setup — e.g. NUXEO_PACKAGES value, seed data, LDAP/multi-repo; or "no

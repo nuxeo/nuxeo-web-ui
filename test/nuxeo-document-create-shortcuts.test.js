@@ -46,6 +46,8 @@ suite('nuxeo-document-create-shortcuts', () => {
     const nodes = Array.from(el.$.shortcuts.children);
     expect(nodes.length).to.equal(2);
     expect(nodes.every((n) => n.tagName.toLowerCase() === 'nuxeo-document-create-shortcut')).to.be.true;
+    // the most common types come first, the last used type last
+    expect(nodes.map((n) => n.type)).to.deep.equal(['Workspace', 'File']);
     el.$.creationStats.lastType.restore();
     el.$.creationStats.mostCommonType.restore();
     el.formatDocType.restore();
@@ -66,5 +68,19 @@ suite('nuxeo-document-create-shortcuts', () => {
 
     el._putNodes(parent);
     expect(parent.children.length).to.equal(0);
+  });
+
+  test('_putNodes appends a node passed outside an array and detaches the previous children', () => {
+    const parent = document.createElement('div');
+    const stale = document.createElement('i');
+    parent.appendChild(stale);
+    const solo = document.createElement('span');
+    solo.id = 'solo';
+
+    el._putNodes(parent, solo);
+
+    expect(parent.children.length).to.equal(1);
+    expect(parent.querySelector('#solo')).to.exist;
+    expect(stale.parentNode).to.be.null;
   });
 });
