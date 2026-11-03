@@ -150,7 +150,10 @@ npm run ftest:dev           # Against localhost:8080 + localhost:5000
 goes where. `npm run lint` fails on a feature that is assigned to no shard or to more than one, so
 append the new file to the shard with the smallest total. WebdriverIO stays at `maxInstances: 1`:
 in-process workers would share one server, and `search.feature` asserts repo-wide absolute result
-counts. Run one shard locally with `FTEST_SPECS=$(node scripts/test/ftest/shards.js --specs 1)`.
+counts. Run one shard locally with
+`FTEST_SPECS=$(node scripts/test/ftest/shards.js --specs 1) npm run ftest` — one command, so the
+variable reaches the runner's environment; assigning it on its own line leaves it unexported and the
+next `npm run ftest` would quietly run all 46 features.
 
 ## CI Workflow
 
