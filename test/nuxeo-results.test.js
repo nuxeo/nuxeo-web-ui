@@ -2815,7 +2815,7 @@ suite('nuxeo-results', () => {
         expect(results.docPrefs).to.deep.equal({ columns: { 'dc:title': { hidden: false } } });
       });
 
-      test('picture books and collections keep their columns shown per document, as before', async () => {
+      test('picture books and collections share the columns shown by type, like other documents', async () => {
         const layouts = {
           '/elements/document/picturebook/nuxeo-picturebook-view-layout.html': 'nuxeo-results',
           '/elements/document/collection/nuxeo-collection-view-layout.html': 'nuxeo-default-results',
@@ -2824,8 +2824,13 @@ suite('nuxeo-results', () => {
           const response = await fetch(url);
           const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
           const table = doc.querySelector('dom-module template').content.querySelector(`${tag}#results`);
-          expect(table.getAttribute('prefs-scope'), url).to.equal('document');
+          expect(table.hasAttribute('prefs-scope'), url).to.equal(false);
         }
+        // each type keeps its own shared columns
+        const keys = ['Collection', 'PictureBook'].map((type) =>
+          results._computeLayoutPrefsKey('layout', undefined, { type }, 'host.results'),
+        );
+        expect(keys).to.deep.equal(['layoutPrefs.Collection.host.results', 'layoutPrefs.PictureBook.host.results']);
       });
 
       test("a document's own columns keep the filters shown, as before; the shared columns alone clear them", () => {
