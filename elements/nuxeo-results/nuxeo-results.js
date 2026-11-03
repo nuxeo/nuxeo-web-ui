@@ -2182,12 +2182,15 @@ Polymer({
       const base = (hasLocal && this._filterSettingsByCapabilities(view, local)) || this._defaultSettings(view);
       settings = this._withSharedColumns(base, filteredSettings);
     }
+    const path = this.document?.path;
+    const before = JSON.stringify(this._visibilityOnly(view.settings));
     this._applyPrefsToView(view, settings, { clearMissingFilters: true });
-    // what a later save compares with, to tell whether the user changed the columns shown
-    this.__shownVisibility = {
-      path: this.document?.path,
-      value: JSON.stringify(this._visibilityOnly(view.settings)),
-    };
+    // What a later save compares with, to tell whether the user changed the columns shown. Applying the columns already
+    // shown for this document (e.g. once a save is stored) keeps it, so a change still to be saved is not forgotten.
+    const value = JSON.stringify(this._visibilityOnly(view.settings));
+    if (this.__shownVisibility?.path !== path || value !== before) {
+      this.__shownVisibility = { path, value };
+    }
   },
   // -------------------------
   // Mode decision functions
