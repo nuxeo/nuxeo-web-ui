@@ -3219,6 +3219,32 @@ suite('nuxeo-results', () => {
         expect(saveLayoutStub).to.not.have.been.called;
       });
 
+      test('a resize after switching from the grid to an unchanged table is not shared', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results._isRestoring = false;
+        results._settings = {};
+        results._settingsScope = 'all';
+        results.document = { path: '/default-domain/grid-table', type: 'Folder' };
+        results.__docPrefsPending = false;
+        const shown = { columns: { 'dc:title': { hidden: false } } };
+        // the table keeps the columns it shows, so applying the prefs changes nothing
+        sinon.stub(results, '_applyPrefsToView');
+        results.displayMode = 'grid';
+        results._applyDocPrefsImpl(true, {}, createMockView());
+        results.displayMode = 'table';
+        results.view = createMockView({ columns: [{ field: 'dc:title' }], settings: shown });
+        results._applyDocPrefsImpl(true, {}, results.view);
+        sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+        const saveLayoutStub = sinon.stub(results, 'saveLayoutPrefs').resolves();
+        sinon.stub(results, 'saveDocPrefs').resolves();
+
+        results.view.settings = { columns: { 'dc:title': { hidden: false, width: '300px' } } };
+        results._saveViewSettings();
+        await Promise.resolve();
+
+        expect(saveLayoutStub.called).to.equal(false);
+      });
+
       test("a document with nothing of its own keeps its default sort, e.g. an Orderable folder's manual order", () => {
         const view = createMockView({ columns: [{ field: 'dc:title', hiddenBack: false }], sortOrder: [] });
         expect(results._defaultSettings(view)).to.deep.equal({
