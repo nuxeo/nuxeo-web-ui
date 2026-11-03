@@ -303,8 +303,8 @@ Polymer({
 
   properties: {
     /**
-     * Where table preferences are kept: `layout` (default, shared by every document of the type) or `document`
-     * (per document). Passed to `nuxeo-results`.
+     * Where the columns shown are kept: `layout` (default, shared by every document of the type) or `document`
+     * (per document). Width, order, sort and filters are always per document. Passed to `nuxeo-results`.
      */
     prefsScope: {
       type: String,
