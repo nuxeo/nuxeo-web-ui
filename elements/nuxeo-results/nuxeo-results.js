@@ -294,11 +294,11 @@ Polymer({
     name: String,
 
     /**
-     * Scope of the table preferences (column visibility, order, width, sort) persisted for a document
-     * context:
+     * Scope of the columns shown, as chosen in the column settings, for a document context:
      * - `layout` (default): shared by every document displayed with the same layout (see `prefsLayout`),
-     *   so customizing the columns of one folder applies to all folders of the same type.
+     *   so showing or hiding a column in one folder applies to all folders of the same type.
      * - `document`: specific to the current document.
+     * Column width, order, sort and filters are always kept per document.
      */
     prefsScope: {
       type: String,
@@ -1061,40 +1061,22 @@ Polymer({
         const storageName = this._localStorageName;
         const scopeVersion = this._getScopeVersion(docPath, docKey);
         const settings = this._deepClone(this.view.settings);
-        const userId = this._getUserId();
-        const savedFilters = this._getDocFilters(this.document, userId);
         this._debounceSave('_docPrefsSaveDebouncer', () => {
           // Save to backend (primary): for this document only when the user chose so, otherwise shared by the layout
+          if (layoutKey && this._getScopeVersion(docPath, docKey) !== scopeVersion) {
+            // the user changed where column changes apply since then, which saved the columns shown at that time
+            return;
+          }
           let save;
           if (documentOnly) {
-            if (this._getScopeVersion(docPath, docKey) !== scopeVersion) {
-              // the user changed where column changes apply since then: don't bring the document's own columns back
-              return;
-            }
             save = this.saveDocPrefs(docPath, docKey, this._markDocumentOnly(settings));
           } else if (layoutKey) {
-            // columns are shared by the layout; column filters stay with this document
-            const { shared, filters } = this._splitFilters(settings);
-            const sharedChanged = this._sharedPrefsChanged(layoutKey, shared);
-            const saveId = (this.__docFiltersSaveId || 0) + 1;
-            this.__docFiltersSaveId = saveId;
+            // the columns shown are shared by the layout; width, order, sort and filters stay with this document
+            const shared = this._visibilityOnly(settings);
             save = Promise.all([
-              sharedChanged ? this.saveLayoutPrefs(layoutKey, shared) : null,
-              this._saveDocFilters(docPath, `${docKey}.filters`, filters, savedFilters),
-            ]).then(() => {
-              // a filters-only change doesn't save the shared columns: keep the applied prefs in step with the filters
-              if (
-                !sharedChanged &&
-                saveId === this.__docFiltersSaveId &&
-                this.document?.path === docPath &&
-                this._layoutPrefsKey === layoutKey &&
-                this._getUserId() === userId &&
-                this._settingsScope !== 'document' &&
-                !this._viewChangedSince(settings)
-              ) {
-                this.docPrefs = this._withDocFilters(shared, filters);
-              }
-            });
+              this._sharedPrefsChanged(layoutKey, shared) ? this.saveLayoutPrefs(layoutKey, shared) : null,
+              this.saveDocPrefs(docPath, docKey, settings),
+            ]);
           } else {
             save = this.saveDocPrefs(docPath, docKey, settings);
           }
@@ -1412,21 +1394,7 @@ Polymer({
         // This approach is future-proof: to add support for new customizable column properties,
         // just update the two sections marked with "EXTEND HERE" below.
 
-        // Remember each column's layout-declared width (from the `width` attribute), captured once.
-        view.columns.forEach((column) => {
-          if (
-            column &&
-            column._declaredWidth === undefined &&
-            typeof column.hasAttribute === 'function' &&
-            typeof column.getAttribute === 'function' &&
-            column.hasAttribute('width')
-          ) {
-            const declaredWidth = column.getAttribute('width');
-            if (declaredWidth) {
-              column._declaredWidth = declaredWidth;
-            }
-          }
-        });
+        this._rememberDeclaredWidths(view);
 
         /**
          * Returns the default value for a given column property.
@@ -1473,7 +1441,7 @@ Polymer({
         if (clearMissingFilters && view.columns) {
           // Filters belong to one document: clear the ones these settings don't have, so they don't carry over
           view.columns.forEach((column, idx) => {
-            const key = column.field ? column.field : `col-${idx}`;
+            const key = column.field || `col-${idx}`;
             if (column.filterValue && !newSettings.columns?.[key]?.filterValue) {
               view.set(`columns.${idx}.filterValue`, '');
             }
@@ -1485,6 +1453,23 @@ Polymer({
     } finally {
       this._isRestoring = false;
     }
+  },
+
+  // Remembers each column's layout-declared width (from the `width` attribute), captured once.
+  _rememberDeclaredWidths(view) {
+    (view.columns || []).forEach((column) => {
+      if (
+        column?._declaredWidth === undefined &&
+        typeof column?.hasAttribute === 'function' &&
+        typeof column.getAttribute === 'function' &&
+        column.hasAttribute('width')
+      ) {
+        const declaredWidth = column.getAttribute('width');
+        if (declaredWidth) {
+          column._declaredWidth = declaredWidth;
+        }
+      }
+    });
   },
 
   // Debounces preference-saving calls (e.g., while the user is resizing/reordering columns).
@@ -1757,21 +1742,18 @@ Polymer({
     }
   },
 
-  // Whether the table settings differ from saved ones (the "This document only" mark aside, and the column filters
-  // with `ignoreFilters`). Column changes in the open settings dialog count, as the table shows them at once.
-  _viewChangedSince(saved, ignoreFilters) {
+  // Whether the table settings differ from saved ones (the "This document only" mark aside). Column changes in the
+  // open settings dialog count, as the table shows them at once.
+  _viewChangedSince(saved) {
     if (!this.view?.settings) {
       return false;
     }
-    const comparable = (settings) => {
-      const kept = ignoreFilters ? this._splitFilters(settings).shared : settings;
-      return JSON.stringify({ ...kept, scope: undefined });
-    };
+    const comparable = (settings) => JSON.stringify({ ...settings, scope: undefined });
     return comparable(saved) !== comparable(this._deepClone(this.view.settings));
   },
 
-  // Persists layout-scoped results prefs (PUT /me/preferences/<key>) shared by every document with the same layout,
-  // and updates the in-session cache/state so the UI reflects it immediately.
+  // Persists the columns shown by every document with the same layout (PUT /me/preferences/<key>), and caches them.
+  // The table is updated by the save of the document's own settings that goes with it.
   async saveLayoutPrefs(key, value) {
     if (!key) {
       throw new Error('Cannot save layout prefs: missing key');
@@ -1781,22 +1763,11 @@ Polymer({
       throw new Error('Cannot save layout prefs: missing user id');
     }
 
-    const cloned = this._splitFilters(value).shared;
+    const cloned = this._visibilityOnly(value);
 
     await this._putGlobalPreference(key, cloned);
 
     __globalPrefsCache.set(this._cacheKey(userId, key), cloned);
-    // Only apply to the view if it still shows a document with this layout, for this user, using the shared columns,
-    // and the columns were not changed meanwhile
-    if (
-      this.document?.path &&
-      this._layoutPrefsKey === key &&
-      this._getUserId() === userId &&
-      this._settingsScope !== 'document' &&
-      !this._viewChangedSince(cloned, true)
-    ) {
-      this.docPrefs = this._withDocFilters(cloned, this._getDocFilters(this.document, userId));
-    }
   },
 
   // Returns the stable preference key used to store/retrieve results table prefs on a document.
@@ -1846,11 +1817,11 @@ Polymer({
     return null;
   },
 
-  // Loads table prefs for a document context, in this order:
+  // Loads table prefs for a document context:
   // 1. the document's own prefs, when the user chose "This document only" for it;
-  // 2. the layout-scoped prefs shared by every document with the same layout;
-  // 3. the document's own prefs saved before prefs were layout-scoped (or with document scope);
-  // 4. the defaults.
+  // 2. otherwise the document's own width, order, sort and filters, with the columns shown by every document of the
+  //    same layout when there are any yet;
+  // 3. the defaults for whatever the document has not saved.
   _loadDocPrefs(enabled, document, connectedUserId, layoutPrefsKey) {
     // Invalidate any in-flight layout prefs load started for a previous document or layout
     this.__docPrefsLoadId = (this.__docPrefsLoadId || 0) + 1;
@@ -1860,7 +1831,7 @@ Polymer({
     this.docPrefs = {};
     this._settingsScope = 'all';
 
-    if (!enabled || !document || !document.path) {
+    if (!enabled || !document?.path) {
       return undefined;
     }
 
@@ -1927,10 +1898,12 @@ Polymer({
       });
   },
 
-  // Applies the layout-scoped prefs, or falls back to the document's own prefs when the layout has none yet.
+  // Uses the document's own prefs with the columns shown by the layout, or the document's own prefs alone when the
+  // layout has none yet.
   _useLayoutPrefs(prefs, document, userId) {
-    if (prefs && Object.keys(prefs).length > 0) {
-      this.docPrefs = this._withDocFilters(prefs, this._getDocFilters(document, userId));
+    const shared = this._visibilityOnly(prefs);
+    if (Object.keys(shared).length > 0) {
+      this.docPrefs = this._withSharedColumns(this._getDocumentPrefs(document, userId), shared);
       this.__hasBackendDocPrefs = true;
       return;
     }
@@ -2013,45 +1986,38 @@ Polymer({
     const version = this._getScopeVersion(docPath, docKey);
     // a newer choice for this document wins over what this one still has to do
     const isLatest = () => this._getScopeVersion(docPath, docKey) === version;
-    let ownRemoved = false;
     let save;
     if (scope === 'document') {
       // keep the current columns for this document only
       save = this.saveDocPrefs(docPath, docKey, this._markDocumentOnly(this._deepClone(this.view.settings)));
     } else {
-      // stop using this document's own columns, and show the ones shared by the layout again
+      // show the columns shared by the layout again; the document keeps its own width, order, sort and filters
       if (this._settings) {
         // the browser copy holds this document's own columns: drop it so they cannot come back
         this.set('_settings.table', null);
         this.saveSettings();
       }
-      const { filters } = this._splitFilters(this.view.settings);
       // With column changes pending in the open dialog, keep what is shown: closing it saves those columns for all
-      // documents of the type. Otherwise show the shared columns again, once the document's own columns are removed,
-      // even if its filters could not be saved. The dialog and the table are checked again then, as the user may have
-      // changed a column meanwhile, and even closed the dialog.
+      // documents of the type. Otherwise show the shared columns again once saved. The dialog and the table are
+      // checked again then, as the user may have changed a column meanwhile, and even closed the dialog.
       const source = e.composedPath?.()[0];
       const shown = this._deepClone(this.view.settings);
       const keepShown = () =>
         Boolean(e.detail?.pendingChanges || source?.pendingChanges) || this._viewChangedSince(shown);
-      save = Promise.all([
-        this._deleteDocPrefs(docPath, docKey).then(() => {
-          ownRemoved = true;
-          if (!keepShown() && isLatest() && this.document?.path === docPath) {
-            this._loadDocPrefs(true, this.document, this._connectedUserId, this._layoutPrefsKey);
-          }
-        }),
-        this._saveDocFilters(docPath, `${docKey}.filters`, filters),
-      ]);
+      save = this.saveDocPrefs(docPath, docKey, shown).then(() => {
+        if (!keepShown() && isLatest() && this.document?.path === docPath) {
+          this._loadDocPrefs(true, this.document, this._connectedUserId, this._layoutPrefsKey);
+        }
+      });
     }
     save
       .then(() => this._columnSettingsSaved())
       .catch((error) => {
         // eslint-disable-next-line no-console
         console.warn('Failed to save where column changes apply', { path: docPath, scope, error });
-        // the choice was not saved: go back to the previous one, so the screen matches what is stored. Not when a newer
-        // choice was made since, or when the document's own columns are already removed (only its filters failed).
-        if (isLatest() && !ownRemoved && this.document?.path === docPath) {
+        // the choice was not saved: go back to the previous one, so the screen matches what is stored, unless a newer
+        // choice was made since
+        if (isLatest() && this.document?.path === docPath) {
           this._settingsScope = previousScope;
           if (this._settings && previousLocal !== undefined) {
             this.set('_settings.table', previousLocal);
@@ -2077,89 +2043,52 @@ Polymer({
     }
   },
 
-  // Removes the document's own table prefs (DELETE /path/<doc>/@preferences/<key>).
-  async _deleteDocPrefs(docPath, key) {
-    const cacheKey = this._docCacheKey(this._getUserId(), docPath, key);
-    await this._queueDocWrite(cacheKey, () => this._removeDocPreference(docPath, key));
-    __docPrefsCache.set(cacheKey, {});
-  },
-
-  // Deletes a single document preference (DELETE /path/<doc>/@preferences/<key>).
-  async _removeDocPreference(docPath, key) {
-    await this._preferencesRequest(() => {
-      this._configureDocPreferencesResource(docPath);
-      this.$.preferences.path = `${this.$.preferences.path}/${encodeURIComponent(key)}`;
-      return this.$.preferences.remove();
-    });
-  },
-
-  // Column filters stay with the document they were set on, even when the columns are shared by the layout.
-  _splitFilters(settings) {
-    const shared = this._deepClone(settings || {});
-    const filters = {};
-    Object.entries(shared.columns || {}).forEach(([key, column]) => {
-      if (column?.filterValue) {
-        filters[key] = { filterValue: column.filterValue };
-        if (column.filterExpression) {
-          filters[key].filterExpression = column.filterExpression;
-        }
-      }
+  // Only which columns are shown is shared by the layout; width, order, sort and filters stay with each document.
+  _visibilityOnly(settings) {
+    const columns = {};
+    Object.entries(settings?.columns || {}).forEach(([key, column]) => {
       if (column) {
-        delete column.filterValue;
-        delete column.filterExpression;
+        columns[key] = { hidden: Boolean(column.hidden) };
       }
     });
-    return { shared, filters };
+    return Object.keys(columns).length > 0 ? { columns } : {};
   },
 
-  _withDocFilters(prefs, filters) {
-    const { shared } = this._splitFilters(prefs);
-    Object.entries(filters || {}).forEach(([key, filter]) => {
-      shared.columns = shared.columns || {};
-      shared.columns[key] = { ...shared.columns[key], ...filter };
+  _isVisibilityOnly(settings) {
+    return (
+      Object.keys(settings || {}).join() === 'columns' &&
+      Object.values(settings.columns || {}).every((column) => Object.keys(column || {}).join() === 'hidden')
+    );
+  },
+
+  // The document's own prefs with the columns shown by the layout. Without own prefs, the columns shown are kept
+  // alone, to be applied over the table defaults (see `_applyDocPrefsImpl`).
+  _withSharedColumns(own, shared) {
+    if (!own || Object.keys(own).length === 0) {
+      return this._deepClone(shared);
+    }
+    const settings = this._deepClone(own);
+    delete settings.scope;
+    Object.entries(shared.columns || {}).forEach(([key, column]) => {
+      settings.columns = settings.columns || {};
+      settings.columns[key] = { ...settings.columns[key], hidden: column.hidden };
     });
-    return shared;
+    return settings;
   },
 
-  _getDocFiltersKey() {
-    return `${this._getDocResultsPrefsKey()}.filters`;
-  },
-
-  // The document's own column filters, from the in-session cache or the document enricher.
-  _getDocFilters(document, userId) {
-    if (!document?.path) {
-      return {};
-    }
-    const key = this._getDocFiltersKey();
-    const cacheKey = this._docCacheKey(userId, document.path, key);
-    if (__docPrefsCache.has(cacheKey)) {
-      return __docPrefsCache.get(cacheKey);
-    }
-    // prefs saved before filters had their own entry keep them in the document's own prefs
-    const filters =
-      this._getDocPrefsFromEnricher(document, key) ||
-      this._splitFilters(this._getDocumentPrefs(document, userId)).filters;
-    __docPrefsCache.set(cacheKey, filters);
-    return filters;
-  },
-
-  // Saves the document's own column filters, only when they changed.
-  async _saveDocFilters(docPath, key, filters, savedFilters) {
-    const cacheKey = this._docCacheKey(this._getUserId(), docPath, key);
-    const current = savedFilters || __docPrefsCache.get(cacheKey) || {};
-    if (JSON.stringify(current) === JSON.stringify(filters)) {
-      return;
-    }
-    __docPrefsCache.set(cacheKey, filters);
-    try {
-      await this._queueDocWrite(cacheKey, () => this._putDocPreference(docPath, key, filters));
-    } catch (error) {
-      // not saved: forget the cached copy, so the next change writes the filters again (unless a newer write replaced it)
-      if (__docPrefsCache.get(cacheKey) === filters) {
-        __docPrefsCache.delete(cacheKey);
-      }
-      throw error;
-    }
+  // The table's default settings, as restored when there are no prefs (see `_applyPrefsToView`).
+  _defaultSettings(view) {
+    this._rememberDeclaredWidths(view);
+    const columns = {};
+    (view.columns || []).forEach((column, idx) => {
+      columns[column.field || `col-${idx}`] = {
+        hidden: column.hiddenBack || false,
+        order: idx,
+        width: column._declaredWidth || null,
+        resized: false,
+      };
+    });
+    return { columns, sortOrder: [] };
   },
 
   // Whether the shared columns differ from what is already stored, so unchanged columns aren't written again.
@@ -2198,15 +2127,12 @@ Polymer({
       return;
     }
 
-    this._applyPrefsToView(view, filteredSettings, { clearMissingFilters: true });
-
-    // no shared or own columns yet: the default columns still get this document's own filters
-    if (Object.keys(filteredSettings).length === 0 && this._layoutPrefsKey && this._settingsScope !== 'document') {
-      const filters = this._getDocFilters(this.document, this._getUserId());
-      if (Object.keys(filters).length > 0 && view.settings) {
-        this._applyPrefsToView(view, this._withDocFilters(view.settings, filters));
-      }
-    }
+    // only the columns shown by the layout, as the document has no prefs of its own: the defaults with those columns
+    const settings =
+      view.columns && this._isVisibilityOnly(filteredSettings)
+        ? this._withSharedColumns(this._defaultSettings(view), filteredSettings)
+        : filteredSettings;
+    this._applyPrefsToView(view, settings, { clearMissingFilters: true });
   },
   // -------------------------
   // Mode decision functions
