@@ -123,15 +123,16 @@ export function normalizeEntryUrl({ pathname, search, hash }) {
   // inside it — an already-corrupted address holds the usable value first and the mangled copy
   // after. Every route reads its parameters with `URLSearchParams.get()`, which returns the first
   // value, so collapsing the duplicates changes nothing except that the address bar comes out clean.
-  const query = [...params]
-    .filter(([, value]) => !EMBEDDED_CREDENTIAL.test(value))
-    .reduce((deduped, [key, value]) => {
-      if (!deduped.has(key)) {
-        deduped.set(key, value);
-      }
-      return deduped;
-    }, new URLSearchParams())
-    .toString();
+  // `URLSearchParams.has()` scans every entry, so track the keys already seen in a Set to stay linear.
+  const seen = new Set();
+  const deduped = new URLSearchParams();
+  params.forEach((value, key) => {
+    if (!seen.has(key) && !EMBEDDED_CREDENTIAL.test(value)) {
+      seen.add(key);
+      deduped.append(key, value);
+    }
+  });
+  const query = deduped.toString();
   const suffix = query ? `?${query}` : '';
   let normalized;
   if (isRoute) {
