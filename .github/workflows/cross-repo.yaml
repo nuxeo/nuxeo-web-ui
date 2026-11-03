@@ -117,7 +117,7 @@ jobs:
           # name is a coincidence - except for sync/<release>-to-<dev>, which both repositories
           # generate from the same template. Matching on that would compare the Elements work
           # against Web UI's release snapshot instead of the development line.
-          case "$CANDIDATE" in sync/*) CANDIDATE="" ;; esac
+          case "$CANDIDATE" in sync/*) CANDIDATE="" ;; *) ;; esac
           if [ -n "$CANDIDATE" ] && git ls-remote --exit-code --heads \
                https://github.com/nuxeo/nuxeo-web-ui "refs/heads/$CANDIDATE" >/dev/null 2>&1; then
             BRANCH="$CANDIDATE"
