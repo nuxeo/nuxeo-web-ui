@@ -744,7 +744,7 @@ suite('nuxeo-results', () => {
       results.document = null;
     });
 
-    test('_saveViewSettings notifies when search column settings cannot be saved', async () => {
+    test("_saveViewSettings doesn't notify when search column settings cannot be saved, as before", async () => {
       results._isRestoring = false;
       results.displayMode = 'table';
       results._settings = {};
@@ -757,12 +757,14 @@ suite('nuxeo-results', () => {
       results.view = createMockView();
       results.view.settings = { order: ['dc:title'] };
       sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
-      sinon.stub(results, 'saveGlobalResultsPrefs').rejects({ status: 404 });
+      sinon.stub(results, 'saveGlobalResultsPrefs').rejects({ status: 500 });
       const notifyStub = sinon.stub(results, 'notify');
 
       results._saveViewSettings();
       await new Promise((resolve) => setTimeout(resolve));
-      expect(notifyStub).to.have.been.calledOnceWith({ message: results.i18n('results.columnSettings.saveFailed') });
+      expect(notifyStub.called).to.equal(false);
+      // the browser copy is still kept
+      expect(results._settings.table).to.deep.equal({ order: ['dc:title'] });
     });
   });
 
@@ -2813,17 +2815,30 @@ suite('nuxeo-results', () => {
         expect(results.docPrefs).to.deep.equal({ columns: { 'dc:title': { hidden: false } } });
       });
 
-      test("applying a document's columns clears filters it does not have, only for document views", () => {
-        const view = createMockView({ columns: [{ field: 'dc:title', filterValue: 'invoice' }], set: sinon.spy() });
-        results._applyPrefsToView(view, { columns: { 'dc:title': { hidden: false } } }, { clearMissingFilters: true });
-        expect(view.set).to.have.been.calledOnceWith('columns.0.filterValue', '');
+      test('picture books and collections keep their columns shown per document, as before', async () => {
+        const layouts = {
+          '/elements/document/picturebook/nuxeo-picturebook-view-layout.html': 'nuxeo-results',
+          '/elements/document/collection/nuxeo-collection-view-layout.html': 'nuxeo-default-results',
+        };
+        for (const [url, tag] of Object.entries(layouts)) {
+          const response = await fetch(url);
+          const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
+          const table = doc.querySelector('dom-module template').content.querySelector(`${tag}#results`);
+          expect(table.getAttribute('prefs-scope'), url).to.equal('document');
+        }
+      });
 
-        const searchView = createMockView({
-          columns: [{ field: 'dc:title', filterValue: 'invoice' }],
-          set: sinon.spy(),
-        });
-        results._applyPrefsToView(searchView, { columns: { 'dc:title': { hidden: false } } });
-        expect(searchView.set).to.not.have.been.called;
+      test("a document's own columns keep the filters shown, as before; the shared columns alone clear them", () => {
+        results.__docPrefsPending = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        const view = createMockView({ columns: [{ field: 'dc:title', filterValue: 'invoice' }], set: sinon.spy() });
+        results._applyDocPrefsImpl(true, { columns: { 'dc:title': { hidden: false, width: '80px' } } }, view);
+        expect(view.set.called).to.equal(false);
+
+        // nothing of its own: the defaults with the shared columns, which reset the filters as the defaults always did
+        results._applyDocPrefsImpl(true, { columns: { 'dc:title': { hidden: false } } }, view);
+        expect(view.set.calledOnceWith('columns.0.filterValue', '')).to.equal(true);
       });
 
       test('a missing or forbidden preferences endpoint is asked once per session; other failures are retried', async () => {
@@ -3124,8 +3139,9 @@ suite('nuxeo-results', () => {
             'dc:title': { hidden: true, order: 0, width: '200px', resized: false },
             'dc:creator': { hidden: false, order: 1, width: null, resized: false },
           },
-          sortOrder: [],
         });
+        // applied as the defaults, which clear the table's sort and filters
+        expect(applyStub.lastCall.args[2]).to.deep.equal({ fromDefaults: true });
       });
 
       test('a resize or sort in one folder is not applied to another folder of the same type', async () => {
@@ -3245,11 +3261,86 @@ suite('nuxeo-results', () => {
         expect(saveLayoutStub.called).to.equal(false);
       });
 
-      test("a document with nothing of its own keeps its default sort, e.g. an Orderable folder's manual order", () => {
-        const view = createMockView({ columns: [{ field: 'dc:title', hiddenBack: false }], sortOrder: [] });
-        expect(results._defaultSettings(view)).to.deep.equal({
-          columns: { 'dc:title': { hidden: false, order: 0, width: null, resized: false } },
+      test("a column change in one document isn't taken for a change of the next one, if their saves are queued together", async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        results._settingsScope = 'all';
+        results.view = createMockView();
+        const saved = [];
+        // the debounced save waits, so the second one replaces the first, as when moving to another document at once
+        sinon.stub(results, '_debounceSave').callsFake((_, fn) => saved.splice(0, 1, fn));
+        const saveLayoutStub = sinon.stub(results, 'saveLayoutPrefs').resolves();
+        sinon.stub(results, 'saveDocPrefs').resolves();
+
+        results.document = { path: '/default-domain/queued-a', type: 'Folder' };
+        markShown(results, '/default-domain/queued-a', { columns: { 'dc:title': { hidden: false } } });
+        results.view.settings = { columns: { 'dc:title': { hidden: true } } };
+        results._saveViewSettings();
+
+        results.document = { path: '/default-domain/queued-b', type: 'Folder' };
+        const shownInB = { columns: { 'dc:title': { hidden: false, width: '80px' } } };
+        markShown(results, '/default-domain/queued-b', shownInB);
+        results.view.settings = { columns: { 'dc:title': { hidden: false, width: '300px' } } };
+        results._saveViewSettings();
+        saved[0]();
+        await Promise.resolve();
+
+        expect(saveLayoutStub.called).to.equal(false);
+      });
+
+      test('restoring an older browser copy, e.g. back from the grid, is saved for the document but not shared', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settingsScope = 'all';
+        results.document = { path: '/default-domain/stale-a', type: 'Folder' };
+        const shown = { columns: { 'dc:title': { hidden: false } } };
+        // the browser copy still has the column hidden, from before it was shown again in another folder
+        results._settings = { table: { columns: { 'dc:title': { hidden: true } } } };
+        let current = shown;
+        const view = createMockView({ columns: [{ field: 'dc:title' }] });
+        // like the table, setting the settings changes the columns shown, which fires settings-changed at once
+        Object.defineProperty(view, 'settings', {
+          get: () => current,
+          set: (value) => {
+            current = value;
+            results._saveViewSettings();
+          },
         });
+        results.view = view;
+        markShown(results, '/default-domain/stale-a', shown);
+        sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+        const saveLayoutStub = sinon.stub(results, 'saveLayoutPrefs').resolves();
+        const saveDocStub = sinon.stub(results, 'saveDocPrefs').resolves();
+
+        results._restoreViewSettings(view);
+        await Promise.resolve();
+
+        expect(saveLayoutStub.called).to.equal(false);
+        expect(saveDocStub.calledOnce).to.equal(true);
+
+        // nor when it replaces a column change still to be saved
+        results.__visibilityChanged = '/default-domain/stale-a';
+        results._restoreViewSettings(view);
+        await Promise.resolve();
+        expect(saveLayoutStub.called).to.equal(false);
+      });
+
+      test("a document with nothing of its own clears the table's sort only, so an Orderable folder keeps its order", () => {
+        results.__docPrefsPending = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        const view = createMockView({
+          columns: [{ field: 'dc:title', hiddenBack: false }],
+          sortOrder: [{ path: 'dc:title', direction: 'asc' }],
+        });
+        results._applyDocPrefsImpl(true, { columns: { 'dc:title': { hidden: true } } }, view);
+        // no sort in the settings, so the table leaves the page provider's sort (e.g. ecm:pos) alone
+        expect(Object.hasOwn(view.settings, 'sortOrder')).to.equal(false);
+        expect(view.settings.columns['dc:title'].hidden).to.equal(true);
+        expect(view.sortOrder).to.deep.equal([]);
       });
 
       test('a document with only a browser copy keeps its width and sort under the shared columns', () => {
