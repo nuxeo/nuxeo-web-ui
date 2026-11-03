@@ -1061,7 +1061,17 @@ Polymer({
         const storageName = this._localStorageName;
         const scopeVersion = this._getScopeVersion(docPath, docKey);
         const settings = this._deepClone(this.view.settings);
+        // only a change of the columns shown is shared: a resize, reorder, sort or filter is not
+        const visibility = JSON.stringify(this._visibilityOnly(settings));
+        const shown = this.__shownVisibility;
+        // compared only with what was shown for this document: otherwise it is not known what the user changed
+        if (shown?.path === docPath && shown.value !== visibility) {
+          this.__visibilityChanged = true;
+        }
+        this.__shownVisibility = { path: docPath, value: visibility };
         this._debounceSave('_docPrefsSaveDebouncer', () => {
+          const visibilityChanged = this.__visibilityChanged;
+          this.__visibilityChanged = false;
           // Save to backend (primary): for this document only when the user chose so, otherwise shared by the layout
           if (layoutKey && this._getScopeVersion(docPath, docKey) !== scopeVersion) {
             // the user changed where column changes apply since then, which saved the columns shown at that time
@@ -1073,8 +1083,9 @@ Polymer({
           } else if (layoutKey) {
             // the columns shown are shared by the layout; width, order, sort and filters stay with this document
             const shared = this._visibilityOnly(settings);
+            const shareColumns = visibilityChanged && this._sharedPrefsChanged(layoutKey, shared);
             save = Promise.all([
-              this._sharedPrefsChanged(layoutKey, shared) ? this.saveLayoutPrefs(layoutKey, shared) : null,
+              shareColumns ? this.saveLayoutPrefs(layoutKey, shared) : null,
               this.saveDocPrefs(docPath, docKey, settings),
             ]);
           } else {
@@ -1736,8 +1747,11 @@ Polymer({
 
     // update in-session cache
     __docPrefsCache.set(cacheKey, cloned);
-    // Only apply to the view if the user has not moved to another document, nor changed the columns, meanwhile
-    if ((!this.document?.path || this.document.path === docPath) && !this._viewChangedSince(cloned)) {
+    // Only apply to the view if the user has not moved to another document, nor changed the columns, meanwhile. Another
+    // display mode (e.g. grid) has no columns to compare: the saved ones are applied when the table shows again.
+    const otherMode = Boolean(this.displayMode) && this.displayMode !== 'table';
+    const changedSince = !otherMode && this._viewChangedSince(cloned);
+    if ((!this.document?.path || this.document.path === docPath) && !changedSince) {
       this.docPrefs = cloned;
     }
   },
@@ -1764,10 +1778,19 @@ Polymer({
     }
 
     const cloned = this._visibilityOnly(value);
-
-    await this._putGlobalPreference(key, cloned);
-
-    __globalPrefsCache.set(this._cacheKey(userId, key), cloned);
+    const cacheKey = this._cacheKey(userId, key);
+    // remembered while the request is pending, so a change back to the stored columns is still written after it
+    const json = JSON.stringify(cloned);
+    this.__queuedLayoutPrefs = this.__queuedLayoutPrefs || new Map();
+    this.__queuedLayoutPrefs.set(cacheKey, json);
+    try {
+      await this._putGlobalPreference(key, cloned);
+      __globalPrefsCache.set(cacheKey, cloned);
+    } finally {
+      if (this.__queuedLayoutPrefs.get(cacheKey) === json) {
+        this.__queuedLayoutPrefs.delete(cacheKey);
+      }
+    }
   },
 
   // Returns the stable preference key used to store/retrieve results table prefs on a document.
@@ -1822,7 +1845,8 @@ Polymer({
   // 2. otherwise the document's own width, order, sort and filters, with the columns shown by every document of the
   //    same layout when there are any yet;
   // 3. the defaults for whatever the document has not saved.
-  _loadDocPrefs(enabled, document, connectedUserId, layoutPrefsKey) {
+  // `keepShown`, when given, tells whether the table must keep what it shows once the shared columns are loaded.
+  _loadDocPrefs(enabled, document, connectedUserId, layoutPrefsKey, keepShown) {
     // Invalidate any in-flight layout prefs load started for a previous document or layout
     this.__docPrefsLoadId = (this.__docPrefsLoadId || 0) + 1;
     this.__docPrefsPending = false;
@@ -1892,6 +1916,10 @@ Polymer({
       .then((prefs) => {
         if (loadId === this.__docPrefsLoadId) {
           this.__docPrefsPending = false;
+          if (keepShown?.()) {
+            // the user changed the columns while they were loading: keep them, to be saved when the dialog closes
+            return;
+          }
           this._useLayoutPrefs(prefs, document, userId);
           this._applyDocPrefs(true, this.docPrefs, this.view);
         }
@@ -1986,6 +2014,8 @@ Polymer({
     const version = this._getScopeVersion(docPath, docKey);
     // a newer choice for this document wins over what this one still has to do
     const isLatest = () => this._getScopeVersion(docPath, docKey) === version;
+    const userId = this._getUserId();
+    const shownAtChoice = this._deepClone(this.view.settings);
     let save;
     if (scope === 'document') {
       // keep the current columns for this document only
@@ -2006,7 +2036,7 @@ Polymer({
         Boolean(e.detail?.pendingChanges || source?.pendingChanges) || this._viewChangedSince(shown);
       save = this.saveDocPrefs(docPath, docKey, shown).then(() => {
         if (!keepShown() && isLatest() && this.document?.path === docPath) {
-          this._loadDocPrefs(true, this.document, this._connectedUserId, this._layoutPrefsKey);
+          this._loadDocPrefs(true, this.document, this._connectedUserId, this._layoutPrefsKey, keepShown);
         }
       });
     }
@@ -2015,13 +2045,21 @@ Polymer({
       .catch((error) => {
         // eslint-disable-next-line no-console
         console.warn('Failed to save where column changes apply', { path: docPath, scope, error });
-        // the choice was not saved: go back to the previous one, so the screen matches what is stored, unless a newer
-        // choice was made since
-        if (isLatest() && this.document?.path === docPath) {
+        // The choice was not saved: go back to the previous one, so the screen matches what is stored. Not when a newer
+        // choice was made since, nor when the columns were changed since or a newer save is queued: that save stores the
+        // columns with this choice, so keeping it keeps the screen and what is stored in step.
+        const newerSave = this.__docPrefsWrites?.has(this._docCacheKey(userId, docPath, docKey));
+        if (isLatest() && this.document?.path === docPath && !newerSave && !this._viewChangedSince(shownAtChoice)) {
           this._settingsScope = previousScope;
+          // saves made with the failed choice, still waiting, must not store it
+          this._bumpScopeVersion(docPath, docKey);
           if (this._settings && previousLocal !== undefined) {
             this.set('_settings.table', previousLocal);
             this.saveSettings();
+          }
+          if (previousScope !== 'document') {
+            // picking the choice stopped the shared columns from loading: load them again
+            this._loadDocPrefs(true, this.document, this._connectedUserId, this._layoutPrefsKey);
           }
         }
         this._notifyColumnSettingsSaveFailed();
@@ -2076,7 +2114,9 @@ Polymer({
     return settings;
   },
 
-  // The table's default settings, as restored when there are no prefs (see `_applyPrefsToView`).
+  // The table's default settings, as restored when there are no prefs (see `_applyPrefsToView`). A sort left from
+  // another document is cleared; otherwise the sort is left alone, so the document's default sort (e.g. the manual
+  // order of an Orderable folder) is kept.
   _defaultSettings(view) {
     this._rememberDeclaredWidths(view);
     const columns = {};
@@ -2088,12 +2128,18 @@ Polymer({
         resized: false,
       };
     });
-    return { columns, sortOrder: [] };
+    return view.sortOrder?.length > 0 ? { columns, sortOrder: [] } : { columns };
   },
 
-  // Whether the shared columns differ from what is already stored, so unchanged columns aren't written again.
+  // Whether the shared columns differ from the latest ones stored or being stored, so unchanged columns aren't written
+  // again.
   _sharedPrefsChanged(layoutKey, shared) {
-    const cached = __globalPrefsCache.get(this._cacheKey(this._getUserId(), layoutKey));
+    const cacheKey = this._cacheKey(this._getUserId(), layoutKey);
+    const queued = this.__queuedLayoutPrefs?.get(cacheKey);
+    if (queued !== undefined) {
+      return queued !== JSON.stringify(shared);
+    }
+    const cached = __globalPrefsCache.get(cacheKey);
     return !cached || JSON.stringify(cached) !== JSON.stringify(shared);
   },
 
@@ -2127,12 +2173,21 @@ Polymer({
       return;
     }
 
-    // only the columns shown by the layout, as the document has no prefs of its own: the defaults with those columns
-    const settings =
-      view.columns && this._isVisibilityOnly(filteredSettings)
-        ? this._withSharedColumns(this._defaultSettings(view), filteredSettings)
-        : filteredSettings;
+    let settings = filteredSettings;
+    if (view.columns && this._isVisibilityOnly(filteredSettings)) {
+      // only the columns shown by the layout, as the document has no prefs of its own on the server: show them with the
+      // document's browser copy when there is one, otherwise with the table defaults
+      const local = this._settings?.[this.displayMode];
+      const hasLocal = Boolean(local) && Object.keys(local).length > 0;
+      const base = (hasLocal && this._filterSettingsByCapabilities(view, local)) || this._defaultSettings(view);
+      settings = this._withSharedColumns(base, filteredSettings);
+    }
     this._applyPrefsToView(view, settings, { clearMissingFilters: true });
+    // what a later save compares with, to tell whether the user changed the columns shown
+    this.__shownVisibility = {
+      path: this.document?.path,
+      value: JSON.stringify(this._visibilityOnly(view.settings)),
+    };
   },
   // -------------------------
   // Mode decision functions
