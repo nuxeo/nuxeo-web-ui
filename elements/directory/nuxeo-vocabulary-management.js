@@ -323,8 +323,9 @@ Polymer({
     this.async(() => {
       const dropdowns = this.$.table.querySelectorAll('nuxeo-dropdown-aggregation');
       dropdowns.forEach((dd) => {
-        const cell = dd.parentNode?.host || dd.closest?.('nuxeo-data-table-cell') || dd.parentNode;
-        const key = cell?.column?.key;
+        const cell =
+          (dd.parentNode && dd.parentNode.host) || (dd.closest && dd.closest('nuxeo-data-table-cell')) || dd.parentNode;
+        const key = cell != null && cell.column != null ? cell.column.key : undefined;
         if (key && aggregations[key]) {
           dd.data = aggregations[key];
         }
@@ -336,7 +337,7 @@ Polymer({
   // whenever its `filterValue` updates. We listen at the host and re-derive the
   // visible entries from the unfiltered source.
   _onColumnFilterChanged(e) {
-    const detail = e?.detail;
+    const detail = e != null ? e.detail : undefined;
     if (!detail) {
       return;
     }
@@ -359,7 +360,7 @@ Polymer({
     const hasFilter = filters && Object.keys(filters).length > 0;
     // show the table when there are visible entries, or when a filter is active but matches
     // nothing (so the table's empty-when-filtered label is rendered instead of hiding the table)
-    if (entries?.length || (hasFilter && allEntries?.length)) {
+    if ((entries && entries.length) || (hasFilter && allEntries && allEntries.length)) {
       return 'display: block;';
     }
     return 'display: none;';
@@ -373,7 +374,7 @@ Polymer({
       return false;
     }
     const v = vocabularies.find((d) => d && d.name === selectedVocabulary);
-    return !!v?.readOnly;
+    return !!(v && v.readOnly);
   },
 
   _visibleChanged() {
@@ -472,7 +473,7 @@ Polymer({
   },
 
   _formattedFilterableValue(entry, key) {
-    const val = entry?.properties?.[key];
+    const val = entry != null && entry.properties != null ? entry.properties[key] : undefined;
     if (val == null) {
       return '';
     }
@@ -490,7 +491,7 @@ Polymer({
       this.entries = all.slice();
     } else {
       this.entries = all.filter((entry) => {
-        if (!entry?.properties) {
+        if (!(entry && entry.properties)) {
           return false;
         }
         return keys.every((k) => {
@@ -510,7 +511,7 @@ Polymer({
     // re-stamp by clearing and re-setting `items` imperatively, mirroring the
     // pre-filter behaviour of `_refresh`. Without this, deleted/edited entries
     // can remain visible in the DOM (see WEBUI-1683).
-    const table = this.$.table ?? this.$$('#table');
+    const table = this.$.table != null ? this.$.table : this.$$('#table');
     if (table) {
       table.items = [];
       table.items = this.entries;
@@ -554,11 +555,11 @@ Polymer({
   _filterByFor(col) {
     // Only set `filter-by` on non-action columns so the data-table-column emits
     // `column-filter-changed` events for those columns.
-    return col?.key && col.key !== 'actions' ? col.key : '';
+    return col && col.key && col.key !== 'actions' ? col.key : '';
   },
 
   _cellValue(item, prop) {
-    if (item?.properties && prop) {
+    if (item && item.properties && prop) {
       if (prop === 'obsolete') {
         return item.properties[prop] > 0 ? this.i18n('label.yes') : this.i18n('label.no');
       }

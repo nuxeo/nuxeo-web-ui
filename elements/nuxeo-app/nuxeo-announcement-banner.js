@@ -273,9 +273,9 @@ class AnnouncementBanner extends mixinBehaviors([I18nBehavior], Nuxeo.Element) {
   }
 
   _update(response) {
-    const entry = response?.properties;
-    const message = typeof entry?.message === 'string' ? entry.message.trim() : '';
-    const enabled = !!entry?.enabled;
+    const entry = response != null ? response.properties : undefined;
+    const message = typeof (entry != null ? entry.message : undefined) === 'string' ? entry.message.trim() : '';
+    const enabled = !!(entry && entry.enabled);
     if (!enabled || !message) {
       this._message = '';
       this._linkUrl = '';
@@ -331,7 +331,7 @@ class AnnouncementBanner extends mixinBehaviors([I18nBehavior], Nuxeo.Element) {
 
   _measure() {
     this._setAppTop(this.offsetHeight);
-    const content = this.$?.content;
+    const content = this.$ != null ? this.$.content : undefined;
     // Sub-pixel rounding leaves a harmless one-pixel difference on content that in fact fits.
     this._scrollable = !!content && content.scrollHeight - content.clientHeight > 1;
   }
