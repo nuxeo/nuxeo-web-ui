@@ -116,7 +116,7 @@ Always use Nuxeo Elements for API calls, never `fetch()`:
 - ESLint: flat config in `eslint.config.mjs`
 - Max line length: 120 characters
 - `Polymer` global is `readonly`, `Nuxeo` is `writable`
-- **Do not use syntax the Polymer analyzer's parser cannot read** in `elements/`, `themes/` or `index.js`:
+- **Do not use syntax the Polymer analyzer's parser cannot read** in `elements/`, `addons/`, `themes/` or `index.js`:
   optional chaining (`?.`), nullish coalescing (`??`), optional catch binding (`catch { }`), logical
   assignment (`||=`, `&&=`, `??=`), class fields, private `#` members, `static { }` blocks, BigInt,
   numeric separators, `export * as`, top-level `await`, import attributes and regex `d`/`v` flags. The
