@@ -274,7 +274,8 @@ class AnnouncementBanner extends mixinBehaviors([I18nBehavior], Nuxeo.Element) {
 
   _update(response) {
     const entry = response != null ? response.properties : undefined;
-    const message = typeof (entry != null ? entry.message : undefined) === 'string' ? entry.message.trim() : '';
+    const rawMessage = entry != null ? entry.message : undefined;
+    const message = typeof rawMessage === 'string' ? rawMessage.trim() : '';
     const enabled = !!(entry && entry.enabled);
     if (!enabled || !message) {
       this._message = '';

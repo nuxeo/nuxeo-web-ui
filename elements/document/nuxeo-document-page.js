@@ -630,9 +630,9 @@ Polymer({
       }
       return n;
     } catch (e) {
-      // Storage may be unavailable (private mode, quota); width is not persisted.
-      return null;
+      // Storage may be unavailable (private mode); there is no stored width then.
     }
+    return null;
   },
 
   /** Save or clear info-pane width under `nuxeo.documentPage.sidePaneWidth`. */

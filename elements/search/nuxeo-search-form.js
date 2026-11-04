@@ -782,11 +782,10 @@ Polymer({
     if (this.visible) {
       // `fetch` replaces the items with new object instances, so the previously selected
       // document has to be looked up again by uid once the new entries are in.
-      const selectedUid = restoreSelection
-        ? this.selectedDocument != null
-          ? this.selectedDocument.uid
-          : undefined
-        : null;
+      let selectedUid = null;
+      if (restoreSelection) {
+        selectedUid = this.selectedDocument != null ? this.selectedDocument.uid : undefined;
+      }
       this.$.list.fetch().then(() => {
         if (typeof index === 'number') {
           const targetIndex = this._queueIndexOf(selectedUid, index);
