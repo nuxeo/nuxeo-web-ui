@@ -116,6 +116,16 @@ Always use Nuxeo Elements for API calls, never `fetch()`:
 - ESLint: flat config in `eslint.config.mjs`
 - Max line length: 120 characters
 - `Polymer` global is `readonly`, `Nuxeo` is `writable`
+- **Do not use syntax the Polymer analyzer's parser cannot read** in `elements/`, `themes/` or `index.js`:
+  optional chaining (`?.`), nullish coalescing (`??`), optional catch binding (`catch { }`), logical
+  assignment (`||=`, `&&=`, `??=`), class fields, private `#` members, `static { }` blocks, BigInt,
+  numeric separators, `export * as`, top-level `await`, import attributes and regex `d`/`v` flags. The
+  Designer catalog generator (`packages/nuxeo-designer-catalog`) runs `polymer-analyzer` 3.2.4 on these
+  sources; a file using such syntax fails to parse and is dropped from the catalog together with the
+  elements it defines and the ones only reachable through it (WEBUI-1922, WEBUI-2418). ESLint enforces
+  this (`no-restricted-syntax` in `eslint.config.mjs`). Use `a && a.b` when only truthiness is needed,
+  `a != null ? a.b : undefined` when the value is used (`a && a.b` can return `null`, `0` or `''`
+  instead of `undefined`), an explicit `!= null` check instead of `??`, and `catch (e)`.
 
 ## Testing
 
