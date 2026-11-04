@@ -254,7 +254,14 @@ export default [
 
   // Source read by the Designer catalog generator. Kept after the addon configs so they cannot switch it off.
   {
-    files: ['elements/**/*.{js,html}', 'addons/**/*.{js,html}', 'themes/**/*.js', 'i18n/**/*.js', 'index.js'],
+    files: [
+      'elements/**/*.{js,html}',
+      'addons/**/*.{js,html}',
+      'themes/**/*.js',
+      'i18n/**/*.js',
+      'index.js',
+      'legacy.js',
+    ],
     // Addon unit tests and functional tests run in the test runners (not read by the catalog).
     ignores: ['addons/**/test/**', 'addons/**/ftest/**'],
     rules: {
