@@ -17,6 +17,20 @@ limitations under the License.
 */
 import moment from '@nuxeo/moment';
 
+// The three helpers below spell out `obj?.key`, `el?.getBoundingClientRect?.() ?? null` and the canvas lookup
+// of the resize snapshot, because the Designer catalog's analyzer cannot parse optional chaining.
+const read = (obj, key) => (obj != null ? obj[key] : undefined);
+
+const rectOf = (el) => {
+  const rect = el != null && el.getBoundingClientRect != null ? el.getBoundingClientRect() : undefined;
+  return rect != null ? rect : null;
+};
+
+const canvasOf = (chart) =>
+  (chart && chart.$ && chart.$.canvas) ||
+  (chart && chart.shadowRoot && chart.shadowRoot.querySelector('#canvas')) ||
+  (chart != null && chart.querySelector != null ? chart.querySelector('canvas') : undefined);
+
 /**
  * @polymerBehavior Nuxeo.ChartDataBehavior
  */
@@ -168,15 +182,8 @@ export const ChartDataBehavior = {
   },
 
   _collectChartResizeSnapshot(chart) {
-    const parent = chart != null ? chart.parentElement : undefined;
-    const canvas =
-      (chart && chart.$ && chart.$.canvas) ||
-      (chart && chart.shadowRoot && chart.shadowRoot.querySelector('#canvas')) ||
-      (chart != null && chart.querySelector != null ? chart.querySelector('canvas') : undefined);
-    const rectOf = (el) => {
-      const rect = el != null && el.getBoundingClientRect != null ? el.getBoundingClientRect() : undefined;
-      return rect != null ? rect : null;
-    };
+    const parent = read(chart, 'parentElement');
+    const canvas = canvasOf(chart);
     const chartRect = rectOf(chart);
     const parentRect = rectOf(parent);
     const computed = chart instanceof Element ? window.getComputedStyle(chart) : null;
@@ -185,45 +192,42 @@ export const ChartDataBehavior = {
         devicePixelRatio: window.devicePixelRatio,
         innerWidth: window.innerWidth,
         outerWidth: window.outerWidth,
-        visualViewportWidth: window.visualViewport != null ? window.visualViewport.width : undefined,
-        visualViewportScale: window.visualViewport != null ? window.visualViewport.scale : undefined,
+        visualViewportWidth: read(window.visualViewport, 'width'),
+        visualViewportScale: read(window.visualViewport, 'scale'),
       },
       chart: {
-        offsetWidth: chart != null ? chart.offsetWidth : undefined,
-        offsetHeight: chart != null ? chart.offsetHeight : undefined,
-        clientWidth: chart != null ? chart.clientWidth : undefined,
-        clientHeight: chart != null ? chart.clientHeight : undefined,
-        rectWidth: chartRect != null ? chartRect.width : undefined,
-        rectHeight: chartRect != null ? chartRect.height : undefined,
+        offsetWidth: read(chart, 'offsetWidth'),
+        offsetHeight: read(chart, 'offsetHeight'),
+        clientWidth: read(chart, 'clientWidth'),
+        clientHeight: read(chart, 'clientHeight'),
+        rectWidth: read(chartRect, 'width'),
+        rectHeight: read(chartRect, 'height'),
       },
       parent: {
-        offsetWidth: parent != null ? parent.offsetWidth : undefined,
-        offsetHeight: parent != null ? parent.offsetHeight : undefined,
-        clientWidth: parent != null ? parent.clientWidth : undefined,
-        clientHeight: parent != null ? parent.clientHeight : undefined,
-        rectWidth: parentRect != null ? parentRect.width : undefined,
-        rectHeight: parentRect != null ? parentRect.height : undefined,
+        offsetWidth: read(parent, 'offsetWidth'),
+        offsetHeight: read(parent, 'offsetHeight'),
+        clientWidth: read(parent, 'clientWidth'),
+        clientHeight: read(parent, 'clientHeight'),
+        rectWidth: read(parentRect, 'width'),
+        rectHeight: read(parentRect, 'height'),
       },
       styles: {
-        display: computed != null ? computed.display : undefined,
-        width: computed != null ? computed.width : undefined,
-        minWidth: computed != null ? computed.minWidth : undefined,
-        maxWidth: computed != null ? computed.maxWidth : undefined,
-        flex: computed != null ? computed.flex : undefined,
-        overflow: computed != null ? computed.overflow : undefined,
-        transform: computed != null ? computed.transform : undefined,
+        display: read(computed, 'display'),
+        width: read(computed, 'width'),
+        minWidth: read(computed, 'minWidth'),
+        maxWidth: read(computed, 'maxWidth'),
+        flex: read(computed, 'flex'),
+        overflow: read(computed, 'overflow'),
+        transform: read(computed, 'transform'),
       },
-      chartInstance: {
-        width: chart != null && chart.chart != null ? chart.chart.width : undefined,
-        height: chart != null && chart.chart != null ? chart.chart.height : undefined,
-      },
+      chartInstance: { width: read(read(chart, 'chart'), 'width'), height: read(read(chart, 'chart'), 'height') },
       canvas: {
-        cssWidth: canvas != null && canvas.style != null ? canvas.style.width : undefined,
-        cssHeight: canvas != null && canvas.style != null ? canvas.style.height : undefined,
-        width: canvas != null ? canvas.width : undefined,
-        height: canvas != null ? canvas.height : undefined,
-        clientWidth: canvas != null ? canvas.clientWidth : undefined,
-        clientHeight: canvas != null ? canvas.clientHeight : undefined,
+        cssWidth: read(read(canvas, 'style'), 'width'),
+        cssHeight: read(read(canvas, 'style'), 'height'),
+        width: read(canvas, 'width'),
+        height: read(canvas, 'height'),
+        clientWidth: read(canvas, 'clientWidth'),
+        clientHeight: read(canvas, 'clientHeight'),
       },
     };
   },

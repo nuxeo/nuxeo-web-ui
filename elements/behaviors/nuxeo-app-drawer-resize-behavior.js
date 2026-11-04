@@ -138,8 +138,9 @@ export const NuxeoAppDrawerResizeBehavior = {
       }
       return n;
     } catch (e) {
-      return null;
+      // Storage may be unavailable (private mode); there is no stored width then.
     }
+    return null;
   },
 
   /** Persist drawer width under `nuxeo.drawerWidth` (no-op when storage is unavailable). */

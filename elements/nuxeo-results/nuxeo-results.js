@@ -525,14 +525,23 @@ Polymer({
       }
     } catch (e) {
       /* Unsafe read during attach/refresh; treat as no rows yet */
-      return [];
     }
     return [];
   },
 
+  // `e?.detail?.value`, spelled out because the Designer catalog's analyzer cannot parse optional chaining.
+  _eventDetailValue(e) {
+    return e != null && e.detail != null ? e.detail.value : undefined;
+  },
+
+  // True when the current view has a `quickFilters` property (`this.view?.quickFilters !== undefined`).
+  _viewHasQuickFilters() {
+    return this.view != null && this.view.quickFilters !== undefined;
+  },
+
   _handleUserQuickFilterToggle(e) {
     let eventFilters = this.quickFilters;
-    if (Array.isArray(e != null && e.detail != null ? e.detail.value : undefined)) {
+    if (Array.isArray(this._eventDetailValue(e))) {
       eventFilters = e.detail.value;
     } else if (Array.isArray(e != null && e.target != null ? e.target.quickFilters : undefined)) {
       eventFilters = e.target.quickFilters;
@@ -546,7 +555,7 @@ Polymer({
     if (this.nxProvider) {
       this.set('nxProvider.quickFilters', filters.slice());
     }
-    if ((this.view != null ? this.view.quickFilters : undefined) !== undefined) {
+    if (this._viewHasQuickFilters()) {
       this.view.quickFilters = filters.slice();
     }
 
@@ -1093,7 +1102,7 @@ Polymer({
 
   _handleViewQuickFiltersSync(e) {
     let incomingFilters;
-    if (Array.isArray(e != null && e.detail != null ? e.detail.value : undefined)) {
+    if (Array.isArray(this._eventDetailValue(e))) {
       incomingFilters = this._cloneQuickFilters(e.detail.value);
     } else if (this.nxProvider && Array.isArray(this.nxProvider.quickFilters)) {
       incomingFilters = this._cloneQuickFilters(this.nxProvider.quickFilters);
@@ -1112,7 +1121,7 @@ Polymer({
       if (this.nxProvider) {
         this.set('nxProvider.quickFilters', pendingFilters.slice());
       }
-      if ((this.view != null ? this.view.quickFilters : undefined) !== undefined) {
+      if (this._viewHasQuickFilters()) {
         this.view.quickFilters = pendingFilters.slice();
       }
       this._scheduleQuickFilterFetch(this._quickFiltersRequestId);
@@ -1190,7 +1199,7 @@ Polymer({
       if (this.nxProvider) {
         this.set('nxProvider.quickFilters', pendingFilters.slice());
       }
-      if ((this.view != null ? this.view.quickFilters : undefined) !== undefined) {
+      if (this._viewHasQuickFilters()) {
         this.view.quickFilters = pendingFilters.slice();
       }
     } finally {
@@ -1254,8 +1263,8 @@ Polymer({
       return parsed;
     } catch (e) {
       /* Stored preference values are user data and may predate the current format; fall back to defaults */
-      return {};
     }
+    return {};
   },
 
   // Creates a JSON-safe deep copy of an object to avoid mutating cached/shared preference references.
@@ -1621,7 +1630,6 @@ Polymer({
         return parsed;
       } catch (e) {
         /* Stored preference values are user data and may predate the current format; fall back to defaults */
-        return null;
       }
     }
 

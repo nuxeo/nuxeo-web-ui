@@ -129,9 +129,10 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
   }
 
   _isAvailable() {
-    return isPageProviderDisplayBehavior(this.documents)
-      ? (this.documents.selectedItems || this.documents.items || []).length > 0
-      : (this.documents != null ? this.documents.length : undefined) > 0;
+    if (isPageProviderDisplayBehavior(this.documents)) {
+      return (this.documents.selectedItems || this.documents.items || []).length > 0;
+    }
+    return (this.documents != null ? this.documents.length : undefined) > 0;
   }
 
   _download() {

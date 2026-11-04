@@ -206,10 +206,10 @@ Polymer({
 
   _params() {
     const actionParams = {};
-    const schemas =
-      this.schemas != null
-        ? this.schemas
-        : this._resolvedSchemas || (this.provider != null ? this.provider.schemas : undefined);
+    let schemas = this.schemas;
+    if (schemas == null) {
+      schemas = this._resolvedSchemas || (this.provider != null ? this.provider.schemas : undefined);
+    }
     if (schemas) {
       actionParams.schemas = this._toList(schemas);
     }
