@@ -377,7 +377,16 @@ function reportUnfixable(blocks) {
   }
 }
 
-function place() {
+/**
+ * `paths` are the feature files to consider, as lint-staged appends them — so a commit places only
+ * what it is actually carrying. Without it an untracked work-in-progress feature sitting in
+ * `ftest/features/` would be placed too, staging a manifest entry for a file the commit does not
+ * contain, and `--check` would then fail CI on "assigned to a shard but does not exist".
+ *
+ * Empty means no paths were supplied, which is `npm run format` scanning the whole directory.
+ */
+function place(paths = []) {
+  const only = new Set(paths.map((entry) => path.basename(entry)).filter((name) => name.endsWith('.feature')));
   const lines = fs.readFileSync(__filename, 'utf8').split('\n');
   const blocks = parseShardBlocks(lines);
 
@@ -400,6 +409,7 @@ function place() {
   const unplaced = fs
     .readdirSync(FEATURES_DIR)
     .filter((entry) => entry.endsWith('.feature'))
+    .filter((feature) => only.size === 0 || only.has(feature))
     .filter((feature) => !assigned.has(feature))
     .sort();
 
@@ -454,14 +464,15 @@ function place() {
   fs.writeFileSync(__filename, rewritten.join('\n'));
 }
 
-const [mode, value] = process.argv.slice(2);
+const args = process.argv.slice(2);
+const [mode, value] = args;
 
 switch (mode) {
   case '--check':
     check();
     break;
   case '--place':
-    place();
+    place(args.slice(1));
     break;
   case '--specs':
     console.log(specsFor(value));
