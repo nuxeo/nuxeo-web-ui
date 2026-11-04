@@ -102,6 +102,17 @@ Polymer({
     >
     </nuxeo-page-provider>
 
+    <nuxeo-page-provider
+      id="unpublishAllProvider"
+      page-size="100"
+      provider="nxql_search"
+      params="[[_computeParams(_src)]]"
+      sort='{"ecm:uuid": "asc"}'
+      enrichers="permissions"
+      schemas="uid"
+    >
+    </nuxeo-page-provider>
+
     <nuxeo-card heading="[[i18n('publication.details')]]">
       <div class="resultActions">
         <template is="dom-if" if="[[canUnpublishAll]]">
@@ -180,7 +191,7 @@ Polymer({
     },
     canUnpublishAll: {
       type: Boolean,
-      computed: '_canUnpublishAll(publishedDocs.*)',
+      value: false,
     },
   },
 
@@ -217,6 +228,7 @@ Polymer({
   _fetchPublications() {
     if (this.visible && this._src) {
       this.$.table.fetch();
+      this._checkUnpublishAll();
     }
   },
 
@@ -293,10 +305,32 @@ Polymer({
     return docs && docs.length > 0;
   },
 
-  _canUnpublishAll() {
-    // rows not fetched yet are empty placeholders, so only the loaded publications can be checked
-    const loaded = (this.publishedDocs || []).filter((doc) => doc?.uid);
-    return loaded.every((doc) => this._canUnpublish(doc));
+  _checkUnpublishAll() {
+    // the table loads rows lazily, so every publication is fetched here before the bulk action is offered
+    this.canUnpublishAll = false;
+    const check = {};
+    this._unpublishAllCheck = check;
+    return this._canUnpublishAllFrom(0, check)
+      .catch(() => false)
+      .then((allowed) => {
+        if (this._unpublishAllCheck === check) {
+          this.canUnpublishAll = allowed;
+        }
+      });
+  },
+
+  _canUnpublishAllFrom(offset, check) {
+    const provider = this.$.unpublishAllProvider;
+    provider.offset = offset;
+    return provider.fetch().then(({ entries, isNextPageAvailable }) => {
+      if (!entries.every((doc) => this._canUnpublish(doc))) {
+        return false;
+      }
+      if (isNextPageAvailable && entries.length > 0 && this._unpublishAllCheck === check) {
+        return this._canUnpublishAllFrom(offset + entries.length, check);
+      }
+      return true;
+    });
   },
 
   _unpublishAll() {
