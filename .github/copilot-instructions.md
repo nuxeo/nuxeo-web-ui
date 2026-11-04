@@ -76,7 +76,7 @@ scripts/              → Build helpers (merge-messages.js, test/unit/, test/fte
 - **ESLint**: Flat config (`eslint.config.mjs`), `eslint-plugin-html` for `.html` files, `eslint-plugin-wc` for web component rules
 - **Max line length**: 120 characters
 - **`Polymer` global**: Declared as `readonly` in ESLint; `Nuxeo` is `writable`
-- **No `?.`, `??`, `catch { }`, `||=`/`&&=`/`??=`, class fields, private `#` members or other post-ES2019 syntax** in `elements/`, `themes/` or `index.js` — the Designer catalog generator (`polymer-analyzer` 3.2.4) cannot parse it and drops the file and the elements it defines from the catalog. ESLint (`no-restricted-syntax`) enforces it. Use `a && a.b` (truthiness only), `a != null ? a.b : undefined` (value used), an explicit `!= null` check instead of `??`, or `catch (e)`.
+- **No `?.`, `??`, `catch { }`, `||=`/`&&=`/`??=`, class fields, private `#` members or other post-ES2019 syntax** in `elements/`, `addons/`, `themes/` or `index.js` — the Designer catalog generator (`polymer-analyzer` 3.2.4) cannot parse it and drops the file and the elements it defines from the catalog. ESLint (`no-restricted-syntax`) enforces it. Use `a && a.b` (truthiness only), `a != null ? a.b : undefined` (value used), an explicit `!= null` check instead of `??`, or `catch (e)`.
 - Run `npm run format` before committing (enforced by husky + lint-staged).
 
 ### Naming
