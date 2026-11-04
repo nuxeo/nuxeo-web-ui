@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { fixture, html, login } from '@nuxeo/testing-helpers';
+import { fixture, flush, html, isElementVisible, login } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-publication/nuxeo-document-publications.js';
 
 suite('nuxeo-document-publications', () => {
@@ -54,6 +54,76 @@ suite('nuxeo-document-publications', () => {
     test('should return false when doc lacks WriteVersion permission', () => {
       const doc = { uid: '1' };
       expect(element._canUnpublish(doc)).to.be.false;
+    });
+  });
+
+  suite('_canUnpublishAll', () => {
+    test('should return true when every publication has WriteVersion permission', () => {
+      element.hasPermission.withArgs(sinon.match.any, 'WriteVersion').returns(true);
+      element.publishedDocs = [{ uid: '1' }, { uid: '2' }];
+      expect(element._canUnpublishAll()).to.be.true;
+    });
+
+    test('should return false when a publication lacks WriteVersion permission', () => {
+      element.hasPermission.withArgs(sinon.match({ uid: '1' }), 'WriteVersion').returns(true);
+      element.publishedDocs = [{ uid: '1' }, { uid: '2' }];
+      expect(element._canUnpublishAll()).to.be.false;
+    });
+
+    test('should return false when the user can only read the publications', () => {
+      element.publishedDocs = [{ uid: '1' }];
+      expect(element._canUnpublishAll()).to.be.false;
+    });
+
+    test('should ignore placeholders of publications not fetched yet', () => {
+      element.hasPermission.withArgs(sinon.match.any, 'WriteVersion').returns(true);
+      element.publishedDocs = [{ uid: '1' }, {}, {}];
+      expect(element._canUnpublishAll()).to.be.true;
+    });
+
+    test('should return true when there are no publications', () => {
+      element.publishedDocs = [];
+      expect(element._canUnpublishAll()).to.be.true;
+    });
+  });
+
+  suite('Unpublish all button', () => {
+    const getButton = () => element.shadowRoot.querySelector('paper-button.unpublish-all');
+
+    setup(() => {
+      sinon.stub(element, 'urlFor').returns('#');
+    });
+
+    test('should not be displayed when the user cannot unpublish every publication', async () => {
+      element.publishedDocs = [{ uid: '1' }];
+      await flush();
+      expect(element.canUnpublishAll).to.be.false;
+      expect(isElementVisible(getButton())).to.be.false;
+    });
+
+    test('should be displayed and enabled when the user can unpublish every publication', async () => {
+      element.hasPermission.withArgs(sinon.match.any, 'WriteVersion').returns(true);
+      element.publishedDocs = [{ uid: '1' }];
+      await flush();
+      expect(isElementVisible(getButton())).to.be.true;
+      expect(getButton().hasAttribute('disabled')).to.be.false;
+    });
+
+    test('should be hidden once a publication the user cannot unpublish is loaded', async () => {
+      element.hasPermission.withArgs(sinon.match({ uid: '1' }), 'WriteVersion').returns(true);
+      element.publishedDocs = [{ uid: '1' }, {}];
+      await flush();
+      expect(isElementVisible(getButton())).to.be.true;
+      element.set('publishedDocs.1', { uid: '2' });
+      await flush();
+      expect(isElementVisible(getButton())).to.be.false;
+    });
+
+    test('should be disabled when there are no publications', async () => {
+      element.publishedDocs = [];
+      await flush();
+      expect(isElementVisible(getButton())).to.be.true;
+      expect(getButton().hasAttribute('disabled')).to.be.true;
     });
   });
 
