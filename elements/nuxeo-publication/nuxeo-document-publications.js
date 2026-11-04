@@ -104,9 +104,11 @@ Polymer({
 
     <nuxeo-card heading="[[i18n('publication.details')]]">
       <div class="resultActions">
-        <paper-button class="uppercase" on-tap="_unpublishAll" disabled$="[[!hasPublications]]"
-          >[[i18n('publication.unpublishAll')]]</paper-button
-        >
+        <template is="dom-if" if="[[canUnpublishAll]]">
+          <paper-button class="uppercase unpublish-all" on-tap="_unpublishAll" disabled$="[[!hasPublications]]"
+            >[[i18n('publication.unpublishAll')]]</paper-button
+          >
+        </template>
       </div>
       <nuxeo-data-table
         id="table"
@@ -175,6 +177,10 @@ Polymer({
     hasPublications: {
       type: Boolean,
       computed: '_hasPublications(publishedDocs)',
+    },
+    canUnpublishAll: {
+      type: Boolean,
+      computed: '_canUnpublishAll(publishedDocs.*)',
     },
   },
 
@@ -285,6 +291,12 @@ Polymer({
 
   _hasPublications(docs) {
     return docs && docs.length > 0;
+  },
+
+  _canUnpublishAll() {
+    // rows not fetched yet are empty placeholders, so only the loaded publications can be checked
+    const loaded = (this.publishedDocs || []).filter((doc) => doc && doc.uid);
+    return loaded.every((doc) => this._canUnpublish(doc));
   },
 
   _unpublishAll() {
