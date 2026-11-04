@@ -500,20 +500,19 @@ Polymer({
       this._sideResizeAriaNow = 0;
       return;
     }
-    const sideEl = this.shadowRoot?.querySelector('.side');
     this._sideResizeAriaMin = this._minSideWidth();
     this._sideResizeAriaMax = this._maxSideWidth();
-    this._sideResizeAriaNow = this.sideWidth ?? sideEl?.offsetWidth ?? SIDE_PANE_FALLBACK_PX;
+    this._sideResizeAriaNow = this._sideResizeCurrentWidth();
   },
 
   /** Width of `.page` (main + side row); drives all clamp math. */
   _containerWidth() {
-    const pageEl = this.shadowRoot?.querySelector('.page');
-    const pageWidth = pageEl?.offsetWidth ?? 0;
+    const pageEl = this.shadowRoot != null ? this.shadowRoot.querySelector('.page') : undefined;
+    const pageWidth = pageEl != null && pageEl.offsetWidth != null ? pageEl.offsetWidth : 0;
     if (pageWidth > 0) {
       return pageWidth;
     }
-    const hostWidth = this.offsetWidth ?? 0;
+    const hostWidth = this.offsetWidth != null ? this.offsetWidth : 0;
     if (hostWidth > 0) {
       return hostWidth;
     }
@@ -557,7 +556,7 @@ Polymer({
    */
   _computeTargetSideWidth() {
     const stored = this._loadStoredSideWidth();
-    const preference = stored ?? this.sideWidth;
+    const preference = stored != null ? stored : this.sideWidth;
     if (preference == null || Number.isNaN(Number(preference))) {
       return null;
     }
@@ -624,13 +623,13 @@ Polymer({
   /** Read persisted info-pane width from localStorage, or null if missing/invalid. */
   _loadStoredSideWidth() {
     try {
-      const raw = globalThis.localStorage?.getItem(SIDE_PANE_STORAGE_KEY);
-      const n = Number.parseInt(raw ?? '', 10);
+      const raw = globalThis.localStorage != null ? globalThis.localStorage.getItem(SIDE_PANE_STORAGE_KEY) : undefined;
+      const n = Number.parseInt(raw != null ? raw : '', 10);
       if (!Number.isFinite(n)) {
         return null;
       }
       return n;
-    } catch {
+    } catch (e) {
       // Storage may be unavailable (private mode, quota); width is not persisted.
       return null;
     }
@@ -646,14 +645,14 @@ Polymer({
           globalThis.localStorage.setItem(SIDE_PANE_STORAGE_KEY, String(px));
         }
       }
-    } catch {
+    } catch (e) {
       // Storage may be unavailable (private mode, quota); width is not persisted.
     }
   },
 
   /** True on narrow breakpoint or when min side + min main cannot fit in the row. */
   _isNarrowViewport() {
-    if (globalThis?.matchMedia(`(max-width: ${NARROW_VIEWPORT_BREAKPOINT_PX}px)`).matches) {
+    if (globalThis && globalThis.matchMedia(`(max-width: ${NARROW_VIEWPORT_BREAKPOINT_PX}px)`).matches) {
       return true;
     }
     // Too narrow when min side + min main cannot fit side by side.
@@ -662,8 +661,11 @@ Polymer({
   },
 
   _sideResizeCurrentWidth() {
-    const sideEl = this.shadowRoot?.querySelector('.side');
-    return this.sideWidth ?? sideEl?.offsetWidth ?? SIDE_PANE_FALLBACK_PX;
+    const sideEl = this.shadowRoot != null ? this.shadowRoot.querySelector('.side') : undefined;
+    if (this.sideWidth != null) {
+      return this.sideWidth;
+    }
+    return sideEl != null && sideEl.offsetWidth != null ? sideEl.offsetWidth : SIDE_PANE_FALLBACK_PX;
   },
 
   _sideResizeActive() {

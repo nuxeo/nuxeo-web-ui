@@ -49,9 +49,9 @@ export const ChartDataBehavior = {
           this._logChartResizeDebug('ResizeObserver.callback', {
             entries: entries.map((entry) => {
               return {
-                target: entry.target?.tagName,
-                width: entry.contentRect?.width,
-                height: entry.contentRect?.height,
+                target: entry.target != null ? entry.target.tagName : undefined,
+                width: entry.contentRect != null ? entry.contentRect.width : undefined,
+                height: entry.contentRect != null ? entry.contentRect.height : undefined,
               };
             }),
           });
@@ -104,7 +104,7 @@ export const ChartDataBehavior = {
     const async = typeof this.async === 'function' ? this.async.bind(this) : (fn, waitTime) => setTimeout(fn, waitTime);
     async(() => {
       const root = this.root || this.shadowRoot || this;
-      this._logChartResizeDebug('resizeCharts.schedule', { trigger, rootTag: root?.tagName });
+      this._logChartResizeDebug('resizeCharts.schedule', { trigger, rootTag: root != null ? root.tagName : undefined });
       if (!root || typeof root.querySelectorAll !== 'function') {
         return;
       }
@@ -118,7 +118,7 @@ export const ChartDataBehavior = {
             trigger,
             chartIndex,
             reason: 'missing-resize-method',
-            tagName: chart?.tagName,
+            tagName: chart != null ? chart.tagName : undefined,
           });
           return;
         }
@@ -168,52 +168,62 @@ export const ChartDataBehavior = {
   },
 
   _collectChartResizeSnapshot(chart) {
-    const parent = chart?.parentElement;
-    const canvas = chart?.$?.canvas || chart?.shadowRoot?.querySelector('#canvas') || chart?.querySelector?.('canvas');
-    const chartRect = chart?.getBoundingClientRect?.() ?? null;
-    const parentRect = parent?.getBoundingClientRect?.() ?? null;
+    const parent = chart != null ? chart.parentElement : undefined;
+    const canvas =
+      (chart && chart.$ && chart.$.canvas) ||
+      (chart && chart.shadowRoot && chart.shadowRoot.querySelector('#canvas')) ||
+      (chart != null && chart.querySelector != null ? chart.querySelector('canvas') : undefined);
+    const rectOf = (el) => {
+      const rect = el != null && el.getBoundingClientRect != null ? el.getBoundingClientRect() : undefined;
+      return rect != null ? rect : null;
+    };
+    const chartRect = rectOf(chart);
+    const parentRect = rectOf(parent);
     const computed = chart instanceof Element ? window.getComputedStyle(chart) : null;
     return {
       viewport: {
         devicePixelRatio: window.devicePixelRatio,
         innerWidth: window.innerWidth,
         outerWidth: window.outerWidth,
-        visualViewportWidth: window.visualViewport?.width,
-        visualViewportScale: window.visualViewport?.scale,
+        visualViewportWidth: window.visualViewport != null ? window.visualViewport.width : undefined,
+        visualViewportScale: window.visualViewport != null ? window.visualViewport.scale : undefined,
       },
       chart: {
-        offsetWidth: chart?.offsetWidth,
-        offsetHeight: chart?.offsetHeight,
-        clientWidth: chart?.clientWidth,
-        clientHeight: chart?.clientHeight,
-        rectWidth: chartRect?.width,
-        rectHeight: chartRect?.height,
+        offsetWidth: chart != null ? chart.offsetWidth : undefined,
+        offsetHeight: chart != null ? chart.offsetHeight : undefined,
+        clientWidth: chart != null ? chart.clientWidth : undefined,
+        clientHeight: chart != null ? chart.clientHeight : undefined,
+        rectWidth: chartRect != null ? chartRect.width : undefined,
+        rectHeight: chartRect != null ? chartRect.height : undefined,
       },
       parent: {
-        offsetWidth: parent?.offsetWidth,
-        offsetHeight: parent?.offsetHeight,
-        clientWidth: parent?.clientWidth,
-        clientHeight: parent?.clientHeight,
-        rectWidth: parentRect?.width,
-        rectHeight: parentRect?.height,
+        offsetWidth: parent != null ? parent.offsetWidth : undefined,
+        offsetHeight: parent != null ? parent.offsetHeight : undefined,
+        clientWidth: parent != null ? parent.clientWidth : undefined,
+        clientHeight: parent != null ? parent.clientHeight : undefined,
+        rectWidth: parentRect != null ? parentRect.width : undefined,
+        rectHeight: parentRect != null ? parentRect.height : undefined,
       },
       styles: {
-        display: computed?.display,
-        width: computed?.width,
-        minWidth: computed?.minWidth,
-        maxWidth: computed?.maxWidth,
-        flex: computed?.flex,
-        overflow: computed?.overflow,
-        transform: computed?.transform,
+        display: computed != null ? computed.display : undefined,
+        width: computed != null ? computed.width : undefined,
+        minWidth: computed != null ? computed.minWidth : undefined,
+        maxWidth: computed != null ? computed.maxWidth : undefined,
+        flex: computed != null ? computed.flex : undefined,
+        overflow: computed != null ? computed.overflow : undefined,
+        transform: computed != null ? computed.transform : undefined,
       },
-      chartInstance: { width: chart?.chart?.width, height: chart?.chart?.height },
+      chartInstance: {
+        width: chart != null && chart.chart != null ? chart.chart.width : undefined,
+        height: chart != null && chart.chart != null ? chart.chart.height : undefined,
+      },
       canvas: {
-        cssWidth: canvas?.style?.width,
-        cssHeight: canvas?.style?.height,
-        width: canvas?.width,
-        height: canvas?.height,
-        clientWidth: canvas?.clientWidth,
-        clientHeight: canvas?.clientHeight,
+        cssWidth: canvas != null && canvas.style != null ? canvas.style.width : undefined,
+        cssHeight: canvas != null && canvas.style != null ? canvas.style.height : undefined,
+        width: canvas != null ? canvas.width : undefined,
+        height: canvas != null ? canvas.height : undefined,
+        clientWidth: canvas != null ? canvas.clientWidth : undefined,
+        clientHeight: canvas != null ? canvas.clientHeight : undefined,
       },
     };
   },

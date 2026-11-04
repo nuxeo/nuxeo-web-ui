@@ -56,7 +56,14 @@ function toHierarchicalPath(entry) {
   let current = entry;
   while (current && current.properties && current.properties.parent) {
     const parent = current.properties.parent;
-    const parentId = typeof parent === 'string' ? parent : (parent.id ?? parent?.properties?.id);
+    let parentId;
+    if (typeof parent === 'string') {
+      parentId = parent;
+    } else if (parent.id != null) {
+      parentId = parent.id;
+    } else if (parent.properties != null) {
+      parentId = parent.properties.id;
+    }
     if (!parentId) break;
     output = `${parentId}`.concat('/', `${output}`);
     current = typeof parent === 'string' ? null : parent;
@@ -775,7 +782,11 @@ Polymer({
     if (this.visible) {
       // `fetch` replaces the items with new object instances, so the previously selected
       // document has to be looked up again by uid once the new entries are in.
-      const selectedUid = restoreSelection ? this.selectedDocument?.uid : null;
+      const selectedUid = restoreSelection
+        ? this.selectedDocument != null
+          ? this.selectedDocument.uid
+          : undefined
+        : null;
       this.$.list.fetch().then(() => {
         if (typeof index === 'number') {
           const targetIndex = this._queueIndexOf(selectedUid, index);
@@ -796,11 +807,11 @@ Polymer({
     // The tapped row carries the `selected` class from `_computedClass`, and when it is the
     // selected one `selectedDocument` is by definition that document, so no index lookup is
     // needed (the row's `index` binding sets a property, not an attribute).
-    if (!row?.classList.contains('selected')) {
+    if (!(row && row.classList.contains('selected'))) {
       return;
     }
     const doc = this.selectedDocument;
-    if (doc?.path) {
+    if (doc && doc.path) {
       e.stopPropagation();
       this._openDocument(doc);
     }
@@ -814,13 +825,13 @@ Polymer({
     if (!items) {
       return fallbackIndex;
     }
-    const index = items.findIndex((item) => item?.uid === uid);
+    const index = items.findIndex((item) => (item != null ? item.uid : undefined) === uid);
     return index > -1 ? index : fallbackIndex;
   },
 
   _navigateToQueueItem(index) {
-    const doc = this.$.list.items?.[index];
-    if (doc?.path) {
+    const doc = this.$.list.items != null ? this.$.list.items[index] : undefined;
+    if (doc && doc.path) {
       // The queue can only be toggled back on from the filters view, which always navigated away
       // to the search results, so the document has to be opened again rather than relying on the
       // selection observer, which skips a selection whose path did not change.
@@ -833,12 +844,12 @@ Polymer({
     // the displayed document - browser back/forward, a breadcrumb, a deep link, a child document
     // opened from the main content area - left the highlight on the previous document
     // (WEBUI-2301). Follow the displayed document instead.
-    if (!this.queue || !doc?.uid) {
+    if (!this.queue || !(doc && doc.uid)) {
       return;
     }
     // The list is guarded because `currentDocument` is bound from the host and can be pushed in
     // before the template is stamped, and `queue` is set as an attribute on some search forms.
-    const list = this.$?.list;
+    const list = this.$ != null ? this.$.list : undefined;
     if (!list) {
       return;
     }
@@ -846,7 +857,7 @@ Polymer({
     // `iron-list.selectIndex` calls `clearSelection()` before selecting on a single-selection
     // list, so a redundant call would push a transient null through `selectedDocument` on every
     // navigation.
-    if (this.selectedDocument?.uid === doc.uid) {
+    if ((this.selectedDocument != null ? this.selectedDocument.uid : undefined) === doc.uid) {
       return;
     }
     const index = this._queueIndexOf(doc.uid, -1);
@@ -1029,8 +1040,9 @@ Polymer({
   },
 
   _rehydrateDirectorySuggestionLabel(suggestion) {
-    const selectivity = suggestion?.$?.s2?._selectivity;
-    const savedValue = suggestion?.value;
+    const selectivity =
+      suggestion != null && suggestion.$ != null && suggestion.$.s2 != null ? suggestion.$.s2._selectivity : undefined;
+    const savedValue = suggestion != null ? suggestion.value : undefined;
     let ids = [];
     if (Array.isArray(savedValue)) {
       ids = savedValue.filter((id) => id !== null && id !== undefined && id !== '');
@@ -1068,7 +1080,7 @@ Polymer({
 
   _queryDirectorySuggestionEntry(suggestion, id) {
     const resource = this.$.directoryEntry;
-    if (!resource || !suggestion?.directoryName) {
+    if (!resource || !(suggestion && suggestion.directoryName)) {
       return Promise.resolve(null);
     }
     resource.path = `/directory/${encodeURIComponent(suggestion.directoryName)}/${encodeURIComponent(String(id))}`;
@@ -1108,8 +1120,8 @@ Polymer({
 
   _syncQuickFiltersFromResults(e) {
     const quickFilters =
-      (Array.isArray(e?.detail?.value) && e.detail.value) ||
-      (Array.isArray(e?.target?.quickFilters) && e.target.quickFilters) ||
+      (Array.isArray(e != null && e.detail != null ? e.detail.value : undefined) && e.detail.value) ||
+      (Array.isArray(e != null && e.target != null ? e.target.quickFilters : undefined) && e.target.quickFilters) ||
       (this.results && Array.isArray(this.results.quickFilters) && this.results.quickFilters) ||
       [];
 

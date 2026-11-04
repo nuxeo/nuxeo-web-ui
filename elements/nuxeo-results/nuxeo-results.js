@@ -523,7 +523,7 @@ Polymer({
         const listItems = this.view.$.list.items;
         return Array.isArray(listItems) ? listItems : [];
       }
-    } catch {
+    } catch (e) {
       /* Unsafe read during attach/refresh; treat as no rows yet */
       return [];
     }
@@ -532,9 +532,9 @@ Polymer({
 
   _handleUserQuickFilterToggle(e) {
     let eventFilters = this.quickFilters;
-    if (Array.isArray(e?.detail?.value)) {
+    if (Array.isArray(e != null && e.detail != null ? e.detail.value : undefined)) {
       eventFilters = e.detail.value;
-    } else if (Array.isArray(e?.target?.quickFilters)) {
+    } else if (Array.isArray(e != null && e.target != null ? e.target.quickFilters : undefined)) {
       eventFilters = e.target.quickFilters;
     }
     const filters = this._cloneQuickFilters(eventFilters);
@@ -546,7 +546,7 @@ Polymer({
     if (this.nxProvider) {
       this.set('nxProvider.quickFilters', filters.slice());
     }
-    if (this.view?.quickFilters !== undefined) {
+    if ((this.view != null ? this.view.quickFilters : undefined) !== undefined) {
       this.view.quickFilters = filters.slice();
     }
 
@@ -827,7 +827,10 @@ Polymer({
   },
 
   _updateStorage() {
-    const userId = this.$.nxcon.user?.id || this.$.nxcon.user?.uid || this.$.nxcon.user?.username;
+    const userId =
+      (this.$.nxcon.user && this.$.nxcon.user.id) ||
+      (this.$.nxcon.user && this.$.nxcon.user.uid) ||
+      (this.$.nxcon.user != null ? this.$.nxcon.user.username : undefined);
     if (userId && this.name) {
       this._localStorageName = `${userId}-nuxeo-results-${this.name}`;
     }
@@ -885,7 +888,7 @@ Polymer({
       return settings;
     }
     // Only nuxeo-data-table exposes column capability flags; other views (e.g. grid) restore as-is.
-    if (view?.localName !== 'nuxeo-data-table') {
+    if ((view != null ? view.localName : undefined) !== 'nuxeo-data-table') {
       return settings;
     }
     // Without the settings panel capability, do not restore any persisted layout;
@@ -1090,7 +1093,7 @@ Polymer({
 
   _handleViewQuickFiltersSync(e) {
     let incomingFilters;
-    if (Array.isArray(e?.detail?.value)) {
+    if (Array.isArray(e != null && e.detail != null ? e.detail.value : undefined)) {
       incomingFilters = this._cloneQuickFilters(e.detail.value);
     } else if (this.nxProvider && Array.isArray(this.nxProvider.quickFilters)) {
       incomingFilters = this._cloneQuickFilters(this.nxProvider.quickFilters);
@@ -1109,7 +1112,7 @@ Polymer({
       if (this.nxProvider) {
         this.set('nxProvider.quickFilters', pendingFilters.slice());
       }
-      if (this.view?.quickFilters !== undefined) {
+      if ((this.view != null ? this.view.quickFilters : undefined) !== undefined) {
         this.view.quickFilters = pendingFilters.slice();
       }
       this._scheduleQuickFilterFetch(this._quickFiltersRequestId);
@@ -1187,7 +1190,7 @@ Polymer({
       if (this.nxProvider) {
         this.set('nxProvider.quickFilters', pendingFilters.slice());
       }
-      if (this.view?.quickFilters !== undefined) {
+      if ((this.view != null ? this.view.quickFilters : undefined) !== undefined) {
         this.view.quickFilters = pendingFilters.slice();
       }
     } finally {
@@ -1249,7 +1252,7 @@ Polymer({
       const decoded = textarea.value;
       const parsed = JSON.parse(decoded);
       return parsed;
-    } catch {
+    } catch (e) {
       /* Stored preference values are user data and may predate the current format; fall back to defaults */
       return {};
     }
@@ -1586,7 +1589,7 @@ Polymer({
   _getDocResultsPrefsKey() {
     // Use this.name as primary identifier (includes context like -trashed suffix)
     // Fall back to document.uid if name not available
-    const docId = this.name || this.document?.uid || 'nuxeo-results';
+    const docId = this.name || (this.document && this.document.uid) || 'nuxeo-results';
     return `documentPrefs.${docId}`;
   },
 
@@ -1616,7 +1619,7 @@ Polymer({
 
         const parsed = JSON.parse(decoded);
         return parsed;
-      } catch {
+      } catch (e) {
         /* Stored preference values are user data and may predate the current format; fall back to defaults */
         return null;
       }
