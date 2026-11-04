@@ -295,7 +295,7 @@ Polymer({
 
   _canUnpublishAll() {
     // rows not fetched yet are empty placeholders, so only the loaded publications can be checked
-    const loaded = (this.publishedDocs || []).filter((doc) => doc && doc.uid);
+    const loaded = (this.publishedDocs || []).filter((doc) => doc?.uid);
     return loaded.every((doc) => this._canUnpublish(doc));
   },
 

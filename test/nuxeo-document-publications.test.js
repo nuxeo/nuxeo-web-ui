@@ -28,6 +28,7 @@ suite('nuxeo-document-publications', () => {
     sinon.stub(element, 'i18n').callsFake((key) => key);
     sinon.stub(element, 'hasFacet').returns(false);
     sinon.stub(element, 'hasPermission').returns(false);
+    sinon.stub(element, 'urlFor').returns('#');
   });
 
   teardown(() => {
@@ -85,14 +86,20 @@ suite('nuxeo-document-publications', () => {
       element.publishedDocs = [];
       expect(element._canUnpublishAll()).to.be.true;
     });
+
+    test('should return true when publications are not set yet', () => {
+      element.publishedDocs = undefined;
+      expect(element._canUnpublishAll()).to.be.true;
+    });
+
+    test('should ignore empty entries', () => {
+      element.publishedDocs = [null, { uid: '1' }];
+      expect(element._canUnpublishAll()).to.be.false;
+    });
   });
 
   suite('Unpublish all button', () => {
     const getButton = () => element.shadowRoot.querySelector('paper-button.unpublish-all');
-
-    setup(() => {
-      sinon.stub(element, 'urlFor').returns('#');
-    });
 
     test('should not be displayed when the user cannot unpublish every publication', async () => {
       element.publishedDocs = [{ uid: '1' }];
