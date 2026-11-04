@@ -377,7 +377,17 @@ function reportUnfixable(blocks) {
   }
 }
 
-function place() {
+/*
+ * `paths` is whatever lint-staged appended - the staged feature files, and only those. Placement is
+ * restricted to them when they are given, because the hook in package.json `git add`s this manifest
+ * straight afterwards: a full scan would also place an untracked work-in-progress feature, stage the
+ * entry for it, and leave the commit naming a file it does not carry, which is precisely the
+ * "assigned to a shard but does not exist" failure `--check` reports in CI.
+ *
+ * `npm run format` passes nothing, which keeps the whole-directory scan it has always done.
+ */
+function place(paths = []) {
+  const only = new Set(paths.map((entry) => path.basename(entry)).filter((name) => name.endsWith('.feature')));
   const lines = fs.readFileSync(__filename, 'utf8').split('\n');
   const blocks = parseShardBlocks(lines);
 
@@ -401,6 +411,7 @@ function place() {
     .readdirSync(FEATURES_DIR)
     .filter((entry) => entry.endsWith('.feature'))
     .filter((feature) => !assigned.has(feature))
+    .filter((feature) => only.size === 0 || only.has(feature))
     .sort();
 
   /*
@@ -454,14 +465,15 @@ function place() {
   fs.writeFileSync(__filename, rewritten.join('\n'));
 }
 
-const [mode, value] = process.argv.slice(2);
+const args = process.argv.slice(2);
+const [mode, value] = args;
 
 switch (mode) {
   case '--check':
     check();
     break;
   case '--place':
-    place();
+    place(args.slice(1));
     break;
   case '--specs':
     console.log(specsFor(value));
