@@ -145,6 +145,44 @@ suite('nuxeo-document-publications', () => {
     });
   });
 
+  suite('pending Unpublish all check', () => {
+    const allowed = { entries: [{ uid: '1' }], isNextPageAvailable: false };
+    let resolveCheck;
+
+    setup(() => {
+      element.hasPermission.withArgs(sinon.match.any, 'WriteVersion').returns(true);
+      sinon.stub(element.$.table, 'fetch');
+      sinon.stub(element.$.unpublishAllProvider, 'fetch').returns(
+        new Promise((resolve) => {
+          resolveCheck = resolve;
+        }),
+      );
+      element.visible = true;
+      element.document = { uid: 'doc-1', isVersion: false };
+    });
+
+    test('should allow unpublishing all once the check completes for the current document', async () => {
+      resolveCheck(allowed);
+      await flush();
+      expect(element.canUnpublishAll).to.be.true;
+    });
+
+    test('should be ignored once the tab is hidden', async () => {
+      element.visible = false;
+      resolveCheck(allowed);
+      await flush();
+      expect(element.canUnpublishAll).to.be.false;
+    });
+
+    test('should be ignored while the source document of a version is resolved', async () => {
+      sinon.stub(element.$.srcDocOp, 'execute').returns(new Promise(() => {}));
+      element.document = { uid: 'ver-2', isVersion: true };
+      resolveCheck(allowed);
+      await flush();
+      expect(element.canUnpublishAll).to.be.false;
+    });
+  });
+
   suite('Unpublish all button', () => {
     const getButton = () => element.shadowRoot.querySelector('paper-button.unpublish-all');
 

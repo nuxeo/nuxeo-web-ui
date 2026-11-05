@@ -207,6 +207,7 @@ Polymer({
       if (!this.document.isVersion) {
         this._src = this.document;
       } else {
+        this._resetUnpublishAll();
         this.$.srcDocOp.execute().then((src) => {
           this._src = src;
         });
@@ -229,6 +230,8 @@ Polymer({
     if (this.visible && this._src) {
       this.$.table.fetch();
       this._checkUnpublishAll();
+    } else {
+      this._resetUnpublishAll();
     }
   },
 
@@ -305,9 +308,14 @@ Polymer({
     return docs && docs.length > 0;
   },
 
+  _resetUnpublishAll() {
+    this._unpublishAllCheck = null;
+    this.canUnpublishAll = false;
+  },
+
   _checkUnpublishAll() {
     // the table loads rows lazily, so every publication is fetched here before the bulk action is offered
-    this.canUnpublishAll = false;
+    this._resetUnpublishAll();
     const check = {};
     this._unpublishAllCheck = check;
     return this._canUnpublishAllFrom(0, check)
