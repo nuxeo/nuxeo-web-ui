@@ -123,7 +123,7 @@ Polymer({
   },
 
   _isAvailable(doc, blob) {
-    return this.hasPermission(doc, 'Write') && !this.isProxy(doc) && blob && !blob.appLinks?.length;
+    return this.hasPermission(doc, 'Write') && !this.isProxy(doc) && blob && !(blob.appLinks && blob.appLinks.length);
   },
 
   _go() {

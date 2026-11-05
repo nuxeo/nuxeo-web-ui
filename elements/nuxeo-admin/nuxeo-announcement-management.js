@@ -298,7 +298,7 @@ class AnnouncementManagement extends mixinBehaviors([I18nBehavior, NotifyBehavio
         if (requestId !== this._requestId) {
           return;
         }
-        const properties = response?.properties || {};
+        const properties = (response && response.properties) || {};
         this._exists = true;
         this._entry = {
           enabled: !!properties.enabled,
@@ -381,11 +381,15 @@ class AnnouncementManagement extends mixinBehaviors([I18nBehavior, NotifyBehavio
   }
 
   _isNotFound(err) {
-    return err?.status === 404 || err?.statusCode === 404 || err?.response?.status === 404;
+    return (
+      (err != null ? err.status : undefined) === 404 ||
+      (err != null ? err.statusCode : undefined) === 404 ||
+      (err != null && err.response != null ? err.response.status : undefined) === 404
+    );
   }
 
   _isAbortError(err) {
-    return err?.name === 'AbortError';
+    return (err != null ? err.name : undefined) === 'AbortError';
   }
 
   _notifyError(messageKey, err) {

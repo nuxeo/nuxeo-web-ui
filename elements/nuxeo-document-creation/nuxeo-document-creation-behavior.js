@@ -213,7 +213,12 @@ export const DocumentCreationBehavior = [
     },
 
     _isValidType(type) {
-      return type && this.subtypes?.some((t) => t._id === type._id && t.type === type.type && t.icon === type.icon);
+      return (
+        type &&
+        (this.subtypes != null
+          ? this.subtypes.some((t) => t._id === type._id && t.type === type.type && t.icon === type.icon)
+          : undefined)
+      );
     },
 
     _getTypeLabel(type) {

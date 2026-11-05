@@ -328,7 +328,7 @@ Polymer({
     // range. A keyboard activation can also reach us as a synthetic tap wrapping the original
     // keydown (nuxeo-default-search-results._triggerItemToggle), so the guard reads that source
     // event rather than the wrapper.
-    const source = e.type === 'tap' ? e.detail?.sourceEvent || {} : e;
+    const source = e.type === 'tap' ? (e.detail && e.detail.sourceEvent) || {} : e;
     if (typeof source.key !== 'string') {
       if (e.type === 'tap') {
         this._toogleSelect(e);
@@ -366,7 +366,7 @@ Polymer({
     // the host as a single labelled link makes it announce just the document title once; inner controls
     // still announce their own labels when focus lands on them. This is a screen-reader-only hint: it
     // adds no keyboard listener, so navigation and selection behavior are unchanged.
-    if (doc?.uid && doc.title) {
+    if (doc && doc.uid && doc.title) {
       this.setAttribute('role', 'link');
       this.setAttribute('aria-label', doc.title);
     } else {
