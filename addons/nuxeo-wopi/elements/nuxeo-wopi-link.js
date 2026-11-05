@@ -53,7 +53,9 @@ Polymer({
   },
 
   _appName() {
-    return this.blob?.wopi?.appName?.toLowerCase();
+    return this.blob != null && this.blob.wopi != null && this.blob.wopi.appName != null
+      ? this.blob.wopi.appName.toLowerCase()
+      : undefined;
   },
 
   _isAvailable() {
@@ -69,7 +71,7 @@ Polymer({
   },
 
   _wopiURL() {
-    const blobInfo = this.blob?.wopi;
+    const blobInfo = this.blob != null ? this.blob.wopi : undefined;
     if (!blobInfo) {
       return null;
     }
