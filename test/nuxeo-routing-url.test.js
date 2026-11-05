@@ -46,9 +46,19 @@ suite('restoreQueryDelimiter', () => {
     expect(restoreQueryDelimiter('#!/browse/default-domain/workspaces/ws/why%3Fdoc')).to.be.null;
   });
 
+  test('leaves a document name whose escaped `?` is followed by a `key=value` alone', () => {
+    expect(restoreQueryDelimiter('#!/browse/default-domain/workspaces/ws/why%3Fsection=1')).to.be.null;
+  });
+
   test('only restores the delimiter when a document name also carries an escaped `?`', () => {
     expect(restoreQueryDelimiter('#!/browse/default-domain/workspaces/ws/why%3Fdoc%3Fp=permissions')).to.equal(
       '#!/browse/default-domain/workspaces/ws/why%3Fdoc?p=permissions',
+    );
+  });
+
+  test('skips an escaped `?` inside a query value and restores the real delimiter', () => {
+    expect(restoreQueryDelimiter('#!/browse/ws/doc%3Fp=permissions&label=why%3Fnow&mode=1')).to.equal(
+      '#!/browse/ws/doc?p=permissions&label=why%3Fnow&mode=1',
     );
   });
 
