@@ -342,14 +342,14 @@ Polymer({
   // The binding also passes urlFor, which this method does not need: it makes the href recompute
   // once the router is known, since urlFor is only resolved from the element when called.
   _documentUrl(doc) {
-    if (!doc?.uid) {
+    if (!(doc && doc.uid)) {
       return undefined;
     }
     try {
       // Anything falsy has to stay undefined, which is what makes Polymer drop the attribute.
       // An empty string would be serialized into href="", a link back to the current page.
       return this.urlFor(doc) || undefined;
-    } catch {
+    } catch (e) {
       return undefined;
     }
   },
@@ -357,7 +357,7 @@ Polymer({
   handleClick(e) {
     // A tap event carries no modifier keys, they belong to the click it was generated from.
     // Direct callers (keyboard handling, tests) pass the original event instead.
-    const source = e.detail?.sourceEvent || e;
+    const source = (e.detail && e.detail.sourceEvent) || e;
     if (!this.selectionMode && (source.ctrlKey || source.shiftKey || source.metaKey || source.button === 1)) {
       // These are the clicks the browser turns into a new tab or window on the title link, so
       // leave them alone. Elsewhere in the row there is no link to follow.
@@ -418,7 +418,7 @@ Polymer({
   },
 
   _isPlaceholder(doc) {
-    return !doc?.uid;
+    return !(doc && doc.uid);
   },
 
   // The results view drives a roving tabindex over the rows from their index alone, so a row whose

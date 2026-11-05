@@ -45,7 +45,7 @@ limitations under the License.
 export const NuxeoAnonymousBehavior = {
   /** True when the connected user is the configured anonymous user. */
   _isAnonymousUser() {
-    return Boolean(this.currentUser?.isAnonymous);
+    return Boolean(this.currentUser && this.currentUser.isAnonymous);
   },
 
   /**
@@ -79,7 +79,7 @@ export const NuxeoAnonymousBehavior = {
     document.cookie = `nuxeo.start.url.fragment=${fragment}; path=/`;
     // Strip any trailing slash so a NUXEO_URL configured as `.../nuxeo/` doesn't yield `.../nuxeo//logout`.
     // A plain loop avoids the super-linear backtracking of a `/\/+$/` regex on adversarial inputs.
-    let baseUrl = this.$?.nxcon?.url || this.url || '';
+    let baseUrl = (this.$ && this.$.nxcon && this.$.nxcon.url) || this.url || '';
     while (baseUrl.endsWith('/')) {
       baseUrl = baseUrl.slice(0, -1);
     }
