@@ -1030,6 +1030,17 @@ suite('nuxeo-results', () => {
   });
 
   suite('Select All and Exclusions', () => {
+    test('select all checkbox is bound to the host state, not the view path', () => {
+      // `view` is assigned imperatively, so Polymer never re-evaluates a `view.selectAllActive`
+      // binding when the view notifies a change: the checkbox would keep a stale checked state
+      // once the results are refetched (WEBUI-2338). The host's own `selectAllActive` is kept in
+      // sync by `_selectAllActiveChanged` and reset by `_teardownView`.
+      const template = results.constructor.template.innerHTML;
+
+      expect(template).to.contain('_isChecked(selectAllActive, _excludedDocs)');
+      expect(template).to.not.contain('_isChecked(view.selectAllActive');
+    });
+
     test('_toggleSelectAll calls clearSelection when all selected', () => {
       const mockView = createMockView({ selectAllActive: true });
       results.view = mockView;
