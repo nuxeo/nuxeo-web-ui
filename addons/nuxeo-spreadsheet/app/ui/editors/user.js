@@ -29,7 +29,7 @@ function getUserLabel(entry) {
 
 class UserEditor extends Select2Editor {
   prepare(row, col, prop, td, originalValue, cellProperties) {
-    this._multiple = !!cellProperties?.multiple;
+    this._multiple = !!(cellProperties && cellProperties.multiple);
 
     const value = Array.isArray(originalValue)
       ? originalValue.map(this.prepareEntity.bind(this))
@@ -61,7 +61,7 @@ class UserEditor extends Select2Editor {
   saveValue(_val, ctrlDown) {
     let data = [];
 
-    if (this.$textarea?.data('select2')) {
+    if (this.$textarea && this.$textarea.data('select2')) {
       data = this.$textarea.select2('data') || [];
     }
 
@@ -122,7 +122,7 @@ class UserEditor extends Select2Editor {
 
   // onSelected invoked by select2-editor when user selects item — ensure cache is filled
   onSelected(evt) {
-    const data = evt.params?.data;
+    const data = evt.params != null ? evt.params.data : undefined;
     if (!data) return;
 
     const prefixedId = data.prefixed_id || (data['entity-type'] ? `${data['entity-type']}:${data.id}` : data.id);
