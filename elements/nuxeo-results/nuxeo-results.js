@@ -237,7 +237,7 @@ Polymer({
         </div>
         <div class="delegatedActions" hidden="[[!_displayDelegatedAction(displaySort, view)]]">
           <template is="dom-if" if="[[_displaySelectAll(view, view.selectAllEnabled)]]">
-            <nuxeo-checkmark checked="[[_isChecked(view.selectAllActive, _excludedDocs)]]" on-click="_toggleSelectAll">
+            <nuxeo-checkmark checked="[[_isChecked(selectAllActive, _excludedDocs)]]" on-click="_toggleSelectAll">
             </nuxeo-checkmark>
           </template>
           <template is="dom-if" if="[[_displaySort(displaySort, view)]]">
@@ -703,6 +703,11 @@ Polymer({
     this.unlisten(oldView, 'quick-filters-changed', '_handleViewQuickFiltersSync');
     this.unlisten(oldView, 'select-all-active-changed', '_selectAllActiveChanged');
     this.unlisten(oldView, '_excluded-items-changed', '_excludedDocsChanged');
+    // Clear selection on the view being torn down so select-all state does not leak when
+    // switching display modes (e.g. table → queue → table after leaving Search).
+    if (typeof oldView.clearSelection === 'function') {
+      oldView.clearSelection();
+    }
     // we need to clear the selected items and selection (removes selection synchronization)
     if (this.selectedItems) {
       this.selectedItems = [];
