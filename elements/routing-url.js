@@ -18,12 +18,25 @@ limitations under the License.
 
 const ENCODED_QUESTION_MARK = '%3f';
 
+/** One `key=value` pair of a route's query. `router.browse()` escapes `&`, `=` and `/` in values. */
+const QUERY_PAIR = /^([^=&/]+)=[^&/]*$/;
+
+/** The only query parameter Web UI puts in a route: the document tab (`?p=permissions`). */
+const TAB_PARAMETER = 'p';
+
 /**
- * What a route's query looks like once the delimiter is put back: a `key=value` pair with no
- * intervening `/`. Requiring it keeps an escaped `?` that belongs to a document name — Nuxeo allows
- * one, and `router.browse()` escapes it exactly the same way — from being read as the delimiter.
+ * Whether what follows a candidate delimiter is the query of a Web UI route: every `&`-separated
+ * part is a `key=value` pair, and one of them is the tab parameter.
+ *
+ * Both halves of that test matter, because an escaped `?` inside a document name — Nuxeo allows one,
+ * and `router.browse()` escapes it to `%3F` exactly like the corrupted delimiter — would otherwise be
+ * mistaken for the delimiter. Requiring well-formed pairs keeps the scan from stopping on an escaped
+ * `?` inside a query *value*, and requiring `p` keeps a document named e.g. `why?section=1` intact.
  */
-const QUERY_SHAPED = /^[^=/]*=/;
+function isRouteQuery(candidate) {
+  const pairs = candidate.split('&').map((pair) => QUERY_PAIR.exec(pair));
+  return pairs.every((pair) => pair !== null) && pairs.some(([, key]) => key === TAB_PARAMETER);
+}
 
 /**
  * WEBUI-2376: repairs the query delimiter of a Web UI route that came back percent-encoded.
@@ -51,7 +64,7 @@ export function restoreQueryDelimiter(route) {
   const probe = route.toLowerCase();
   for (let i = probe.lastIndexOf(ENCODED_QUESTION_MARK); i > 0; i = probe.lastIndexOf(ENCODED_QUESTION_MARK, i - 1)) {
     const query = route.slice(i + ENCODED_QUESTION_MARK.length);
-    if (QUERY_SHAPED.test(query)) {
+    if (isRouteQuery(query)) {
       return `${route.slice(0, i)}?${query}`;
     }
   }
