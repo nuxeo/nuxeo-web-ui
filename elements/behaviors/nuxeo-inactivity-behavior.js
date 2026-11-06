@@ -114,7 +114,7 @@ export const NuxeoInactivityBehavior = {
       return;
     }
     this._lastKeepAlive = now;
-    const keepAlive = this.$?.keepAlive;
+    const keepAlive = this.$ != null ? this.$.keepAlive : undefined;
     if (keepAlive && typeof keepAlive.execute === 'function') {
       keepAlive.execute().catch(() => {
         // A failure here (e.g. the session already expired) is handled by the 401 -> logout redirect.
@@ -153,7 +153,7 @@ export const NuxeoInactivityBehavior = {
 
   // Another tab recorded activity — re-arm this (possibly idle) tab without re-broadcasting.
   _onInactivityStorage(e) {
-    if (e?.key !== INACTIVITY_ACTIVITY_KEY || !e.newValue || !this._inactivityTimeoutMs) {
+    if ((e != null ? e.key : undefined) !== INACTIVITY_ACTIVITY_KEY || !e.newValue || !this._inactivityTimeoutMs) {
       return;
     }
     // Re-arm from the REMOTE activity timestamp (when the other tab was actually active), not this event's
@@ -290,7 +290,7 @@ export const NuxeoInactivityBehavior = {
     // Only persist a page we can actually return later: without a resolved user id we couldn't match the
     // saved URL to its owner on restore, so it would be consumed but never navigated. Skip the save instead
     // of writing an unrestorable `{ user: undefined }` payload.
-    const userId = this.currentUser?.id;
+    const userId = this.currentUser != null ? this.currentUser.id : undefined;
     if (!userId) {
       return;
     }

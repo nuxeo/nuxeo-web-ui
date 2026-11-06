@@ -71,7 +71,7 @@ export const NuxeoScrollRestoreBehavior = {
     if (!v) {
       return [];
     }
-    const listItems = v.$?.list?.items;
+    const listItems = v.$ != null && v.$.list != null ? v.$.list.items : undefined;
     if (Array.isArray(listItems) && listItems.length) {
       return listItems;
     }
@@ -94,7 +94,7 @@ export const NuxeoScrollRestoreBehavior = {
   _srSaveAnchor(view) {
     const v = view || this.view;
     const name = this.name;
-    if (!name || !v?.$?.list) {
+    if (!name || !(v && v.$ && v.$.list)) {
       return;
     }
     const items = this._srItems(v);
@@ -110,7 +110,7 @@ export const NuxeoScrollRestoreBehavior = {
     if (typeof index !== 'number' || index < 0) {
       return;
     }
-    _setAnchor(name, { uid: items[index]?.uid || null, index });
+    _setAnchor(name, { uid: (items[index] && items[index].uid) || null, index });
   },
 
   /**
@@ -204,7 +204,7 @@ export const NuxeoScrollRestoreBehavior = {
     this._srDisarmScrollTracking();
     // Guard against out-of-order deferred calls: only track the view that is still
     // the active one, so a fast display-mode/view swap can't attach to a stale view.
-    if (view !== this.view || !view?.$?.list || typeof view.$.list.addEventListener !== 'function') {
+    if (view !== this.view || !(view && view.$ && view.$.list) || typeof view.$.list.addEventListener !== 'function') {
       return;
     }
     const list = view.$.list;
@@ -233,12 +233,12 @@ export const NuxeoScrollRestoreBehavior = {
     }
     // Cancel any queued save so a late debounced callback can't overwrite the
     // anchor with a stale index after the view was swapped or torn down.
-    if (this._srScrollDebouncer?.isActive?.()) {
+    if (this._srScrollDebouncer && this._srScrollDebouncer.isActive && this._srScrollDebouncer.isActive()) {
       this._srScrollDebouncer.cancel();
     }
     // Cancel any pending restore verification so it can't call scrollToIndex on a
     // view that has since been detached or replaced.
-    if (this._srVerifyDebouncer?.isActive?.()) {
+    if (this._srVerifyDebouncer && this._srVerifyDebouncer.isActive && this._srVerifyDebouncer.isActive()) {
       this._srVerifyDebouncer.cancel();
     }
     this._srScrollList = null;

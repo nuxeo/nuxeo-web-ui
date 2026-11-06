@@ -101,8 +101,10 @@ class DirectoryEditor extends Select2Editor {
             return {
               'entity-type': 'directoryEntry',
               directoryName: this.directoryName,
-              id: e.id || (e.properties && e.properties.id) || e.properties?.id,
-              properties: { id: e.id || (e.properties && e.properties.id) || e.properties?.id },
+              id: e.id || (e.properties && e.properties.id) || (e.properties != null ? e.properties.id : undefined),
+              properties: {
+                id: e.id || (e.properties && e.properties.id) || (e.properties != null ? e.properties.id : undefined),
+              },
             };
           });
           value = this.column.multiple ? entries : entries[0] || null;
@@ -124,14 +126,14 @@ class DirectoryEditor extends Select2Editor {
           const entry = {
             'entity-type': 'directoryEntry',
             directoryName: this.directoryName,
-            id: value.id || value.properties?.id,
-            properties: { id: value.id || value.properties?.id },
+            id: value.id || (value.properties != null ? value.properties.id : undefined),
+            properties: { id: value.id || (value.properties != null ? value.properties.id : undefined) },
           };
           value = this.column.multiple ? [entry] : entry;
           return super.saveValue([[value]], ctrlDown);
         }
         // unknown object shape — try to extract id
-        const maybeId = value.id || value.properties?.id;
+        const maybeId = value.id || (value.properties != null ? value.properties.id : undefined);
         if (maybeId) ids = [maybeId];
         else ids = [];
       } else {
@@ -161,7 +163,7 @@ class DirectoryEditor extends Select2Editor {
   getValue() {
     let data = [];
 
-    if (this.$textarea?.data('select2')) {
+    if (this.$textarea && this.$textarea.data('select2')) {
       data = this.$textarea.select2('data') || [];
     }
 
@@ -183,7 +185,7 @@ class DirectoryEditor extends Select2Editor {
   // When a dbl10n entry is selected we'll cache the labels to be used
   // by our renderer
   onSelected(evt) {
-    const data = evt.params?.data;
+    const data = evt.params != null ? evt.params.data : undefined;
     if (!data) return;
 
     const id = data.computedId || data.id;
@@ -270,7 +272,7 @@ function DirectoryRenderer(instance, td, row, col, prop, value, cellProperties) 
     const labels = instance.getCellMeta(row, col)._labels;
     arguments[5] = value
       .map((v) => {
-        const key = v.computedId || v.properties?.id || v.id || v;
+        const key = v.computedId || (v.properties && v.properties.id) || v.id || v;
         return labels && labels[key] ? labels[key] : getEntryLabel(v, lang);
       })
       .join(','); // jshint ignore:line

@@ -58,12 +58,12 @@ export const Performance = {
     // `performance.timing` exposed, so the difference keeps the fetchStart baseline the metric has
     // always used. Reporting loadEventEnd on its own would silently fold in redirect and unload
     // time. loadEventEnd stays 0 until the load event has fired.
-    return navigation?.loadEventEnd ? Math.round(navigation.loadEventEnd - navigation.fetchStart) : null;
+    return navigation && navigation.loadEventEnd ? Math.round(navigation.loadEventEnd - navigation.fetchStart) : null;
   },
 
   getDomContentLoaded() {
     const navigation = this.getNavigationTiming();
-    return navigation?.domContentLoadedEventEnd
+    return navigation && navigation.domContentLoadedEventEnd
       ? Math.round(navigation.domContentLoadedEventEnd - navigation.fetchStart)
       : null;
   },
