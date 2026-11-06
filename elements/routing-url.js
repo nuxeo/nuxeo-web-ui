@@ -30,8 +30,8 @@ const TAB_PARAMETER = 'p';
  *
  * Both halves of that test matter, because an escaped `?` inside a document name — Nuxeo allows one,
  * and `router.browse()` escapes it to `%3F` exactly like the corrupted delimiter — would otherwise be
- * mistaken for the delimiter. Requiring well-formed pairs keeps the scan from stopping on an escaped
- * `?` inside a query *value*, and requiring `p` keeps a document named e.g. `why?section=1` intact.
+ * mistaken for the delimiter. Requiring well-formed pairs rejects `why%3Fdoc`, and requiring `p`
+ * rejects `why%3Fsection=1`, so both documents keep resolving from their own valid links.
  */
 function isRouteQuery(candidate) {
   const pairs = candidate.split('&').map((pair) => QUERY_PAIR.exec(pair));
@@ -59,10 +59,11 @@ export function restoreQueryDelimiter(route) {
   if (typeof route !== 'string' || !route.startsWith('#!') || route.includes('?')) {
     return null;
   }
-  // Scan from the end, because when a document name carries an escaped `?` of its own only the
-  // trailing candidate is the delimiter. The leading `#!` means index 0 is never a candidate.
+  // Take the FIRST candidate whose remainder is a complete route query. A later candidate can be an
+  // escaped `?` sitting inside a query value — `doc%3Flabel=why%3Fsection=1&p=view` — and its own
+  // remainder still parses as a query, so accepting it would leave the real delimiter in the path.
   const probe = route.toLowerCase();
-  for (let i = probe.lastIndexOf(ENCODED_QUESTION_MARK); i > 0; i = probe.lastIndexOf(ENCODED_QUESTION_MARK, i - 1)) {
+  for (let i = probe.indexOf(ENCODED_QUESTION_MARK); i >= 0; i = probe.indexOf(ENCODED_QUESTION_MARK, i + 1)) {
     const query = route.slice(i + ENCODED_QUESTION_MARK.length);
     if (isRouteQuery(query)) {
       return `${route.slice(0, i)}?${query}`;
