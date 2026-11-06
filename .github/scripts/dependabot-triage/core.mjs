@@ -49,7 +49,7 @@ export function textOf(node) {
 
 export function owningScope(issue) {
   const text = textOf(issue.fields.description);
-  return text.split(/\n### (?:Related|Separate|Independent|Notes|Definition)/i)[0];
+  return text.split(/\n### (?:Related|Separate|Independent|Notes|Definition|Out[ -]of[ -]scope)/i)[0];
 }
 
 export function matchFinding(finding, issues) {
@@ -117,7 +117,7 @@ export function assessLock(finding, lock, manifest, patchMetadata) {
   const evidence = [];
   for (const [instance, value] of affected) {
     const parents = Object.entries(lock.packages).flatMap(([parent, metadata]) =>
-      ['dependencies', 'devDependencies', 'optionalDependencies'].flatMap((field) => {
+      ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies'].flatMap((field) => {
         const declared = metadata[field]?.[finding.package];
         return declared && resolveDependency(lock.packages, parent, finding.package) === instance
           ? [{ parent: parent || '(root)', declared }]
@@ -161,7 +161,12 @@ export function groupFindings(findings) {
     // Affected version lines and target must agree: no global major override or unrelated package batching.
     const major = (semver.validRange(finding.range) ? semver.minVersion(finding.range)?.major : null) ?? 'unknown';
     const blocker = blocked ? hash(branches.filter((b) => b.blocked).map((b) => b.reason)).slice(0, 8) : '';
-    const key = stableKey(finding.repository, finding.package, `${major}:${blocker}`, blocked);
+    const key = stableKey(
+      finding.repository,
+      finding.package,
+      `${major}:${blocked ? blocker : finding.patched}`,
+      blocked,
+    );
     const id = key;
     if (!groups.has(id))
       groups.set(id, { key, repository: finding.repository, package: finding.package, blocked, findings: [] });

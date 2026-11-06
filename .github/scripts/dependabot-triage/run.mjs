@@ -2,7 +2,18 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { assessLock, card, changedSince, description, highest, matchFinding, normalize, textOf, adf } from './core.mjs';
+import {
+  assessLock,
+  card,
+  changedSince,
+  description,
+  highest,
+  matchFinding,
+  normalize,
+  textOf,
+  adf,
+  owningScope,
+} from './core.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const directory = process.env.TRIAGE_STATE_DIR || path.join(process.env.RUNNER_TEMP || '/tmp', 'dependabot-triage');
@@ -162,9 +173,52 @@ async function gate() {
   console.log(shouldRun ? 'Triage is due.' : 'No one-time triage is due.');
 }
 
+async function recoverNotification(notification) {
+  if (!notification.snapshot || !notification.payload)
+    throw new Error('Prior notification has no immutable snapshot; manual recovery is required.');
+  state.active.recovery = true;
+  const original = structuredClone(notification.snapshot);
+  await save('state.json', state);
+  await save('report.json', original);
+  await render(original);
+  await save('teams-payload.json', notification.payload);
+  console.log('Recovering only the original notification; new alerts wait for a separate scan.');
+}
+
 async function scan() {
-  if (state.active?.notification?.status === 'confirmed' && state.active.originRun !== process.env.GITHUB_RUN_ID) {
-    state.active = null; // A delivered incomplete scan is history; a later scheduled run gets a fresh summary.
+  if (state.active && state.active.mode !== mode)
+    throw new Error('Pending run uses another execution mode; resolve it before changing modes');
+  const completed = state.completedRuns?.[`${mode}:${process.env.GITHUB_RUN_ID}`];
+  if (completed) {
+    if (state.active) throw new Error('Another notification cycle is pending; cannot replay a completed run.');
+    state.active = { mode, recovery: true, notification: completed };
+    await recoverNotification(completed);
+    return;
+  }
+  state.createIntents ||= {};
+  // Migrate older pre-write journals before retiring any notification cycle.
+  if (state.active?.mode === 'automatic') {
+    for (const key of state.active.plannedKeys || []) state.createIntents[key] ||= { attempt: state.active.attempt };
+  }
+  const notification = state.active?.notification;
+  if (notification?.status === 'reserved' && notification.attempt !== runIdentity) {
+    if (!notification.snapshot || !notification.payload)
+      throw new Error('Prior notification has no immutable snapshot; manual recovery is required.');
+    const resolution = process.env.DELIVERY_RESOLUTION;
+    if (resolution === 'delivered' && process.env.DELIVERY_MESSAGE_URL?.startsWith('https://teams.microsoft.com/')) {
+      notification.status = 'confirmed';
+      notification.receipt = process.env.DELIVERY_MESSAGE_URL;
+    } else if (resolution === 'not-delivered') notification.attempt = runIdentity;
+    else throw new Error('Prior Teams delivery is uncertain; verify it and provide a delivery resolution.');
+    await recoverNotification(notification);
+    return;
+  }
+  if (notification?.status === 'confirmed') {
+    if (notification.snapshot && !notification.snapshot.failures.length) {
+      await recoverNotification(notification);
+      return;
+    }
+    state.active = null;
   }
   const started = state.active?.started || new Date().toISOString();
   const run = {
@@ -181,6 +235,7 @@ async function scan() {
   };
   if (state.active && state.active.mode !== mode)
     throw new Error('Pending run uses another execution mode; resolve it before changing modes');
+  const blockerCandidates = new Map();
   try {
     const date = new Date().toLocaleDateString('en-CA', { timeZone: config.timezone });
     const quarter = `${date.slice(0, 4)}-Q${Math.ceil(Number(date.slice(5, 7)) / 3)}`;
@@ -218,32 +273,9 @@ async function scan() {
             ticket: match.ticket.key,
             evidence: `${finding.url}, ${finding.ghsa}, ${finding.manifest}; current severity adequate.`,
           });
-          // Reassess no-patch blockers every run, not just timestamp-window changes.
-          const text = textOf(match.ticket.fields.description);
-          if (
-            !finding.patched ||
-            match.ticket.fields.status.name === config.holdStatus ||
-            /blocked.*publish|publishing.*block|Blocking dependency|Blocker and recheck criteria/i.test(text)
-          ) {
-            run.blockers.push({
-              ticket: match.ticket.key,
-              severity: match.ticket.fields[config.severityField].value.toLowerCase(),
-              package: finding.package,
-              blocker: !finding.patched
-                ? 'No patched release listed; reassess mitigation/upstream.'
-                : 'Existing remediation blocker; recheck the ticket, compatible parent upgrades and upstream publishing.',
-              status: match.ticket.fields.status.name,
-              existing: true,
-            });
-          }
-          if (finding.patched && match.ticket.fields.status.name === config.holdStatus) {
-            const assessment = await branchEvidence(finding, repo);
-            if (Object.values(assessment).every((e) => !e.blocked && !e.review)) {
-              run.review.push(
-                `${match.ticket.key}: a usable patch candidate is now available; review resuming from On Hold.`,
-              );
-            }
-          }
+          const candidate = blockerCandidates.get(match.ticket.key) || { ticket: match.ticket, findings: [] };
+          candidate.findings.push({ finding, repo });
+          blockerCandidates.set(match.ticket.key, candidate);
           continue;
         }
         if (match.kind === 'closed' || match.kind === 'ambiguous') {
@@ -285,35 +317,62 @@ async function scan() {
     }
     const { groupFindings } = await import('./core.mjs');
     run.groups = groupFindings(run.newFindings);
-    run.blockers = run.blockers.filter((g, i, all) => all.findIndex((a) => a.ticket === g.ticket) === i);
-    if (state.active?.notification?.status === 'reserved' && state.active.notification.attempt !== runIdentity) {
-      if (
-        process.env.DELIVERY_RESOLUTION === 'delivered' &&
-        process.env.DELIVERY_MESSAGE_URL?.startsWith('https://teams.microsoft.com/')
-      ) {
-        state.active.notification.status = 'confirmed';
-        state.active.notification.receipt = process.env.DELIVERY_MESSAGE_URL;
-      } else if (process.env.DELIVERY_RESOLUTION === 'not-delivered') state.active.notification = null;
-      else
-        run.failures.push(
-          'Prior Teams delivery is uncertain. Verify the Run ID in Teams, then resolve manually; no automatic resend.',
+    for (const { ticket, findings } of blockerCandidates.values()) {
+      const scope = owningScope(ticket);
+      const candidate =
+        ticket.fields.status.name === config.holdStatus ||
+        findings.some(({ finding }) => !finding.patched) ||
+        /blocked.*publish|publishing.*block|Blocking dependency|Blocker and recheck criteria/i.test(scope);
+      if (!candidate) continue;
+      const referenced = [...scope.matchAll(/https:\/\/github\.com\/[^\s)]+\/security\/dependabot\/\d+/g)].map(
+        (m) => m[0],
+      );
+      const complete = referenced.every((url) => findings.some(({ finding }) => finding.url === url));
+      const assessments = await Promise.all(
+        findings.map(async ({ finding, repo }) => {
+          return {
+            finding,
+            evidence: await branchEvidence(finding, repo),
+          };
+        }),
+      );
+      const allBlocked =
+        complete &&
+        assessments.every(
+          ({ evidence }) =>
+            Object.values(evidence).some((e) => e.blocked) && !Object.values(evidence).some((e) => e.review),
         );
+      if (!allBlocked) {
+        run.review.push(
+          `${ticket.key}: blocker is no longer established ticket-wide; review resuming or splitting scope. No automatic On Hold transition.`,
+        );
+        continue;
+      }
+      run.blockers.push({
+        ticket: ticket.key,
+        severity: ticket.fields[config.severityField].value.toLowerCase(),
+        package: [...new Set(findings.map(({ finding }) => finding.package))].join(', '),
+        blocker: assessments
+          .flatMap(({ finding, evidence }) =>
+            Object.entries(evidence).map(([branch, e]) => `${finding.url} (${branch}): ${e.reason}`),
+          )
+          .join('\n'),
+        status: ticket.fields.status.name,
+        existing: true,
+      });
     }
   } catch (e) {
     run.failures.push(e.message);
   }
-  const uncertainGroups =
-    state.active?.attempt && state.active.attempt !== runIdentity
-      ? [...new Set([...(state.active.uncertainGroups || []), ...(state.active.plannedKeys || [])])]
-      : state.active?.uncertainGroups || [];
+  if (mode === 'automatic') {
+    for (const group of run.groups)
+      state.createIntents[group.key] ||= { attempt: runIdentity, findingIds: group.findings.map((f) => f.id) };
+  }
   state.active = {
-    ...state.active,
-    attempt: runIdentity,
-    plannedKeys: run.groups.map((group) => group.key),
-    uncertainGroups,
     id: run.id,
     started,
     mode,
+    attempt: runIdentity,
     originRun: process.env.GITHUB_RUN_ID,
     oneTimeAt: process.env.SCHEDULE_TRIGGER === '30 * * * *' ? process.env.TRIAGE_ONE_TIME_AT : state.active?.oneTimeAt,
   };
@@ -331,6 +390,23 @@ async function reconcileGroup(group, repo) {
   const exact = issues.filter((i) => textOf(i.fields.description).includes(`Triage remediation key: ${group.key}`));
   if (exact.length > 1) throw new Error(`Multiple tickets for remediation key ${group.key}; review required`);
   if (exact.length) return exact[0];
+  const known = state.createIntents[group.key]?.ticket;
+  if (known) return jira(`/issue/${known}?fields=summary,description,status,${config.severityField}`);
+  const fresh = [];
+  for (const finding of group.findings) {
+    const matches = await search(`project = ${repo.project} AND text ~ "${finding.ghsa}" ORDER BY updated DESC`);
+    fresh.push(...matches.filter((m) => !fresh.some((i) => i.key === m.key)));
+  }
+  const coverage = group.findings.map((finding) => matchFinding(finding, fresh));
+  if (coverage.some((match) => match.kind !== 'new')) {
+    if (state.createIntents[group.key]?.attempt === runIdentity) {
+      delete state.createIntents[group.key];
+      await save('state.json', state);
+    }
+    throw new Error(
+      `Fresh alert/advisory coverage found for ${group.key}; review existing human scope before creating.`,
+    );
+  }
   return null;
 }
 async function hold(ticket, reason, key) {
@@ -368,12 +444,20 @@ async function apply() {
   }
   if (process.env.ALLOW_AUTOMATIC !== 'true' || process.env.GITHUB_REF_NAME !== process.env.DEFAULT_BRANCH)
     throw new Error('Automatic writes require explicit approval and the default branch');
-  if (report.failures.length) return;
+  if (report.failures.length || state.active?.recovery) return;
   try {
+    for (const [key, intent] of Object.entries(state.createIntents || {})) {
+      if (intent.ticket || intent.attempt === runIdentity) continue;
+      const matches = await search(`text ~ "${key}" ORDER BY created ASC`);
+      const exact = matches.filter((i) => textOf(i.fields.description).includes(`Triage remediation key: ${key}`));
+      if (exact.length !== 1) throw new Error(`Uncertain prior create for ${key}; reconcile Jira before retrying.`);
+      intent.ticket = exact[0].key;
+      await save('state.json', state);
+    }
     for (const group of report.groups) {
       const repo = config.repositories.find((r) => r.name === group.repository);
       let existing = await reconcileGroup(group, repo);
-      if (!existing && state.active.uncertainGroups?.includes(group.key))
+      if (!existing && state.createIntents[group.key]?.attempt !== runIdentity)
         throw new Error(`Uncertain prior create for ${group.key}; verify Jira indexing before any retry.`);
       if (existing?.fields.status.statusCategory.key === 'done')
         throw new Error(`Closed ticket ${existing.key} still matches; review before updating`);
@@ -417,6 +501,8 @@ async function apply() {
           },
         });
         ticket = result.key;
+        state.createIntents[group.key].ticket = ticket;
+        await save('state.json', state);
         group.action = 'created';
       }
       group.ticket = ticket;
@@ -443,7 +529,7 @@ async function apply() {
         );
     }
     for (const blocker of report.blockers) {
-      if (blocker.status !== config.holdStatus) await hold(blocker.ticket, blocker.blocker, blocker.ticket);
+      await hold(blocker.ticket, blocker.blocker, blocker.ticket);
       blocker.status = config.holdStatus;
     }
   } catch (e) {
@@ -499,7 +585,12 @@ async function prepareNotification() {
   if (!report || !state.active) throw new Error('No active report');
   if (state.active.notification?.status === 'confirmed') return;
   if (state.active.notification?.status === 'reserved' && state.active.notification.attempt !== runIdentity) return;
-  state.active.notification = { status: 'reserved', attempt: runIdentity };
+  state.active.notification = {
+    status: 'reserved',
+    attempt: runIdentity,
+    snapshot: structuredClone(report),
+    payload: await read('teams-payload.json', null),
+  };
   await save('state.json', state);
 }
 async function notify() {
@@ -519,11 +610,11 @@ async function notify() {
   const response = await fetch(webhook, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: await fs.readFile(path.join(directory, 'teams-payload.json'), 'utf8'),
+    body: JSON.stringify(delivery.payload),
     signal: AbortSignal.timeout(60000),
   });
   if (!response.ok) throw new Error(`Teams delivery uncertain: HTTP ${response.status}; do not blindly retry`);
-  state.active.notification = { status: 'confirmed', attempt: runIdentity, acceptedAt: new Date().toISOString() };
+  state.active.notification = { ...delivery, status: 'confirmed', acceptedAt: new Date().toISOString() };
   await save('state.json', state);
   console.log('Dedicated Teams webhook accepted the summary.');
 }
@@ -531,8 +622,14 @@ async function finish() {
   if (!report) throw new Error('Report missing');
   const deliveryComplete = mode === 'preview' || state.active?.notification?.status === 'confirmed';
   if (!report.failures.length && deliveryComplete) {
-    state.checkpoints[mode] = report.started; // scan start, not finish: trigger-day alerts remain eligible.
-    state.fingerprints[mode] = Object.fromEntries(report.alerts.map((a) => [a.id, a.fingerprint]));
+    if (!state.checkpoints[mode] || Date.parse(report.started) >= Date.parse(state.checkpoints[mode])) {
+      state.checkpoints[mode] = report.started; // scan start, not finish: trigger-day alerts remain eligible.
+      state.fingerprints[mode] = Object.fromEntries(report.alerts.map((a) => [a.id, a.fingerprint]));
+    }
+    if (mode === 'automatic' && process.env.GITHUB_RUN_ID) {
+      state.completedRuns ||= {};
+      state.completedRuns[`${mode}:${process.env.GITHUB_RUN_ID}`] = state.active.notification;
+    }
     if (state.active?.oneTimeAt) state.oneTimeCompleted = state.active.oneTimeAt;
     state.active = null;
     await save('state.json', state);
