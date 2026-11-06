@@ -1609,3 +1609,31 @@ test('CLI automatic triage cannot create a duplicate when an exact alert link ha
     fs.rmSync(folder, { recursive: true, force: true });
   }
 });
+
+test('fresh pre-create lookup catches a URL-only ticket added after the scan', () => {
+  const { folder, phase, hook, first } = createFixture();
+  try {
+    const f = first.findings[0];
+    seed(folder, 'report.json', { ...report(), alerts: [f], newFindings: [f], groups: [first] });
+    const ticket = issue(f, { description: f.url });
+    fs.writeFileSync(
+      hook,
+      `globalThis.fetch=async(url,options={})=>{
+      if(String(url).endsWith('/search/jql')) {
+        const jql=JSON.parse(options.body).jql;
+        const includesUrl=jql.includes(${JSON.stringify(JSON.stringify(`"${f.url}"`))});
+        return Response.json({issues:includesUrl?[${JSON.stringify(ticket)}]:[],isLast:true});
+      }
+      throw new Error('Unexpected write or request: '+String(url));
+    };`,
+    );
+    assert.equal(phase('apply', automatic).status, 0);
+    const saved = JSON.parse(fs.readFileSync(path.join(folder, 'report.json')));
+    assert.match(saved.failures[0], /Fresh alert\/advisory coverage/);
+    assert.equal(saved.groups[0].action, undefined);
+    assert.deepEqual(JSON.parse(fs.readFileSync(path.join(folder, 'state.json'))).createIntents, {});
+    assert.equal(fs.existsSync(path.join(folder, 'durable-journal.json')), false);
+  } finally {
+    fs.rmSync(folder, { recursive: true, force: true });
+  }
+});

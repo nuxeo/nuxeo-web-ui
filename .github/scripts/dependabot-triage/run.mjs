@@ -96,6 +96,10 @@ async function search(jql) {
   } while (token);
   return issues;
 }
+function findingQuery(project, finding) {
+  // Jira phrase quoting keeps URL punctuation literal; exact ownership is verified after retrieval.
+  return `project = ${project} AND (text ~ "${finding.ghsa}" OR text ~ ${JSON.stringify(`"${finding.url}"`)}) ORDER BY updated DESC`;
+}
 async function file(repo, branch, filename) {
   let result = await gh(`/repos/${repo}/contents/${filename}?ref=${encodeURIComponent(branch)}`);
   if (result.encoding !== 'base64' && result.sha) result = await gh(`/repos/${repo}/git/blobs/${result.sha}`);
@@ -331,7 +335,7 @@ async function scan() {
         run.alerts.push(finding);
         let match = matchFinding(finding, issues);
         if (match.kind === 'new') {
-          const prior = await search(`project = ${repo.project} AND text ~ "${finding.ghsa}" ORDER BY updated DESC`);
+          const prior = await search(findingQuery(repo.project, finding));
           match = matchFinding(finding, [...issues, ...prior.filter((p) => !issues.some((i) => i.key === p.key))]);
         }
         if (match.kind === 'covered') {
@@ -553,7 +557,7 @@ async function reconcileGroup(group, repo) {
   if (known) return jira(`/issue/${known}?fields=summary,description,status,${config.severityField}`);
   const fresh = [];
   for (const finding of group.findings) {
-    const matches = await search(`project = ${repo.project} AND text ~ "${finding.ghsa}" ORDER BY updated DESC`);
+    const matches = await search(findingQuery(repo.project, finding));
     fresh.push(...matches.filter((m) => !fresh.some((i) => i.key === m.key)));
   }
   const coverage = group.findings.map((finding) => matchFinding(finding, fresh));
