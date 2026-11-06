@@ -38,7 +38,6 @@ jobs:
     timeout-minutes: 45
     env:
       TRIAGE_RUN_NUMBER: ${{ github.run_number }}
-      TRIAGE_STATE_DIR: ${{ runner.temp }}/dependabot-triage
       TRIAGE_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || vars.DEPENDABOT_TRIAGE_MODE || 'preview' }}
       ALLOW_AUTOMATIC: ${{ vars.DEPENDABOT_TRIAGE_ALLOW_AUTOMATIC || 'false' }}
       DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
@@ -55,6 +54,8 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 24
+      - name: Set runner-local state directory
+        run: echo "TRIAGE_STATE_DIR=$RUNNER_TEMP/dependabot-triage" >> "$GITHUB_ENV"
       - name: Install isolated triage dependencies
         run: npm ci --ignore-scripts --prefix .github/scripts/dependabot-triage
       - name: Test triage invariants
