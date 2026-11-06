@@ -140,38 +140,49 @@ async function restore() {
   const defaultBranch = env('DEFAULT_BRANCH');
   const workflow = await gh(`/repos/${repo}/actions/workflows/dependabot-triage.yaml`);
   if (workflow.path !== '.github/workflows/dependabot-triage.yaml') throw new Error('Unexpected state workflow');
-  const runs = new Map();
-  let candidates = [];
+  const trustedRuns = [];
   for (let page = 1; ; page++) {
-    const response = await gh(`/repos/${repo}/actions/artifacts?per_page=100&page=${page}`);
-    if (!Array.isArray(response.artifacts)) throw new Error('Incomplete artifact inventory');
-    const possible = response.artifacts
-      .filter(
-        (a) =>
-          a.name.startsWith('dependabot-triage-state-') &&
-          !a.expired &&
-          a.workflow_run?.head_branch === defaultBranch &&
-          a.workflow_run?.id,
-      )
-      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at) || b.id - a.id);
-    for (const artifact of possible) {
-      const runId = artifact.workflow_run.id;
-      if (!runs.has(runId)) runs.set(runId, await gh(`/repos/${repo}/actions/runs/${runId}`));
-      const run = runs.get(runId);
+    // Unfiltered workflow history avoids the repository-wide artifact scan and
+    // the search-result cap on filtered workflow-run queries.
+    const response = await gh(`/repos/${repo}/actions/workflows/${workflow.id}/runs?per_page=100&page=${page}`);
+    if (!Array.isArray(response.workflow_runs)) throw new Error('Incomplete workflow-run inventory');
+    for (const run of response.workflow_runs) {
       if (
         run.repository?.full_name === repo &&
         run.head_repository?.full_name === repo &&
         run.workflow_id === workflow.id &&
         run.path === workflow.path &&
         ['schedule', 'workflow_dispatch'].includes(run.event) &&
-        run.head_branch === defaultBranch
-      ) {
-        candidates.push(artifact);
-        break;
-      }
+        run.head_branch === defaultBranch &&
+        Number.isFinite(Date.parse(run.updated_at))
+      )
+        trustedRuns.push(run);
     }
-    if (candidates.length || response.artifacts.length < 100) break;
+    if (response.workflow_runs.length < 100) break;
   }
+  trustedRuns.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at) || b.id - a.id);
+  let latest;
+  for (const run of trustedRuns) {
+    // A completed run cannot gain artifacts after its last update. Keep a
+    // one-minute overlap for timestamp precision and delayed metadata updates.
+    if (latest && Date.parse(run.updated_at) + 60000 < Date.parse(latest.created_at)) break;
+    for (let page = 1; ; page++) {
+      const response = await gh(`/repos/${repo}/actions/runs/${run.id}/artifacts?per_page=100&page=${page}`);
+      if (!Array.isArray(response.artifacts)) throw new Error('Incomplete workflow artifact inventory');
+      for (const artifact of response.artifacts) {
+        if (!artifact.name.startsWith('dependabot-triage-state-') || artifact.expired) continue;
+        if (!Number.isFinite(Date.parse(artifact.created_at))) throw new Error('Invalid artifact timestamp');
+        if (
+          !latest ||
+          Date.parse(artifact.created_at) > Date.parse(latest.created_at) ||
+          (artifact.created_at === latest.created_at && artifact.id > latest.id)
+        )
+          latest = artifact;
+      }
+      if (response.artifacts.length < 100) break;
+    }
+  }
+  const candidates = latest ? [latest] : [];
   if (!candidates.length) {
     console.log('No retained state: reconcile all open alerts against Jira.');
     return;

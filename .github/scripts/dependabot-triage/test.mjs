@@ -329,9 +329,9 @@ test('state restore paginates past unrelated CI artifacts before declaring no ch
       path.join(folder, 'fetch.mjs'),
       `
       globalThis.fetch = async (url) => {
-        if (String(url).includes('/actions/workflows/')) return Response.json({id:42,path:'.github/workflows/dependabot-triage.yaml'});
+        if (String(url).endsWith('/actions/workflows/dependabot-triage.yaml')) return Response.json({id:42,path:'.github/workflows/dependabot-triage.yaml'});
         const page = new URL(url).searchParams.get('page');
-        if (page === '1') return Response.json({ artifacts: Array.from({length: 100}, () => ({name: 'other-ci-artifact'})) });
+        if (page === '1') return Response.json({ workflow_runs: Array.from({length: 100}, () => ({path: 'other-workflow'})) });
         if (page === '2') return new Response('', {status: 503});
         throw new Error('Unexpected page');
       };
@@ -815,6 +815,7 @@ for (const attack of ['fork', 'workflow', 'event']) {
         head_repository: { full_name: repo },
         workflow_id: 42,
         path: '.github/workflows/dependabot-triage.yaml',
+        updated_at: '2026-11-06T01:00:00Z',
         event: 'schedule',
         head_branch: 'develop-2023',
       };
@@ -827,13 +828,12 @@ for (const attack of ['fork', 'workflow', 'event']) {
         `
         globalThis.fetch=async(url)=>{
           const value=String(url);
-          if(value.includes('/actions/workflows/')) return Response.json({id:42,path:'.github/workflows/dependabot-triage.yaml'});
-          if(value.includes('/actions/artifacts?')) {
+          if(value.endsWith('/actions/workflows/dependabot-triage.yaml')) return Response.json({id:42,path:'.github/workflows/dependabot-triage.yaml'});
+          if(value.includes('/actions/workflows/42/runs?')) {
             const page=new URL(value).searchParams.get('page');
-            return Response.json({artifacts:page==='1'?Array.from({length:100},(_,i)=>({id:i,name:'dependabot-triage-state-forged',workflow_run:{id:1,head_branch:'develop-2023'},archive_download_url:'https://example.invalid/forged'})):[{id:200,name:'dependabot-triage-state-trusted',workflow_run:{id:2,head_branch:'develop-2023'},archive_download_url:'https://example.invalid/trusted'}]});
+            return Response.json({workflow_runs:page==='1'?Array.from({length:100},()=>({...${JSON.stringify(forged)},id:1})):[{...${JSON.stringify(run)},id:2}]});
           }
-          if(value.endsWith('/actions/runs/1')) return Response.json(${JSON.stringify(forged)});
-          if(value.endsWith('/actions/runs/2')) return Response.json(${JSON.stringify(run)});
+          if(value.includes('/actions/runs/2/artifacts?')) return Response.json({artifacts:[{id:200,name:'dependabot-triage-state-trusted',created_at:'2026-11-06T00:59:00Z',archive_download_url:'https://example.invalid/trusted'}]});
           if(value==='https://example.invalid/trusted') return new Response(Buffer.from('${zipped}','base64'));
           throw new Error('Untrusted artifact must never be downloaded');
         };
@@ -847,3 +847,57 @@ for (const attack of ['fork', 'workflow', 'event']) {
     }
   });
 }
+
+test('first hosted run starts cleanly when this workflow has no trusted default-branch history', () => {
+  const { folder, phase, hook } = fixtureRun(false);
+  try {
+    fs.writeFileSync(
+      hook,
+      `globalThis.fetch=async(url)=>{
+      if(String(url).endsWith('/actions/workflows/dependabot-triage.yaml')) return Response.json({id:42,path:'.github/workflows/dependabot-triage.yaml'});
+      if(String(url).includes('/actions/workflows/42/runs?')) return Response.json({workflow_runs:[]});
+      throw new Error('Repository-wide artifact access is not needed for a cold start');
+    };`,
+    );
+    const result = phase('restore', { GITHUB_REPOSITORY: repo, DEFAULT_BRANCH: 'develop-2023' });
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /No retained state/);
+  } finally {
+    fs.rmSync(folder, { recursive: true, force: true });
+  }
+});
+
+test('restore chooses a recently rerun old workflow over a newer-created run with stale state', async () => {
+  const { folder, phase, hook } = fixtureRun(false);
+  try {
+    seed(folder, 'state.json', { version: 1, checkpoints: {}, receipts: {}, recoveredFromOldRerun: true });
+    const { execFileSync } = await import('node:child_process');
+    execFileSync('zip', ['-q', path.join(folder, 'prior.zip'), 'state.json'], { cwd: folder });
+    fs.rmSync(path.join(folder, 'state.json'));
+    const zipped = fs.readFileSync(path.join(folder, 'prior.zip')).toString('base64');
+    const run = {
+      repository: { full_name: repo },
+      head_repository: { full_name: repo },
+      workflow_id: 42,
+      path: '.github/workflows/dependabot-triage.yaml',
+      event: 'workflow_dispatch',
+      head_branch: 'develop-2023',
+    };
+    fs.writeFileSync(
+      hook,
+      `globalThis.fetch=async(url)=>{
+      const value=String(url);
+      if(value.endsWith('/actions/workflows/dependabot-triage.yaml')) return Response.json({id:42,path:'.github/workflows/dependabot-triage.yaml'});
+      if(value.includes('/actions/workflows/42/runs?')) return Response.json({workflow_runs:[{...${JSON.stringify(run)},id:20,updated_at:'2026-11-05T00:01:00Z'},{...${JSON.stringify(run)},id:10,updated_at:'2026-11-06T00:01:00Z'}]});
+      if(value.includes('/actions/runs/10/artifacts?')) return Response.json({artifacts:[{id:200,name:'dependabot-triage-state-new',created_at:'2026-11-06T00:00:00Z',archive_download_url:'https://example.invalid/new'}]});
+      if(value==='https://example.invalid/new') return new Response(Buffer.from('${zipped}','base64'));
+      throw new Error('Stale run should be skipped after finding the newer durable journal');
+    };`,
+    );
+    const result = phase('restore', { GITHUB_REPOSITORY: repo, DEFAULT_BRANCH: 'develop-2023' });
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(JSON.parse(fs.readFileSync(path.join(folder, 'state.json'))).recoveredFromOldRerun, true);
+  } finally {
+    fs.rmSync(folder, { recursive: true, force: true });
+  }
+});
