@@ -215,6 +215,7 @@ function fixtureRun(failure) {
     const history = ${JSON.stringify(path.join(folder, 'durable-journal.json'))};
     export class DefaultArtifactClient {
       async uploadArtifact(name, files) {
+        if (process.env.FIXTURE_FAIL_UPLOAD === 'true') throw new Error('Fixture journal upload failed');
         const snapshots = fs.existsSync(history) ? JSON.parse(fs.readFileSync(history)) : [];
         snapshots.push(JSON.parse(fs.readFileSync(files[0])));
         fs.writeFileSync(history, JSON.stringify(snapshots));
@@ -328,6 +329,7 @@ test('state restore paginates past unrelated CI artifacts before declaring no ch
       path.join(folder, 'fetch.mjs'),
       `
       globalThis.fetch = async (url) => {
+        if (String(url).includes('/actions/workflows/')) return Response.json({id:42,path:'.github/workflows/dependabot-triage.yaml'});
         const page = new URL(url).searchParams.get('page');
         if (page === '1') return Response.json({ artifacts: Array.from({length: 100}, () => ({name: 'other-ci-artifact'})) });
         if (page === '2') return new Response('', {status: 503});
@@ -618,11 +620,14 @@ test('direct and nested manifest overrides route effective-constraint decisions 
   tree.packages['node_modules/plugin'] = { dependencies: { example: '^1.0.0' } };
   assert.equal(assessLock(finding(), tree, { overrides: { plugin: '2.0.0' } }, {}).review, true);
 });
-test('incomplete and unauthorized scans do not reserve any future Jira creates', () => {
-  const { folder, phase } = fixtureRun(true);
+test('unauthorized automatic scans leave no cycle and do not block subsequent previews', () => {
+  const { folder, phase } = fixtureRun(false);
   try {
-    assert.equal(phase('scan', { ...automatic, ALLOW_AUTOMATIC: 'false' }).status, 0);
+    assert.equal(phase('scan', { ...automatic, ALLOW_AUTOMATIC: 'false' }).status, 1);
+    assert.equal(fs.existsSync(path.join(folder, 'state.json')), false);
+    assert.equal(phase('scan').status, 0);
     const saved = JSON.parse(fs.readFileSync(path.join(folder, 'state.json')));
+    assert.equal(saved.active.mode, 'preview');
     assert.deepEqual(saved.createIntents, {});
   } finally {
     fs.rmSync(folder, { recursive: true, force: true });
@@ -661,6 +666,7 @@ function createFixture() {
         return Response.json({issues:remote.filter(i=>jql.includes(i.marker)),isLast:true});
       }
       if(value.endsWith('/issue')&&options.method==='POST'){
+        if(process.env.FIXTURE_JIRA_STATUS) return new Response('',{status:Number(process.env.FIXTURE_JIRA_STATUS)});
         const body=JSON.parse(options.body);
         const key=body.fields.labels.find(l=>l.startsWith('cve-triage-'));
         const durable=JSON.parse(fs.readFileSync(historyPath)).at(-1);
@@ -690,6 +696,7 @@ test('only an actually attempted POST is reserved, and a lost create result reco
     assert.equal(saved.carriedActions[0].ticket, 'WEBUI-99');
     const payload = fs.readFileSync(path.join(folder, 'teams-payload.json'), 'utf8');
     assert.match(payload, /Recovered Jira actions/);
+    assert.doesNotMatch(payload, /No new untriaged Dependabot findings were identified|bugs took the day off/);
     assert.match(payload, /WEBUI-99/);
     assert.equal(JSON.parse(fs.readFileSync(path.join(folder, 'remote.json'))).length, 1);
   } finally {
@@ -751,3 +758,92 @@ test('patched artifact archiver can pack and read the state journal locally', as
     fs.rmSync(folder, { recursive: true, force: true });
   }
 });
+
+test('failed pre-POST journal upload does not strand an unattempted create', () => {
+  const { folder, phase } = createFixture();
+  try {
+    assert.equal(phase('apply', { ...automatic, FIXTURE_FAIL_UPLOAD: 'true' }).status, 0);
+    const state = JSON.parse(fs.readFileSync(path.join(folder, 'state.json')));
+    assert.deepEqual(state.createIntents, {});
+    assert.equal(fs.existsSync(path.join(folder, 'remote.json')), false);
+  } finally {
+    fs.rmSync(folder, { recursive: true, force: true });
+  }
+});
+
+test('GitHub comma-separated npm comparator ranges remain actionable and support no-patch evidence', () => {
+  const raw = {
+    number: 1,
+    html_url: 'https://github.com/nuxeo/nuxeo-web-ui/security/dependabot/1',
+    dependency: { package: { name: 'example', ecosystem: 'npm' }, manifest_path: 'package-lock.json' },
+    security_advisory: { severity: 'medium', ghsa_id: 'GHSA-test' },
+    security_vulnerability: {
+      vulnerable_version_range: '>= 1.0.0, < 1.2.0',
+      first_patched_version: { identifier: '1.2.0' },
+    },
+  };
+  const f = normalize(repo, raw);
+  assert.equal(assessLock(f, lock(), {}, {}).blocked, false);
+  assert.equal(assessLock({ ...f, patched: null }, lock(), {}, {}).noPatch, true);
+});
+for (const status of [400, 401, 403, 422, 500]) {
+  test(`Jira HTTP ${status} ${status < 500 ? 'releases a rejected' : 'preserves an uncertain'} create reservation`, () => {
+    const { folder, phase } = createFixture();
+    try {
+      assert.equal(phase('apply', { ...automatic, FIXTURE_JIRA_STATUS: String(status) }).status, 0);
+      const saved = JSON.parse(fs.readFileSync(path.join(folder, 'state.json')));
+      assert.equal(Object.keys(saved.createIntents).length, status < 500 ? 0 : 1);
+      assert.equal(fs.existsSync(path.join(folder, 'remote.json')), false);
+      const snapshots = JSON.parse(fs.readFileSync(path.join(folder, 'durable-journal.json')));
+      assert.equal(Object.keys(snapshots.at(-1).createIntents).length, status < 500 ? 0 : 1);
+    } finally {
+      fs.rmSync(folder, { recursive: true, force: true });
+    }
+  });
+}
+for (const attack of ['fork', 'workflow', 'event']) {
+  test(`state restore rejects ${attack} provenance and continues to trusted older artifacts`, async () => {
+    const { folder, phase, hook } = fixtureRun(false);
+    try {
+      seed(folder, 'state.json', { version: 1, checkpoints: {}, receipts: {}, trusted: true });
+      const { execFileSync } = await import('node:child_process');
+      execFileSync('zip', ['-q', path.join(folder, 'prior.zip'), 'state.json'], { cwd: folder });
+      fs.rmSync(path.join(folder, 'state.json'));
+      const zipped = fs.readFileSync(path.join(folder, 'prior.zip')).toString('base64');
+      const run = {
+        repository: { full_name: repo },
+        head_repository: { full_name: repo },
+        workflow_id: 42,
+        path: '.github/workflows/dependabot-triage.yaml',
+        event: 'schedule',
+        head_branch: 'develop-2023',
+      };
+      const forged = structuredClone(run);
+      if (attack === 'fork') forged.head_repository.full_name = 'attacker/nuxeo-web-ui';
+      if (attack === 'workflow') forged.workflow_id = 99;
+      if (attack === 'event') forged.event = 'pull_request';
+      fs.writeFileSync(
+        hook,
+        `
+        globalThis.fetch=async(url)=>{
+          const value=String(url);
+          if(value.includes('/actions/workflows/')) return Response.json({id:42,path:'.github/workflows/dependabot-triage.yaml'});
+          if(value.includes('/actions/artifacts?')) {
+            const page=new URL(value).searchParams.get('page');
+            return Response.json({artifacts:page==='1'?Array.from({length:100},(_,i)=>({id:i,name:'dependabot-triage-state-forged',workflow_run:{id:1,head_branch:'develop-2023'},archive_download_url:'https://example.invalid/forged'})):[{id:200,name:'dependabot-triage-state-trusted',workflow_run:{id:2,head_branch:'develop-2023'},archive_download_url:'https://example.invalid/trusted'}]});
+          }
+          if(value.endsWith('/actions/runs/1')) return Response.json(${JSON.stringify(forged)});
+          if(value.endsWith('/actions/runs/2')) return Response.json(${JSON.stringify(run)});
+          if(value==='https://example.invalid/trusted') return new Response(Buffer.from('${zipped}','base64'));
+          throw new Error('Untrusted artifact must never be downloaded');
+        };
+      `,
+      );
+      const result = phase('restore', { GITHUB_REPOSITORY: repo, DEFAULT_BRANCH: 'develop-2023' });
+      assert.equal(result.status, 0, result.stderr);
+      assert.equal(JSON.parse(fs.readFileSync(path.join(folder, 'state.json'))).trusted, true);
+    } finally {
+      fs.rmSync(folder, { recursive: true, force: true });
+    }
+  });
+}

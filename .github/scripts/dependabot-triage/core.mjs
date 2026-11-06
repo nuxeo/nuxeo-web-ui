@@ -26,7 +26,10 @@ export function normalize(repo, alert) {
     ghsa: advisory.ghsa_id,
     cve: advisory.cve_id,
     summary: advisory.summary,
-    range: vulnerable.vulnerable_version_range,
+    range:
+      alert.dependency.package.ecosystem === 'npm'
+        ? vulnerable.vulnerable_version_range.replace(/,\s*/g, ' ')
+        : vulnerable.vulnerable_version_range,
     patched: vulnerable.first_patched_version?.identifier || null,
     created: alert.created_at,
     updated: alert.updated_at || advisory.updated_at || alert.created_at,
@@ -96,7 +99,7 @@ export function resolveDependency(packages, from, name) {
 export function assessLock(finding, lock, manifest, patchMetadata) {
   if (finding.ecosystem !== 'npm')
     return { review: true, reason: 'Unsupported ecosystem; engineering review required.' };
-  const range = semver.validRange(finding.range);
+  const range = semver.validRange(finding.range.replace(/,\s*/g, ' '));
   if (!range || !lock.packages || typeof lock.packages !== 'object')
     return { review: true, reason: 'Cannot safely interpret version range or lockfile.' };
   const instances = Object.entries(lock.packages).filter(
@@ -309,6 +312,10 @@ export function card(report, config, mode) {
         ),
       );
       body.push(text('🐛 Dependabot found a few uninvited guests in the dependency tree.'));
+    } else if (report.carriedActions?.length) {
+      body.push(
+        text('📨 Recovered Jira actions awaiting notification; see the ticket table below.', { weight: 'Bolder' }),
+      );
     } else if (report.review.length) {
       body.push(text('⚠️ No confirmed new findings; existing-ticket coverage needs review.', { weight: 'Bolder' }));
     } else {

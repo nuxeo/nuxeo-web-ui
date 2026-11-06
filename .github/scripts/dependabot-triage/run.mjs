@@ -57,7 +57,13 @@ async function request(base, endpoint, token, method = 'GET', body) {
     ...(body ? { body: JSON.stringify(body) } : {}),
   });
   // Never include a credential, webhook, response body or customer data in an exception.
-  if (!response.ok) throw new Error(`${new URL(base).hostname} ${method} request failed: HTTP ${response.status}`);
+  if (!response.ok) {
+    const error = new Error(`${new URL(base).hostname} ${method} request failed: HTTP ${response.status}`);
+    error.status = response.status;
+    error.service = new URL(base).hostname;
+    error.method = method;
+    throw error;
+  }
   return response.status === 204 ? {} : response.json();
 }
 const gh = (endpoint) => request('https://api.github.com', endpoint, `Bearer ${env('GH_TOKEN')}`);
@@ -132,16 +138,38 @@ const report = await read('report.json', null);
 async function restore() {
   const repo = env('GITHUB_REPOSITORY');
   const defaultBranch = env('DEFAULT_BRANCH');
-  let candidates;
+  const workflow = await gh(`/repos/${repo}/actions/workflows/dependabot-triage.yaml`);
+  if (workflow.path !== '.github/workflows/dependabot-triage.yaml') throw new Error('Unexpected state workflow');
+  const runs = new Map();
+  let candidates = [];
   for (let page = 1; ; page++) {
     const response = await gh(`/repos/${repo}/actions/artifacts?per_page=100&page=${page}`);
     if (!Array.isArray(response.artifacts)) throw new Error('Incomplete artifact inventory');
-    candidates = response.artifacts
+    const possible = response.artifacts
       .filter(
         (a) =>
-          a.name.startsWith('dependabot-triage-state-') && !a.expired && a.workflow_run?.head_branch === defaultBranch,
+          a.name.startsWith('dependabot-triage-state-') &&
+          !a.expired &&
+          a.workflow_run?.head_branch === defaultBranch &&
+          a.workflow_run?.id,
       )
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at) || b.id - a.id);
+    for (const artifact of possible) {
+      const runId = artifact.workflow_run.id;
+      if (!runs.has(runId)) runs.set(runId, await gh(`/repos/${repo}/actions/runs/${runId}`));
+      const run = runs.get(runId);
+      if (
+        run.repository?.full_name === repo &&
+        run.head_repository?.full_name === repo &&
+        run.workflow_id === workflow.id &&
+        run.path === workflow.path &&
+        ['schedule', 'workflow_dispatch'].includes(run.event) &&
+        run.head_branch === defaultBranch
+      ) {
+        candidates.push(artifact);
+        break;
+      }
+    }
     if (candidates.length || response.artifacts.length < 100) break;
   }
   if (!candidates.length) {
@@ -187,6 +215,11 @@ async function recoverNotification(notification) {
 }
 
 async function scan() {
+  if (
+    mode === 'automatic' &&
+    (process.env.ALLOW_AUTOMATIC !== 'true' || process.env.GITHUB_REF_NAME !== process.env.DEFAULT_BRANCH)
+  )
+    throw new Error('Automatic runs require explicit approval and the default branch before scanning');
   if (state.active && state.active.mode !== mode)
     throw new Error('Pending run uses another execution mode; resolve it before changing modes');
   const completed = state.completedRuns?.[`${mode}:${process.env.GITHUB_RUN_ID}`];
@@ -516,20 +549,39 @@ async function apply() {
         group.action = 'updated';
       } else {
         state.createIntents[group.key] = { status: 'reserved', group: structuredClone(group) };
-        await durableWriteJournal();
-        const result = await jira('/issue', 'POST', {
-          fields: {
-            project: { key: repo.project },
-            issuetype: { name: config.issueType },
-            parent: { key: config.epic },
-            summary: group.summary,
-            description: document,
-            components: [{ name: repo.component }],
-            labels: [...config.labels, group.key],
-            [config.severityField]: { id: config.severityOptions[group.severity] },
-            ...(config.priorityBySeverity ? { priority: { name: config.priorityBySeverity[group.severity] } } : {}),
-          },
-        });
+        try {
+          await durableWriteJournal();
+        } catch (error) {
+          delete state.createIntents[group.key];
+          await save('state.json', state);
+          throw error;
+        }
+        let result;
+        try {
+          result = await jira('/issue', 'POST', {
+            fields: {
+              project: { key: repo.project },
+              issuetype: { name: config.issueType },
+              parent: { key: config.epic },
+              summary: group.summary,
+              description: document,
+              components: [{ name: repo.component }],
+              labels: [...config.labels, group.key],
+              [config.severityField]: { id: config.severityOptions[group.severity] },
+              ...(config.priorityBySeverity ? { priority: { name: config.priorityBySeverity[group.severity] } } : {}),
+            },
+          });
+        } catch (error) {
+          if (
+            error.service === new URL(config.jiraSite).hostname &&
+            error.method === 'POST' &&
+            [400, 401, 403, 404, 405, 413, 415, 422].includes(error.status)
+          ) {
+            delete state.createIntents[group.key];
+            await durableWriteJournal();
+          }
+          throw error;
+        }
         ticket = result.key;
         state.createIntents[group.key].ticket = ticket;
         pendingOutcome(group.key, state.createIntents[group.key]);
