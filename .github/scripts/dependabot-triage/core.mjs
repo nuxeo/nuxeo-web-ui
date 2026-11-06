@@ -327,22 +327,24 @@ export function card(report, config, mode) {
         row([
           g.ticket ? `[${g.ticket}](${config.jiraSite}/browse/${g.ticket})` : 'Proposed',
           `${symbols[g.severity]} ${g.severity}`,
-          `${g.package}: ${g.blocker || g.summary}`,
+          `${g.action ? `${g.action}: ` : ''}${g.package}: ${g.blocker || g.summary}`,
         ]),
       );
     if (groups.length > 12) body.push(text(`${groups.length - 12} more rows are included in the full Actions report.`));
   };
   table(
     mode === 'preview' ? 'Proposed tickets / updates' : 'Tickets created / updated',
-    report.groups.filter((g) => !g.blocked),
+    report.groups.filter((g) => !g.blocked && (mode === 'preview' || g.action)),
   );
   table('Blockers / CVEs with no patch available', [...report.groups.filter((g) => g.blocked), ...report.blockers]);
-  if (report.groups.some((g) => g.blocked))
+  if (report.groups.some((g) => g.blocked) || report.blockers.length)
     body.push(
       text(
         mode === 'preview'
           ? 'FYI: blocked tickets would be placed On Hold with a reason and recheck criteria.'
-          : 'FYI: blocked tickets are put On Hold with a reason and recheck criteria.',
+          : report.failures.length
+            ? 'FYI: On Hold processing may be incomplete; check the run failures.'
+            : 'FYI: blocked tickets are put On Hold with a reason and recheck criteria.',
       ),
     );
   if (report.review.length)

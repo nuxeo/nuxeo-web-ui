@@ -309,3 +309,12 @@ test('state restore paginates past unrelated CI artifacts before declaring no ch
     fs.rmSync(folder, { recursive: true, force: true });
   }
 });
+
+test('automatic summary does not call an unprocessed proposal a created ticket', () => {
+  const value = report();
+  value.groups = [{ package: 'never-created-package', severity: 'medium', summary: 'Pending', blocked: false }];
+  value.failures = ['Jira unavailable'];
+  const output = JSON.stringify(card(value, config, 'automatic'));
+  assert.doesNotMatch(output, /never-created-package/);
+  assert.doesNotMatch(output, /Tickets created/);
+});

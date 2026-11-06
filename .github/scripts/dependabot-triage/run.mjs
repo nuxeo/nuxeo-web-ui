@@ -401,6 +401,7 @@ async function apply() {
           fields: { description: document, [config.severityField]: { id: config.severityOptions[group.severity] } },
         });
         ticket = existing.key;
+        group.action = 'updated';
       } else {
         const result = await jira('/issue', 'POST', {
           fields: {
@@ -416,6 +417,7 @@ async function apply() {
           },
         });
         ticket = result.key;
+        group.action = 'created';
       }
       group.ticket = ticket;
       const check = await jira(`/issue/${ticket}?fields=description,parent,${config.severityField}`);
