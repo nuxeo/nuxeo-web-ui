@@ -81,7 +81,7 @@ function findingBlocks(issue) {
         new Set(section.match(/GHSA-[a-zA-Z0-9-]+/g) || []).size === 1,
     );
   const uniqueAdvisories = new Set(scope.match(/GHSA-[a-zA-Z0-9-]+/g) || []);
-  if (storedAlertUrls(issue).length === 1 && uniqueAdvisories.size === 1) sections.push(scope);
+  if (!scope.includes('|') && storedAlertUrls(issue).length === 1 && uniqueAdvisories.size === 1) sections.push(scope);
   return [...rows, ...sections, ...scope.split('\n').filter((line) => !line.includes('|'))];
 }
 

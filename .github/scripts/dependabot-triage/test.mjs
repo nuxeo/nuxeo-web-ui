@@ -1553,3 +1553,15 @@ test('confirming delivery acknowledges outcomes even when the delivered scan was
     fs.rmSync(folder, { recursive: true, force: true });
   }
 });
+
+test('a single alert does not permit whole-table coverage from unrelated package or manifest rows', () => {
+  const f = finding();
+  const ticket = issue(f, {
+    description: `### Findings\n| ${f.url} | ${f.ghsa} | other-package | plugin/a11y/package-lock.json |\n| Remediation context | example | package-lock.json |\n`,
+  });
+  assert.equal(matchFinding(f, [ticket]).kind, 'ambiguous');
+  ticket.fields.description = `### Findings\n| ${f.url} | ${f.ghsa} | other-package\n| example | package-lock.json`;
+  assert.equal(matchFinding(f, [ticket]).kind, 'ambiguous');
+  ticket.fields.description = `### Findings\n| ${f.url} | ${f.ghsa} | example | package-lock.json |`;
+  assert.equal(matchFinding(f, [ticket]).kind, 'covered');
+});
