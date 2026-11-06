@@ -24,6 +24,8 @@ Repository variables:
 
 Use **Actions → Dependabot CVE Triage → Run workflow → preview** first. Preview reads GitHub/Jira and saves a report/card payload; it does not modify Jira or post to Teams. Automatic mode must run on the default branch and pass both mode/approval gates.
 
+A pre-merge hosted preview can also be dispatched against the PR branch using `gh workflow run dependabot-triage.yaml --repo nuxeo/nuxeo-web-ui --ref <PR-branch> -f mode=preview`. It uses the same workflow, runner and repository credentials. Production state restoration remains restricted to trusted default-branch runs, so pre-merge artifacts cannot seed automatic execution. Inspect both the workflow result and the generated report: a failed/incomplete run is not a verified dry run. Preview exercises live source reads and report generation; Jira mutations, Teams delivery and the cron trigger require separate validation.
+
 The regular schedule is Monday 13:00 Asia/Kolkata (07:30 UTC). A configured one-time date is checked hourly at minute 30 UTC and runs at the first check on/after that timestamp; it is not an exact-minute scheduler. The completed timestamp is recorded so it does not repeat. Change the timestamp for another one-time run. GitHub can delay scheduled executions. Manual dispatch is also available.
 
 ## Deterministic triage

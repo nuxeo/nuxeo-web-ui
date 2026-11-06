@@ -44,7 +44,7 @@ const env = (name) => {
   if (!process.env[name]) throw new Error(`Missing ${name}; configure the dedicated Actions secret.`);
   return process.env[name];
 };
-async function request(base, endpoint, token, method = 'GET', body) {
+async function request(base, endpoint, token, method = 'GET', body, metadata = false) {
   const response = await fetch(`${base}${endpoint}`, {
     method,
     signal: AbortSignal.timeout(60000),
@@ -64,9 +64,11 @@ async function request(base, endpoint, token, method = 'GET', body) {
     error.method = method;
     throw error;
   }
-  return response.status === 204 ? {} : response.json();
+  const data = response.status === 204 ? {} : await response.json();
+  return metadata ? { data, link: response.headers.get('link') } : data;
 }
-const gh = (endpoint) => request('https://api.github.com', endpoint, `Bearer ${env('GH_TOKEN')}`);
+const gh = (endpoint, metadata = false) =>
+  request('https://api.github.com', endpoint, `Bearer ${env('GH_TOKEN')}`, 'GET', undefined, metadata);
 const jira = (endpoint, method = 'GET', body) =>
   request(
     config.jiraSite,
@@ -295,12 +297,23 @@ async function scan() {
     const issues = await search(`parent = ${config.epic} ORDER BY key ASC`);
     for (const repo of config.repositories) {
       const raw = [];
-      for (let page = 1; ; page++) {
-        const values = await gh(`/repos/${repo.name}/dependabot/alerts?state=open&per_page=100&page=${page}`);
+      let cursor = null;
+      const seen = new Set();
+      do {
+        const endpoint = `/repos/${repo.name}/dependabot/alerts?state=open&per_page=100${cursor ? `&after=${encodeURIComponent(cursor)}` : ''}`;
+        const { data: values, link } = await gh(endpoint, true);
         if (!Array.isArray(values)) throw new Error('Unexpected GitHub alerts response');
         raw.push(...values);
-        if (values.length < 100) break;
-      }
+        const next = link?.match(/<([^>]+)>;\s*rel="next"/);
+        cursor = null;
+        if (next) {
+          const url = new URL(next[1]);
+          if (url.origin !== 'https://api.github.com') throw new Error('Unsafe Dependabot pagination origin');
+          cursor = url.searchParams.get('after');
+          if (!cursor || seen.has(cursor)) throw new Error('Incomplete/repeated Dependabot cursor');
+          seen.add(cursor);
+        }
+      } while (cursor);
       for (const value of raw) {
         const finding = { ...normalize(repo.name, value), project: repo.project, severityField: config.severityField };
         finding.changed = changedSince(

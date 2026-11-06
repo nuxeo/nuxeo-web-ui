@@ -901,3 +901,53 @@ test('restore chooses a recently rerun old workflow over a newer-created run wit
     fs.rmSync(folder, { recursive: true, force: true });
   }
 });
+
+for (const unsafe of [false, true]) {
+  test(`Dependabot cursor pagination ${unsafe ? 'rejects foreign links' : 'follows API cursors across short pages'}`, () => {
+    const { folder, phase, hook } = fixtureRun(false);
+    try {
+      const findings = [
+        finding(),
+        finding({ id: repo + '#124', number: 124, url: `https://github.com/${repo}/security/dependabot/124` }),
+      ];
+      const tickets = findings.map((f, i) => {return { ...issue(f), key: 'WEBUI-' + (i + 1) }});
+      const raw = findings.map((f) => {return {
+        number: f.number,
+        html_url: f.url,
+        created_at: '2026-01-01T00:00:00Z',
+        dependency: { package: { name: f.package, ecosystem: 'npm' }, manifest_path: f.manifest },
+        security_advisory: { severity: f.severity, ghsa_id: f.ghsa },
+        security_vulnerability: {
+          vulnerable_version_range: '>= 1.0.0, < 1.2.0',
+          first_patched_version: { identifier: f.patched },
+        },
+      }});
+      fs.writeFileSync(
+        hook,
+        `globalThis.fetch=async(url,options={})=>{
+        const value=String(url);
+        if(value.includes('/issue/NXENG-987')) return Response.json({fields:{issuetype:{name:'Epic'},status:{statusCategory:{key:'new'}}}});
+        if(value.endsWith('/search/jql')) return Response.json({issues:${JSON.stringify(tickets)},isLast:true});
+        if(value.includes('/dependabot/alerts?')) {
+          const params=new URL(value).searchParams;
+          if(params.has('page')) throw new Error('Page-number pagination is rejected by GitHub');
+          if(!value.includes('nuxeo-web-ui')) return Response.json([]);
+          if(params.get('after')==='cursor=one') return Response.json([${JSON.stringify(raw[1])}]);
+          return Response.json([${JSON.stringify(raw[0])}],{headers:{link:'<https://${unsafe ? 'example.invalid' : 'api.github.com'}/repositories/46934532/dependabot/alerts?after=cursor%3Done>; rel="next"'}});
+        }
+        throw new Error('Unexpected request');
+      };`,
+      );
+      assert.equal(phase('scan').status, 0);
+      const value = JSON.parse(fs.readFileSync(path.join(folder, 'report.json')));
+      if (unsafe) assert.match(value.failures.join(' '), /Unsafe Dependabot pagination/);
+      else {
+        assert.deepEqual(value.failures, []);
+        assert.equal(value.alerts.length, 2);
+        assert.equal(value.covered.length, 2);
+      }
+    } finally {
+      fs.rmSync(folder, { recursive: true, force: true });
+    }
+  });
+}
