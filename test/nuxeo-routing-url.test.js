@@ -62,6 +62,18 @@ suite('restoreQueryDelimiter', () => {
     );
   });
 
+  test('skips an escaped `?` inside a query value that itself looks like a tab parameter', () => {
+    expect(restoreQueryDelimiter('#!/browse/ws/doc%3Fp=permissions&label=why%3Fp=now')).to.equal(
+      '#!/browse/ws/doc?p=permissions&label=why%3Fp=now',
+    );
+  });
+
+  test('skips an escaped `?` in a value whose own remainder parses as a query', () => {
+    expect(restoreQueryDelimiter('#!/browse/ws/doc%3Flabel=why%3Fsection=1&p=permissions')).to.equal(
+      '#!/browse/ws/doc?label=why%3Fsection=1&p=permissions',
+    );
+  });
+
   test('ignores anything that is not a hashbang route', () => {
     expect(restoreQueryDelimiter('#/browse/ws/doc%3Fp=view')).to.be.null;
     expect(restoreQueryDelimiter('')).to.be.null;
