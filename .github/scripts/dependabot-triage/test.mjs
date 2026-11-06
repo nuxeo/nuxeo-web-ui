@@ -9,6 +9,7 @@ import {
   groupFindings,
   relatedRemediation,
   highest,
+  hash,
   matchFinding,
   normalize,
   textOf,
@@ -1370,4 +1371,185 @@ test('recovered ticket actions are not counted as tickets created in the current
   assert.match(output, /0 created · 0 updated/);
   assert.match(output, /1 recovered from earlier runs/);
   assert.match(output, /Recovered actions from earlier runs/);
+});
+
+test('coverage requires alert, advisory, package and manifest in the same finding row', () => {
+  const f = finding();
+  const other = finding({ number: 124, url: f.url.replace('123', '124'), ghsa: 'GHSA-other' });
+  const ticket = issue(f, {
+    description: `### Findings\n| ${f.url} | ${other.ghsa} | example | package-lock.json |\n| ${other.url} | ${f.ghsa} | example | package-lock.json |\n`,
+  });
+  assert.equal(matchFinding(f, [ticket]).kind, 'ambiguous');
+  ticket.fields.description = `### Findings\n${f.url} ${other.ghsa} example package-lock.json\n${other.url} ${f.ghsa} example package-lock.json`;
+  assert.equal(matchFinding(f, [ticket]).kind, 'ambiguous');
+  ticket.fields.description = `### Findings\n| ${f.url} | ${f.ghsa} | example | package-lock.json |\n| ${other.url} | ${other.ghsa} | example | package-lock.json |\n`;
+  assert.equal(matchFinding(f, [ticket]).kind, 'covered');
+});
+
+function updateFixture({ severity = 'Medium', historical = false } = {}) {
+  const fixture = fixtureRun(false);
+  const { folder, hook } = fixture;
+  const group = groupFindings([finding()])[0];
+  const fullConfig = JSON.parse(fs.readFileSync(new URL('../../dependabot-triage.json', import.meta.url)));
+  const old = structuredClone(group);
+  old.reason = 'Previous automated assessment';
+  if (historical) old.findings.push(finding({ number: 124, url: finding().url.replace('123', '124') }));
+  const document = description(old, fullConfig);
+  seed(folder, 'remote.json', {
+    key: 'WEBUI-99',
+    fields: {
+      description: document,
+      parent: { key: config.epic },
+      customfield_12201: { id: severity === 'Critical' ? '13603' : '15790', value: severity },
+      status: { name: 'Open', statusCategory: { key: 'new' } },
+    },
+  });
+  seed(folder, 'report.json', { ...report(), alerts: [finding()], newFindings: [finding()], groups: [group] });
+  seed(folder, 'state.json', {
+    version: 1,
+    checkpoints: {},
+    fingerprints: {},
+    active: { mode: 'automatic' },
+    createIntents: {},
+    receipts: { [group.key]: { ticket: 'WEBUI-99', descriptionHash: hash(document) } },
+  });
+  fs.writeFileSync(
+    hook,
+    `
+    import fs from 'node:fs';
+    const remotePath=${JSON.stringify(path.join(folder, 'remote.json'))};
+    const journalPath=${JSON.stringify(path.join(folder, 'durable-journal.json'))};
+    const writesPath=${JSON.stringify(path.join(folder, 'writes.json'))};
+    globalThis.fetch=async(url,options={})=>{
+      const value=String(url);
+      const remote=JSON.parse(fs.readFileSync(remotePath));
+      if(value.endsWith('/search/jql')) return Response.json({issues:[remote],isLast:true});
+      if(value.includes('/issue/WEBUI-99')) {
+        if(options.method==='PUT') {
+          const intent=Object.values(JSON.parse(fs.readFileSync(journalPath)).at(-1).updateIntents)[0];
+          if(!intent||intent.ticket!=='WEBUI-99') throw new Error('Missing durable update intent before PUT');
+          const fields=JSON.parse(options.body).fields;
+          Object.assign(remote.fields,fields);
+          remote.fields.customfield_12201.value='Medium';
+          fs.writeFileSync(remotePath,JSON.stringify(remote));
+          fs.writeFileSync(writesPath,JSON.stringify((fs.existsSync(writesPath)?JSON.parse(fs.readFileSync(writesPath)):0)+1));
+          if(process.env.FIXTURE_LOST_UPDATE==='true') throw new Error('Simulated lost PUT response');
+          return new Response(null,{status:204});
+        }
+        return Response.json(remote);
+      }
+      throw new Error('Unexpected fixture request '+value);
+    };
+  `,
+  );
+  return { ...fixture, group };
+}
+
+test('manual severity increase survives an owned description update', () => {
+  const { folder, phase } = updateFixture({ severity: 'Critical' });
+  try {
+    assert.equal(phase('apply', automatic).status, 0);
+    assert.equal(fs.existsSync(path.join(folder, 'writes.json')), false);
+    assert.match(fs.readFileSync(path.join(folder, 'report.json'), 'utf8'), /higher severity/);
+    assert.equal(
+      JSON.parse(fs.readFileSync(path.join(folder, 'remote.json'))).fields.customfield_12201.value,
+      'Critical',
+    );
+  } finally {
+    fs.rmSync(folder, { recursive: true, force: true });
+  }
+});
+
+test('historical finding rows remain when an alert is no longer returned by GitHub', () => {
+  const { folder, phase } = updateFixture({ historical: true });
+  try {
+    assert.equal(phase('apply', automatic).status, 0);
+    assert.equal(fs.existsSync(path.join(folder, 'writes.json')), false);
+    assert.match(fs.readFileSync(path.join(folder, 'report.json'), 'utf8'), /additional retained findings/);
+    assert.match(fs.readFileSync(path.join(folder, 'remote.json'), 'utf8'), /dependabot\/124/);
+  } finally {
+    fs.rmSync(folder, { recursive: true, force: true });
+  }
+});
+
+test('lost update response is reconciled and reported without another PUT', () => {
+  const { folder, phase, group } = updateFixture();
+  try {
+    assert.equal(phase('apply', { ...automatic, FIXTURE_LOST_UPDATE: 'true' }).status, 0);
+    let saved = JSON.parse(fs.readFileSync(path.join(folder, 'state.json')));
+    assert.equal(Object.values(saved.updateIntents)[0].confirmed, undefined);
+    seed(folder, 'report.json', { ...report(), alerts: [finding()], newFindings: [finding()], groups: [group] });
+    assert.equal(phase('apply', automatic).status, 0);
+    saved = JSON.parse(fs.readFileSync(path.join(folder, 'report.json')));
+    assert.deepEqual(saved.failures, []);
+    assert.equal(saved.carriedActions[0].action, 'updated');
+    assert.equal(saved.groups[0].reconciled, true);
+    assert.equal(JSON.parse(fs.readFileSync(path.join(folder, 'writes.json'))), 1);
+    const state = JSON.parse(fs.readFileSync(path.join(folder, 'state.json')));
+    assert.equal(Object.values(state.updateIntents)[0].confirmed, true);
+    assert.equal(Object.values(state.pendingOutcomes)[0].ticket, 'WEBUI-99');
+  } finally {
+    fs.rmSync(folder, { recursive: true, force: true });
+  }
+});
+
+test('confirmed update outcome survives later human edits without replaying writes', () => {
+  const { folder, phase } = updateFixture();
+  try {
+    assert.equal(phase('apply', automatic).status, 0);
+    const remote = JSON.parse(fs.readFileSync(path.join(folder, 'remote.json')));
+    remote.fields.description = 'Human changed this after the confirmed update';
+    seed(folder, 'remote.json', remote);
+    seed(folder, 'report.json', report());
+    assert.equal(phase('apply', automatic).status, 0);
+    const saved = JSON.parse(fs.readFileSync(path.join(folder, 'report.json')));
+    assert.deepEqual(saved.failures, []);
+    assert.equal(saved.carriedActions[0].action, 'updated');
+    assert.equal(JSON.parse(fs.readFileSync(path.join(folder, 'writes.json'))), 1);
+  } finally {
+    fs.rmSync(folder, { recursive: true, force: true });
+  }
+});
+
+test('confirming delivery acknowledges outcomes even when the delivered scan was incomplete', () => {
+  const { folder, phase } = fixtureRun(false);
+  try {
+    const snapshot = { ...report(), failures: ['Earlier source failed'] };
+    seed(folder, 'state.json', {
+      version: 1,
+      receipts: {},
+      checkpoints: {},
+      fingerprints: {},
+      active: {
+        mode: 'automatic',
+        notification: {
+          status: 'reserved',
+          attempt: 'old-attempt',
+          snapshot,
+          payload: { message: 'incomplete' },
+          outcomeKeys: ['created', 'updated'],
+        },
+      },
+      pendingOutcomes: { created: { ticket: 'WEBUI-99' }, updated: { ticket: 'WEBUI-98' } },
+      createIntents: { created: { ticket: 'WEBUI-99' }, uncertain: { status: 'reserved' } },
+      updateIntents: { updated: { confirmed: true, ticket: 'WEBUI-98' } },
+    });
+    assert.equal(
+      phase('scan', {
+        ...automatic,
+        DELIVERY_RESOLUTION: 'delivered',
+        DELIVERY_MESSAGE_URL: 'https://teams.microsoft.com/l/message/example',
+      }).status,
+      0,
+    );
+    const saved = JSON.parse(fs.readFileSync(path.join(folder, 'state.json')));
+    assert.deepEqual(saved.pendingOutcomes, {});
+    assert.equal(saved.createIntents.created, undefined);
+    assert.equal(saved.updateIntents.updated, undefined);
+    assert.ok(saved.createIntents.uncertain);
+    assert.deepEqual(saved.checkpoints, {});
+    assert.equal(phase('finish', automatic).status, 1);
+  } finally {
+    fs.rmSync(folder, { recursive: true, force: true });
+  }
 });

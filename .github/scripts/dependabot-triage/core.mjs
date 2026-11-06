@@ -55,7 +55,8 @@ export function textOf(node) {
   if (Array.isArray(node)) return node.map(textOf).join('');
   const inner = node.text || textOf(node.content);
   if (node.type === 'heading') return `\n### ${inner}\n`;
-  if (node.type === 'tableRow') return `|${(node.content || []).map(textOf).join('|')}|\n`;
+  if (node.type === 'tableRow')
+    return `|${(node.content || []).map((cell) => textOf(cell).replace(/\n/g, ' ')).join('|')}|\n`;
   const urls = (node.marks || []).filter((m) => m.type === 'link').map((m) => m.attrs.href);
   return `${inner}${urls.length ? ` (${urls.join(' ')})` : ''}${node.type === 'paragraph' ? '\n' : ''}`;
 }
@@ -63,6 +64,25 @@ export function textOf(node) {
 export function owningScope(issue) {
   const text = textOf(issue.fields.description);
   return text.split(/\n### (?:Related|Separate|Independent|Notes|Definition|Out[ -]of[ -]scope)/i)[0];
+}
+
+export function storedAlertUrls(issue) {
+  return [...new Set(owningScope(issue).match(/https:\/\/github\.com\/[^\s)|]+\/security\/dependabot\/\d+/g) || [])];
+}
+function findingBlocks(issue) {
+  const scope = owningScope(issue);
+  const rows = scope.match(/^\|[^\n]*\|[ \t]*(?:\n|$)/gm) || [];
+  const sections = scope
+    .split(/\n#{1,6} /)
+    .filter(
+      (section) =>
+        !section.includes('|') &&
+        new Set(section.match(/https:\/\/github\.com\/[^\s)|]+\/security\/dependabot\/\d+/g) || []).size === 1 &&
+        new Set(section.match(/GHSA-[a-zA-Z0-9-]+/g) || []).size === 1,
+    );
+  const uniqueAdvisories = new Set(scope.match(/GHSA-[a-zA-Z0-9-]+/g) || []);
+  if (storedAlertUrls(issue).length === 1 && uniqueAdvisories.size === 1) sections.push(scope);
+  return [...rows, ...sections, ...scope.split('\n').filter((line) => !line.includes('|'))];
 }
 
 export function matchFinding(finding, issues) {
@@ -74,7 +94,15 @@ export function matchFinding(finding, issues) {
     const scope = owningScope(issue);
     const same = mentions(scope, finding.package) && scope.includes(finding.ghsa) && mentions(scope, finding.manifest);
     if (!same) continue;
-    if (new RegExp(`${escaped}(?![0-9])`).test(scope)) exact.push(issue);
+    const urlMatch = new RegExp(`${escaped}(?![0-9])`);
+    const associated = findingBlocks(issue).some(
+      (block) =>
+        urlMatch.test(block) &&
+        mentions(block, finding.package) &&
+        block.includes(finding.ghsa) &&
+        mentions(block, finding.manifest),
+    );
+    if (associated) exact.push(issue);
     else possible.push(issue);
   }
   if (exact.length === 1) {
@@ -304,7 +332,7 @@ export function relatedRemediation(finding, issues) {
           reason: `Review extending existing ${finding.package} remediation; explicit alert coverage must be added.`,
         },
       ];
-    const rows = scope.match(/^\|[\s\S]*?\|[ \t]*\n/gm) || scope.split('\n');
+    const rows = scope.match(/^\|[^\n]*\|[ \t]*(?:\n|$)/gm) || scope.split('\n');
     const shared = [...parentNames].filter((name) =>
       rows.some((row) => mentions(row, name) && mentions(row, finding.manifest)),
     );
@@ -505,7 +533,7 @@ export function card(report, config, mode) {
     );
   const created = currentActions.filter((g) => g.action === 'created').length;
   const updated = currentActions.filter((g) => g.action === 'updated').length;
-  const pending = mode === 'automatic' ? report.groups.filter((g) => !g.action) : [];
+  const pending = mode === 'automatic' ? report.groups.filter((g) => !g.action && !g.reconciled) : [];
   body.push(
     text(
       mode === 'preview'

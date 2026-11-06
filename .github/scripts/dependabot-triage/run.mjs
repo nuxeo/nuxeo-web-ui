@@ -6,6 +6,7 @@ import {
   assessLock,
   automaticAuthorized,
   relatedRemediation,
+  storedAlertUrls,
   card,
   changedSince,
   description,
@@ -259,6 +260,7 @@ async function scan() {
     if (resolution === 'delivered' && process.env.DELIVERY_MESSAGE_URL?.startsWith('https://teams.microsoft.com/')) {
       notification.status = 'confirmed';
       notification.receipt = process.env.DELIVERY_MESSAGE_URL;
+      acknowledgeOutcomes(notification);
     } else if (resolution === 'not-delivered') notification.attempt = runIdentity;
     else throw new Error('Prior Teams delivery is uncertain; verify it and provide a delivery resolution.');
     await recoverNotification(notification);
@@ -614,7 +616,64 @@ function acknowledgeOutcomes(notification) {
   for (const key of notification.outcomeKeys || []) {
     delete state.pendingOutcomes?.[key];
     if (state.createIntents?.[key]?.ticket) delete state.createIntents[key];
+    if (state.updateIntents?.[key]?.confirmed) delete state.updateIntents[key];
   }
+}
+
+function matchesUpdate(issue, intent) {
+  return (
+    hash(textOf(issue.fields.description)) === intent.afterTextHash &&
+    issue.fields[config.severityField]?.id === intent.afterSeverity &&
+    issue.fields.parent?.key === intent.parent
+  );
+}
+function recordUpdate(key, intent, current) {
+  intent.confirmed = true;
+  state.pendingOutcomes ||= {};
+  state.pendingOutcomes[key] ||= { ...intent.group, ticket: intent.ticket, action: 'updated' };
+  state.receipts[intent.group.key] = {
+    ticket: intent.ticket,
+    descriptionHash: hashDocument(current.fields.description),
+    run: report.id,
+  };
+}
+async function performUpdate(group, existing, document) {
+  const key = `update:${group.key}:${hash(textOf(document))}`;
+  state.updateIntents ||= {};
+  const intent = {
+    ticket: existing.key,
+    parent: config.epic,
+    afterTextHash: hash(textOf(document)),
+    afterSeverity: config.severityOptions[group.severity],
+    group: structuredClone(group),
+  };
+  state.updateIntents[key] = intent;
+  try {
+    await durableWriteJournal();
+  } catch (error) {
+    delete state.updateIntents[key];
+    await save('state.json', state);
+    throw error;
+  }
+  try {
+    await jira(`/issue/${existing.key}`, 'PUT', {
+      fields: { description: document, [config.severityField]: { id: intent.afterSeverity } },
+    });
+  } catch (error) {
+    if (
+      error.service === new URL(config.jiraSite).hostname &&
+      [400, 401, 403, 404, 405, 413, 415, 422].includes(error.status)
+    ) {
+      delete state.updateIntents[key];
+      await durableWriteJournal();
+    }
+    throw error;
+  }
+  const current = await jira(`/issue/${existing.key}?fields=description,parent,${config.severityField}`);
+  if (!matchesUpdate(current, intent))
+    throw new Error(`Update outcome differs from the planned scope/severity for ${existing.key}`);
+  recordUpdate(key, intent, current);
+  await durableWriteJournal();
 }
 
 async function apply() {
@@ -626,6 +685,18 @@ async function apply() {
   if (!automaticAuthorized(process.env)) throw new Error('Automatic Jira actions are not authorized');
   if (report.failures.length || state.active?.recovery) return;
   try {
+    for (const [key, intent] of Object.entries(state.updateIntents || {})) {
+      if (intent.confirmed) {
+        state.pendingOutcomes ||= {};
+        state.pendingOutcomes[key] ||= { ...intent.group, ticket: intent.ticket, action: 'updated' };
+        continue;
+      }
+      const current = await jira(`/issue/${intent.ticket}?fields=description,parent,${config.severityField}`);
+      if (!matchesUpdate(current, intent))
+        throw new Error(`Uncertain prior update for ${intent.ticket}; review remote scope before retrying.`);
+      recordUpdate(key, intent, current);
+      await durableWriteJournal();
+    }
     for (const [key, intent] of Object.entries(state.createIntents || {})) {
       if (intent.ticket) {
         pendingOutcome(key, intent);
@@ -648,6 +719,9 @@ async function apply() {
       const document = description(group, config);
       let ticket;
       if (existing) {
+        existing = await jira(`/issue/${existing.key}?fields=description,status,parent,${config.severityField}`);
+        if (existing.fields.status.statusCategory.key === 'done' || existing.fields.parent?.key !== config.epic)
+          throw new Error(`Existing ticket ${existing.key} needs parent/status scope review before updating`);
         // Only machine-owned finding sections are rewritten. Human-modified bodies require manual review.
         const receipt = state.receipts[group.key];
         if (!receipt || receipt.descriptionHash !== hashDocument(existing.fields.description)) {
@@ -656,20 +730,29 @@ async function apply() {
           continue;
         }
         const retained = report.alerts.filter((a) => textOf(existing.fields.description).includes(a.url));
-        const actualSeverity = highest([...group.findings, ...retained].map((f) => f.severity));
+        const currentSeverity = existing.fields[config.severityField]?.value?.toLowerCase();
+        if (!['critical', 'high', 'medium', 'low'].includes(currentSeverity))
+          throw new Error(`Current Jira severity is unknown for ${existing.key}`);
+        const actualSeverity = highest([...group.findings, ...retained].map((f) => f.severity).concat(currentSeverity));
         if (actualSeverity !== group.severity)
           throw new Error(`Retained findings require higher severity for ${existing.key}`);
         // Preserve old finding rows unless they were explicitly reconciled into this group.
-        if (retained.some((a) => !group.findings.some((f) => f.id === a.id))) {
+        if (storedAlertUrls(existing).some((url) => !group.findings.some((f) => f.url === url))) {
           report.review.push(`${existing.key}: additional retained findings need scope review; no automatic rewrite.`);
           group.ticket = existing.key;
           continue;
         }
-        await jira(`/issue/${existing.key}`, 'PUT', {
-          fields: { description: document, [config.severityField]: { id: config.severityOptions[group.severity] } },
-        });
+        const expected = {
+          afterTextHash: hash(textOf(document)),
+          afterSeverity: config.severityOptions[group.severity],
+          parent: config.epic,
+        };
+        if (matchesUpdate(existing, expected)) group.reconciled = true;
+        else {
+          await performUpdate(group, existing, document);
+          group.action = 'updated';
+        }
         ticket = existing.key;
-        group.action = 'updated';
       } else {
         state.createIntents[group.key] = { status: 'reserved', group: structuredClone(group) };
         try {
