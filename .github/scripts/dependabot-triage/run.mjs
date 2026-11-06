@@ -13,6 +13,7 @@ import {
   textOf,
   adf,
   owningScope,
+  hash,
 } from './core.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
@@ -195,6 +196,8 @@ async function scan() {
     await recoverNotification(completed);
     return;
   }
+  if (Number(process.env.TRIAGE_RUN_NUMBER) && Number(process.env.TRIAGE_RUN_NUMBER) <= (state.completedRunNumber || 0))
+    throw new Error('Completed-run replay expired; dispatch a new workflow run instead.');
   state.createIntents ||= {};
   // Migrate older pre-write journals before retiring any notification cycle.
   if (state.active?.mode === 'automatic') {
@@ -232,6 +235,7 @@ async function scan() {
     newFindings: [],
     failures: [],
     reviewFindings: [],
+    carriedActions: Object.values(state.pendingOutcomes || {}),
   };
   if (state.active && state.active.mode !== mode)
     throw new Error('Pending run uses another execution mode; resolve it before changing modes');
@@ -364,10 +368,6 @@ async function scan() {
   } catch (e) {
     run.failures.push(e.message);
   }
-  if (mode === 'automatic') {
-    for (const group of run.groups)
-      state.createIntents[group.key] ||= { attempt: runIdentity, findingIds: group.findings.map((f) => f.id) };
-  }
   state.active = {
     id: run.id,
     started,
@@ -436,6 +436,30 @@ async function hold(ticket, reason, key) {
   if (verified.fields.status.name !== config.holdStatus) throw new Error(`Hold status did not persist for ${ticket}`);
 }
 
+async function durableWriteJournal() {
+  state.journalSequence = (state.journalSequence || 0) + 1;
+  await save('state.json', state);
+  const { DefaultArtifactClient } = await import('@actions/artifact');
+  await new DefaultArtifactClient().uploadArtifact(
+    `dependabot-triage-state-${runIdentity}-write-${state.journalSequence}`,
+    [path.join(directory, 'state.json')],
+    directory,
+    { retentionDays: 90 },
+  );
+}
+function pendingOutcome(key, intent) {
+  if (!intent.group)
+    throw new Error(`Missing reporting snapshot for recovered create ${key}; manual reconciliation required.`);
+  state.pendingOutcomes ||= {};
+  state.pendingOutcomes[key] ||= { ...intent.group, ticket: intent.ticket, action: 'created' };
+}
+function acknowledgeOutcomes(notification) {
+  for (const key of notification.outcomeKeys || []) {
+    delete state.pendingOutcomes?.[key];
+    if (state.createIntents?.[key]?.ticket) delete state.createIntents[key];
+  }
+}
+
 async function apply() {
   if (!report) throw new Error('Scan report missing');
   if (mode === 'preview') {
@@ -447,17 +471,21 @@ async function apply() {
   if (report.failures.length || state.active?.recovery) return;
   try {
     for (const [key, intent] of Object.entries(state.createIntents || {})) {
-      if (intent.ticket || intent.attempt === runIdentity) continue;
+      if (intent.ticket) {
+        pendingOutcome(key, intent);
+        continue;
+      }
       const matches = await search(`text ~ "${key}" ORDER BY created ASC`);
       const exact = matches.filter((i) => textOf(i.fields.description).includes(`Triage remediation key: ${key}`));
       if (exact.length !== 1) throw new Error(`Uncertain prior create for ${key}; reconcile Jira before retrying.`);
       intent.ticket = exact[0].key;
-      await save('state.json', state);
+      pendingOutcome(key, intent);
+      await durableWriteJournal();
     }
     for (const group of report.groups) {
       const repo = config.repositories.find((r) => r.name === group.repository);
       let existing = await reconcileGroup(group, repo);
-      if (!existing && state.createIntents[group.key]?.attempt !== runIdentity)
+      if (!existing && state.createIntents[group.key])
         throw new Error(`Uncertain prior create for ${group.key}; verify Jira indexing before any retry.`);
       if (existing?.fields.status.statusCategory.key === 'done')
         throw new Error(`Closed ticket ${existing.key} still matches; review before updating`);
@@ -487,6 +515,8 @@ async function apply() {
         ticket = existing.key;
         group.action = 'updated';
       } else {
+        state.createIntents[group.key] = { status: 'reserved', group: structuredClone(group) };
+        await durableWriteJournal();
         const result = await jira('/issue', 'POST', {
           fields: {
             project: { key: repo.project },
@@ -502,7 +532,8 @@ async function apply() {
         });
         ticket = result.key;
         state.createIntents[group.key].ticket = ticket;
-        await save('state.json', state);
+        pendingOutcome(group.key, state.createIntents[group.key]);
+        await durableWriteJournal();
         group.action = 'created';
       }
       group.ticket = ticket;
@@ -525,7 +556,7 @@ async function apply() {
                   .join('; ')}`,
             )
             .join('\n'),
-          group.key,
+          ticket,
         );
     }
     for (const blocker of report.blockers) {
@@ -535,11 +566,14 @@ async function apply() {
   } catch (e) {
     report.failures.push(`Jira processing: ${e.message}`);
   }
+  report.carriedActions = Object.values(state.pendingOutcomes || {}).filter(
+    (g) => !report.groups.some((current) => current.key === g.key && current.action),
+  );
   await save('report.json', report);
   await render(report);
 }
 function hashDocument(document) {
-  return JSON.stringify(document);
+  return hash(document);
 }
 async function render(value) {
   await save('teams-payload.json', card(value, config, mode));
@@ -565,6 +599,10 @@ async function render(value) {
         ...Object.entries(f.branchEvidence).map(([b, e]) => `  - ${b}: ${e.reason}`),
       ]),
     ]),
+    '## Recovered Jira actions awaiting notification',
+    ...(value.carriedActions || []).map(
+      (g) => `- [${g.ticket}](${config.jiraSite}/browse/${g.ticket}): ${g.severity}; ${g.summary}`,
+    ),
     '## Covered findings',
     ...value.covered.map((c) => `- ${c.alert} → [${c.ticket}](${config.jiraSite}/browse/${c.ticket}): ${c.evidence}`),
     '## Existing blockers',
@@ -590,6 +628,7 @@ async function prepareNotification() {
     attempt: runIdentity,
     snapshot: structuredClone(report),
     payload: await read('teams-payload.json', null),
+    outcomeKeys: Object.keys(state.pendingOutcomes || {}),
   };
   await save('state.json', state);
 }
@@ -615,6 +654,7 @@ async function notify() {
   });
   if (!response.ok) throw new Error(`Teams delivery uncertain: HTTP ${response.status}; do not blindly retry`);
   state.active.notification = { ...delivery, status: 'confirmed', acceptedAt: new Date().toISOString() };
+  acknowledgeOutcomes(state.active.notification);
   await save('state.json', state);
   console.log('Dedicated Teams webhook accepted the summary.');
 }
@@ -626,9 +666,17 @@ async function finish() {
       state.checkpoints[mode] = report.started; // scan start, not finish: trigger-day alerts remain eligible.
       state.fingerprints[mode] = Object.fromEntries(report.alerts.map((a) => [a.id, a.fingerprint]));
     }
+    if (mode === 'automatic') acknowledgeOutcomes(state.active.notification);
     if (mode === 'automatic' && process.env.GITHUB_RUN_ID) {
       state.completedRuns ||= {};
       state.completedRuns[`${mode}:${process.env.GITHUB_RUN_ID}`] = state.active.notification;
+      state.completedRunNumber = Math.max(state.completedRunNumber || 0, Number(process.env.TRIAGE_RUN_NUMBER) || 0);
+      while (
+        Object.keys(state.completedRuns).length > 20 ||
+        Buffer.byteLength(JSON.stringify(state.completedRuns)) > 2 * 1024 * 1024
+      ) {
+        delete state.completedRuns[Object.keys(state.completedRuns)[0]];
+      }
     }
     if (state.active?.oneTimeAt) state.oneTimeCompleted = state.active.oneTimeAt;
     state.active = null;

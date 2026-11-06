@@ -95,25 +95,36 @@ export function resolveDependency(packages, from, name) {
 
 export function assessLock(finding, lock, manifest, patchMetadata) {
   if (finding.ecosystem !== 'npm')
-    return { blocked: true, reason: 'Unsupported ecosystem; engineering review required.' };
-  if (!finding.patched) return { blocked: true, reason: 'GitHub lists no patched release.', noPatch: true };
-  const patch = semver.valid(finding.patched);
+    return { review: true, reason: 'Unsupported ecosystem; engineering review required.' };
   const range = semver.validRange(finding.range);
-  if (!patch || !range || !lock.packages)
-    return { blocked: true, reason: 'Cannot safely interpret version range or lockfile.' };
-  const affected = Object.entries(lock.packages)
-    .filter(
-      ([key, value]) => key.endsWith(`/node_modules/${finding.package}`) || key === `node_modules/${finding.package}`,
-    )
-    .filter(([, value]) => semver.valid(value.version) && semver.satisfies(value.version, range));
+  if (!range || !lock.packages || typeof lock.packages !== 'object')
+    return { review: true, reason: 'Cannot safely interpret version range or lockfile.' };
+  const instances = Object.entries(lock.packages).filter(
+    ([key, value]) => key.endsWith(`/node_modules/${finding.package}`) || key === `node_modules/${finding.package}`,
+  );
+  if (instances.some(([, value]) => !value || !semver.valid(value.version)))
+    return { review: true, reason: 'Resolved package version is unreadable; inspect the dependency path.' };
+  const affected = instances.filter(([, value]) => semver.satisfies(value.version, range));
   if (!affected.length)
     return {
       blocked: false,
       review: true,
       reason: 'No vulnerable resolved instance on this branch; confirm alert branch/re-scan.',
     };
+  if (!finding.patched)
+    return { blocked: true, reason: 'Affected instance confirmed; GitHub lists no patched release.', noPatch: true };
+  const patch = semver.valid(finding.patched);
+  if (!patch) return { review: true, reason: 'Patched version cannot be interpreted safely.' };
   if (semver.satisfies(patch, range))
-    return { blocked: true, reason: 'Listed patched version still matches advisory range; review upstream data.' };
+    return { review: true, reason: 'Listed patched version still matches advisory range; review upstream data.' };
+  const overrideTouches = (name, overrides) =>
+    overrides &&
+    typeof overrides === 'object' &&
+    Object.entries(overrides).some(
+      ([key, value]) => key === name || key.startsWith(`${name}@`) || overrideTouches(name, value),
+    );
+  if (overrideTouches(finding.package, manifest.overrides))
+    return { review: true, reason: 'Manifest overrides affect this package; validate the effective constraints.' };
   const evidence = [];
   for (const [instance, value] of affected) {
     const parents = Object.entries(lock.packages).flatMap(([parent, metadata]) =>
@@ -124,6 +135,8 @@ export function assessLock(finding, lock, manifest, patchMetadata) {
           : [];
       }),
     );
+    if (parents.some((p) => overrideTouches(p.parent.split('node_modules/').pop(), manifest.overrides)))
+      return { review: true, reason: 'A parent override affects this dependency path; inspect effective constraints.' };
     const constraints = parents.filter((p) => !semver.validRange(p.declared) || !semver.satisfies(patch, p.declared));
     evidence.push({ instance, installed: value.version, parents });
     if (!parents.length || constraints.length) {
@@ -303,6 +316,8 @@ export function card(report, config, mode) {
       if (!report.review.length) body.push(text('🐛 The bugs took the day off. We checked anyway.'));
     }
   }
+  if (report.carriedActions?.length)
+    body.push(text('📨 Recovered Jira actions awaiting notification', { weight: 'Bolder' }));
   const urgentReview = (report.reviewFindings || []).filter((f) => ['critical', 'high'].includes(f.severity));
   if (urgentReview.length)
     body.push(
@@ -341,6 +356,7 @@ export function card(report, config, mode) {
     mode === 'preview' ? 'Proposed tickets / updates' : 'Tickets created / updated',
     report.groups.filter((g) => !g.blocked && (mode === 'preview' || g.action)),
   );
+  table('Recovered Jira actions', report.carriedActions || []);
   table('Blockers / CVEs with no patch available', [...report.groups.filter((g) => g.blocked), ...report.blockers]);
   if (report.groups.some((g) => g.blocked) || report.blockers.length)
     body.push(

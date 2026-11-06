@@ -37,6 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
+      TRIAGE_RUN_NUMBER: ${{ github.run_number }}
       TRIAGE_STATE_DIR: ${{ runner.temp }}/dependabot-triage
       TRIAGE_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || vars.DEPENDABOT_TRIAGE_MODE || 'preview' }}
       ALLOW_AUTOMATIC: ${{ vars.DEPENDABOT_TRIAGE_ALLOW_AUTOMATIC || 'false' }}
@@ -83,12 +84,18 @@ jobs:
           retention-days: 90
           if-no-files-found: error
       - name: Apply approved Jira actions
+        uses: actions/github-script@v8
         if: steps.due.outputs.run == 'true'
         env:
           GH_TOKEN: ${{ secrets.GIT_ADMIN_TOKEN }}
           JIRA_EMAIL: ${{ secrets.DEPENDABOT_TRIAGE_JIRA_EMAIL }}
           JIRA_API_TOKEN: ${{ secrets.DEPENDABOT_TRIAGE_TOKEN }}
-        run: node .github/scripts/dependabot-triage/run.mjs apply
+        with:
+          script: |
+            process.argv[2] = 'apply';
+            const { pathToFileURL } = require('node:url');
+            const path = require('node:path');
+            await import(pathToFileURL(path.join(process.env.GITHUB_WORKSPACE, '.github/scripts/dependabot-triage/run.mjs')).href);
       - name: Prepare notification intent
         if: steps.due.outputs.run == 'true'
         run: node .github/scripts/dependabot-triage/run.mjs prepare-notification

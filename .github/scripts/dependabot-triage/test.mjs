@@ -194,6 +194,35 @@ function fixtureRun(failure) {
     };
   `,
   );
+  const artifactInit = path.join(folder, 'artifact-init.mjs');
+  fs.writeFileSync(
+    artifactInit,
+    `import {register} from 'node:module'; register(new URL('./artifact-loader.mjs', import.meta.url));`,
+  );
+  fs.writeFileSync(
+    path.join(folder, 'artifact-loader.mjs'),
+    `
+    export async function resolve(specifier, context, nextResolve) {
+      if (specifier === '@actions/artifact') return {url: new URL('./artifact-stub.mjs', import.meta.url).href, shortCircuit: true};
+      return nextResolve(specifier, context);
+    }
+  `,
+  );
+  fs.writeFileSync(
+    path.join(folder, 'artifact-stub.mjs'),
+    `
+    import fs from 'node:fs';
+    const history = ${JSON.stringify(path.join(folder, 'durable-journal.json'))};
+    export class DefaultArtifactClient {
+      async uploadArtifact(name, files) {
+        const snapshots = fs.existsSync(history) ? JSON.parse(fs.readFileSync(history)) : [];
+        snapshots.push(JSON.parse(fs.readFileSync(files[0])));
+        fs.writeFileSync(history, JSON.stringify(snapshots));
+        return {id: snapshots.length};
+      }
+    }
+  `,
+  );
   const script = fileURLToPath(new URL('./run.mjs', import.meta.url));
   const env = {
     ...process.env,
@@ -209,7 +238,10 @@ function fixtureRun(failure) {
     })(),
   };
   const phase = (name, overrides = {}) =>
-    spawnSync(process.execPath, ['--import', hook, script, name], { env: { ...env, ...overrides }, encoding: 'utf8' });
+    spawnSync(process.execPath, ['--import', artifactInit, '--import', hook, script, name], {
+      env: { ...env, ...overrides },
+      encoding: 'utf8',
+    });
   return { folder, phase, hook };
 }
 test('CLI preview runs scan/apply/finish without writes or automatic checkpoint advancement', () => {
@@ -445,7 +477,7 @@ test('fresh human-owned alert coverage stops a create after scan', () => {
       checkpoints: {},
       receipts: {},
       active: {},
-      createIntents: { [group.key]: { attempt: 'local-1' } },
+      createIntents: {},
     });
     fs.writeFileSync(
       hook,
@@ -566,6 +598,155 @@ test('accepted delivery interrupted before checkpoint resumes the original succe
     for (const name of ['scan', 'apply', 'prepare-notification', 'notify', 'finish'])
       assert.equal(phase(name, { ...env, GITHUB_RUN_ATTEMPT: '3' }).status, 0, name);
     assert.equal(JSON.parse(fs.readFileSync(path.join(folder, 'state.json'))).active, null);
+  } finally {
+    fs.rmSync(folder, { recursive: true, force: true });
+  }
+});
+
+test('no-patch classifications require a vulnerable, interpretable resolved instance', () => {
+  const f = finding({ patched: null });
+  assert.equal(assessLock(f, { packages: {} }, {}, {}).review, true);
+  assert.equal(assessLock(f, {}, {}, {}).review, true);
+  assert.equal(assessLock({ ...f, range: 'not-semver' }, lock(), {}, {}).review, true);
+  assert.equal(assessLock(f, { packages: { 'node_modules/example': { version: 'file:local' } } }, {}, {}).review, true);
+  assert.equal(assessLock(f, lock(), {}, {}).noPatch, true);
+});
+test('direct and nested manifest overrides route effective-constraint decisions to review', () => {
+  assert.equal(assessLock(finding(), lock(), { overrides: { example: '1.1.0' } }, {}).review, true);
+  assert.equal(assessLock(finding(), lock(), { overrides: { plugin: { example: '^1.2.0' } } }, {}).review, true);
+  const tree = lock();
+  tree.packages['node_modules/plugin'] = { dependencies: { example: '^1.0.0' } };
+  assert.equal(assessLock(finding(), tree, { overrides: { plugin: '2.0.0' } }, {}).review, true);
+});
+test('incomplete and unauthorized scans do not reserve any future Jira creates', () => {
+  const { folder, phase } = fixtureRun(true);
+  try {
+    assert.equal(phase('scan', { ...automatic, ALLOW_AUTOMATIC: 'false' }).status, 0);
+    const saved = JSON.parse(fs.readFileSync(path.join(folder, 'state.json')));
+    assert.deepEqual(saved.createIntents, {});
+  } finally {
+    fs.rmSync(folder, { recursive: true, force: true });
+  }
+});
+function createFixture() {
+  const fixture = fixtureRun(false);
+  const { folder, hook } = fixture;
+  const first = groupFindings([finding()])[0];
+  const second = groupFindings([finding({ package: 'other-package' })])[0];
+  const value = report();
+  value.groups = [first, second];
+  value.alerts = [...first.findings, ...second.findings];
+  seed(folder, 'report.json', value);
+  seed(folder, 'state.json', {
+    version: 1,
+    checkpoints: {},
+    fingerprints: {},
+    receipts: {},
+    active: { mode: 'automatic' },
+    createIntents: {},
+  });
+  fs.writeFileSync(
+    hook,
+    `
+    import fs from 'node:fs';
+    const remotePath=${JSON.stringify(path.join(folder, 'remote.json'))};
+    const historyPath=${JSON.stringify(path.join(folder, 'durable-journal.json'))};
+    const remote=fs.existsSync(remotePath)?JSON.parse(fs.readFileSync(remotePath)):[];
+    globalThis.fetch=async(url,options={})=>{
+      const value=String(url);
+      if(value.includes('/issue/NXENG-987')) return Response.json({fields:{issuetype:{name:'Epic'},status:{statusCategory:{key:'new'}}}});
+      if(value.includes('/dependabot/alerts?')) return Response.json([]);
+      if(value.endsWith('/search/jql')) {
+        const jql=JSON.parse(options.body).jql;
+        return Response.json({issues:remote.filter(i=>jql.includes(i.marker)),isLast:true});
+      }
+      if(value.endsWith('/issue')&&options.method==='POST'){
+        const body=JSON.parse(options.body);
+        const key=body.fields.labels.find(l=>l.startsWith('cve-triage-'));
+        const durable=JSON.parse(fs.readFileSync(historyPath)).at(-1);
+        if(!durable.createIntents[key]||Object.keys(durable.createIntents).length!==1) throw new Error('POST must have exactly its own durable reservation');
+        remote.push({key:'WEBUI-99',marker:key,fields:{...body.fields,status:{name:'Open',statusCategory:{key:'new'}}}});
+        fs.writeFileSync(remotePath,JSON.stringify(remote));
+        throw new Error('Simulated response loss after successful create');
+      }
+      throw new Error('Unexpected fixture request: '+value);
+    };
+  `,
+  );
+  return { ...fixture, first, second };
+}
+test('only an actually attempted POST is reserved, and a lost create result recovers into the next notification', () => {
+  const { folder, phase, first, second } = createFixture();
+  try {
+    assert.equal(phase('apply', automatic).status, 0);
+    let saved = JSON.parse(fs.readFileSync(path.join(folder, 'state.json')));
+    assert.ok(saved.createIntents[first.key]);
+    assert.equal(saved.createIntents[second.key], undefined);
+    assert.equal(JSON.parse(fs.readFileSync(path.join(folder, 'remote.json'))).length, 1);
+    assert.equal(phase('scan', automatic).status, 0);
+    assert.equal(phase('apply', automatic).status, 0);
+    saved = JSON.parse(fs.readFileSync(path.join(folder, 'report.json')));
+    assert.deepEqual(saved.failures, []);
+    assert.equal(saved.carriedActions[0].ticket, 'WEBUI-99');
+    const payload = fs.readFileSync(path.join(folder, 'teams-payload.json'), 'utf8');
+    assert.match(payload, /Recovered Jira actions/);
+    assert.match(payload, /WEBUI-99/);
+    assert.equal(JSON.parse(fs.readFileSync(path.join(folder, 'remote.json'))).length, 1);
+  } finally {
+    fs.rmSync(folder, { recursive: true, force: true });
+  }
+});
+test('completed replay snapshots are bounded without pruning unresolved journals', () => {
+  const { folder, phase } = fixtureRun(false);
+  try {
+    const value = report();
+    seed(folder, 'report.json', value);
+    const notification = { status: 'confirmed', snapshot: value, payload: { message: 'delivered' } };
+    const completedRuns = Object.fromEntries(Array.from({ length: 25 }, (_, i) => ['automatic:' + i, notification]));
+    seed(folder, 'state.json', {
+      version: 1,
+      checkpoints: {},
+      receipts: {},
+      completedRuns,
+      fingerprints: {},
+      createIntents: { uncertain: { status: 'reserved' } },
+      active: { mode: 'automatic', notification },
+    });
+    assert.equal(phase('finish', { ...automatic, GITHUB_RUN_ID: 'last', TRIAGE_RUN_NUMBER: '26' }).status, 0);
+    const saved = JSON.parse(fs.readFileSync(path.join(folder, 'state.json')));
+    assert.ok(Object.keys(saved.completedRuns).length <= 20);
+    assert.ok(Buffer.byteLength(JSON.stringify(saved.completedRuns)) <= 2 * 1024 * 1024);
+    assert.ok(saved.createIntents.uncertain);
+    assert.equal(phase('scan', { ...automatic, GITHUB_RUN_ID: 'expired', TRIAGE_RUN_NUMBER: '1' }).status, 1);
+  } finally {
+    fs.rmSync(folder, { recursive: true, force: true });
+  }
+});
+
+test('patched artifact archiver can pack and read the state journal locally', async () => {
+  const { createRequire } = await import('node:module');
+  const require = createRequire(import.meta.url);
+  // eslint-disable-next-line import-x/no-extraneous-dependencies -- Test the SDK's transitive glob override.
+  const archiver = require('archiver');
+  const folder = fs.mkdtempSync(path.join(os.tmpdir(), 'triage-zip-'));
+  try {
+    seed(folder, 'state.json', { checkpoint: 'test-only' });
+    const archive = archiver('zip');
+    const chunks = [];
+    const finished = new Promise((resolve, reject) => {
+      archive.on('data', (chunk) => chunks.push(chunk));
+      archive.on('end', resolve);
+      archive.on('error', reject);
+    });
+    archive.glob('state.json', { cwd: folder });
+    await archive.finalize();
+    await finished;
+    fs.writeFileSync(path.join(folder, 'journal.zip'), Buffer.concat(chunks));
+    const { execFileSync } = await import('node:child_process');
+    const contents = execFileSync('unzip', ['-p', path.join(folder, 'journal.zip'), 'state.json'], {
+      encoding: 'utf8',
+    });
+    assert.deepEqual(JSON.parse(contents), { checkpoint: 'test-only' });
   } finally {
     fs.rmSync(folder, { recursive: true, force: true });
   }

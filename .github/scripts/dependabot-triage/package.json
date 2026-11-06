@@ -7,9 +7,15 @@
     "test": "node --test test.mjs"
   },
   "dependencies": {
+    "@actions/artifact": "6.3.1",
     "semver": "7.8.6"
   },
   "engines": {
     "node": ">=22.13.0"
+  },
+  "overrides": {
+    "archiver-utils": {
+      "glob": "14.0.4"
+    }
   }
 }
