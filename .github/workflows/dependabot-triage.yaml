@@ -69,8 +69,8 @@ jobs:
         if: steps.due.outputs.run == 'true'
         env:
           GH_TOKEN: ${{ secrets.GIT_ADMIN_TOKEN }}
-          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL || secrets.CLOUD_FIX_JIRA_USERNAME }}
-          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN || secrets.CLOUD_FIX_JIRA_API_TOKEN }}
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
         run: node .github/scripts/dependabot-triage/run.mjs scan
       # Persist intent BEFORE writes. Even a killed runner leaves enough information
       # to re-query Jira and resolve uncertain delivery without blind retries.
@@ -86,8 +86,8 @@ jobs:
         if: steps.due.outputs.run == 'true'
         env:
           GH_TOKEN: ${{ secrets.GIT_ADMIN_TOKEN }}
-          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL || secrets.CLOUD_FIX_JIRA_USERNAME }}
-          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN || secrets.CLOUD_FIX_JIRA_API_TOKEN }}
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
         run: node .github/scripts/dependabot-triage/run.mjs apply
       - name: Prepare notification intent
         if: steps.due.outputs.run == 'true'
