@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import {
   assessLock,
   automaticAuthorized,
+  relatedRemediation,
   card,
   changedSince,
   description,
@@ -283,6 +284,8 @@ async function scan() {
     failures: [],
     reviewFindings: [],
     carriedActions: Object.values(state.pendingOutcomes || {}),
+    updates: [],
+    existingReviews: [],
   };
   if (state.active && state.active.mode !== mode)
     throw new Error('Pending run uses another execution mode; resolve it before changing modes');
@@ -348,9 +351,19 @@ async function scan() {
           continue;
         }
         if (match.kind === 'update') {
-          finding.branchEvidence = {
-            review: { review: true, reason: 'Existing ticket severity/scope requires review.' },
-          };
+          finding.branchEvidence = await branchEvidence(finding, repo);
+          finding.triageReview = true;
+          const actualSeverity = match.ticket.fields[config.severityField]?.value?.toLowerCase();
+          run.updates.push({
+            ticket: match.ticket.key,
+            repository: finding.repository,
+            package: finding.package,
+            severity: highest([actualSeverity, finding.severity]),
+            currentSeverity: actualSeverity || null,
+            isProposal: true,
+            findings: [finding],
+            reason: 'Review Defect Severity and explicit finding scope; never downgrade to fit an existing ticket.',
+          });
           run.newFindings.push(finding);
           // Never infer retained-ticket scope or change its severity blindly without a full finding register.
           run.review.push(
@@ -358,27 +371,113 @@ async function scan() {
           );
           continue;
         }
-        const related = await search(
-          `project = ${repo.project} AND statusCategory != Done AND summary ~ "${finding.package.replace(/[^a-zA-Z0-9-]/g, ' ')}"`,
-        );
-        if (related.some((i) => textOf(i.fields.description).includes(finding.package))) {
-          finding.branchEvidence = {
-            review: { review: true, reason: 'Possible extension of existing remediation scope.' },
-          };
-          run.newFindings.push(finding);
-          run.review.push(
-            `${finding.id}: possible same-package follow-up in ${related.map((i) => i.key).join(', ')}; propose extending existing scope after review.`,
-          );
-          continue;
-        }
         finding.branchEvidence = await branchEvidence(finding, repo);
         run.newFindings.push(finding);
-        if (Object.values(finding.branchEvidence).some((b) => b.review))
-          run.review.push(`${finding.id}: branch/dependency-path assessment required; no automatic ticket.`);
+        const names = new Set([
+          finding.package,
+          ...Object.values(finding.branchEvidence).flatMap((b) =>
+            (b.evidence || [])
+              .filter((e) => e.requiresParentUpgrade)
+              .flatMap((e) => e.parents.filter((p) => p.name !== '(root)').map((p) => p.name)),
+          ),
+        ]);
+        const pages = await Promise.all(
+          [...names].map((name) =>
+            cached(`related:${repo.project}:${name}`, () =>
+              search(
+                `project = ${repo.project} AND statusCategory != Done AND summary ~ "${name.replace(/[^a-zA-Z0-9-]/g, ' ')}"`,
+              ),
+            ),
+          ),
+        );
+        const pool = [...new Map([...issues, ...pages.flat()].map((i) => [i.key, i])).values()];
+        const related = relatedRemediation(finding, pool);
+        if (related.length) {
+          finding.triageReview = true;
+          finding.relatedTickets = related.map(({ ticket, kind, reason }) => {
+            return { ticket, kind, reason };
+          });
+          for (const candidate of related) {
+            let update = run.updates.find((u) => u.ticket === candidate.ticket);
+            const existingSeverity = candidate.issue.fields[config.severityField]?.value?.toLowerCase();
+            if (!['critical', 'high', 'medium', 'low'].includes(existingSeverity)) {
+              run.review.push(`${candidate.ticket}: Defect Severity needs review before adding ${finding.id}.`);
+            }
+            if (!update) {
+              update = {
+                ticket: candidate.ticket,
+                repository: finding.repository,
+                package: finding.package,
+                severity: existingSeverity || finding.severity,
+                currentSeverity: existingSeverity || null,
+                isProposal: true,
+                findings: [],
+                reason: candidate.reason,
+              };
+              run.updates.push(update);
+            }
+            update.findings.push(finding);
+            update.severity = highest([update.severity, finding.severity]);
+            const confirmedNoPatch =
+              Object.values(finding.branchEvidence).length &&
+              Object.values(finding.branchEvidence).every((b) => b.noPatch && !b.review);
+            if (
+              confirmedNoPatch &&
+              candidate.kind === 'same_package' &&
+              /no patched|unpatched|no patch/i.test(owningScope(candidate.issue))
+            ) {
+              let blocker = run.blockers.find((b) => b.ticket === candidate.ticket && b.referenceOnly);
+              if (!blocker) {
+                blocker = {
+                  ticket: candidate.ticket,
+                  package: finding.package,
+                  severity: finding.severity,
+                  blocker:
+                    'New finding shares the confirmed missing-patch blocker; extend existing scope after review.',
+                  status: candidate.issue.fields.status.name,
+                  existing: true,
+                  referenceOnly: true,
+                  isProposal: true,
+                  currentSeverity: existingSeverity || null,
+                  findings: [],
+                  newFindingIds: [],
+                };
+                run.blockers.push(blocker);
+              }
+              blocker.newFindingIds.push(finding.id);
+              blocker.findings.push(finding);
+              blocker.severity = highest([blocker.severity, finding.severity]);
+            }
+          }
+          run.review.push(
+            `${finding.id}: review scope extension in ${related.map((r) => r.ticket).join(', ')}; no duplicate ticket created.`,
+          );
+        } else if (Object.values(finding.branchEvidence).some((b) => b.review)) {
+          run.review.push(
+            `${finding.id}: ${[
+              ...new Set(
+                Object.values(finding.branchEvidence)
+                  .filter((b) => b.review)
+                  .map((b) => b.reason),
+              ),
+            ].join(' ')}`,
+          );
+        }
       }
     }
     const { groupFindings } = await import('./core.mjs');
     run.groups = groupFindings(run.newFindings);
+    const updateProposals = new Map();
+    for (const proposal of run.updates) {
+      const previous = updateProposals.get(proposal.ticket);
+      if (!previous) updateProposals.set(proposal.ticket, proposal);
+      else {
+        previous.severity = highest([previous.severity, proposal.severity]);
+        previous.findings = [...new Map([...previous.findings, ...proposal.findings].map((f) => [f.id, f])).values()];
+        if (previous.reason !== proposal.reason) previous.reason += ` ${proposal.reason}`;
+      }
+    }
+    run.updates = [...updateProposals.values()];
     for (const { ticket, findings } of blockerCandidates.values()) {
       const scope = owningScope(ticket);
       const candidate =
@@ -405,8 +504,8 @@ async function scan() {
             Object.values(evidence).some((e) => e.blocked) && !Object.values(evidence).some((e) => e.review),
         );
       if (!allBlocked) {
-        run.review.push(
-          `${ticket.key}: blocker is no longer established ticket-wide; review resuming or splitting scope. No automatic On Hold transition.`,
+        run.existingReviews.push(
+          `${ticket.key}: current automated evidence does not confirm a ticket-wide blocker; review external dependencies and hold status. No automatic transition.`,
         );
         continue;
       }
@@ -634,8 +733,10 @@ async function apply() {
             .join('\n'),
           ticket,
         );
+      if (group.blocked) group.holdConfirmed = true;
     }
     for (const blocker of report.blockers) {
+      if (blocker.referenceOnly) continue;
       await hold(blocker.ticket, blocker.blocker, blocker.ticket);
       blocker.status = config.holdStatus;
     }
@@ -664,7 +765,7 @@ async function render(value) {
     `Status: ${value.failures.length ? 'INCOMPLETE' : 'scan complete'}`,
     `${value.alerts.length} open reviewed; ${value.covered.length} covered; ${value.newFindings.length} newly untriaged.`,
     `GitHub severity counts: ${JSON.stringify(counts)}`,
-    `Proposed new ticket groups: ${value.groups.filter((g) => !g.ticket).length}`,
+    `Tickets created: ${value.groups.filter((g) => g.action === 'created').length}; updated: ${value.groups.filter((g) => g.action === 'updated').length}; proposed: ${value.groups.filter((g) => !g.ticket).length}; existing scope updates proposed: ${(value.updates || []).length}`,
     '',
     ...value.groups.flatMap((g) => [
       `## ${g.summary}`,
@@ -675,14 +776,33 @@ async function render(value) {
         ...Object.entries(f.branchEvidence).map(([b, e]) => `  - ${b}: ${e.reason}`),
       ]),
     ]),
+    '## Untriaged alert assessments',
+    ...value.newFindings.flatMap((f) => [
+      `### ${f.id} — ${f.package} (${f.severity})`,
+      `Manifest: ${f.manifest}; advisory: ${f.ghsa}; alert: ${f.url}`,
+      ...Object.entries(f.branchEvidence || {}).flatMap(([branch, evidence]) => [
+        `- ${branch}: ${evidence.reason}`,
+        ...(evidence.evidence || []).map(
+          (instance) =>
+            `  - ${instance.instance}: ${instance.installed}; parents: ${instance.parents.map((parent) => `${parent.name || parent.parent} ${parent.declared}`).join(', ')}; applicable overrides: ${instance.overrides?.map((rule) => rule.selector).join(', ') || 'none'}`,
+        ),
+      ]),
+    ]),
     '## Recovered Jira actions awaiting notification',
     ...(value.carriedActions || []).map(
       (g) => `- [${g.ticket}](${config.jiraSite}/browse/${g.ticket}): ${g.severity}; ${g.summary}`,
     ),
+    '## Existing scope updates proposed',
+    ...(value.updates || []).map(
+      (u) =>
+        `- [${u.ticket}](${config.jiraSite}/browse/${u.ticket}): ${u.reason} Alerts: ${u.findings.map((f) => f.id).join(', ')}; required severity at least ${u.severity}.`,
+    ),
     '## Covered findings',
     ...value.covered.map((c) => `- ${c.alert} → [${c.ticket}](${config.jiraSite}/browse/${c.ticket}): ${c.evidence}`),
-    '## Existing blockers',
+    '## Existing blocker audit (not new findings)',
     ...value.blockers.map((b) => `- [${b.ticket}](${config.jiraSite}/browse/${b.ticket}): ${b.blocker} (${b.status})`),
+    '## Existing ticket reassessments (audit only)',
+    ...(value.existingReviews || []).map((r) => `- ${r}`),
     '## Needs review',
     ...value.review.map((r) => `- ${r}`),
     '## Failures',

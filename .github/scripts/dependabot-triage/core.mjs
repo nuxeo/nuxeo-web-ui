@@ -72,7 +72,7 @@ export function matchFinding(finding, issues) {
   for (const issue of issues) {
     if (!issue.key.startsWith(`${finding.project}-`)) continue;
     const scope = owningScope(issue);
-    const same = scope.includes(finding.package) && scope.includes(finding.ghsa) && scope.includes(finding.manifest);
+    const same = mentions(scope, finding.package) && scope.includes(finding.ghsa) && mentions(scope, finding.manifest);
     if (!same) continue;
     if (new RegExp(`${escaped}(?![0-9])`).test(scope)) exact.push(issue);
     else possible.push(issue);
@@ -106,80 +106,226 @@ export function resolveDependency(packages, from, name) {
   }
 }
 
+function packageName(location, metadata) {
+  return metadata?.name || location.split('node_modules/').pop();
+}
+
+function dependencyGraph(packages) {
+  const parents = new Map();
+  for (const [location, metadata] of Object.entries(packages)) {
+    for (const field of ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies']) {
+      for (const [name, declared] of Object.entries(metadata?.[field] || {})) {
+        const target = resolveDependency(packages, location, name);
+        if (!target) continue;
+        if (!parents.has(target)) parents.set(target, []);
+        parents.get(target).push({
+          parent: location || '(root)',
+          name: location ? packageName(location, metadata) : '(root)',
+          declared,
+          field,
+        });
+      }
+    }
+  }
+  return parents;
+}
+
+function applicableOverrides(instance, packages, parents, overrides) {
+  const ancestors = (target) => {
+    const found = new Set([target]);
+    const queue = [target];
+    for (let i = 0; i < queue.length; i++) {
+      for (const edge of parents.get(queue[i]) || []) {
+        if (edge.parent !== '(root)' && !found.has(edge.parent)) {
+          found.add(edge.parent);
+          queue.push(edge.parent);
+        }
+      }
+    }
+    return found;
+  };
+  const candidates = ancestors(instance);
+  const matches = (selector, location, replacement) => {
+    const split = selector.lastIndexOf('@');
+    const name = split > 0 ? selector.slice(0, split) : selector;
+    const range = split > 0 ? selector.slice(split + 1) : null;
+    const metadata = packages[location];
+    if (name !== packageName(location, metadata)) return false;
+    if (!range) return true;
+    return (
+      !semver.validRange(range) ||
+      semver.satisfies(metadata.version, range) ||
+      (typeof replacement === 'string' &&
+        semver.validRange(replacement) &&
+        semver.satisfies(metadata.version, replacement))
+    );
+  };
+  const result = [];
+  const visit = (rules, scope, trail = []) => {
+    if (!rules || typeof rules !== 'object') return;
+    for (const [selector, replacement] of Object.entries(rules)) {
+      if (selector === '.') continue;
+      for (const location of scope) {
+        if (!matches(selector, location, replacement)) continue;
+        const chain = [...trail, selector];
+        if (typeof replacement === 'string' || typeof replacement?.['.'] === 'string')
+          result.push({
+            path: location,
+            selector: chain.join(' → '),
+            value: typeof replacement === 'string' ? replacement : replacement['.'],
+          });
+        if (replacement && typeof replacement === 'object') {
+          const descendants = [...scope].filter(
+            (candidate) => candidate !== location && ancestors(candidate).has(location),
+          );
+          visit(replacement, descendants, chain);
+        }
+      }
+    }
+  };
+  visit(overrides, [...candidates]);
+  return result;
+}
+
 export function assessLock(finding, lock, manifest, patchMetadata) {
   if (finding.ecosystem !== 'npm')
     return { review: true, reason: 'Unsupported ecosystem; engineering review required.' };
-  const range = semver.validRange(finding.range.replace(/,\s*/g, ' '));
-  if (!range || !lock.packages || typeof lock.packages !== 'object')
+  const range = typeof finding.range === 'string' && semver.validRange(finding.range.replace(/,\s*/g, ' '));
+  if (!range || !lock?.packages || typeof lock.packages !== 'object')
     return { review: true, reason: 'Cannot safely interpret version range or lockfile.' };
   const instances = Object.entries(lock.packages).filter(
-    ([key, value]) => key.endsWith(`/node_modules/${finding.package}`) || key === `node_modules/${finding.package}`,
+    ([key]) => key.endsWith(`/node_modules/${finding.package}`) || key === `node_modules/${finding.package}`,
   );
-  if (instances.some(([, value]) => !value || !semver.valid(value.version)))
-    return { review: true, reason: 'Resolved package version is unreadable; inspect the dependency path.' };
-  const affected = instances.filter(([, value]) => semver.satisfies(value.version, range));
-  if (!affected.length)
+  const graph = dependencyGraph(lock.packages);
+  const patch = semver.valid(finding.patched || '');
+  const affected = instances.filter(
+    ([, value]) => !semver.valid(value?.version) || semver.satisfies(value.version, range),
+  );
+  const evidence = affected.map(([instance, value]) => {
+    const parents = graph.get(instance) || [];
+    return {
+      instance,
+      installed: value?.version || 'unreadable',
+      parents,
+      overrides: applicableOverrides(instance, lock.packages, graph, manifest.overrides),
+      requiresParentUpgrade: Boolean(
+        patch && parents.some((p) => semver.validRange(p.declared) && !semver.satisfies(patch, p.declared)),
+      ),
+    };
+  });
+  if (!evidence.length)
     return {
       blocked: false,
       review: true,
+      evidence,
       reason: 'No vulnerable resolved instance on this branch; confirm alert branch/re-scan.',
     };
+  if (evidence.some((e) => !semver.valid(e.installed)))
+    return { review: true, evidence, reason: 'Resolved package version is unreadable; inspect the dependency path.' };
   if (!finding.patched)
-    return { blocked: true, reason: 'Affected instance confirmed; GitHub lists no patched release.', noPatch: true };
-  const patch = semver.valid(finding.patched);
-  if (!patch) return { review: true, reason: 'Patched version cannot be interpreted safely.' };
-  if (semver.satisfies(patch, range))
-    return { review: true, reason: 'Listed patched version still matches advisory range; review upstream data.' };
-  const overrideTouches = (name, overrides) =>
-    overrides &&
-    typeof overrides === 'object' &&
-    Object.entries(overrides).some(
-      ([key, value]) => key === name || key.startsWith(`${name}@`) || overrideTouches(name, value),
-    );
-  if (overrideTouches(finding.package, manifest.overrides))
-    return { review: true, reason: 'Manifest overrides affect this package; validate the effective constraints.' };
-  const evidence = [];
-  for (const [instance, value] of affected) {
-    const parents = Object.entries(lock.packages).flatMap(([parent, metadata]) =>
-      ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies'].flatMap((field) => {
-        const declared = metadata[field]?.[finding.package];
-        return declared && resolveDependency(lock.packages, parent, finding.package) === instance
-          ? [{ parent: parent || '(root)', declared }]
-          : [];
-      }),
-    );
-    if (parents.some((p) => overrideTouches(p.parent.split('node_modules/').pop(), manifest.overrides)))
-      return { review: true, reason: 'A parent override affects this dependency path; inspect effective constraints.' };
-    const constraints = parents.filter((p) => !semver.validRange(p.declared) || !semver.satisfies(patch, p.declared));
-    evidence.push({ instance, installed: value.version, parents });
-    if (!parents.length || constraints.length) {
-      return {
-        blocked: true,
-        reason: `Published patch ${patch} needs parent/pin changes or a validated override.`,
-        evidence,
-      };
-    }
-  }
-  const supported = manifest.engines?.node;
-  const required = patchMetadata.engines?.node;
-  if (required && (!supported || !semver.validRange(supported) || !semver.subset(supported, required))) {
     return {
       blocked: true,
-      reason: `Patched package requires Node ${required}; declared support ${supported || 'unspecified'} needs review.`,
+      noPatch: true,
+      blockerKind: 'no_patch',
       evidence,
+      reason: 'Affected instances confirmed; GitHub lists no patched release. Assess mitigation and recheck upstream.',
     };
-  }
+  if (!patch || semver.satisfies(patch, range))
+    return {
+      review: true,
+      evidence,
+      reason: 'Patched version is unreadable or still matches the advisory range; review upstream data.',
+    };
+  if (evidence.some((e) => e.overrides.length))
+    return {
+      blocked: false,
+      review: true,
+      evidence,
+      reason: 'An override applies to a vulnerable dependency path; validate its effective constraints.',
+    };
+  if (evidence.some((e) => !e.parents.length || e.parents.some((p) => !semver.validRange(p.declared))))
+    return {
+      review: true,
+      evidence,
+      reason: 'A dependency path or parent declaration requires engineering assessment.',
+    };
+  const supported = manifest.engines?.node;
+  const required = patchMetadata.engines?.node;
+  if (
+    required &&
+    (!semver.validRange(required) || !supported || !semver.validRange(supported) || !semver.subset(supported, required))
+  )
+    return {
+      blocked: false,
+      review: true,
+      evidence,
+      reason: `Patched package requires Node ${required}; declared support ${supported || 'unspecified'} needs review.`,
+    };
+  const needsParentUpgrade = evidence.some((e) => e.requiresParentUpgrade);
   return {
     blocked: false,
     target: patch,
-    reason: 'Published patch fits all resolved-parent ranges and declared Node support; tests still required.',
     evidence,
+    needsParentUpgrade,
+    remediation: needsParentUpgrade ? 'parent_upgrade' : 'lockfile_refresh',
+    reason: needsParentUpgrade
+      ? `Published patch ${patch} requires scoped parent/pin changes or override assessment; engineering work, not a confirmed external blocker.`
+      : 'Published patch fits all resolved-parent ranges and declared Node support; tests still required.',
   };
+}
+
+function mentions(value, token) {
+  const escaped = token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`(?<![a-zA-Z0-9_/@.-])${escaped}(?![a-zA-Z0-9_/.-])`).test(value);
+}
+
+export function relatedRemediation(finding, issues) {
+  const parentNames = new Set(
+    Object.values(finding.branchEvidence || {}).flatMap((b) =>
+      (b.evidence || [])
+        .filter((e) => e.requiresParentUpgrade)
+        .flatMap((e) => e.parents.filter((p) => p.name !== '(root)').map((p) => p.name)),
+    ),
+  );
+  return issues.flatMap((issue) => {
+    if (!issue.key.startsWith(`${finding.project}-`) || issue.fields.status.statusCategory.key === 'done') return [];
+    const scope = owningScope(issue);
+    if (
+      !scope.includes(`https://github.com/${finding.repository}/`) &&
+      !scope.includes(`Repository: ${finding.repository}`)
+    )
+      return [];
+    if (mentions(scope, finding.package))
+      return [
+        {
+          ticket: issue.key,
+          issue,
+          kind: 'same_package',
+          reason: `Review extending existing ${finding.package} remediation; explicit alert coverage must be added.`,
+        },
+      ];
+    const rows = scope.match(/^\|[\s\S]*?\|[ \t]*\n/gm) || scope.split('\n');
+    const shared = [...parentNames].filter((name) =>
+      rows.some((row) => mentions(row, name) && mentions(row, finding.manifest)),
+    );
+    return shared.length
+      ? [
+          {
+            ticket: issue.key,
+            issue,
+            kind: 'shared_parent',
+            parents: shared,
+            reason: `Shared parent upgrade (${shared.join(', ')}) in ${finding.manifest}; review extending scope and remaining dependency paths.`,
+          },
+        ]
+      : [];
+  });
 }
 
 export function groupFindings(findings) {
   const groups = new Map();
   for (const finding of findings) {
+    if (finding.triageReview) continue;
     const branches = Object.values(finding.branchEvidence);
     const blocked = branches.some((b) => b.blocked);
     const review = branches.some((b) => b.review);
@@ -267,13 +413,13 @@ export function description(group, config) {
       heading(group.blocked ? 'Blocker and recheck criteria' : 'Remediation candidate'),
       ...group.findings.flatMap((f) =>
         Object.entries(f.branchEvidence).map(([branch, e]) =>
-          paragraph(`${branch}: ${e.reason} Evidence: ${JSON.stringify(e.evidence || [])}`),
+          paragraph(`${f.manifest} — ${branch}: ${e.reason} Evidence: ${JSON.stringify(e.evidence || [])}`),
         ),
       ),
       paragraph(
         group.blocked
           ? 'Mitigation: none established automatically. Recheck upstream patch releases, supported parent upgrades and pin/engine constraints. Removal, replacement or overrides require engineering assessment. No risk acceptance is implied.'
-          : 'Prefer the smallest in-range lockfile update clearing every advisory. This is a candidate, not proof that implementation tests passed.',
+          : 'Prefer the smallest supported remediation clearing every advisory. Parent/pin upgrades may be required; validate their APIs and engines. This is an engineering candidate, not proof that implementation tests passed.',
       ),
       heading('Acceptance criteria'),
       paragraph(
@@ -285,122 +431,161 @@ export function description(group, config) {
       paragraph(
         'For blocked work: document reachability, mitigation, upstream references and review criteria; do not close as fixed without remediation or approved risk disposition.',
       ),
-      paragraph(`Epic: ${config.jiraSite}/browse/${config.epic}. Other-repository work is separate.`),
+      paragraph(`Epic: ${config.jiraSite}/browse/${config.epic} Other-repository work is separate.`),
     ],
   };
 }
 
 export function card(report, config, mode) {
   const text = (value, extra = {}) => {
-    return { type: 'TextBlock', text: value, wrap: true, ...extra };
+    return { type: 'TextBlock', text: String(value), wrap: true, ...extra };
   };
+  const shorten = (value, limit = 280) => {
+    const clean = String(value || '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    return clean.length > limit ? `${clean.slice(0, limit)}…` : clean;
+  };
+  const newIds = new Set(report.newFindings.map((f) => f.id));
+  const currentActions = report.groups.filter((g) => g.action);
+  const currentTickets = new Set(currentActions.map((g) => g.ticket));
+  const recoveredActions = (report.carriedActions || []).filter((g) => !currentTickets.has(g.ticket));
+  const actions = [...currentActions, ...recoveredActions];
+  const uniqueActions = [...new Map(actions.map((a) => [a.ticket || a.key, a])).values()];
+  const proposals = mode === 'preview' ? report.groups.filter((g) => !g.action) : [];
+  const updates = report.updates || [];
+  const counts = Object.fromEntries(
+    Object.keys(symbols).map((s) => [s, report.newFindings.filter((f) => f.severity === s).length]),
+  );
+  const newTracked = new Set(
+    uniqueActions.flatMap((g) => (g.findings || []).filter((f) => newIds.has(f.id)).map((f) => f.id)),
+  );
+  const proposedIds = new Set(report.groups.flatMap((g) => (g.findings || []).map((f) => f.id)));
+  const manualIds = new Set([
+    ...report.newFindings.filter((f) => !proposedIds.has(f.id)).map((f) => f.id),
+    ...(report.reviewFindings || []).map((f) => f.id),
+  ]);
+  const linkedBlockers = (report.blockers || []).filter((b) => b.newFindingIds?.some((id) => newIds.has(id)));
   const body = [
     text(
       `🛡️ Dependabot triage · ${new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: config.timezone }).format(new Date(report.started))} ${config.timezone}`,
       { weight: 'Bolder', size: 'Large' },
     ),
   ];
-  body.push(text(`Repositories: ${(config.repositories || []).map((r) => r.name).join(' · ')}`, { isSubtle: true }));
+  body.push(text((config.repositories || []).map((r) => r.name.replace('nuxeo/', '')).join(' · '), { isSubtle: true }));
   if (report.failures.length)
     body.push(
       text('⚠️ Scan incomplete', { weight: 'Bolder', color: 'Attention' }),
-      ...report.failures.map((f) => text(f)),
+      ...report.failures.slice(0, 4).map((f) => text(shorten(f, 500))),
     );
-  else {
-    const counts = Object.fromEntries(
-      Object.keys(symbols).map((s) => [s, report.newFindings.filter((f) => f.severity === s).length]),
+  else if (report.newFindings.length) {
+    body.push(
+      text(
+        `${!counts.critical ? `No new Critical${!counts.high ? ' or High' : ''} findings.\n` : ''}${Object.keys(symbols)
+          .filter((s) => counts[s])
+          .map((s) => `${symbols[s]} ${counts[s]} ${s[0].toUpperCase() + s.slice(1)}`)
+          .join(' · ')}`,
+        { weight: 'Bolder' },
+      ),
     );
-    if (report.newFindings.length) {
-      const zero = !counts.critical ? `No new Critical${!counts.high ? ' or High' : ''} findings. ` : '';
-      body.push(
-        text(
-          `${zero}${Object.keys(symbols)
-            .filter((s) => counts[s])
-            .map((s) => `${symbols[s]} ${counts[s]} ${s}`)
-            .join(' · ')}`,
-          { weight: 'Bolder' },
-        ),
-      );
-      body.push(text('🐛 Dependabot found a few uninvited guests in the dependency tree.'));
-    } else if (report.carriedActions?.length) {
-      body.push(
-        text('📨 Recovered Jira actions awaiting notification; see the ticket table below.', { weight: 'Bolder' }),
-      );
-    } else if (report.review.length) {
-      body.push(text('⚠️ No confirmed new findings; existing-ticket coverage needs review.', { weight: 'Bolder' }));
-    } else {
-      body.push(text('✅ No new untriaged Dependabot findings were identified.', { weight: 'Bolder' }));
-      if (!report.review.length) body.push(text('🐛 The bugs took the day off. We checked anyway.'));
-    }
-  }
-  if (report.carriedActions?.length)
+    const advisories = new Set(report.newFindings.map((f) => f.ghsa || f.cve));
+    body.push(
+      text(
+        `${report.newFindings.length} untriaged ${report.newFindings.length === 1 ? 'alert' : 'alerts'} · ${advisories.size} unique ${advisories.size === 1 ? 'advisory' : 'advisories'}`,
+      ),
+    );
+    body.push(text('🐛 Dependabot found a few uninvited guests in the dependency tree.'));
+  } else if (uniqueActions.length)
     body.push(text('📨 Recovered Jira actions awaiting notification', { weight: 'Bolder' }));
-  const urgentReview = (report.reviewFindings || []).filter((f) => ['critical', 'high'].includes(f.severity));
-  if (urgentReview.length)
+  else if (report.review.length) body.push(text('⚠️ Existing-ticket coverage needs review.', { weight: 'Bolder' }));
+  else
     body.push(
-      text(
-        `⚠️ Critical/High coverage needs review: ${urgentReview.map((f) => `${symbols[f.severity]} ${f.id}`).join(', ')}`,
-        { weight: 'Bolder', color: 'Attention' },
-      ),
+      text('✅ No new untriaged Dependabot findings were identified.', { weight: 'Bolder' }),
+      text('🐛 The bugs took the day off. We checked anyway.'),
     );
-  const table = (title, groups) => {
-    if (!groups.length) return;
-    body.push(text(title, { weight: 'Bolder', separator: true }));
-    const row = (values, bold = false) => {
-      return {
-        type: 'ColumnSet',
-        columns: values.map((value, i) => {
-          return {
-            type: 'Column',
-            width: i === 2 ? 'stretch' : 'auto',
-            items: [text(value, bold ? { weight: 'Bolder' } : {})],
-          };
-        }),
-      };
-    };
-    body.push(row(['Jira', 'Severity', 'Summary'], true));
-    for (const g of groups.slice(0, 12))
-      body.push(
-        row([
-          g.ticket ? `[${g.ticket}](${config.jiraSite}/browse/${g.ticket})` : 'Proposed',
-          `${symbols[g.severity]} ${g.severity}`,
-          `${g.action ? `${g.action}: ` : ''}${g.package}: ${g.blocker || g.summary}`,
-        ]),
-      );
-    if (groups.length > 12) body.push(text(`${groups.length - 12} more rows are included in the full Actions report.`));
-  };
-  table(
-    mode === 'preview' ? 'Proposed tickets / updates' : 'Tickets created / updated',
-    report.groups.filter((g) => !g.blocked && (mode === 'preview' || g.action)),
+  const created = currentActions.filter((g) => g.action === 'created').length;
+  const updated = currentActions.filter((g) => g.action === 'updated').length;
+  const pending = mode === 'automatic' ? report.groups.filter((g) => !g.action) : [];
+  body.push(
+    text(
+      mode === 'preview'
+        ? `Preview: ${proposals.length} new ticket ${proposals.length === 1 ? 'proposal' : 'proposals'} · ${updates.length} existing ticket update ${updates.length === 1 ? 'proposal' : 'proposals'} · ${manualIds.size} ${manualIds.size === 1 ? 'alert needs' : 'alerts need'} review`
+        : `Jira: ${created} created · ${updated} updated · ${manualIds.size} ${manualIds.size === 1 ? 'alert needs' : 'alerts need'} review${pending.length ? ` · ${pending.length} pending actions` : ''}${recoveredActions.length ? ` · ${recoveredActions.length} recovered from earlier runs` : ''}`,
+      { weight: 'Bolder' },
+    ),
   );
-  table('Recovered Jira actions', report.carriedActions || []);
-  table('Blockers / CVEs with no patch available', [...report.groups.filter((g) => g.blocked), ...report.blockers]);
-  if (report.groups.some((g) => g.blocked) || report.blockers.length)
-    body.push(
-      text(
-        mode === 'preview'
-          ? 'FYI: blocked tickets would be placed On Hold with a reason and recheck criteria.'
-          : report.failures.length
-            ? 'FYI: On Hold processing may be incomplete; check the run failures.'
-            : 'FYI: blocked tickets are put On Hold with a reason and recheck criteria.',
-      ),
-    );
+  const entries = (title, groups) => {
+    if (!groups.length) return;
+    body.push(text(`${title} (${groups.length})`, { weight: 'Bolder', separator: true }));
+    for (const g of groups.slice(0, 8)) {
+      const link = g.ticket ? `[${g.ticket}](${config.jiraSite}/browse/${g.ticket})` : 'Proposed new ticket';
+      body.push({
+        type: 'Container',
+        spacing: 'Medium',
+        items: [
+          text(
+            `${symbols[g.severity] || '•'} **${link} · ${g.isProposal ? 'required ' : ''}${g.severity ? g.severity[0].toUpperCase() + g.severity.slice(1) : 'review'}**`,
+          ),
+          text(shorten(g.summary || g.reason || g.blocker)),
+          ...(g.findings?.length
+            ? [
+                text(
+                  `${g.findings.length} ${g.findings.length === 1 ? 'alert' : 'alerts'} · ${(g.repository || '').replace('nuxeo/', '')}${g.holdConfirmed ? ' · On Hold' : g.blocked ? ' · No patched release' : ''}`,
+                  { isSubtle: true },
+                ),
+              ]
+            : []),
+        ],
+      });
+    }
+    if (groups.length > 8) body.push(text(`${groups.length - 8} more entries in the full report.`));
+  };
+  entries('Tickets created / updated', currentActions);
+  entries('Recovered actions from earlier runs', recoveredActions);
+  entries('Proposed new tickets', proposals);
+  entries('Pending actions — not completed', pending);
+  const blockerTickets = new Set(linkedBlockers.map((b) => b.ticket));
+  entries(
+    'Existing work to update',
+    updates.filter((u) => !blockerTickets.has(u.ticket)),
+  );
+  entries('Existing blockers affecting new alerts', linkedBlockers);
+  if (proposals.some((g) => g.blocked))
+    body.push(text('FYI: proposals with a confirmed missing patch would be placed On Hold.'));
   if (report.review.length)
     body.push(
-      text('Needs review', { weight: 'Bolder' }),
-      ...report.review.slice(0, 5).map((r) => text(r.slice(0, 900))),
+      text('Needs review', { weight: 'Bolder', separator: true }),
+      ...report.review.slice(0, 5).map((r) => {
+        const finding = [...report.newFindings, ...(report.reviewFindings || [])].find((f) => r.startsWith(`${f.id}:`));
+        const label = finding
+          ? `[${finding.repository.replace('nuxeo/', '')} #${finding.number}](${finding.url})${r.slice(finding.id.length)}`
+          : r;
+        return text(shorten(label, 400));
+      }),
+    );
+  if (report.review.length > 5) body.push(text(`${report.review.length - 5} more review notes in the full report.`));
+  const urgent = (report.reviewFindings || []).filter((f) => ['critical', 'high'].includes(f.severity));
+  if (urgent.length)
+    body.push(
+      text(
+        `⚠️ Critical/High coverage needs review: ${urgent
+          .slice(0, 8)
+          .map((f) => f.id)
+          .join(', ')}`,
+        { color: 'Attention', weight: 'Bolder' },
+      ),
     );
   body.push(
     text(
-      `${mode === 'preview' ? 'PREVIEW — no Jira changes' : 'Automatic run'} · ${report.alerts.length} reviewed · ${report.covered.length} covered`,
+      `${report.alerts.length} reviewed · ${report.covered.length} already covered · ${newTracked.size} newly tracked`,
       { isSubtle: true },
     ),
   );
-  if (report.review.length > 5) body.push(text(`${report.review.length - 5} more review items in the Actions report.`));
+  if (mode === 'preview') body.push(text('PREVIEW — no Jira changes or Teams posting', { isSubtle: true }));
   if (process.env.GITHUB_SERVER_URL && process.env.GITHUB_REPOSITORY && process.env.GITHUB_RUN_ID)
     body.push(
       text(
-        `[Full triage report](${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID})`,
+        `[Full report](${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID})`,
       ),
     );
   body.push(

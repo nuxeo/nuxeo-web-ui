@@ -7,6 +7,7 @@ import {
   changedSince,
   description,
   groupFindings,
+  relatedRemediation,
   highest,
   matchFinding,
   normalize,
@@ -83,19 +84,19 @@ test('no-patch and actionable findings are kept separate', () => {
 test('absence of a patch does not infer a nonexistent upgrade', () => {
   assert.equal(assessLock(finding({ patched: null }), lock(), {}, {}).noPatch, true);
 });
-test('exact pins block routine lockfile refresh despite published patch', () => {
+test('exact pins require parent work without implying an external blocker', () => {
   const tree = lock();
   tree.packages[''].dependencies.example = '1.1.0';
-  assert.equal(assessLock(finding(), tree, { engines: { node: '>=22.13' } }, {}).blocked, true);
+  assert.equal(assessLock(finding(), tree, { engines: { node: '>=22.13' } }, {}).needsParentUpgrade, true);
 });
 test('in-range patch is a candidate, never claims compatibility tests passed', () => {
   const result = assessLock(finding(), lock(), { engines: { node: '>=22.13' } }, { engines: { node: '>=20' } });
   assert.equal(result.blocked, false);
   assert.match(result.reason, /tests still required/);
 });
-test('engine floor incompatible with declared support blocks upgrade', () => {
+test('engine floor uncertainty requires review instead of automatic On Hold', () => {
   assert.equal(
-    assessLock(finding(), lock(), { engines: { node: '>=18' } }, { engines: { node: '>=22' } }).blocked,
+    assessLock(finding(), lock(), { engines: { node: '>=18' } }, { engines: { node: '>=22' } }).review,
     true,
   );
 });
@@ -103,7 +104,7 @@ test('all nested affected instances must be examined', () => {
   const tree = lock();
   tree.packages['node_modules/parent'] = { dependencies: { example: '1.1.0' } };
   tree.packages['node_modules/parent/node_modules/example'] = { version: '1.1.0' };
-  assert.equal(assessLock(finding(), tree, {}, {}).blocked, true);
+  assert.equal(assessLock(finding(), tree, {}, {}).needsParentUpgrade, true);
 });
 test('related/out-of-scope ticket references do not establish coverage', () => {
   const f = finding();
@@ -352,7 +353,7 @@ test('automatic summary does not call an unprocessed proposal a created ticket',
   value.groups = [{ package: 'never-created-package', severity: 'medium', summary: 'Pending', blocked: false }];
   value.failures = ['Jira unavailable'];
   const output = JSON.stringify(card(value, config, 'automatic'));
-  assert.doesNotMatch(output, /never-created-package/);
+  assert.match(output, /Pending actions — not completed/);
   assert.doesNotMatch(output, /Tickets created/);
 });
 
@@ -382,7 +383,7 @@ test('ADF Out of scope heading excludes an explicitly unowned alert', () => {
 test('installed peer contracts can block an otherwise in-range patch', () => {
   const tree = lock();
   tree.packages['node_modules/plugin'] = { peerDependencies: { example: '<1.2.0' } };
-  assert.equal(assessLock(finding(), tree, {}, {}).blocked, true);
+  assert.equal(assessLock(finding(), tree, {}, {}).needsParentUpgrade, true);
 });
 test('notification completion does not discard an unresolved Jira create intent', () => {
   const { folder, phase } = fixtureRun(false);
@@ -550,7 +551,7 @@ test('resumed ticket with historical blocker heading is not moved back On Hold',
     const value = JSON.parse(fs.readFileSync(path.join(folder, 'report.json')));
     assert.deepEqual(value.failures, []);
     assert.equal(value.blockers.length, 0);
-    assert.match(value.review.join(' '), /no longer established ticket-wide/);
+    assert.match(value.existingReviews.join(' '), /does not confirm a ticket-wide blocker/);
     assert.equal(phase('apply', automatic).status, 0);
     assert.equal(fs.existsSync(path.join(folder, 'writes.json')), false);
   } finally {
@@ -616,7 +617,7 @@ test('no-patch classifications require a vulnerable, interpretable resolved inst
 });
 test('direct and nested manifest overrides route effective-constraint decisions to review', () => {
   assert.equal(assessLock(finding(), lock(), { overrides: { example: '1.1.0' } }, {}).review, true);
-  assert.equal(assessLock(finding(), lock(), { overrides: { plugin: { example: '^1.2.0' } } }, {}).review, true);
+  assert.notEqual(assessLock(finding(), lock(), { overrides: { plugin: { example: '^1.2.0' } } }, {}).review, true);
   const tree = lock();
   tree.packages['node_modules/plugin'] = { dependencies: { example: '^1.0.0' } };
   assert.equal(assessLock(finding(), tree, { overrides: { plugin: '2.0.0' } }, {}).review, true);
@@ -1042,3 +1043,331 @@ for (const approve of [true, false]) {
     }
   });
 }
+
+function auditedMinimatch(extra = {}) {
+  return finding({
+    package: 'minimatch',
+    range: '>=7.0.0 <11.0.1',
+    patched: '11.0.1',
+    manifest: 'packages/nuxeo-web-ui-ftest/package-lock.json',
+    ...extra,
+  });
+}
+function auditedTree() {
+  return {
+    packages: {
+      '': { dependencies: { glob: '^10.5.0', 'readdir-glob': '^3.0.0' } },
+      'node_modules/glob': { version: '10.5.0', dependencies: { minimatch: '^9.0.4' } },
+      'node_modules/minimatch': { version: '9.0.9' },
+      'node_modules/readdir-glob': { version: '3.0.0', dependencies: { minimatch: '^10.2.2' } },
+      'node_modules/readdir-glob/node_modules/minimatch': { version: '10.2.6' },
+    },
+  };
+}
+test('audit regression: both ftest minimatch instances survive a rejecting first parent range', () => {
+  const result = assessLock(
+    auditedMinimatch(),
+    auditedTree(),
+    { engines: { node: '>=22.13' } },
+    { engines: { node: '18 || 20 || >=22' } },
+  );
+  assert.equal(result.evidence.length, 2);
+  assert.deepEqual(
+    result.evidence.map((e) => e.installed),
+    ['9.0.9', '10.2.6'],
+  );
+  assert.equal(result.blocked, false);
+  assert.equal(result.needsParentUpgrade, true);
+  assert.equal(result.remediation, 'parent_upgrade');
+});
+test('no-patch findings retain every resolved dependency path', () => {
+  const result = assessLock(auditedMinimatch({ patched: null }), auditedTree(), {}, {});
+  assert.equal(result.blocked, true);
+  assert.equal(result.evidence.length, 2);
+});
+test('audit regression: replace-only minimatch override does not affect vulnerable glob paths', () => {
+  const tree = auditedTree();
+  tree.packages[''].dependencies.replace = '1.0.0';
+  tree.packages['node_modules/replace'] = { version: '1.0.0', dependencies: { minimatch: '^3.1.4' } };
+  tree.packages['node_modules/replace/node_modules/minimatch'] = { version: '3.1.5' };
+  const result = assessLock(auditedMinimatch(), tree, { overrides: { replace: { minimatch: '^3.1.4' } } }, {});
+  assert.notEqual(result.review, true);
+  assert.ok(result.evidence.every((e) => e.overrides.length === 0));
+});
+test('path-specific overrides affect only their matching vulnerable instances', () => {
+  const result = assessLock(auditedMinimatch(), auditedTree(), { overrides: { glob: { minimatch: '11.0.1' } } }, {});
+  assert.equal(result.review, true);
+  assert.equal(result.evidence[0].overrides[0].selector, 'glob → minimatch');
+  assert.equal(result.evidence[1].overrides.length, 0);
+});
+test('unrelated sibling overrides do not affect a parent’s vulnerable dependency', () => {
+  const result = assessLock(auditedMinimatch(), auditedTree(), { overrides: { glob: { minipass: '7.0.0' } } }, {});
+  assert.notEqual(result.review, true);
+});
+test('existing glob remediation is a reuse proposal for new minimatch work in the same manifest', () => {
+  const f = auditedMinimatch();
+  f.branchEvidence = { a: assessLock(f, auditedTree(), {}, {}) };
+  const existing = issue(f, {
+    description: `Repository: ${repo}\n### Findings\n| Package | Manifest | Alert |\n| glob | ${f.manifest} | https://github.com/${repo}/security/dependabot/639 |\n### Remediation\nUpgrade glob to 14.0.4.`,
+  });
+  const related = relatedRemediation(f, [existing]);
+  assert.equal(related[0].kind, 'shared_parent');
+  assert.deepEqual(related[0].parents, ['glob']);
+  assert.equal(relatedRemediation({ ...f, manifest: 'package-lock.json' }, [existing]).length, 0);
+  assert.equal(relatedRemediation(f, [{ ...existing, key: 'ELEMENTS-1' }]).length, 0);
+});
+test('ADF parent remediation rows are matched without confusing root and nested manifests', () => {
+  const f = auditedMinimatch();
+  f.branchEvidence = { a: assessLock(f, auditedTree(), {}, {}) };
+  const paragraph = (value) => {
+    return { type: 'paragraph', content: [{ type: 'text', text: value }] };
+  };
+  const existing = issue(f, {
+    description: {
+      type: 'doc',
+      content: [
+        paragraph(`Repository: ${repo}`),
+        {
+          type: 'table',
+          content: [
+            {
+              type: 'tableRow',
+              content: ['glob', f.manifest].map((t) => {
+                return { type: 'tableCell', content: [paragraph(t)] };
+              }),
+            },
+          ],
+        },
+      ],
+    },
+  });
+  assert.equal(relatedRemediation(f, [existing])[0].kind, 'shared_parent');
+});
+test('root manifest coverage is not inferred from a child lockfile path', () => {
+  const f = finding();
+  const existing = issue(f, { description: `${f.url} ${f.ghsa} ${f.package} plugin/a11y/package-lock.json` });
+  assert.equal(matchFinding(f, [existing]).kind, 'new');
+});
+test('Teams summary separates new actions and hides unrelated existing blockers', () => {
+  const value = report();
+  const a = finding(),
+    b = finding({ id: repo + '#124', number: 124 }),
+    c = finding({ id: repo + '#125', number: 125 });
+  value.alerts = [a, b, c];
+  value.newFindings = [a, b, c];
+  value.review = ['Alert 125 requires scope review'];
+  value.groups = [
+    {
+      key: 'new',
+      ticket: 'WEBUI-2431',
+      action: 'created',
+      severity: 'medium',
+      package: 'minimatch',
+      repository: repo,
+      summary: 'Update minimatch',
+      findings: [a, b],
+      blocked: true,
+      holdConfirmed: true,
+    },
+  ];
+  value.blockers = [
+    { ticket: 'WEBUI-2429', severity: 'low', blocker: 'old' },
+    { ticket: 'WEBUI-2430', severity: 'medium', blocker: 'old' },
+    { ticket: 'ELEMENTS-2145', severity: 'low', blocker: 'old' },
+  ];
+  const output = JSON.stringify(card(value, config, 'automatic'));
+  assert.match(output, /1 created · 0 updated · 1 alert needs review/);
+  assert.match(output, /WEBUI-2431/);
+  assert.doesNotMatch(output, /WEBUI-2429|WEBUI-2430|ELEMENTS-2145|ColumnSet|tableCell/);
+});
+test('only existing blockers linked to new untriaged alerts appear in Teams', () => {
+  const value = report();
+  const f = finding();
+  value.newFindings = [f];
+  value.blockers = [
+    { ticket: 'WEBUI-10', severity: 'medium', blocker: 'same upstream blocker', newFindingIds: [f.id] },
+    { ticket: 'WEBUI-11', severity: 'low', blocker: 'unrelated', newFindingIds: ['different'] },
+  ];
+  const output = JSON.stringify(card(value, config, 'preview'));
+  assert.match(output, /Existing blockers affecting new alerts/);
+  assert.match(output, /WEBUI-10/);
+  assert.doesNotMatch(output, /WEBUI-11/);
+});
+test('zero-finding Teams summary does not revive existing blocker audit notes', () => {
+  const value = report();
+  value.blockers = [{ ticket: 'WEBUI-old', severity: 'low' }];
+  value.existingReviews = ['WEBUI-old remains held'];
+  const output = JSON.stringify(card(value, config, 'automatic'));
+  assert.match(output, /No new untriaged Dependabot findings were identified/);
+  assert.doesNotMatch(output, /WEBUI-old/);
+});
+test('compact Teams card remains size-bounded for a large review backlog', () => {
+  const value = report();
+  const f = finding();
+  value.newFindings = [f];
+  value.updates = Array.from({ length: 1000 }, (_, i) => {
+    return {
+      ticket: 'WEBUI-' + i,
+      severity: 'medium',
+      reason: 'x'.repeat(2000),
+      findings: [f],
+    };
+  });
+  value.review = Array.from({ length: 1000 }, () => 'x'.repeat(2000));
+  assert.ok(Buffer.byteLength(JSON.stringify(card(value, config, 'preview'))) < 25000);
+});
+
+for (const noPatch of [false, true]) {
+  test(`CLI report ${noPatch ? 'links a confirmed missing-patch blocker for a new alert' : 'proposes existing scope without surfacing unrelated blockers'}`, () => {
+    const { folder, phase, hook } = fixtureRun(false);
+    try {
+      const f = finding(
+        noPatch ? { package: 'example', range: '>=1.0.0 <1.2.0', patched: null, severity: 'critical' } : {},
+      );
+      const old = finding({
+        id: repo + '#200',
+        number: 200,
+        url: `https://github.com/${repo}/security/dependabot/200`,
+        package: 'other',
+        patched: null,
+        range: '>=1.0.0 <1.2.0',
+        severity: 'low',
+      });
+      const candidate = issue(f, {
+        description: `Repository: ${repo}\n### Findings\nhttps://github.com/${repo}/security/dependabot/999 GHSA-previous example plugin/a11y/package-lock.json\n${noPatch ? 'No patched release available.' : ''}`,
+      });
+      const unrelated = {
+        ...issue(old),
+        key: 'WEBUI-222',
+        fields: {
+          ...issue(old).fields,
+          status: { name: 'On Hold', statusCategory: { key: 'new' } },
+          customfield_12201: { value: 'Low' },
+        },
+      };
+      const values = [f, old].map((a) => {
+        return {
+          number: a.number,
+          html_url: a.url,
+          created_at: '2026-01-01T00:00:00Z',
+          dependency: { package: { name: a.package, ecosystem: 'npm' }, manifest_path: a.manifest },
+          security_advisory: { severity: a.severity, ghsa_id: a.ghsa },
+          security_vulnerability: {
+            vulnerable_version_range: a.range,
+            first_patched_version: a.patched ? { identifier: a.patched } : null,
+          },
+        };
+      });
+      const tree = {
+        packages: {
+          '': { dependencies: { example: '1.1.0', other: '^1.0.0' } },
+          'node_modules/example': { version: '1.1.0' },
+          'node_modules/other': { version: '1.1.0' },
+        },
+      };
+      fs.writeFileSync(
+        hook,
+        `globalThis.fetch=async(url,options={})=>{
+        const value=String(url);
+        if(value.includes('/issue/NXENG-987')) return Response.json({fields:{issuetype:{name:'Epic'},status:{statusCategory:{key:'new'}}}});
+        if(value.endsWith('/search/jql')) return Response.json({issues:${JSON.stringify([candidate, unrelated])},isLast:true});
+        if(value.includes('/dependabot/alerts?')) return Response.json(value.includes('nuxeo-web-ui')?${JSON.stringify(values)}:[]);
+        if(value.includes('/contents/')) return Response.json({encoding:'base64',content:Buffer.from(JSON.stringify(value.includes('package-lock.json')?${JSON.stringify(tree)}:{})).toString('base64')});
+        if(value.startsWith('https://registry.npmjs.org/')) return Response.json({});
+        throw new Error('No mutation is permitted in the preview fixture');
+      };`,
+      );
+      const result = phase('scan');
+      assert.equal(result.status, 0, result.stderr);
+      const value = JSON.parse(fs.readFileSync(path.join(folder, 'report.json')));
+      assert.deepEqual(value.failures, []);
+      assert.equal(value.alerts.length, 2);
+      assert.equal(value.covered.length, 1);
+      assert.equal(value.newFindings.length, 1);
+      assert.equal(value.groups.length, 0);
+      assert.equal(value.updates[0].ticket, 'WEBUI-1');
+      assert.equal(value.updates[0].severity, noPatch ? 'critical' : 'medium');
+      const payload = fs.readFileSync(path.join(folder, 'teams-payload.json'), 'utf8');
+      if (!noPatch) assert.match(payload, /Existing work to update/);
+      assert.doesNotMatch(payload, /WEBUI-222/);
+      if (noPatch) {
+        assert.match(payload, /Existing blockers affecting new alerts/);
+        assert.match(payload, /1 Critical/);
+      } else assert.doesNotMatch(payload, /Existing blockers affecting new alerts/);
+      assert.equal(phase('apply').status, 0);
+      assert.equal(phase('finish').status, 0);
+    } finally {
+      fs.rmSync(folder, { recursive: true, force: true });
+    }
+  });
+}
+
+test('multiple severity corrections consolidate to one existing-ticket proposal with Critical preserved', () => {
+  const { folder, phase, hook } = fixtureRun(false);
+  try {
+    const findings = [
+      finding({ severity: 'high', ghsa: 'GHSA-high' }),
+      finding({
+        id: repo + '#124',
+        number: 124,
+        url: `https://github.com/${repo}/security/dependabot/124`,
+        severity: 'critical',
+        ghsa: 'GHSA-critical',
+      }),
+    ];
+    const ticket = issue(findings[0], {
+      customfield_12201: { value: 'Low' },
+      description: findings.map((f) => `${f.url} ${f.package} ${f.ghsa} ${f.manifest}`).join('\n'),
+    });
+    const raw = findings.map((f) => {
+      return {
+        number: f.number,
+        html_url: f.url,
+        dependency: { package: { name: f.package, ecosystem: 'npm' }, manifest_path: f.manifest },
+        security_advisory: { severity: f.severity, ghsa_id: f.ghsa },
+        security_vulnerability: { vulnerable_version_range: f.range, first_patched_version: { identifier: f.patched } },
+      };
+    });
+    fs.writeFileSync(
+      hook,
+      `globalThis.fetch=async(url)=>{
+      const value=String(url);
+      if(value.includes('/issue/NXENG-987'))return Response.json({fields:{issuetype:{name:'Epic'},status:{statusCategory:{key:'new'}}}});
+      if(value.endsWith('/search/jql'))return Response.json({issues:[${JSON.stringify(ticket)}],isLast:true});
+      if(value.includes('/dependabot/alerts?'))return Response.json(value.includes('nuxeo-web-ui')?${JSON.stringify(raw)}:[]);
+      if(value.includes('/contents/'))return Response.json({encoding:'base64',content:Buffer.from(JSON.stringify(value.includes('package-lock.json')?${JSON.stringify(lock())}:{})).toString('base64')});
+      if(value.startsWith('https://registry.npmjs.org/'))return Response.json({});
+      throw new Error('No writes allowed');
+    };`,
+    );
+    assert.equal(phase('scan').status, 0);
+    const value = JSON.parse(fs.readFileSync(path.join(folder, 'report.json')));
+    assert.deepEqual(value.failures, []);
+    assert.equal(value.updates.length, 1);
+    assert.equal(value.updates[0].severity, 'critical');
+    assert.equal(value.updates[0].findings.length, 2);
+    assert.ok(
+      value.updates[0].findings.every((f) => Object.values(f.branchEvidence).every((b) => b.evidence.length === 1)),
+    );
+  } finally {
+    fs.rmSync(folder, { recursive: true, force: true });
+  }
+});
+
+test('recovered ticket actions are not counted as tickets created in the current run', () => {
+  const value = report();
+  value.carriedActions = [
+    {
+      ticket: 'WEBUI-9',
+      key: 'old',
+      action: 'created',
+      severity: 'medium',
+      summary: 'Recovered minimatch work',
+      findings: [finding()],
+    },
+  ];
+  const output = JSON.stringify(card(value, config, 'automatic'));
+  assert.match(output, /0 created · 0 updated/);
+  assert.match(output, /1 recovered from earlier runs/);
+  assert.match(output, /Recovered actions from earlier runs/);
+});
