@@ -63,7 +63,7 @@ export function textOf(node) {
 
 export function owningScope(issue) {
   const text = textOf(issue.fields.description);
-  return text.split(/\n### (?:Related|Separate|Independent|Notes|Definition|Out[ -]of[ -]scope)/i)[0];
+  return text.split(/(?:^|\n)#{1,6} (?:Related|Separate|Independent|Notes|Definition|Out[ -]of[ -]scope)/i)[0];
 }
 
 export function storedAlertUrls(issue) {
@@ -93,8 +93,12 @@ export function matchFinding(finding, issues) {
     if (!issue.key.startsWith(`${finding.project}-`)) continue;
     const scope = owningScope(issue);
     const same = mentions(scope, finding.package) && scope.includes(finding.ghsa) && mentions(scope, finding.manifest);
-    if (!same) continue;
     const urlMatch = new RegExp(`${escaped}(?![0-9])`);
+    if (!same) {
+      // An explicit in-scope alert reference prevents a new ticket even when its register is incomplete.
+      if (urlMatch.test(scope)) possible.push(issue);
+      continue;
+    }
     const associated = findingBlocks(issue).some(
       (block) =>
         urlMatch.test(block) &&

@@ -1147,7 +1147,7 @@ test('ADF parent remediation rows are matched without confusing root and nested 
 test('root manifest coverage is not inferred from a child lockfile path', () => {
   const f = finding();
   const existing = issue(f, { description: `${f.url} ${f.ghsa} ${f.package} plugin/a11y/package-lock.json` });
-  assert.equal(matchFinding(f, [existing]).kind, 'new');
+  assert.equal(matchFinding(f, [existing]).kind, 'ambiguous');
 });
 test('Teams summary separates new actions and hides unrelated existing blockers', () => {
   const value = report();
@@ -1564,4 +1564,48 @@ test('a single alert does not permit whole-table coverage from unrelated package
   assert.equal(matchFinding(f, [ticket]).kind, 'ambiguous');
   ticket.fields.description = `### Findings\n| ${f.url} | ${f.ghsa} | example | package-lock.json |`;
   assert.equal(matchFinding(f, [ticket]).kind, 'covered');
+});
+
+test('an exact in-scope alert reference with incomplete identifiers requires review before creation', () => {
+  const f = finding();
+  for (const body of [`${f.url} ${f.ghsa}`, `${f.url} example`, f.url]) {
+    assert.equal(matchFinding(f, [issue(f, { description: body })]).kind, 'ambiguous');
+  }
+  assert.equal(matchFinding(f, [issue(f, { description: f.url + '4' })]).kind, 'new');
+  assert.equal(matchFinding(f, [issue(f, { description: `### Out of scope\n${f.url}` })]).kind, 'new');
+});
+
+test('CLI automatic triage cannot create a duplicate when an exact alert link has an incomplete register', () => {
+  const { folder, phase, hook } = fixtureRun(false);
+  try {
+    const f = finding();
+    const ticket = issue(f, { description: `${f.url} ${f.ghsa}` });
+    const raw = {
+      number: f.number,
+      html_url: f.url,
+      dependency: { package: { name: f.package, ecosystem: 'npm' }, manifest_path: f.manifest },
+      security_advisory: { severity: f.severity, ghsa_id: f.ghsa },
+      security_vulnerability: { vulnerable_version_range: f.range, first_patched_version: { identifier: f.patched } },
+    };
+    fs.writeFileSync(
+      hook,
+      `globalThis.fetch=async(url)=>{
+      const value=String(url);
+      if(value.includes('/issue/NXENG-987'))return Response.json({fields:{issuetype:{name:'Epic'},status:{statusCategory:{key:'new'}}}});
+      if(value.endsWith('/search/jql'))return Response.json({issues:[${JSON.stringify(ticket)}],isLast:true});
+      if(value.includes('/dependabot/alerts?'))return Response.json(value.includes('nuxeo-web-ui')?[${JSON.stringify(raw)}]:[]);
+      throw new Error('Unexpected write or request: '+value);
+    };`,
+    );
+    assert.equal(phase('scan', automatic).status, 0);
+    assert.equal(phase('apply', automatic).status, 0);
+    const saved = JSON.parse(fs.readFileSync(path.join(folder, 'report.json')));
+    assert.deepEqual(saved.failures, []);
+    assert.deepEqual(saved.groups, []);
+    assert.equal(saved.reviewFindings.length, 1);
+    assert.match(saved.review[0], /ambiguous coverage; review WEBUI-1/);
+    assert.deepEqual(JSON.parse(fs.readFileSync(path.join(folder, 'state.json'))).createIntents, {});
+  } finally {
+    fs.rmSync(folder, { recursive: true, force: true });
+  }
 });
