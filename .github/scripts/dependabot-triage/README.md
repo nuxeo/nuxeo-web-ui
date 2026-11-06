@@ -56,3 +56,9 @@ npm test --prefix .github/scripts/dependabot-triage
 ```
 
 Tests cover severity, repository boundaries, grouping, parent and engine constraints, nested instances, coverage exclusions, date overlap, source failure and actual CLI preview/checkpoint behavior without live credentials. Reports may contain internal Jira context: apply repository visibility/access policy before distributing artifacts.
+
+## Explicit pre-merge automatic execution
+
+For an authorized real integration run before merge, set `DEPENDABOT_TRIAGE_PREMERGE_SHA` to the exact reviewed and signed 40-character PR commit and temporarily set `DEPENDABOT_TRIAGE_ALLOW_AUTOMATIC=true`. Manually dispatch that commit with mode `automatic`. The regular scheduled mode can remain `preview`. Automatic execution on other non-default commits, PR events and scheduled non-default events remains prohibited.
+
+This is a real run: Jira tickets/comments/statuses and Teams posts are live. Observe the run without manually creating tickets, posting messages, repairing its state or retrying uncertain writes. A failed test remains a failure. After observing completion, restore the write-approval flag to `false`. Retain the approved SHA as provenance for historical pre-merge state so interrupted actions can be reconciled and the post-merge scanner can restore its journal. Removing the write-approval flag disables execution even while this provenance SHA remains configured.

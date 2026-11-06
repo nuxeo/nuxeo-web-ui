@@ -4,6 +4,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import {
   assessLock,
+  automaticAuthorized,
   card,
   changedSince,
   description,
@@ -155,7 +156,10 @@ async function restore() {
         run.workflow_id === workflow.id &&
         run.path === workflow.path &&
         ['schedule', 'workflow_dispatch'].includes(run.event) &&
-        run.head_branch === defaultBranch &&
+        (run.head_branch === defaultBranch ||
+          (run.event === 'workflow_dispatch' &&
+            /^[a-f0-9]{40}$/.test(process.env.APPROVED_PREMERGE_SHA || '') &&
+            run.head_sha === process.env.APPROVED_PREMERGE_SHA)) &&
         Number.isFinite(Date.parse(run.updated_at))
       )
         trustedRuns.push(run);
@@ -228,11 +232,8 @@ async function recoverNotification(notification) {
 }
 
 async function scan() {
-  if (
-    mode === 'automatic' &&
-    (process.env.ALLOW_AUTOMATIC !== 'true' || process.env.GITHUB_REF_NAME !== process.env.DEFAULT_BRANCH)
-  )
-    throw new Error('Automatic runs require explicit approval and the default branch before scanning');
+  if (mode === 'automatic' && !automaticAuthorized(process.env))
+    throw new Error('Automatic runs require approval and the default branch or an approved manual commit');
   if (state.active && state.active.mode !== mode)
     throw new Error('Pending run uses another execution mode; resolve it before changing modes');
   const completed = state.completedRuns?.[`${mode}:${process.env.GITHUB_RUN_ID}`];
@@ -523,8 +524,7 @@ async function apply() {
     console.log('Preview: no Jira writes or Teams sends.');
     return;
   }
-  if (process.env.ALLOW_AUTOMATIC !== 'true' || process.env.GITHUB_REF_NAME !== process.env.DEFAULT_BRANCH)
-    throw new Error('Automatic writes require explicit approval and the default branch');
+  if (!automaticAuthorized(process.env)) throw new Error('Automatic Jira actions are not authorized');
   if (report.failures.length || state.active?.recovery) return;
   try {
     for (const [key, intent] of Object.entries(state.createIntents || {})) {
@@ -694,8 +694,7 @@ async function render(value) {
 }
 async function prepareNotification() {
   if (mode === 'preview') return;
-  if (process.env.ALLOW_AUTOMATIC !== 'true' || process.env.GITHUB_REF_NAME !== process.env.DEFAULT_BRANCH)
-    throw new Error('Automatic notification is not authorized');
+  if (!automaticAuthorized(process.env)) throw new Error('Automatic notification is not authorized');
   if (!report || !state.active) throw new Error('No active report');
   if (state.active.notification?.status === 'confirmed') return;
   if (state.active.notification?.status === 'reserved' && state.active.notification.attempt !== runIdentity) return;
@@ -710,8 +709,7 @@ async function prepareNotification() {
 }
 async function notify() {
   if (mode === 'preview') return;
-  if (process.env.ALLOW_AUTOMATIC !== 'true' || process.env.GITHUB_REF_NAME !== process.env.DEFAULT_BRANCH)
-    throw new Error('Automatic notification is not authorized');
+  if (!automaticAuthorized(process.env)) throw new Error('Automatic notification is not authorized');
   if (!report || !state.active) throw new Error('No active report');
   const delivery = state.active.notification;
   if (delivery?.status === 'confirmed') {

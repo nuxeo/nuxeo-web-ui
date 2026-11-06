@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   assessLock,
+  automaticAuthorized,
   card,
   changedSince,
   description,
@@ -910,18 +911,22 @@ for (const unsafe of [false, true]) {
         finding(),
         finding({ id: repo + '#124', number: 124, url: `https://github.com/${repo}/security/dependabot/124` }),
       ];
-      const tickets = findings.map((f, i) => {return { ...issue(f), key: 'WEBUI-' + (i + 1) }});
-      const raw = findings.map((f) => {return {
-        number: f.number,
-        html_url: f.url,
-        created_at: '2026-01-01T00:00:00Z',
-        dependency: { package: { name: f.package, ecosystem: 'npm' }, manifest_path: f.manifest },
-        security_advisory: { severity: f.severity, ghsa_id: f.ghsa },
-        security_vulnerability: {
-          vulnerable_version_range: '>= 1.0.0, < 1.2.0',
-          first_patched_version: { identifier: f.patched },
-        },
-      }});
+      const tickets = findings.map((f, i) => {
+        return { ...issue(f), key: 'WEBUI-' + (i + 1) };
+      });
+      const raw = findings.map((f) => {
+        return {
+          number: f.number,
+          html_url: f.url,
+          created_at: '2026-01-01T00:00:00Z',
+          dependency: { package: { name: f.package, ecosystem: 'npm' }, manifest_path: f.manifest },
+          security_advisory: { severity: f.severity, ghsa_id: f.ghsa },
+          security_vulnerability: {
+            vulnerable_version_range: '>= 1.0.0, < 1.2.0',
+            first_patched_version: { identifier: f.patched },
+          },
+        };
+      });
       fs.writeFileSync(
         hook,
         `globalThis.fetch=async(url,options={})=>{
@@ -946,6 +951,92 @@ for (const unsafe of [false, true]) {
         assert.equal(value.alerts.length, 2);
         assert.equal(value.covered.length, 2);
       }
+    } finally {
+      fs.rmSync(folder, { recursive: true, force: true });
+    }
+  });
+}
+
+test('pre-merge automatic approval requires the exact commit, a manual event and write approval', () => {
+  const approved = 'a'.repeat(40);
+  const context = {
+    ...automatic,
+    GITHUB_REF_NAME: 'codex/premerge-test',
+    GITHUB_SHA: approved,
+    APPROVED_PREMERGE_SHA: approved,
+    GITHUB_EVENT_NAME: 'workflow_dispatch',
+  };
+  assert.equal(automaticAuthorized(context), true);
+  for (const override of [
+    { ALLOW_AUTOMATIC: 'false' },
+    { GITHUB_SHA: 'b'.repeat(40) },
+    { GITHUB_EVENT_NAME: 'pull_request' },
+    { GITHUB_EVENT_NAME: 'schedule' },
+    { APPROVED_PREMERGE_SHA: '' },
+    { APPROVED_PREMERGE_SHA: 'not-a-commit' },
+  ])
+    assert.equal(automaticAuthorized({ ...context, ...override }), false);
+  assert.equal(automaticAuthorized(automatic), true);
+  assert.equal(automaticAuthorized({ ALLOW_AUTOMATIC: 'true' }), false);
+});
+test('approved pre-merge commit can run the actual CLI scan without default-branch spoofing', () => {
+  const { folder, phase } = fixtureRun(false);
+  try {
+    const approved = 'a'.repeat(40);
+    const result = phase('scan', {
+      ...automatic,
+      GITHUB_REF_NAME: 'codex/premerge-test',
+      GITHUB_SHA: approved,
+      APPROVED_PREMERGE_SHA: approved,
+      GITHUB_EVENT_NAME: 'workflow_dispatch',
+    });
+    assert.equal(result.status, 0, result.stderr);
+    const saved = JSON.parse(fs.readFileSync(path.join(folder, 'report.json')));
+    assert.deepEqual(saved.failures, []);
+  } finally {
+    fs.rmSync(folder, { recursive: true, force: true });
+  }
+});
+
+for (const approve of [true, false]) {
+  test(`pre-merge state provenance ${approve ? 'accepts only the approved' : 'rejects an unapproved'} manual commit`, async () => {
+    const { folder, phase, hook } = fixtureRun(false);
+    try {
+      seed(folder, 'state.json', { version: 1, checkpoints: {}, receipts: {}, premergeJournal: true });
+      const { execFileSync } = await import('node:child_process');
+      execFileSync('zip', ['-q', path.join(folder, 'prior.zip'), 'state.json'], { cwd: folder });
+      fs.rmSync(path.join(folder, 'state.json'));
+      const zipped = fs.readFileSync(path.join(folder, 'prior.zip')).toString('base64');
+      const sha = 'a'.repeat(40);
+      const run = {
+        id: 10,
+        repository: { full_name: repo },
+        head_repository: { full_name: repo },
+        workflow_id: 42,
+        path: '.github/workflows/dependabot-triage.yaml',
+        event: 'workflow_dispatch',
+        head_branch: 'codex/test',
+        head_sha: sha,
+        updated_at: '2026-11-06T00:01:00Z',
+      };
+      fs.writeFileSync(
+        hook,
+        `globalThis.fetch=async(url)=>{
+        const value=String(url);
+        if(value.endsWith('/actions/workflows/dependabot-triage.yaml')) return Response.json({id:42,path:'.github/workflows/dependabot-triage.yaml'});
+        if(value.includes('/actions/workflows/42/runs?')) return Response.json({workflow_runs:[${JSON.stringify(run)}]});
+        if(value.includes('/actions/runs/10/artifacts?')) return Response.json({artifacts:[{id:1,name:'dependabot-triage-state-premerge',created_at:'2026-11-06T00:00:00Z',archive_download_url:'https://example.invalid/state'}]});
+        if(value==='https://example.invalid/state') return new Response(Buffer.from('${zipped}','base64'));
+        throw new Error('Unexpected request');
+      };`,
+      );
+      const result = phase('restore', {
+        GITHUB_REPOSITORY: repo,
+        DEFAULT_BRANCH: 'develop-2023',
+        APPROVED_PREMERGE_SHA: approve ? sha : 'b'.repeat(40),
+      });
+      assert.equal(result.status, 0, result.stderr);
+      assert.equal(fs.existsSync(path.join(folder, 'state.json')), approve);
     } finally {
       fs.rmSync(folder, { recursive: true, force: true });
     }

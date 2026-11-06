@@ -41,6 +41,7 @@ jobs:
       TRIAGE_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || vars.DEPENDABOT_TRIAGE_MODE || 'preview' }}
       ALLOW_AUTOMATIC: ${{ vars.DEPENDABOT_TRIAGE_ALLOW_AUTOMATIC || 'false' }}
       DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      APPROVED_PREMERGE_SHA: ${{ vars.DEPENDABOT_TRIAGE_PREMERGE_SHA }}
       SECURITY_EPIC: ${{ vars.SECURITY_EPIC || 'NXENG-987' }}
       SECURITY_EPIC_QUARTER: ${{ vars.SECURITY_EPIC_QUARTER || '2026-Q4' }}
       TRIAGE_ONE_TIME_AT: ${{ vars.TRIAGE_ONE_TIME_AT }}

@@ -9,6 +9,16 @@ export const highest = (values) => values.reduce((a, b) => (severityRank[b] > se
 export const stableKey = (repo, pkg, major, blocker = false) =>
   `cve-triage-${hash([repo, pkg, major, blocker ? 'blocked' : 'upgrade']).slice(0, 24)}`;
 
+export function automaticAuthorized(context) {
+  if (context.ALLOW_AUTOMATIC !== 'true') return false;
+  const defaultBranch = Boolean(context.DEFAULT_BRANCH) && context.GITHUB_REF_NAME === context.DEFAULT_BRANCH;
+  const approvedCommit =
+    /^[a-f0-9]{40}$/.test(context.APPROVED_PREMERGE_SHA || '') &&
+    context.GITHUB_SHA === context.APPROVED_PREMERGE_SHA &&
+    context.GITHUB_EVENT_NAME === 'workflow_dispatch';
+  return defaultBranch || approvedCommit;
+}
+
 export function normalize(repo, alert) {
   const advisory = alert.security_advisory;
   const vulnerable = alert.security_vulnerability;
