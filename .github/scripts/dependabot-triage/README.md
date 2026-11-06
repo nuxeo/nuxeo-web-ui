@@ -9,7 +9,7 @@ Merge `.github/workflows/dependabot-triage.yaml`, `.github/dependabot-triage.jso
 Secrets (never put values in source, reports, or chat):
 
 - `GIT_ADMIN_TOKEN`: read Dependabot alerts and repository contents in both configured repos. The ordinary workflow token reads this repo's state artifacts only.
-- `JIRA_EMAIL` and `JIRA_API_TOKEN`: Naveen’s Jira email and API token, configured explicitly for this workflow. No Cloud Fix credentials are reused. The first preview must verify this identity’s access to WEBUI, ELEMENTS and the epic. Add the values in GitHub Actions secrets; never paste tokens in chat.
+- `DEPENDABOT_TRIAGE_JIRA_EMAIL` and `DEPENDABOT_TRIAGE_TOKEN`: Naveen’s Jira email and API token, configured explicitly for this workflow. No Cloud Fix credentials are reused. The first preview must verify this identity’s access to WEBUI, ELEMENTS and the epic. Add the values in GitHub Actions secrets; never paste tokens in chat.
 - `DEPENDABOT_TEAMS_WEBHOOK_URL`: the new **Dependabot CVE Triage** workflow for **Nuxeo → WebUI - Collaboration**. Do not replace or reuse `TEAMS_WEBHOOK_URL`, which belongs to review reminders.
 
 Repository variables:
