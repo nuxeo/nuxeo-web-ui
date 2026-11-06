@@ -219,10 +219,14 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS}
+          # One invocation, not four: the root `preinstall` hook clean-installs the ftest, Designer
+          # catalog and a11y subpackages, so each extra `npm install` here costs three more `npm ci`
+          # runs for no benefit.
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" \
+            nuxeo-elements/core/${ELEMENTS_CORE} \
+            nuxeo-elements/ui/${ELEMENTS_UI} \
+            nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ} \
+            nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS}
 
       - name: Web UI Unit tests
         if: ${{ github.event.inputs.skip_unit_tests == 'false' && github.event.inputs.sauce_labs == 'false' }}
@@ -413,10 +417,15 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_TESTING_HELPERS}
+          # One invocation, not four — and it matters more here than in the Build job above, because
+          # this step runs on every shard. The root `preinstall` hook clean-installs three
+          # subpackages, so four invocations cost twelve `npm ci` runs per shard, forty-eight across
+          # the matrix, where three would do.
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" \
+            nuxeo-elements/core/${ELEMENTS_CORE} \
+            nuxeo-elements/ui/${ELEMENTS_UI} \
+            nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ} \
+            nuxeo-elements/testing-helpers/${ELEMENTS_TESTING_HELPERS}
 
       # Resolved in its own step rather than inline below so that the shard -> feature mapping has
       # exactly one home, which the same script can then guard against drift.
