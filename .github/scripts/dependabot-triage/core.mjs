@@ -109,7 +109,7 @@ export function matchFinding(finding, issues) {
     if (associated) exact.push(issue);
     else possible.push(issue);
   }
-  if (exact.length === 1) {
+  if (exact.length === 1 && !possible.length) {
     const ticket = exact[0];
     if (ticket.fields.status.statusCategory.key === 'done') return { kind: 'closed', ticket };
     const actual = ticket.fields[finding.severityField]?.value?.toLowerCase();

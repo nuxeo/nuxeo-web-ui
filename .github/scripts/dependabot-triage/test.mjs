@@ -911,7 +911,12 @@ for (const unsafe of [false, true]) {
     try {
       const findings = [
         finding(),
-        finding({ id: repo + '#124', number: 124, url: `https://github.com/${repo}/security/dependabot/124` }),
+        finding({
+          id: repo + '#124',
+          number: 124,
+          url: `https://github.com/${repo}/security/dependabot/124`,
+          ghsa: 'GHSA-independent',
+        }),
       ];
       const tickets = findings.map((f, i) => {
         return { ...issue(f), key: 'WEBUI-' + (i + 1) };
@@ -1636,4 +1641,13 @@ test('fresh pre-create lookup catches a URL-only ticket added after the scan', (
   } finally {
     fs.rmSync(folder, { recursive: true, force: true });
   }
+});
+
+test('a complete match cannot conceal another partial association for the same alert', () => {
+  const f = finding();
+  const complete = issue(f);
+  const partial = { ...issue(f, { description: f.url }), key: 'WEBUI-2' };
+  const result = matchFinding(f, [complete, partial]);
+  assert.equal(result.kind, 'ambiguous');
+  assert.deepEqual(result.tickets.map((t) => t.key).sort(), ['WEBUI-1', 'WEBUI-2']);
 });
