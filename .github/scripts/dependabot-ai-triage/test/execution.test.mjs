@@ -463,6 +463,28 @@ test('ticket description lists every finding with its own severity, branches and
   assert.match(doc, /Rationale for the regression fixture/);
 });
 
+test('an incomplete report never shows zero untriaged findings when no plan was validated', () => {
+  const report = (planDetermined) =>
+    JSON.stringify(
+      runReport(
+        {
+          ...baseOutcome({ complete: false, mode: 'preview', startedAt: 'now', configRevision: 'c', planDetermined }),
+          counts: { alerts: 24, uniqueAdvisories: 11, covered: 0, carried: 0, create: 0, extend: 0, adopt: 0 },
+          cleared: [],
+          ambiguous: [],
+          warnings: [],
+          actions: [],
+          validationErrors: [],
+          failures: ['Planner unavailable'],
+        },
+        config,
+      ),
+    );
+  assert.match(report(false), /not determined \(no validated plan; 24 alert\(s\) awaiting triage\)/);
+  assert.doesNotMatch(report(false), /0 Medium/);
+  assert.match(report(true), /0 Medium/);
+});
+
 test('large reports are split into several Jira comments instead of truncated', () => {
   const many = Array.from({ length: 300 }, (_, index) => {
     return { ...group(`${WEB}:g${index}`, WEB, 'create', undefined, 'low', [index]), action: 'proposed create' };

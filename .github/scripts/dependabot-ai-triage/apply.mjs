@@ -480,6 +480,7 @@ function describe(outcome, inventory, plan) {
     return { id: alertId(item.repository, item.alert), tickets: [item.ticket], isNew: true };
   });
   Object.assign(outcome, {
+    planDetermined: Boolean(plan),
     newBySeverity: summary.newBySeverity,
     firstReconciliation: summary.firstReconciliation,
     untriaged: summary.untriaged,

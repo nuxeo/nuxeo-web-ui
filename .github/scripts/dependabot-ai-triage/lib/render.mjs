@@ -160,11 +160,15 @@ function sourceLine(repo) {
 function countLines(outcome) {
   const { counts } = outcome;
   const label = outcome.firstReconciliation ? 'Untriaged at first reconciliation' : 'Newly untriaged';
+  // Without a validated plan the number of untriaged findings is unknown, not zero.
+  const untriaged = outcome.planDetermined
+    ? countLine(outcome.newBySeverity)
+    : `not determined (no validated plan; ${counts.alerts - counts.covered} alert(s) awaiting triage)`;
   return [
     `${counts.alerts} open alert(s) across ${counts.uniqueAdvisories} unique advisory(ies). One advisory can raise ` +
       'several alerts (one per manifest/lockfile), and one ticket can own several alerts.',
     `Adequately covered by existing tickets: ${counts.covered}`,
-    `${label}: ${countLine(outcome.newBySeverity)}`,
+    `${label}: ${untriaged}`,
     `Carried over from earlier runs: ${counts.carried}`,
     `Tickets to create: ${counts.create} · extend: ${counts.extend} · adopt existing coverage: ${counts.adopt}`,
   ];
