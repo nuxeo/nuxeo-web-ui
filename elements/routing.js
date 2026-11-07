@@ -64,14 +64,18 @@ function encodeQueryParams(path) {
 // flagged as default — but only when the path is actually under that base, so an
 // arbitrary same-origin URL is not misclassified as the default repository.
 function repositoryNameForPath(pathname) {
-  const repositories = Nuxeo?.UI?.repositories || [];
+  const repositories = (Nuxeo && Nuxeo.UI && Nuxeo.UI.repositories) || [];
   const current = repositories.find((repo) => repo.href && pathname.startsWith(repo.href));
   if (current) {
     return current.name;
   }
   const base = (app.baseUrl || '').replace(/\/$/, '');
   const underBase = !base || pathname === base || pathname.startsWith(`${base}/`);
-  return underBase ? repositories.find((repo) => repo.isDefault)?.name : undefined;
+  if (!underBase) {
+    return undefined;
+  }
+  const defaultRepository = repositories.find((repo) => repo.isDefault);
+  return defaultRepository != null ? defaultRepository.name : undefined;
 }
 
 // Convenience wrapper for the pathname currently being browsed.
@@ -298,5 +302,8 @@ app.router = {
 // (RoutingBehavior) are only available once `app.router` is set, so it must be registered before
 // this initial dispatch, otherwise elements rendered by the first route can hit
 // "navigateTo is not a function" (WEBUI-1715).
+//
+// The URL page.js dispatches from has already been normalized at module scope in index.js — see
+// `elements/entry-url.js` for why that matters in hashbang mode (WEBUI-2316).
 // add #! before urls
 page({ hashbang: true, click: false, decodeURLComponents: false });

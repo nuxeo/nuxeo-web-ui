@@ -73,10 +73,6 @@ jobs:
       contents: read
 
     steps:
-      - uses: catchpoint/workflow-telemetry-action@94c3c3d9567a0205de6da68a76c428ce4e769af1 # v2
-        with:
-          comment_on_pr: false
-
       - name: Build parameters
         env:
           BUILD_PARAMS: ${{ toJSON(github.event.inputs) }}
@@ -116,7 +112,7 @@ jobs:
           # name is a coincidence - except for sync/<release>-to-<dev>, which both repositories
           # generate from the same template. Matching on that would compare the Elements work
           # against Web UI's release snapshot instead of the development line.
-          case "$CANDIDATE" in sync/*) CANDIDATE="" ;; esac
+          case "$CANDIDATE" in sync/*) CANDIDATE="" ;; *) ;; esac
           if [ -n "$CANDIDATE" ] && git ls-remote --exit-code --heads \
                https://github.com/nuxeo/nuxeo-web-ui "refs/heads/$CANDIDATE" >/dev/null 2>&1; then
             BRANCH="$CANDIDATE"
