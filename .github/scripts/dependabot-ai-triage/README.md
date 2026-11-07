@@ -96,6 +96,18 @@ nothing claims a clean scan.
 3. Run **Run workflow** with `preview`, review the report on the control issue.
 4. Set `DEPENDABOT_AI_TRIAGE_ALLOW_AUTOMATIC=true` and `DEPENDABOT_AI_TRIAGE_MODE=automatic`.
 
+## Pre-merge testing
+
+Before the workflow is on the default branch, **Run workflow** is not offered in the UI. The workflow is already
+registered (id `410170056`), so a branch can still be dispatched through the API:
+
+```sh
+gh api -X POST repos/nuxeo/nuxeo-web-ui/actions/workflows/410170056/dispatches \
+  -f ref=<branch> -f 'inputs[mode]=preview'
+```
+
+Automatic mode from a branch also needs `DEPENDABOT_AI_TRIAGE_APPROVED_REF=refs/heads/<branch>`.
+
 ## Development
 
 ```sh
