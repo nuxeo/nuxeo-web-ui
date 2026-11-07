@@ -5,6 +5,11 @@ name: Dependabot AI triage
 # action journal live in the private Jira control issue named in .github/dependabot-ai-triage.json.
 # See .github/scripts/dependabot-ai-triage/README.md.
 on:
+  # TEMPORARY (pre-merge testing only): registers the workflow so it can be dispatched from this branch.
+  # Runs in preview mode. Remove before the PR leaves draft.
+  push:
+    branches:
+      - task-NXENG-987-dependabot-ai-triage-develop-2023
   schedule:
     # Monday 07:30 UTC = 13:00 Asia/Kolkata. GitHub only schedules the default branch's copy.
     - cron: '30 7 * * 1'
