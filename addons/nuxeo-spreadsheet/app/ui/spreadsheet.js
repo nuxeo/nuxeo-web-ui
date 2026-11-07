@@ -21,6 +21,14 @@ import { Query } from '../nuxeo/rpc/query';
 import { DirectoryEditor } from './editors/directory';
 import { Select2Editor } from './editors/select2';
 import { assign, hasProp } from '../utils';
+import {
+  applySavedChangeToken,
+  createDirtyDocument,
+  detachDirtyBatch,
+  markSaveError,
+  restoreUnsavedRow,
+  stampChangeToken,
+} from './optimistic-locking';
 
 /**
  * Spreadsheet backed by Hansontable
@@ -29,6 +37,9 @@ class Spreadsheet {
   constructor(container, connection, columns, pageProvider, language) {
     this.container = container;
     this.connection = connection;
+    // Called when an autosave fails. Nothing on this side can reach the console the app renders
+    // the message in, and a save the user did not ask for still has to say why it did not happen.
+    this.onSaveFailure = () => {};
     this._data = [];
     this.options = {
       data: this._data,
@@ -67,8 +78,8 @@ class Spreadsheet {
     // get schemas prefixes from columns
     const schemasPrefixes = [];
     for (const c of columns) {
-      const schema = c.field.indexOf(':') > -1 ? c.field.split(':')[0] : undefined;
-      if (schema && schemasPrefixes.indexOf(schema) === -1) {
+      const schema = c.field.includes(':') ? c.field.split(':')[0] : undefined;
+      if (schema && !schemasPrefixes.includes(schema)) {
         schemasPrefixes.push(schema);
       }
     }
@@ -83,7 +94,7 @@ class Spreadsheet {
 
         // get field definition from schemas map
         let field; // <- explicitly set field as undefined in each iteration
-        if (c.field.indexOf(':') > -1) {
+        if (c.field.includes(':')) {
           const [s, f] = c.field.split(':');
           field = schemas[s].fields[f] || undefined;
           field = typeof field === 'string' ? { type: field } : field;
@@ -106,7 +117,7 @@ class Spreadsheet {
                   column.widget.type = field.type === 'string[]' ? 'suggestManyDirectory' : 'suggestOneDirectory';
                   column.widget.properties = { dbl10n: true, directoryName: constraint.parameters.directory };
                   break;
-                case 'userManagerResolver':
+                case 'userManagerResolver': {
                   column.widget.type = field.type === 'string[]' ? 'multipleUsersSuggestion' : 'singleUserSuggestion';
                   let searchType;
                   if (constraint.parameters.includeGroups === 'true' && constraint.parameters.includeUsers === 'true') {
@@ -122,6 +133,7 @@ class Spreadsheet {
                     },
                   };
                   break;
+                }
               }
             }
           }
@@ -167,8 +179,8 @@ class Spreadsheet {
   createCell(row) {
     const cell = {};
     const doc = this.getDataAtRow(row);
-    const permissions = doc && doc.contextParameters && doc.contextParameters.permissions;
-    if (permissions && permissions.indexOf('Write') === -1) {
+    const permissions = doc != null && doc.contextParameters != null ? doc.contextParameters.permissions : undefined;
+    if (permissions && !permissions.includes('Write')) {
       cell.readOnly = true;
     }
     return cell;
@@ -214,30 +226,56 @@ class Spreadsheet {
     return this._fetch();
   }
 
+  /**
+   * Saves every dirty row, one batch at a time.
+   *
+   * Autosave calls this on each edit without waiting for the previous batch. Overlapping batches
+   * would send the same change token twice for a row, and the one that landed second would be
+   * rejected as a stale write by the row's own earlier save — a conflict reported to the user
+   * with no other user involved. Queueing them means a row is only ever in flight once, so each
+   * batch submits against the token the one before it brought back.
+   */
   save() {
-    return Promise.all(
-      Object.keys(this._dirty).map((uid) =>
-        this.connection
+    this._saving = (this._saving || Promise.resolve()).then(() => this._saveDirtyRows());
+    return this._saving;
+  }
+
+  _saveDirtyRows() {
+    this.hasConflicts = false;
+    const batch = detachDirtyBatch(this._dirty);
+
+    // Every PUT has to settle before the outcome is read: hasConflicts decides which message the
+    // caller shows, and Promise.all would hand back as soon as one row failed, so a non-conflict
+    // failure could report the generic error while a slower 409 was still in flight.
+    return Promise.allSettled(
+      batch.map(([uid, dirtyDocument]) => {
+        const row = this.data.find((document) => document.uid === uid);
+        return this.connection
           .request(`/id/${uid}`)
-          .put({ body: this._dirty[uid] })
-          .then(() => {
-            delete this._dirty[uid];
+          .put({ body: stampChangeToken(dirtyDocument, row) })
+          .then((response) => {
+            applySavedChangeToken(row, response);
             return uid;
           })
           .catch((error) => {
-            this._dirty[uid]._error = error;
-            throw new Error(error);
-          }),
-      ),
-    )
-      .catch((err) => {
-        console.error(err);
-      })
-      .then((result) => {
-        this.ht.clearUndo();
-        this.ht.render();
-        return result;
-      });
+            if (markSaveError(dirtyDocument, error)) {
+              this.hasConflicts = true;
+            }
+            restoreUnsavedRow(this._dirty, uid, dirtyDocument);
+            throw error;
+          });
+      }),
+    ).then((outcomes) => {
+      this.ht.clearUndo();
+      this.ht.render();
+      const failures = outcomes.filter((outcome) => outcome.status === 'rejected');
+      if (failures.length > 0) {
+        failures.forEach(({ reason }) => console.error(reason));
+        // The caller tells a failed save from a successful one by the absence of a result.
+        return undefined;
+      }
+      return outcomes.map(({ value }) => value);
+    });
   }
 
   onChange(change, source) {
@@ -246,13 +284,13 @@ class Spreadsheet {
       return;
     }
     if (change !== null) {
-      for (let i = 0; i < change.length; i++) {
-        let [idx, field, oldV, newV] = change[i];
+      for (let [idx, field, oldV, newV] of change) {
         if (oldV === newV) {
           continue;
         }
-        const uid = this.data[idx].uid;
-        const doc = (this._dirty[uid] = this._dirty[uid] || { 'entity-type': 'document', uid });
+        const sourceDocument = this.data[idx];
+        const uid = sourceDocument.uid;
+        const doc = (this._dirty[uid] = this._dirty[uid] || createDirtyDocument(sourceDocument));
 
         // Split csv values into array
         const column = this._columnsByField[field];
@@ -268,7 +306,11 @@ class Spreadsheet {
         assign(doc, field, newV);
       }
       if (this.autosave) {
-        this.save();
+        this.save().then((results) => {
+          if (!results) {
+            this.onSaveFailure();
+          }
+        });
       }
       this.ht.render();
     }

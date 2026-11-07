@@ -137,18 +137,23 @@ const template = html`
         }
 
         /* layouts */
-        div[role='widget'] > div.multiline {
+        /* data-widget is the supported marker; role="widget" is kept for layouts authored against
+           the previous guidance, including customer-authored ones. See WEBUI-2229. */
+        div[role='widget'] > div.multiline,
+        div[data-widget] > div.multiline {
           white-space: pre-line;
         }
 
-        div[role='widget'] > div {
+        div[role='widget'] > div,
+        div[data-widget] > div {
           word-wrap: break-word;
           overflow-wrap: break-word;
           word-break: break-word;
           hyphens: auto;
         }
 
-        *[role='widget'] {
+        *[role='widget'],
+        *[data-widget] {
           @apply --nuxeo-widget;
         }
       </style>

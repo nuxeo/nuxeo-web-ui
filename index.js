@@ -16,7 +16,7 @@ const setupRTLSupport = () => {
   window.nuxeo.I18n = window.nuxeo.I18n || {};
   const userLanguage = navigator.language || navigator.userLanguage || 'en';
   const rtlLanguages = ['ar', 'he', 'fa', 'ur'];
-  const isRTL = rtlLanguages.some((lang) => userLanguage?.startsWith(lang));
+  const isRTL = rtlLanguages.some((lang) => (userLanguage != null ? userLanguage.startsWith(lang) : undefined));
   window.nuxeo.I18n.direction = isRTL ? 'rtl' : 'ltr';
   document.documentElement.dir = window.nuxeo.I18n.direction;
 };

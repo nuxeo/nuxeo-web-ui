@@ -61,7 +61,7 @@ class DocumentEditor extends Select2Editor {
   }
 
   onSelected(evt) {
-    const data = evt?.params?.data;
+    const data = evt != null && evt.params != null ? evt.params.data : undefined;
     if (!data || !data.id) return;
 
     const uid = data.id;
@@ -77,7 +77,7 @@ class DocumentEditor extends Select2Editor {
   getValue() {
     let data = [];
 
-    if (this.$textarea?.data('select2')) {
+    if (this.$textarea && this.$textarea.data('select2')) {
       data = this.$textarea.select2('data') || [];
     }
 
@@ -90,7 +90,7 @@ class DocumentEditor extends Select2Editor {
     let data = [];
 
     // ✅ authoritative source (same fix as user.js)
-    if (this.$textarea?.data('select2')) {
+    if (this.$textarea && this.$textarea.data('select2')) {
       data = this.$textarea.select2('data') || [];
     }
 
@@ -118,7 +118,9 @@ class DocumentEditor extends Select2Editor {
   }
 
   get cellLabels() {
-    return (this.cellMeta._labels = this.cellMeta._labels || {});
+    const meta = this.cellMeta;
+    meta._labels = meta._labels || {};
+    return meta._labels;
   }
 }
 

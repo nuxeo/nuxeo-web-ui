@@ -180,7 +180,7 @@ Polymer({
    */
   _ensureTaskParams() {
     const existing = this.$.tasksProvider.params;
-    if (existing?.userId) {
+    if (existing && existing.userId) {
       this._ensureTaskParamsPromise = null;
       return Promise.resolve();
     }
@@ -191,7 +191,7 @@ Polymer({
       .connect()
       .then((user) => {
         const current = this.$.tasksProvider.params;
-        if (!current?.userId && user?.id != null) {
+        if (!(current && current.userId) && (user != null ? user.id : undefined) != null) {
           this.$.tasksProvider.params = { ...current, userId: user.id };
         }
         this._ensureTaskParamsPromise = null;
@@ -212,7 +212,7 @@ Polymer({
   selectTask(index, task, { offset, pageSize }) {
     let fetch;
     const tasks = this.$.list.items;
-    if (tasks.find((item) => item.id === task.id)) {
+    if (tasks.some((item) => item.id === task.id)) {
       fetch = Promise.resolve();
     } else {
       fetch = this.fetch(offset, pageSize);
@@ -235,9 +235,9 @@ Polymer({
     }
     const tasks = this.$.list.items;
     if (newVal && tasks) {
-      for (let i = 0; i < tasks.length; i++) {
-        if (tasks[i].id === newVal.id) {
-          this.$.list.selectItem(tasks[i]);
+      for (const task of tasks) {
+        if (task.id === newVal.id) {
+          this.$.list.selectItem(task);
           break;
         }
       }
