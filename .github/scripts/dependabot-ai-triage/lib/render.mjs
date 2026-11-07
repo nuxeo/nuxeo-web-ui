@@ -57,8 +57,11 @@ export function instanceSummary(analysis) {
 
 function findingsSection(alerts, evidence) {
   return alerts.map((alert) => {
-    const branches = Object.entries(evidence[alertId(alert.repository, alert.number)] ?? {}).map(([branch, analysis]) =>
-      adfText(`\n${clip(`${branch}: ${instanceSummary(analysis)}`, 1500)}`),
+    const branches = Object.entries(evidence[alertId(alert.repository, alert.number)] ?? {}).map(
+      ([branch, analysis]) => {
+        const line = clip(`${branch}: ${instanceSummary(analysis)}`, 1500);
+        return adfText(`\n${line}`);
+      },
     );
     return [...alertLine(alert), ...branches];
   });
