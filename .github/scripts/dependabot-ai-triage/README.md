@@ -23,6 +23,9 @@ People can freely edit ticket descriptions; that never changes ownership.
 The first run has no ownership records, so the planner sees every alert and is expected to **adopt** existing
 tickets (record ownership without editing them) and create tickets only for uncovered work.
 
+Blocked owners are also sent back to the planner when the upstream Jira ticket they wait for changes status, and at
+least every four weeks, because publishing an upstream release does not change the GitHub alert.
+
 ### What the validator enforces
 
 A plan is rejected, and nothing is written, unless:
@@ -83,9 +86,12 @@ the variables were not updated, the run still reconciles and reports, but refuse
   changes and no Teams message.
 - **automatic**: requires `DEPENDABOT_AI_TRIAGE_ALLOW_AUTOMATIC=true` and the default branch (or the approved ref).
   Applies the plan, then posts the Teams card. Every Jira/Teams write is reserved in the journal before it is made.
-  A write whose outcome is unknown (timeout, 5xx) stops further writes and is reconciled on the next run; it is never
-  blindly repeated. A Teams post whose delivery is unknown is not resent. Re-running the same workflow run does not
-  repeat completed writes.
+  Each target is re-read just before it is changed; a ticket closed, started or re-owned since collection is left
+  alone and reported. The ownership property is written **last**, after the scope, severity and On Hold changes are
+  verified, so an interrupted run leaves those alerts unowned and they are simply planned again. A write whose
+  outcome is unknown (timeout, 5xx) stops further writes and is never blindly repeated; the next automatic run settles
+  it from Jira (preview only reports it). A Teams post whose delivery is unknown is not resent, and no Teams message is
+  sent when the private journal is unavailable. Re-running the same workflow run does not repeat completed writes.
 
 The checkpoint advances only after a complete automatic run. Collection, planning, validation or write failures make
 the run incomplete: the report and (in automatic mode) the Teams card say "scan incomplete" and name the failure;

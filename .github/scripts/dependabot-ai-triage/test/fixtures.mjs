@@ -1,44 +1,38 @@
-// Live state observed on 2026-11-06/07: open alerts and the corrected NXENG-987 ownership register.
-export const WEB = 'nuxeo/nuxeo-web-ui';
-export const EL = 'nuxeo/nuxeo-elements';
+// Synthetic scenario (no real alerts, packages or tickets): two repositories, a set of open alerts and an
+// ownership register shaped like a typical quarter, used as regression cases for the triage rules.
+export const WEB = 'acme/app';
+export const EL = 'acme/lib';
 export const RUN = '19000000001';
 export const DIGEST = 'digest-1';
 
 const rows = {
   [WEB]: [
-    [517, 'medium', 'moment', 'GHSA-4p3w-j4w9-5jqw', '2.31.0', 'package-lock.json'],
-    [542, 'medium', 'moment', 'GHSA-4p3w-j4w9-5jqw', '2.31.0', 'packages/nuxeo-web-ui-ftest/package-lock.json'],
-    [587, 'low', 'fast-uri', 'GHSA-333x-w4r6-6crp', '3.1.9', 'package-lock.json'],
-    [588, 'medium', 'fast-uri', 'GHSA-wjr9-j795-jxcr', '3.1.9', 'package-lock.json'],
-    [589, 'low', 'fast-uri', 'GHSA-xhq7-xmqj-769h', '3.1.9', 'package-lock.json'],
-    [590, 'medium', 'fast-uri', 'GHSA-w74x-v6f9-j3xg', '3.1.9', 'package-lock.json'],
-    [591, 'low', 'serialize-javascript', 'GHSA-m5mm-p8h7-m29v', '7.1.3', 'package-lock.json'],
-    [598, 'medium', 'qs', 'GHSA-6pq8-jhm2-2vcw', '6.16.1', 'package-lock.json'],
-    [607, 'low', 'deepmerge', 'GHSA-gcqx-w48m-w2h4', null, 'package-lock.json'],
-    [
-      608,
-      'low',
-      'serialize-javascript',
-      'GHSA-m5mm-p8h7-m29v',
-      '7.1.3',
-      'packages/nuxeo-web-ui-ftest/package-lock.json',
-    ],
-    [622, 'low', 'serialize-javascript', 'GHSA-m5mm-p8h7-m29v', '7.1.3', 'plugin/a11y/package-lock.json'],
-    [639, 'medium', 'glob', 'GHSA-3g3m-2fjr-6pw4', '14.0.2', 'packages/nuxeo-web-ui-ftest/package-lock.json'],
-    [641, 'medium', 'glob', 'GHSA-3g3m-2fjr-6pw4', '14.0.2', 'plugin/a11y/package-lock.json'],
-    [643, 'medium', 'minimatch', 'GHSA-g3hv-75wg-m249', '11.0.1', 'package-lock.json'],
-    [644, 'medium', 'minimatch', 'GHSA-g3hv-75wg-m249', '11.0.1', 'packages/nuxeo-web-ui-ftest/package-lock.json'],
-    [645, 'medium', 'minimatch', 'GHSA-g3hv-75wg-m249', '11.0.1', 'plugin/a11y/package-lock.json'],
+    [1, 'medium', 'pkg-time', 'GHSA-0000-0000-0000', '1.0.1', 'package-lock.json'],
+    [2, 'medium', 'pkg-time', 'GHSA-0000-0000-0000', '1.0.1', 'ftest/package-lock.json'],
+    [3, 'low', 'pkg-uri', 'GHSA-0000-0000-0001', '1.0.1', 'package-lock.json'],
+    [4, 'medium', 'pkg-uri', 'GHSA-0000-0000-0002', '1.0.1', 'package-lock.json'],
+    [5, 'low', 'pkg-uri', 'GHSA-0000-0000-0003', '1.0.1', 'package-lock.json'],
+    [6, 'medium', 'pkg-uri', 'GHSA-0000-0000-0004', '1.0.1', 'package-lock.json'],
+    [7, 'low', 'pkg-serialize', 'GHSA-0000-0000-0005', '1.0.1', 'package-lock.json'],
+    [8, 'medium', 'pkg-query', 'GHSA-0000-0000-0006', '1.0.1', 'package-lock.json'],
+    [9, 'low', 'pkg-merge', 'GHSA-0000-0000-0007', null, 'package-lock.json'],
+    [10, 'low', 'pkg-serialize', 'GHSA-0000-0000-0005', '1.0.1', 'ftest/package-lock.json'],
+    [11, 'low', 'pkg-serialize', 'GHSA-0000-0000-0005', '1.0.1', 'a11y/package-lock.json'],
+    [12, 'medium', 'pkg-files', 'GHSA-0000-0000-0008', '1.0.1', 'ftest/package-lock.json'],
+    [13, 'medium', 'pkg-files', 'GHSA-0000-0000-0008', '1.0.1', 'a11y/package-lock.json'],
+    [14, 'medium', 'pkg-match', 'GHSA-0000-0000-0009', '1.0.1', 'package-lock.json'],
+    [15, 'medium', 'pkg-match', 'GHSA-0000-0000-0009', '1.0.1', 'ftest/package-lock.json'],
+    [16, 'medium', 'pkg-match', 'GHSA-0000-0000-0009', '1.0.1', 'a11y/package-lock.json'],
   ],
   [EL]: [
-    [235, 'medium', 'moment', 'GHSA-4p3w-j4w9-5jqw', '2.31.0', 'dataviz/package.json'],
-    [248, 'medium', 'moment', 'GHSA-4p3w-j4w9-5jqw', '2.31.0', 'package-lock.json'],
-    [251, 'medium', 'moment', 'GHSA-4p3w-j4w9-5jqw', '2.31.0', 'ui/package.json'],
-    [288, 'low', 'serialize-javascript', 'GHSA-m5mm-p8h7-m29v', '7.1.3', 'package-lock.json'],
-    [291, 'medium', 'qs', 'GHSA-6pq8-jhm2-2vcw', '6.16.1', 'package-lock.json'],
-    [295, 'low', 'deepmerge', 'GHSA-gcqx-w48m-w2h4', null, 'package-lock.json'],
-    [296, 'high', 'follow-redirects', 'GHSA-mrwp-f3q8-3g9p', '1.16.2', 'package-lock.json'],
-    [299, 'medium', 'minimatch', 'GHSA-g3hv-75wg-m249', '11.0.1', 'package-lock.json'],
+    [101, 'medium', 'pkg-time', 'GHSA-0000-0000-0000', '1.0.1', 'charts/package.json'],
+    [102, 'medium', 'pkg-time', 'GHSA-0000-0000-0000', '1.0.1', 'package-lock.json'],
+    [103, 'medium', 'pkg-time', 'GHSA-0000-0000-0000', '1.0.1', 'ui/package.json'],
+    [104, 'low', 'pkg-serialize', 'GHSA-0000-0000-0005', '1.0.1', 'package-lock.json'],
+    [105, 'medium', 'pkg-query', 'GHSA-0000-0000-0006', '1.0.1', 'package-lock.json'],
+    [106, 'low', 'pkg-merge', 'GHSA-0000-0000-0007', null, 'package-lock.json'],
+    [107, 'high', 'pkg-redirect', 'GHSA-0000-0000-0010', '1.0.1', 'package-lock.json'],
+    [108, 'medium', 'pkg-match', 'GHSA-0000-0000-0009', '1.0.1', 'package-lock.json'],
   ],
 };
 
@@ -62,14 +56,14 @@ export function liveAlerts() {
 
 // [key, repository, alerts, status, statusCategory, severity]
 export const REGISTER = [
-  ['WEBUI-2431', WEB, [643, 644, 645], 'Open', 'new', 'medium'],
-  ['WEBUI-2428', WEB, [587, 588, 589, 590, 591, 598, 608, 622, 639, 641], 'Open', 'new', 'medium'],
-  ['WEBUI-2429', WEB, [607], 'On Hold', 'new', 'low'],
-  ['WEBUI-2430', WEB, [517], 'On Hold', 'new', 'medium'],
-  ['WEBUI-2384', WEB, [542], 'Open', 'new', 'medium'],
-  ['ELEMENTS-2124', EL, [235, 248, 251], 'Open', 'new', 'medium'],
-  ['ELEMENTS-2144', EL, [288, 291, 296], 'Open', 'new', 'high'],
-  ['ELEMENTS-2145', EL, [295], 'On Hold', 'new', 'low'],
+  ['APP-31', WEB, [14, 15, 16], 'Open', 'new', 'medium'],
+  ['APP-28', WEB, [3, 4, 5, 6, 7, 8, 10, 11, 12, 13], 'Open', 'new', 'medium'],
+  ['APP-29', WEB, [9], 'On Hold', 'new', 'low'],
+  ['APP-30', WEB, [1], 'On Hold', 'new', 'medium'],
+  ['APP-84', WEB, [2], 'Open', 'new', 'medium'],
+  ['LIB-24', EL, [101, 102, 103], 'Open', 'new', 'medium'],
+  ['LIB-44', EL, [104, 105, 107], 'Open', 'new', 'high'],
+  ['LIB-45', EL, [106], 'On Hold', 'new', 'low'],
 ];
 
 export function registerTickets({ withOwnership = false, fingerprintOf } = {}) {
@@ -142,27 +136,27 @@ export function bootstrapPlan() {
     runId: RUN,
     inventoryDigest: DIGEST,
     groups: [
-      adopt('WEBUI-2431', WEB, 'medium', [643, 644, 645]),
-      adopt('WEBUI-2428', WEB, 'medium', [587, 588, 589, 590, 591, 598, 608, 622, 639, 641]),
+      adopt('APP-31', WEB, 'medium', [14, 15, 16]),
+      adopt('APP-28', WEB, 'medium', [3, 4, 5, 6, 7, 8, 10, 11, 12, 13]),
       adopt(
-        'WEBUI-2429',
+        'APP-29',
         WEB,
         'low',
-        [607],
-        blocked('no-upstream-patch', 'https://github.com/advisories/GHSA-gcqx-w48m-w2h4'),
+        [9],
+        blocked('no-upstream-patch', 'https://github.com/advisories/GHSA-0000-0000-0007'),
       ),
-      adopt('WEBUI-2430', WEB, 'medium', [517], blocked('upstream-release-pending', 'ELEMENTS-2124')),
-      adopt('WEBUI-2384', WEB, 'medium', [542]),
-      adopt('ELEMENTS-2124', EL, 'medium', [235, 248, 251]),
-      adopt('ELEMENTS-2144', EL, 'high', [288, 291, 296]),
+      adopt('APP-30', WEB, 'medium', [1], blocked('upstream-release-pending', 'LIB-24')),
+      adopt('APP-84', WEB, 'medium', [2]),
+      adopt('LIB-24', EL, 'medium', [101, 102, 103]),
+      adopt('LIB-44', EL, 'high', [104, 105, 107]),
       adopt(
-        'ELEMENTS-2145',
+        'LIB-45',
         EL,
         'low',
-        [295],
-        blocked('no-upstream-patch', 'https://github.com/advisories/GHSA-gcqx-w48m-w2h4'),
+        [106],
+        blocked('no-upstream-patch', 'https://github.com/advisories/GHSA-0000-0000-0007'),
       ),
-      group(`${EL}:minimatch-globparts`, EL, 'create', undefined, 'medium', [299]),
+      group(`${EL}:pkg-match-globparts`, EL, 'create', undefined, 'medium', [108]),
     ],
     needsReview: [],
     closedTicketMismatches: [],

@@ -139,11 +139,27 @@ function countLine(bySeverity) {
     .join(' · ');
 }
 
-// Lists are chunked into several nodes so that a long report can be split across comments.
+const ENTRY_BUDGET = 6000;
+const LIST_BUDGET = 9000;
+
+// Lists are split into several nodes by size, so a long report can be divided across comments and no single
+// node can outgrow a comment.
 function chunks(items, size = 10) {
   const nodes = [];
-  for (let i = 0; i < items.length; i += size) {
-    nodes.push(adfBullets(items.slice(i, i + size)));
+  let current = [];
+  let length = 0;
+  for (const item of items) {
+    const itemLength = JSON.stringify(item).length;
+    if (current.length && (current.length >= size || length + itemLength > LIST_BUDGET)) {
+      nodes.push(adfBullets(current));
+      current = [];
+      length = 0;
+    }
+    current.push(item);
+    length += itemLength;
+  }
+  if (current.length) {
+    nodes.push(adfBullets(current));
   }
   return nodes;
 }
@@ -202,7 +218,7 @@ function groupEntry(group, site) {
   if (group.acceptanceCriteria) {
     lines.push(`Done when: ${group.acceptanceCriteria.join(' | ')}`);
   }
-  return [target, adfText(lines.filter(Boolean).join('\n'))];
+  return [target, adfText(clip(lines.filter(Boolean).join('\n'), ENTRY_BUDGET))];
 }
 
 function attentionLines(outcome) {
@@ -399,7 +415,11 @@ function reviewLines(outcome) {
     ),
     ...outcome.closedMismatches
       .filter((item) => item.isNew)
-      .map((item) => `${item.id.replace('nuxeo/', '')} is still open but ${item.tickets.join(', ')} is closed.`),
+      .map((item) => `${shortRepo(item.id)} is still open but ${item.tickets.join(', ')} is closed.`),
+    ...(outcome.ambiguous ?? []).map(
+      (item) =>
+        `${shortRepo(item.id)} is recorded on several open tickets (${item.tickets.join(', ')}); keep one owner.`,
+    ),
   ];
 }
 

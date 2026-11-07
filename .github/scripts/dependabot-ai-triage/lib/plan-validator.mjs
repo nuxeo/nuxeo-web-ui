@@ -128,8 +128,9 @@ function checkShape(ctx, group, where) {
     fail('group-schema', `${where} teamsLine must be at most ${MAX_TEAMS_LINE} characters.`);
   }
   const criteria = group.acceptanceCriteria;
-  if (operation === 'create' && !(Array.isArray(criteria) && criteria.length && criteria.every((c) => isText(c)))) {
-    fail('group-schema', `${where} needs acceptance criteria.`);
+  const validCriteria = Array.isArray(criteria) && criteria.length > 0 && criteria.every((item) => isText(item));
+  if ((operation === 'create' || criteria !== undefined) && !validCriteria) {
+    fail('group-schema', `${where} needs acceptance criteria as a non-empty list of text.`);
   }
   const related = group.relatedTickets ?? [];
   if (!Array.isArray(related) || related.length > 5 || !related.every((key) => JIRA_KEY.test(key))) {

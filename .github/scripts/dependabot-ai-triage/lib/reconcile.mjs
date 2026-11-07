@@ -70,7 +70,28 @@ function ownersByAlert(tickets) {
   return owners;
 }
 
-function classify(alert, candidates) {
+const RECHECK_DAYS = 28;
+const JIRA_KEY = /^[A-Z][A-Z0-9]+-\d+$/;
+
+/**
+ * A blocked owner is re-assessed when the upstream Jira ticket it waits for changes status, and at least every
+ * four weeks: publishing an upstream release does not change the GitHub alert, so the fingerprint alone would
+ * never bring it back to the planner.
+ */
+export function blockerRecheck(ownership, ticketsByKey, now) {
+  if (ownership.kind !== 'blocked') {
+    return null;
+  }
+  const ref = ownership.blocker?.upstreamRef;
+  const upstream = ref && JIRA_KEY.test(ref) ? ticketsByKey.get(ref) : null;
+  if (upstream && upstream.status !== ownership.blocker.upstreamStatus) {
+    return 'upstream-status-changed';
+  }
+  const checked = Date.parse(ownership.checkedAt ?? ownership.updatedAt ?? '');
+  return Number.isNaN(checked) || now.getTime() - checked > RECHECK_DAYS * 864e5 ? 'periodic-recheck' : null;
+}
+
+function classify(alert, candidates, context) {
   const id = alertId(alert.repository, alert.number);
   const active = candidates.filter((owner) => owner.ticket.statusCategory !== 'done');
   if (active.length > 1) {
@@ -82,8 +103,13 @@ function classify(alert, candidates) {
       : { bucket: 'unowned', item: id };
   }
   const [{ ticket, record }] = active;
-  const bucket = record.fingerprint === fingerprint(alert) ? 'covered' : 'changed';
-  return { bucket, item: { id, ticket: ticket.key }, owner: ticket };
+  const reason =
+    record.fingerprint === fingerprint(alert)
+      ? blockerRecheck(ticket.ownership, context.ticketsByKey, context.now)
+      : 'fingerprint';
+  return reason
+    ? { bucket: 'changed', item: { id, ticket: ticket.key, reason }, owner: ticket }
+    : { bucket: 'covered', item: { id, ticket: ticket.key }, owner: ticket };
 }
 
 function addRaise(raises, ticket, alert) {
@@ -100,14 +126,16 @@ function addRaise(raises, ticket, alert) {
  * Deterministic coverage: an alert is owned only through the structured ownership property that the
  * executor writes. Description text is never parsed for ownership.
  */
-export function reconcile({ alerts, tickets, previousState }) {
+export function reconcile({ alerts, tickets, previousState, now = new Date() }) {
   const owners = ownersByAlert(tickets);
+  const context = { ticketsByKey: new Map(tickets.map((ticket) => [ticket.key, ticket])), now };
   const result = { covered: [], unowned: [], changed: [], closedMismatches: [], ambiguous: [], ownedNotOpen: [] };
   const raises = new Map();
   const openIds = new Set();
   for (const alert of alerts) {
     openIds.add(alertId(alert.repository, alert.number));
-    const { bucket, item, owner } = classify(alert, owners.get(alertId(alert.repository, alert.number)) ?? []);
+    const candidates = owners.get(alertId(alert.repository, alert.number)) ?? [];
+    const { bucket, item, owner } = classify(alert, candidates, context);
     result[bucket].push(item);
     if (owner) {
       addRaise(raises, owner, alert);

@@ -2,6 +2,7 @@ export const STATE_PROPERTY = 'dependabot-ai-triage-state';
 export const JOURNAL_PROPERTY = 'dependabot-ai-triage-journal';
 const LOCK_STALE_HOURS = 6;
 const JOURNAL_BUDGET = 28000;
+const RESOLVED = new Set(['done', 'failed', 'not-applied']);
 
 export class LockHeldError extends Error {}
 
@@ -60,11 +61,12 @@ export class ControlState {
   }
 
   async persistJournal() {
-    // Keep the property under Jira's size limit by dropping the oldest settled entries.
+    // Keep the property under Jira's size limit by dropping the oldest resolved entries. Reserved and uncertain
+    // entries are kept: they are what stops an interrupted write (or Teams send) from being repeated.
     while (JSON.stringify(this.journal).length > JOURNAL_BUDGET) {
-      const index = this.journal.entries.findIndex((entry) => entry.status !== 'reserved');
+      const index = this.journal.entries.findIndex((entry) => RESOLVED.has(entry.status));
       if (index < 0) {
-        throw new Error('Action journal is full of unresolved reservations; manual reconciliation required.');
+        throw new Error('Action journal is full of unresolved writes; manual reconciliation required.');
       }
       this.journal.entries.splice(index, 1);
     }

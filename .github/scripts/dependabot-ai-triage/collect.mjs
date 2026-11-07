@@ -133,6 +133,16 @@ async function readTickets(jira, config, alerts, warnings) {
     ticketQueries(config, alerts).map((jql) => jira.search(jql, fields, [OWNERSHIP_PROPERTY])),
   );
   const byKey = new Map(pages.flat().map((issue) => [issue.key, issue]));
+  // Upstream tickets that blocked owners wait for must be read too, so a status change triggers a recheck.
+  const upstream = [...byKey.values()]
+    .map((issue) => issue.properties?.[OWNERSHIP_PROPERTY]?.blocker?.upstreamRef)
+    .filter((ref) => /^[A-Z][A-Z0-9]+-\d+$/.test(ref ?? '') && !byKey.has(ref));
+  if (upstream.length) {
+    const extra = await jira.search(`key in (${[...new Set(upstream)].join(', ')})`, fields, [OWNERSHIP_PROPERTY]);
+    for (const issue of extra) {
+      byKey.set(issue.key, issue);
+    }
+  }
   byKey.delete(config.controlIssue);
   return [...byKey.values()].map((issue) => {
     const ticket = toTicket(issue, config);
@@ -301,6 +311,7 @@ function indexEntry(alert) {
     ghsa: alert.ghsa,
     firstPatched: alert.firstPatched,
     reason: alert.reason,
+    changeReason: alert.changeReason,
     currentOwner: alert.currentOwner,
     file: alertFile(alert),
   };
@@ -399,6 +410,7 @@ function ticketSummary(ticket) {
 async function buildPlannerInput(ctx, { alerts, repositories, tickets, result }) {
   const byId = new Map(alerts.map((alert) => [alertId(alert.repository, alert.number), alert]));
   const currentOwner = Object.fromEntries([...result.covered, ...result.changed].map(({ id, ticket }) => [id, ticket]));
+  const changeReason = Object.fromEntries(result.changed.map(({ id, reason }) => [id, reason]));
   const aiInput = [...result.unowned, ...result.changed.map((item) => item.id)];
   const aiAlerts = aiInput.map((id) => byId.get(id));
   const readJson = (() => {
@@ -428,6 +440,7 @@ async function buildPlannerInput(ctx, { alerts, repositories, tickets, result })
     return {
       ...alert,
       reason: owner ? 'changed' : 'unowned',
+      changeReason: changeReason[id] ?? null,
       currentOwner: owner,
       evidence: evidenceList[index],
       npm: npmInfo[index],

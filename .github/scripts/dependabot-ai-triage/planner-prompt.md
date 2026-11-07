@@ -54,8 +54,11 @@ remediation:
 - If the only ticket that explicitly covers an open alert is closed (`statusCategory` = `done`), report it in
   `closedTicketMismatches`. Do not reopen, replace or extend closed tickets.
 - `changed` alerts stay with their `currentOwner`: use `keep` (or `extend`/`adopt` if you also add alerts to the
-  same ticket). Write `updateNote` when the change matters to the assignee, for example when a patch is now
-  published for a blocked finding.
+  same ticket). `changeReason` says why: `fingerprint` (the GitHub advisory data changed),
+  `upstream-status-changed` (the Jira ticket a blocked owner waits for changed status) or `periodic-recheck` (a
+  blocked owner has not been re-assessed for four weeks). Re-assess the blocker from the evidence and the upstream
+  ticket. Write `updateNote` only when something matters to the assignee, for example a patch is now published or
+  the upstream release happened; otherwise leave it out so the ticket is not commented on every week.
 
 ### 2. Grouping new tickets (`create`)
 
@@ -158,5 +161,5 @@ Respond with only one JSON object, no Markdown fences and no other text:
 ```
 
 `remediationId` must be stable across runs for the same remediation: build it from the repository, the package
-and the remediation, for example `nuxeo/nuxeo-web-ui:minimatch-globparts` or `nuxeo/nuxeo-elements:deepmerge`.
+and the remediation, for example `nuxeo/nuxeo-web-ui:example-package-upgrade` or `nuxeo/nuxeo-elements:example-package`.
 Omit optional fields that do not apply (`ticket` for create, `blocker` for actionable groups).

@@ -77,14 +77,16 @@ function attemptPlan(options) {
   }
   try {
     return { plan: extractJson(result.stdout) };
-  } catch (error) {
-    return { reason: error.message, stop: false };
+  } catch {
+    // Parser messages quote the reply, which is private; keep a fixed reason.
+    return { reason: 'the reply was not a single valid JSON object', stop: false };
   }
 }
 
+/** The detailed reason goes to the private report; the public Actions log gets a fixed message. */
 function fail(file, message) {
   writeFileSync(file, JSON.stringify({ message }), { mode: 0o600 });
-  log(message);
+  log('Planner did not produce a plan; the reason is in the private report on the control issue.');
 }
 
 export function plan() {
@@ -114,7 +116,7 @@ export function plan() {
       attempt = attemptPlan({ ...options, prompt: retry });
     }
   } catch (error) {
-    attempt = { reason: error.message };
+    attempt = { reason: error instanceof SyntaxError ? 'the planner input could not be read' : error.message };
   }
   if (!attempt.plan) {
     fail(failure, `Planner failed: ${attempt.reason}`);

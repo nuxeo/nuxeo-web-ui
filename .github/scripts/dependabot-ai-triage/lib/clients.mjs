@@ -70,7 +70,7 @@ export function npmClient() {
   return {
     packument(name) {
       if (!cache.has(name)) {
-        const url = `https://registry.npmjs.org/${name.replace('/', '%2F')}`;
+        const url = `https://registry.npmjs.org/${name.replaceAll('/', '%2F')}`;
         const pending = request({
           service: 'npm',
           url,
