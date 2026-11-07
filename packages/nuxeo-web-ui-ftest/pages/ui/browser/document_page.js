@@ -74,6 +74,10 @@ export default class DocumentPage extends BasePage {
     return new DocumentCommentThread('nuxeo-document-comment-thread[name="comments"]');
   }
 
+  get tags() {
+    return this.el.element('nuxeo-tag-suggestion');
+  }
+
   get publicationsCount() {
     return (async () => {
       const info = await this.el.element('nuxeo-document-info');
