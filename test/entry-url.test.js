@@ -144,6 +144,14 @@ suite('entry-url', () => {
       );
     });
 
+    test('keeps the encoding of a parameter the lost separator swallowed along with the tab', () => {
+      // Recovery works on the raw query string. Re-parsing a decoded value turned the encoded `&`
+      // and `=` into a separator, truncating `q`, and the encoded `+` into a space.
+      expect(
+        normalizeEntryUrl(location('/nuxeo/ui/', '', '#!/doc/xyz?p=permissions?q=a%26b%3Dc%2Bd&token=abc123')),
+      ).to.equal('/nuxeo/ui/#!/doc/xyz?p=permissions&q=a%26b%3Dc%2Bd');
+    });
+
     test('leaves a question mark in the tab name alone when no credential is involved', () => {
       expect(normalizeEntryUrl(location('/nuxeo/ui/', '', '#!/doc/xyz?p=permissions?lang=fr'))).to.be.null;
     });

@@ -61,34 +61,39 @@ const DUPLICATED_CREDENTIAL_SEPARATOR = new RegExp(String.raw`\?(?=(?:${CREDENTI
  */
 const TAB_PARAM = 'p';
 
+/** Matches a credential assignment anywhere in a raw (still percent-encoded) query string. */
+const CREDENTIAL_ASSIGNMENT = new RegExp(`(?:^|[?&])(?:${CREDENTIAL_PARAMS.join('|')})=`);
+
+/** Matches the raw `p=<tab>` assignment, up to the next parameter. */
+const TAB_ASSIGNMENT = new RegExp(`(^|&)${TAB_PARAM}=([^&]*)`);
+
 /**
- * When the query carries a credential, a `?` inside the tab name is the separator page.js lost when
- * it appended `location.search`, even if the copy's own parameters came first (`p=permissions?lang=fr&token=t`).
- * Keep the tab name that precedes it and treat what follows as the parameters it swallowed. Restricting
- * this to the tab is deliberate: any other value may legitimately hold a `?`, and is left as data.
+ * When the query carries a credential, a literal `?` inside the tab name is the separator page.js
+ * lost when it appended `location.search`, even if the copy's own parameters came first
+ * (`p=permissions?lang=fr&token=t`). Keep the tab name that precedes it and put what follows back
+ * as parameters of their own. Restricting this to the tab is deliberate: any other value may
+ * legitimately hold a `?`, and is left as data.
  *
- * @param {URLSearchParams} params the parsed query
- * @return {URLSearchParams} `params`, with a tab name that swallowed a separator split back apart
+ * This works on the raw query string, not on parsed values. A parsed value is already decoded, so
+ * splitting it again would turn an encoded `&`, `=` or `+` in a swallowed parameter into a
+ * separator or a space. A percent-encoded `%3F` is data and is never mistaken for the separator.
+ *
+ * @param {string} query the raw query string, without its leading `?`
+ * @return {string} `query`, with a tab name that swallowed a separator split back apart
  */
-function recoverTab(params) {
-  const tab = params.get(TAB_PARAM);
-  if (tab === null || !tab.includes('?') || !CREDENTIAL_PARAMS.some((param) => params.has(param))) {
-    return params;
+function recoverTab(query) {
+  if (!CREDENTIAL_ASSIGNMENT.test(query)) {
+    return query;
   }
-  const separator = tab.indexOf('?');
-  const recovered = new URLSearchParams();
-  params.forEach((value, key) => {
-    if (key !== TAB_PARAM || value !== tab) {
-      recovered.append(key, value);
-      return;
+  return query.replace(TAB_ASSIGNMENT, (match, lead, tab) => {
+    const separator = tab.indexOf('?');
+    if (separator < 0) {
+      return match;
     }
     // An empty name means nothing usable is left of the tab, so the route falls back to its default.
-    if (separator > 0) {
-      recovered.append(TAB_PARAM, tab.slice(0, separator));
-    }
-    new URLSearchParams(tab.slice(separator + 1)).forEach((v, k) => recovered.append(k, v));
+    const name = tab.slice(0, separator);
+    return lead + [name && `${TAB_PARAM}=${name}`, tab.slice(separator + 1)].filter(Boolean).join('&');
   });
-  return recovered;
 }
 
 /**
@@ -124,7 +129,7 @@ function parseQuery(query, appended) {
   }
   // Otherwise fall back to the credential heuristic, for a copy whose `location.search` the server's
   // login redirect has since dropped.
-  return recoverTab(new URLSearchParams(repaired.replace(DUPLICATED_CREDENTIAL_SEPARATOR, '&')));
+  return new URLSearchParams(recoverTab(repaired.replace(DUPLICATED_CREDENTIAL_SEPARATOR, '&')));
 }
 
 /**
