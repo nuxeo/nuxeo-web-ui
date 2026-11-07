@@ -359,6 +359,16 @@ function checkGroup(ctx, group, index) {
   checkText(ctx, group, owned, where);
 }
 
+/** A report item must name a configured repository and an integer alert number before it is assigned. */
+function validReportTarget(ctx, item) {
+  return (
+    isObject(item) &&
+    typeof item.repository === 'string' &&
+    ctx.projectOf.has(item.repository) &&
+    Number.isInteger(item.alert)
+  );
+}
+
 function checkReports(ctx) {
   for (const [index, item] of ctx.plan.needsReview.entries()) {
     const where = `needsReview[${index}]`;
@@ -367,18 +377,20 @@ function checkReports(ctx) {
       !unknownKeys(item, REVIEW_KEYS).length &&
       isText(item.missingEvidence) &&
       isText(item.candidateTicket);
-    if (!fine) {
+    if (!fine || !validReportTarget(ctx, item)) {
       ctx.fail('review-schema', `${where} must name the alert, candidate ticket and the specific missing evidence.`);
+      continue;
     }
-    assign(ctx, item?.repository, item?.alert, where);
+    assign(ctx, item.repository, item.alert, where);
   }
   for (const [index, item] of ctx.plan.closedTicketMismatches.entries()) {
     const where = `closedTicketMismatches[${index}]`;
-    const ticket = isObject(item) ? ctx.tickets.get(item.ticket) : null;
-    if (!isObject(item) || unknownKeys(item, MISMATCH_KEYS).length || ticket?.statusCategory !== 'done') {
+    const ticket = isObject(item) && typeof item.ticket === 'string' ? ctx.tickets.get(item.ticket) : null;
+    if (!validReportTarget(ctx, item) || unknownKeys(item, MISMATCH_KEYS).length || ticket?.statusCategory !== 'done') {
       ctx.fail('mismatch-schema', `${where} must reference a closed ticket from the fresh Jira read.`);
+      continue;
     }
-    assign(ctx, item?.repository, item?.alert, where);
+    assign(ctx, item.repository, item.alert, where);
   }
 }
 

@@ -11,7 +11,7 @@ import { validatePlan } from '../lib/plan-validator.mjs';
 import { OWNERSHIP_PROPERTY, blockerRecheck, fingerprint, reconcile } from '../lib/reconcile.mjs';
 import { runReport, teamsCard } from '../lib/render.mjs';
 import { request } from '../lib/util.mjs';
-import { ControlState, JOURNAL_PROPERTY, STATE_PROPERTY } from '../lib/state.mjs';
+import { CARD_PROPERTY, ControlState, JOURNAL_PROPERTY, STATE_PROPERTY } from '../lib/state.mjs';
 import { plan } from '../plan.mjs';
 import { DIGEST, EL, RUN, WEB, blocked, bootstrapPlan, group, liveAlerts, registerTickets } from './fixtures.mjs';
 import { FakeJira, config, createGroup, executor, newOutcome, severityId } from './support.mjs';
@@ -601,4 +601,186 @@ test('an unreadable response to a write is an uncertain outcome', async () => {
   } finally {
     globalThis.fetch = original;
   }
+});
+
+// Third review round (inline threads and the "previously missed" findings from the review summary).
+
+test('each run keeps its own Teams card; a retry without its stored card is not rebuilt or resent', async () => {
+  const jira = new FakeJira();
+  const created = [{ ...createGroup(), ticketKey: 'LIB-3000', action: 'created' }];
+  await teamsAttempt(jira, () => new Response('', { status: 429 }), { groups: created, newBySeverity: { medium: 1 } });
+  const otherRun = new ControlState(jira, config.controlIssue);
+  await otherRun.storeCard('another-run', { other: true });
+  assert.ok(await otherRun.storedCard(RUN));
+  delete jira.issues.get(config.controlIssue).properties[`${CARD_PROPERTY}-${RUN}`];
+  const retry = await teamsAttempt(jira, () => new Response('', { status: 202 }));
+  assert.equal(retry.delivered, false);
+  assert.equal(retry.sent.length, 0);
+  assert.match(retry.outcome.failures.join(), /no longer stored; not rebuilt or resent/);
+});
+
+test('a delivered card is removed once its delivery is recorded', async () => {
+  const jira = new FakeJira();
+  const sent = await teamsAttempt(jira, () => new Response('', { status: 202 }));
+  assert.equal(sent.delivered, true);
+  assert.equal(jira.issues.get(config.controlIssue).properties[`${CARD_PROPERTY}-${RUN}`], undefined);
+});
+
+test('only confirmed closures count as cleared alerts', async () => {
+  const states = { 1: 'fixed', 2: 'open', 3: 'dismissed', 4: 'auto_dismissed' };
+  const github = {
+    async alert(repository, number) {
+      return { state: states[number] };
+    },
+  };
+  const owned = [1, 2, 3, 4].map((number) => {
+    return { id: `${WEB}#${number}`, tickets: ['APP-1'] };
+  });
+  const cleared = await clearedAlerts(github, owned, []);
+  assert.deepEqual(
+    cleared.map((item) => item.id),
+    [`${WEB}#1`, `${WEB}#3`, `${WEB}#4`],
+  );
+});
+
+test('a change whose journal entry cannot be saved stops further writes and is never replayed', async () => {
+  const tickets = registerTickets();
+  const jira = new FakeJira(tickets);
+  const { exec, outcome, control } = await executor(jira, tickets);
+  const settle = control.settle.bind(control);
+  control.settle = async () => {
+    throw new Error('HTTP 429');
+  };
+  await exec.update(bootstrapPlan().groups[0], {});
+  control.settle = settle;
+  assert.equal(exec.stopped, true);
+  assert.match(outcome.failures.join(), /was applied but its journal entry was not saved/);
+  const labelAdds = jira.calls.filter((call) => call.name === 'addLabel').length;
+  // A retry of the run settles the still-reserved entry as uncertain and does not repeat the change.
+  const retry = await executor(jira, tickets);
+  await retry.exec.recover();
+  await retry.exec.update(bootstrapPlan().groups[0], {});
+  assert.equal(jira.calls.filter((call) => call.name === 'addLabel').length, labelAdds);
+  assert.match(retry.outcome.failures.join(), /unknown outcome from an earlier attempt; not repeated/);
+});
+
+test('a covered severity raise is skipped when the ticket closed or changed owner after collection', async () => {
+  const tickets = registerTickets();
+  const jira = new FakeJira(tickets);
+  jira.issues.get('APP-31').fields.status = { name: 'Resolved', statusCategory: { key: 'done' } };
+  const { exec, outcome } = await executor(jira, tickets);
+  const raise = { ticket: 'APP-31', from: 'medium', to: 'high', alerts: [`${WEB}#14`] };
+  await exec.raiseCovered(raise, new Set());
+  assert.equal(raise.applied, false);
+  assert.equal(jira.calls.filter((call) => call.name === 'edit').length, 0);
+  assert.match(outcome.failures.join(), /is now Resolved/);
+});
+
+test('planner-found closed-ticket mismatches already reported are not announced again', async () => {
+  const jira = new FakeJira();
+  const work = mkdtempSync(path.join(tmpdir(), 'dat-mismatch-'));
+  const alerts = liveAlerts().filter((alert) => alert.repository === WEB && alert.number === 2);
+  const inventory = baseInventory({
+    alerts,
+    plannerNeeded: true,
+    aiInput: [`${WEB}#2`],
+    inventoryDigest: DIGEST,
+    tickets: [{ key: 'APP-84', project: 'APP', status: 'Resolved', statusCategory: 'done', onHold: false }],
+    previousState: { lastSuccess: {}, pendingUnowned: [`${WEB}#2`], reportedMismatches: [`${WEB}#2`] },
+  });
+  writeFileSync(path.join(work, 'inventory.json'), JSON.stringify(inventory));
+  writeFileSync(
+    path.join(work, 'plan.json'),
+    JSON.stringify({
+      schemaVersion: 1,
+      runId: RUN,
+      inventoryDigest: DIGEST,
+      groups: [],
+      needsReview: [],
+      closedTicketMismatches: [{ repository: WEB, alert: 2, ticket: 'APP-84' }],
+    }),
+  );
+  const outcome = await withEnv({ TRIAGE_WORK_DIR: work, TRIAGE_CONFIG: CONFIG_FILE }, () => apply(jira));
+  process.exitCode = 0;
+  assert.deepEqual(
+    outcome.closedMismatches.map((item) => item.isNew),
+    [false],
+  );
+});
+
+test('Teams bookkeeping errors still save state and release the lock', async () => {
+  const jira = new FakeJira();
+  const control = new ControlState(jira, config.controlIssue);
+  await control.load();
+  await control.saveState({ lock: { runId: RUN, acquiredAt: new Date().toISOString() } });
+  const setProperty = jira.setProperty.bind(jira);
+  jira.setProperty = async (key, name, value) => {
+    if (name.startsWith(CARD_PROPERTY)) {
+      throw new Error('HTTP 503');
+    }
+    return setProperty(key, name, value);
+  };
+  const work = workDir(baseInventory({ mode: 'automatic' }));
+  const outcome = await withEnv(
+    { TRIAGE_WORK_DIR: work, TRIAGE_CONFIG: CONFIG_FILE, DEPENDABOT_TEAMS_WEBHOOK_URL: 'https://hooks.example/x' },
+    () => apply(jira),
+  );
+  process.exitCode = 0;
+  assert.equal(outcome.complete, false);
+  assert.match(outcome.failures.join(), /Teams notification bookkeeping/);
+  const state = jira.issues.get(config.controlIssue).properties[STATE_PROPERTY];
+  assert.ok(!state.lock);
+  assert.ok(state.lastFailure);
+});
+
+test('report items need a configured repository string and an integer alert number', () => {
+  const alerts = liveAlerts();
+  const planned = bootstrapPlan();
+  planned.groups.pop();
+  planned.needsReview.push({ repository: [EL], alert: 108, candidateTicket: 'none', missingEvidence: 'x' });
+  planned.closedTicketMismatches.push({ repository: EL, alert: '108', ticket: 'LIB-27' });
+  const result = validatePlan({
+    plan: planned,
+    runId: RUN,
+    inventoryDigest: DIGEST,
+    repositories: [
+      { name: WEB, project: 'APP' },
+      { name: EL, project: 'LIB' },
+    ],
+    epicQuarter: '2026-Q4',
+    alerts,
+    aiInput: alerts.map((alert) => `${alert.repository}#${alert.number}`),
+    currentOwner: new Map(),
+    tickets: [...registerTickets(), { key: 'LIB-27', statusCategory: 'done' }],
+    now: new Date('2026-11-09T07:45:00Z'),
+  });
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some((error) => error.code === 'review-schema'));
+  assert.ok(result.errors.some((error) => error.code === 'mismatch-schema'));
+});
+
+test('completed Teams delivery records survive journal pruning for the 30-day re-run window', async () => {
+  const jira = new FakeJira();
+  const control = new ControlState(jira, config.controlIssue);
+  await control.load();
+  const filler = 'x'.repeat(400);
+  const recent = new Date().toISOString();
+  const old = new Date(Date.now() - 40 * 864e5).toISOString();
+  control.journal.entries.push(
+    { id: 'old:teams', kind: 'teams', status: 'done', settledAt: old, detail: filler },
+    { id: 'recent:teams', kind: 'teams', status: 'done', settledAt: recent, detail: filler },
+  );
+  for (let i = 0; i < 80; i++) {
+    control.journal.entries.push({
+      id: `done-${i}`,
+      kind: 'create',
+      status: 'done',
+      settledAt: recent,
+      detail: filler,
+    });
+  }
+  await control.persistJournal();
+  const ids = control.journal.entries.map((entry) => entry.id);
+  assert.ok(ids.includes('recent:teams'));
+  assert.ok(!ids.includes('old:teams'));
 });

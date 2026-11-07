@@ -107,6 +107,11 @@ export class FakeJira {
     return this.issues.get(key).properties[name] || null;
   }
 
+  async deleteProperty(key, name) {
+    this.record('deleteProperty', { key, name });
+    delete this.issues.get(key).properties[name];
+  }
+
   async setProperty(key, name, value) {
     this.record('setProperty', { key, name });
     this.issues.get(key).properties[name] = structuredClone(value);

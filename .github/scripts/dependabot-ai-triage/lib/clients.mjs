@@ -151,6 +151,9 @@ export function jiraClient({ site, email, token }) {
     setProperty(key, name, value) {
       return call('PUT', `/issue/${key}/properties/${name}`, value, 'property write');
     },
+    deleteProperty(key, name) {
+      return call('DELETE', `/issue/${key}/properties/${name}`, undefined, 'property delete');
+    },
     create(fields) {
       return call('POST', '/issue', { fields }, 'issue create');
     },

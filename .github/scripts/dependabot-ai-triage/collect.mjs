@@ -397,6 +397,7 @@ async function collectRepositories(github, config, failures) {
 }
 
 const LOOKUP_BATCH = 10;
+const CLOSED_STATES = new Set(['fixed', 'dismissed', 'auto_dismissed']);
 
 async function clearedBatch(github, batch, warnings) {
   const lookups = await Promise.allSettled(
@@ -408,7 +409,8 @@ async function clearedBatch(github, batch, warnings) {
   return lookups
     .map((lookup, index) => {
       if (lookup.status === 'fulfilled') {
-        return lookup.value;
+        // An alert can reopen between the open-alert scan and this lookup; only a confirmed closure counts.
+        return CLOSED_STATES.has(lookup.value.state) ? lookup.value : null;
       }
       warnings.push(`State of ${batch[index].id} unavailable: ${lookup.reason.message}`);
       return null;

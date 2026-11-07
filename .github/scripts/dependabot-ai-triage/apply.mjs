@@ -143,19 +143,42 @@ export class Executor {
       const previous = this.control.find(id);
       return previous?.status === 'done' ? previous.result : null;
     }
+    let result;
     try {
-      const result = (await fn()) ?? {};
-      await this.control.settle(id, 'done', result);
-      this.outcome.actions.push({ status: 'done', kind, target: result.key ?? target, detail: result.detail ?? '' });
-      return result;
+      result = (await fn()) ?? {};
     } catch (error) {
-      const status = error.uncertain ? 'uncertain' : 'failed';
-      await this.control.settle(id, status, { message: error.message });
-      this.outcome.actions.push({ status, kind, target, detail: error.message });
-      this.outcome.failures.push(`${kind} ${target}: ${error.message}`);
-      // The remote outcome is unknown; reconcile on the next run instead of continuing blindly.
-      this.stopped = Boolean(error.uncertain);
+      await this.recordFailure(id, kind, target, error);
       return null;
+    }
+    this.outcome.actions.push({ status: 'done', kind, target: result.key ?? target, detail: result.detail ?? '' });
+    await this.acknowledge(id, kind, target, result);
+    return result;
+  }
+
+  /**
+   * The change was made. If its journal entry cannot be completed, nothing more is written: the entry stays
+   * reserved, and the next automatic run settles it as uncertain instead of repeating the change.
+   */
+  async acknowledge(id, kind, target, result) {
+    try {
+      await this.control.settle(id, 'done', result);
+    } catch (error) {
+      this.stopped = true;
+      this.outcome.failures.push(`${kind} ${target} was applied but its journal entry was not saved: ${error.message}`);
+    }
+  }
+
+  async recordFailure(id, kind, target, error) {
+    const status = error.uncertain ? 'uncertain' : 'failed';
+    this.outcome.actions.push({ status, kind, target, detail: error.message });
+    this.outcome.failures.push(`${kind} ${target}: ${error.message}`);
+    // An unknown remote outcome is reconciled on the next run instead of continuing blindly.
+    this.stopped = Boolean(error.uncertain);
+    try {
+      await this.control.settle(id, status, { message: error.message });
+    } catch (journalError) {
+      this.stopped = true;
+      this.outcome.failures.push(`${kind} ${target}: journal entry not saved: ${journalError.message}`);
     }
   }
 
@@ -399,9 +422,9 @@ export class Executor {
     }
     const id = `${this.inventory.runId}:${raise.ticket}:severity-${raise.to}`;
     const result = await this.act(id, 'severity', raise.ticket, async () => {
-      // Decide from the current Jira value: a severity raised by hand meanwhile is never lowered.
-      const current = await this.jira.issue(raise.ticket, [this.config.severityField]);
-      const severity = this.config.severityOf(current.fields[this.config.severityField]?.id);
+      // Same fresh checks as planned updates (closed or re-owned tickets are left alone), and the decision uses
+      // the current Jira value: a severity raised by hand meanwhile is never lowered.
+      const { severity } = await this.refreshTarget({ ticket: raise.ticket, operation: 'raise', kind: 'actionable' });
       if (SEVERITY_RANK[raise.to] <= (SEVERITY_RANK[severity] ?? 0)) {
         return { key: raise.ticket, unchanged: true };
       }
@@ -468,11 +491,14 @@ export async function postTeams(control, outcome, config, inventory) {
     outcome.failures.push('Teams webhook secret is missing or not HTTPS.');
     return false;
   }
-  // A retry resends the card built by the run that made the changes, not one rebuilt from the retry's (by then
+  // A retry resends the card built by the run that made the changes; it is never rebuilt from the retry's (by then
   // empty) plan.
-  const stored = previous ? await control.storedCard(inventory.runId) : null;
-  const body = stored ?? teamsCard(outcome, config);
+  const body = previous ? await control.storedCard(inventory.runId) : teamsCard(outcome, config);
   if (previous) {
+    if (!body) {
+      outcome.failures.push(`Teams card of run ${inventory.runId} is no longer stored; not rebuilt or resent.`);
+      return false;
+    }
     previous.status = 'reserved';
     await control.persistJournal();
   } else {
@@ -488,8 +514,6 @@ export async function postTeams(control, outcome, config, inventory) {
       body,
       label: 'webhook',
     });
-    await control.settle(id, 'done', { acceptedAt: new Date().toISOString() });
-    return true;
   } catch (error) {
     const uncertain = error.uncertain || !error.status;
     await control.settle(id, uncertain ? 'uncertain' : 'failed', { message: error.message });
@@ -497,6 +521,14 @@ export async function postTeams(control, outcome, config, inventory) {
     outcome.failures.push(`Teams delivery ${label}: ${error.message}`);
     return false;
   }
+  try {
+    await control.settle(id, 'done', { acceptedAt: new Date().toISOString() });
+    await control.discardCard(inventory.runId);
+  } catch (error) {
+    // Delivered, but not recorded: the still-reserved entry is settled as uncertain next run, never resent.
+    outcome.failures.push(`Teams summary was delivered but its journal entry was not saved: ${error.message}`);
+  }
+  return true;
 }
 
 function emptyOutcome(inventory) {
@@ -584,7 +616,8 @@ function describe(outcome, inventory, plan) {
   const groups = plan?.groups ?? [];
   const byOperation = (operation) => groups.filter((group) => group.operation === operation).length;
   const planMismatches = (plan?.closedTicketMismatches ?? []).map((item) => {
-    return { id: alertId(item.repository, item.alert), tickets: [item.ticket], isNew: true };
+    const id = alertId(item.repository, item.alert);
+    return { id, tickets: [item.ticket], isNew: !reported.has(id) };
   });
   Object.assign(outcome, {
     planDetermined: Boolean(plan),
@@ -672,7 +705,21 @@ async function noteDeliveryFailure(jira, config, outcome) {
   }
 }
 
-async function runWithLock({ jira, control, config, inventory, outcome, plan }) {
+/** Teams delivery and its bookkeeping; any error makes the run incomplete instead of escaping. */
+async function notify({ jira, control, config, inventory, outcome }) {
+  let delivered = false;
+  try {
+    delivered = await postTeams(control, outcome, config, inventory);
+  } catch (error) {
+    outcome.failures.push(`Teams notification bookkeeping: ${error.message}`);
+  }
+  outcome.complete = outcome.failures.length === 0;
+  if (!delivered) {
+    await noteDeliveryFailure(jira, config, outcome);
+  }
+}
+
+async function executeLocked({ jira, control, config, inventory, outcome, plan }) {
   await control.load();
   const executor = new Executor({ jira, control, config, inventory, outcome });
   try {
@@ -693,17 +740,31 @@ async function runWithLock({ jira, control, config, inventory, outcome, plan }) 
   await publishReport(jira, config, outcome);
   // A failed report makes the run incomplete before the Teams card is built, so it cannot claim a clean scan.
   outcome.complete = outcome.failures.length === 0;
-  if (outcome.mode === 'automatic') {
-    const delivered = await postTeams(control, outcome, config, inventory);
-    outcome.complete = outcome.failures.length === 0;
-    if (!delivered) {
-      await noteDeliveryFailure(jira, config, outcome);
+}
+
+/** Everything that needs the lock; state is saved and the lock released whatever happens before. */
+async function runWithLock(context) {
+  const { control, inventory, outcome } = context;
+  try {
+    await executeLocked(context);
+    if (outcome.mode === 'automatic') {
+      await notify(context);
     }
+  } catch (error) {
+    outcome.failures.push(`Run: ${error.message}`);
   }
+  outcome.complete = outcome.failures.length === 0;
   try {
     await saveState(control, outcome, inventory);
-  } finally {
+  } catch (error) {
+    outcome.failures.push(`State: ${error.message}`);
+    outcome.complete = false;
+  }
+  try {
     await control.releaseLock(inventory.runId);
+  } catch (error) {
+    outcome.failures.push(`Lock release: ${error.message}`);
+    outcome.complete = false;
   }
 }
 
