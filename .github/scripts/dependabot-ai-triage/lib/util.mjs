@@ -123,8 +123,15 @@ async function attemptRequest(options, attempt) {
     failure.uncertain = method !== 'GET' && response.status >= 500;
     throw failure;
   }
-  const text = await response.text();
-  return { data: text ? JSON.parse(text) : {}, headers: response.headers, status: response.status };
+  try {
+    const text = await response.text();
+    return { data: text ? JSON.parse(text) : {}, headers: response.headers, status: response.status };
+  } catch {
+    // The request reached the service; for a write the outcome is unknown and must not be repeated blindly.
+    const failure = new RequestError(service, method, response.status, `${label} response`);
+    failure.uncertain = method !== 'GET';
+    throw failure;
+  }
 }
 
 /** JSON HTTP request with bounded retries for idempotent reads. */

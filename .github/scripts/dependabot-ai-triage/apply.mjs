@@ -204,6 +204,9 @@ export class Executor {
     if (group.operation === 'extend' && category !== 'new') {
       problems.push(`is now ${status.name}, so its scope is not extended`);
     }
+    if (group.operation === 'extend' && group.kind === 'actionable' && status.name === this.config.holdStatus) {
+      problems.push('is now On Hold, so independently actionable work is not added to it');
+    }
     if (![expected, this.inventory.runId].includes(ownership?.updatedBy ?? null)) {
       problems.push('had its recorded ownership changed since collection');
     }
@@ -250,6 +253,7 @@ export class Executor {
    */
   async finish(group, target, alerts, report) {
     const { runId } = this.inventory;
+    report.onHold = target.onHold;
     if (group.kind === 'blocked' && !target.onHold) {
       const held = await this.act(`${runId}:${target.key}:hold`, 'hold', target.key, async () => {
         return { key: target.key, held: await this.hold(target.key, group) };
@@ -258,6 +262,7 @@ export class Executor {
       if (!held) {
         return false;
       }
+      report.onHold = true;
       report.blockerChanged = report.blockerChanged || report.heldVerified;
     }
     const ownership = ownershipRecord({
@@ -449,24 +454,32 @@ export class Executor {
 export async function postTeams(control, outcome, config, inventory) {
   const id = `${inventory.runId}:teams`;
   const previous = control.find(id);
+  if (previous?.status === 'done') {
+    outcome.warnings.push({ code: 'teams', message: 'Teams summary for this run was already delivered; not resent.' });
+    return true;
+  }
   if (previous && !RETRYABLE.has(previous.status)) {
-    const message = `Teams summary for this run is already ${previous.status}; not resent.`;
-    outcome.warnings.push({ code: 'teams', message });
-    return previous.status === 'done';
+    // Unknown outcome: never resent automatically, and the run cannot count as complete.
+    outcome.failures.push(`Teams delivery for run ${inventory.runId} is unresolved (${previous.status}); not resent.`);
+    return false;
   }
   const url = process.env.DEPENDABOT_TEAMS_WEBHOOK_URL;
   if (!url?.startsWith('https://')) {
     outcome.failures.push('Teams webhook secret is missing or not HTTPS.');
     return false;
   }
+  // A retry resends the card built by the run that made the changes, not one rebuilt from the retry's (by then
+  // empty) plan.
+  const stored = previous ? await control.storedCard(inventory.runId) : null;
+  const body = stored ?? teamsCard(outcome, config);
   if (previous) {
     previous.status = 'reserved';
     await control.persistJournal();
   } else {
+    await control.storeCard(inventory.runId, body);
     await control.reserve({ id, kind: 'teams', target: 'webhook', runId: inventory.runId });
   }
   try {
-    const body = teamsCard(outcome, config);
     await request({
       service: 'Teams',
       url,
@@ -637,7 +650,9 @@ async function saveState(control, outcome, inventory) {
       lastSuccess: record,
       pendingUnowned: (outcome.untriaged ?? []).filter((id) => pending.has(id)),
       reportedMismatches: outcome.closedMismatches.map((item) => item.id),
-      reportedCleared: outcome.cleared.map((item) => item.id),
+      reportedCleared: [
+        ...new Set([...(inventory.previousState?.reportedCleared ?? []), ...outcome.cleared.map((item) => item.id)]),
+      ].slice(-2000),
     });
   } else {
     await control.saveState({ lastFailure: { ...record, failures: outcome.failures.slice(0, 20) } });
@@ -692,6 +707,18 @@ async function runWithLock({ jira, control, config, inventory, outcome, plan }) 
   }
 }
 
+/** Loads, validates and describes the plan; nothing may escape before the locked section reports and unlocks. */
+function preparePlan(work, inventory, config, outcome) {
+  try {
+    const plan = loadPlan(work, inventory, config, outcome);
+    describe(outcome, inventory, plan);
+    return plan;
+  } catch (error) {
+    outcome.failures.push(`Plan handling: ${error.message}`);
+    return null;
+  }
+}
+
 /** @param {object} [jiraOverride] Injected Jira client (tests and local dry runs); defaults to the real service. */
 export async function apply(jiraOverride) {
   const work = process.env.TRIAGE_WORK_DIR;
@@ -701,8 +728,7 @@ export async function apply(jiraOverride) {
   const jira =
     jiraOverride ??
     jiraClient({ site: config.jiraSite, email: process.env.JIRA_EMAIL, token: process.env.JIRA_API_TOKEN });
-  const plan = loadPlan(work, inventory, config, outcome);
-  describe(outcome, inventory, plan);
+  const plan = preparePlan(work, inventory, config, outcome);
   if (inventory.lockAcquired) {
     await runWithLock({ jira, control: new ControlState(jira, config.controlIssue), config, inventory, outcome, plan });
   } else {

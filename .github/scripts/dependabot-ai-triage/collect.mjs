@@ -14,6 +14,7 @@ import {
   inAdvisoryRange,
   isMainModule,
   log,
+  mapSequential,
   parseVersion,
   quarterExpired,
   textOf,
@@ -251,7 +252,7 @@ async function npmEvidence(npm, alert, evidence, warnings) {
   }
 }
 
-function plannerTicket(ticket, comments) {
+export function plannerTicket(ticket, comments) {
   const owned = ticket.ownership ? Object.keys(ticket.ownership.alerts).map(Number) : [];
   return {
     key: ticket.key,
@@ -265,7 +266,14 @@ function plannerTicket(ticket, comments) {
     parent: ticket.parent,
     updated: ticket.updated,
     recordedOwnership: ticket.ownership
-      ? { repository: ticket.ownership.repository, alerts: owned, remediationId: ticket.ownership.remediationId }
+      ? {
+          repository: ticket.ownership.repository,
+          alerts: owned,
+          remediationId: ticket.ownership.remediationId,
+          kind: ticket.ownership.kind ?? null,
+          blocker: ticket.ownership.blocker ?? null,
+          checkedAt: ticket.ownership.checkedAt ?? null,
+        }
       : null,
     links: ticket.links,
     description: clip(ticket.description, 8000),
@@ -287,8 +295,19 @@ export function mentions(ticket, alert) {
   );
 }
 
-function selectCandidates(tickets, aiAlerts, currentOwner, config) {
+export function selectCandidates(tickets, aiAlerts, currentOwner, config) {
+  // The upstream tickets that re-planned blocked owners wait for are always shown with their current status.
+  const owners = new Set(aiAlerts.map((alert) => currentOwner[alertId(alert.repository, alert.number)]));
+  const upstream = new Set(
+    tickets
+      .filter((ticket) => owners.has(ticket.key))
+      .map((ticket) => ticket.ownership?.blocker?.upstreamRef)
+      .filter(Boolean),
+  );
   return tickets.filter((ticket) => {
+    if (upstream.has(ticket.key)) {
+      return true;
+    }
     const openInEpic = ticket.statusCategory !== 'done' && ticket.parent === config.epic;
     return aiAlerts.some(
       (alert) =>
@@ -377,9 +396,11 @@ async function collectRepositories(github, config, failures) {
   });
 }
 
-async function clearedAlerts(github, ownedNotOpen, warnings) {
+const LOOKUP_BATCH = 10;
+
+async function clearedBatch(github, batch, warnings) {
   const lookups = await Promise.allSettled(
-    ownedNotOpen.slice(0, 100).map(async (item) => {
+    batch.map(async (item) => {
       const [repository, number] = item.id.split('#');
       return { ...item, state: (await github.alert(repository, Number(number))).state };
     }),
@@ -389,10 +410,21 @@ async function clearedAlerts(github, ownedNotOpen, warnings) {
       if (lookup.status === 'fulfilled') {
         return lookup.value;
       }
-      warnings.push(`State of ${ownedNotOpen[index].id} unavailable: ${lookup.reason.message}`);
+      warnings.push(`State of ${batch[index].id} unavailable: ${lookup.reason.message}`);
       return null;
     })
     .filter(Boolean);
+}
+
+/** Looks up owned alerts that are no longer open, in small batches; ones already reported are skipped. */
+export async function clearedAlerts(github, ownedNotOpen, warnings, alreadyReported = []) {
+  const reported = new Set(alreadyReported);
+  const pending = ownedNotOpen.filter((item) => !reported.has(item.id));
+  const batches = [];
+  for (let i = 0; i < pending.length; i += LOOKUP_BATCH) {
+    batches.push(pending.slice(i, i + LOOKUP_BATCH));
+  }
+  return (await mapSequential(batches, (batch) => clearedBatch(github, batch, warnings))).flat();
 }
 
 function repositorySummary(repo) {
@@ -504,7 +536,8 @@ async function reconcileAndPlan(ctx, inventory) {
   const previous = inventory.previousState?.lastSuccess ? inventory.previousState : null;
   const result = reconcile({ alerts, tickets, previousState: previous });
   inventory.reconciliation = result;
-  inventory.cleared = await clearedAlerts(ctx.github, result.ownedNotOpen, ctx.warnings);
+  const reportedCleared = inventory.previousState?.reportedCleared ?? [];
+  inventory.cleared = await clearedAlerts(ctx.github, result.ownedNotOpen, ctx.warnings, reportedCleared);
   const planner = await buildPlannerInput(ctx, { alerts, repositories, tickets, result });
   Object.assign(inventory, planner, { plannerNeeded: planner.aiInput.length > 0 });
 }

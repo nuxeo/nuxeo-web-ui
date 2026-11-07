@@ -1,5 +1,6 @@
 export const STATE_PROPERTY = 'dependabot-ai-triage-state';
 export const JOURNAL_PROPERTY = 'dependabot-ai-triage-journal';
+export const CARD_PROPERTY = 'dependabot-ai-triage-teams-card';
 const LOCK_STALE_HOURS = 6;
 const JOURNAL_BUDGET = 28000;
 const RESOLVED = new Set(['done', 'failed', 'not-applied']);
@@ -50,6 +51,16 @@ export class ControlState {
     if (this.state?.lock?.runId === runId) {
       await this.saveState({ lock: null });
     }
+  }
+
+  /** Keeps the Teams card of a run so a retried delivery sends exactly what that run reported. */
+  storeCard(runId, card) {
+    return this.jira.setProperty(this.issueKey, CARD_PROPERTY, { runId, card });
+  }
+
+  async storedCard(runId) {
+    const stored = await this.jira.property(this.issueKey, CARD_PROPERTY);
+    return stored?.runId === runId ? stored.card : null;
   }
 
   pending() {

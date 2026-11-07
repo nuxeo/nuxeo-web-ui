@@ -4,11 +4,13 @@ import assert from 'node:assert/strict';
 import { chmodSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { Executor, apply, summarize } from '../apply.mjs';
+import { Executor, apply, postTeams, summarize } from '../apply.mjs';
+import { clearedAlerts, plannerTicket, selectCandidates } from '../collect.mjs';
 import { npmClient } from '../lib/clients.mjs';
 import { validatePlan } from '../lib/plan-validator.mjs';
 import { OWNERSHIP_PROPERTY, blockerRecheck, fingerprint, reconcile } from '../lib/reconcile.mjs';
 import { runReport, teamsCard } from '../lib/render.mjs';
+import { request } from '../lib/util.mjs';
 import { ControlState, JOURNAL_PROPERTY, STATE_PROPERTY } from '../lib/state.mjs';
 import { plan } from '../plan.mjs';
 import { DIGEST, EL, RUN, WEB, blocked, bootstrapPlan, group, liveAlerts, registerTickets } from './fixtures.mjs';
@@ -403,4 +405,200 @@ test('planner parse failures never put the reply in the public log or the error 
   assert.doesNotMatch(printed.join(''), /SECRET/);
   assert.doesNotMatch(error, /SECRET/);
   assert.match(error, /not a single valid JSON object/);
+});
+
+// Second review round.
+
+test('an extension is refused when the target was put On Hold after collection', async () => {
+  const tickets = registerTickets();
+  const jira = new FakeJira(tickets);
+  jira.issues.get('LIB-44').fields.status = { name: 'On Hold', statusCategory: { key: 'new' } };
+  const { exec, outcome } = await executor(jira, tickets);
+  const extend = group(`${EL}:refresh`, EL, 'extend', 'LIB-44', 'high', [104, 105, 107, 108], { updateNote: 'x' });
+  await exec.update(extend, {});
+  assert.match(outcome.failures.join(), /is now On Hold/);
+  assert.equal(jira.calls.filter((call) => call.args?.key === 'LIB-44').length, 0);
+});
+
+async function teamsAttempt(jira, response, outcomeExtra = {}) {
+  const control = new ControlState(jira, config.controlIssue);
+  await control.load();
+  const outcome = {
+    ...newOutcome(),
+    runId: RUN,
+    complete: true,
+    newBySeverity: {},
+    groups: [],
+    needsReview: [],
+    closedMismatches: [],
+    repositories: [{ name: WEB }],
+    ...outcomeExtra,
+  };
+  const original = globalThis.fetch;
+  const sent = [];
+  globalThis.fetch = async (url, init) => {
+    sent.push(JSON.parse(init.body));
+    return response();
+  };
+  process.env.DEPENDABOT_TEAMS_WEBHOOK_URL = 'https://hooks.example/x';
+  try {
+    const delivered = await postTeams(control, outcome, config, { runId: RUN });
+    return { delivered, outcome, sent };
+  } finally {
+    globalThis.fetch = original;
+    delete process.env.DEPENDABOT_TEAMS_WEBHOOK_URL;
+  }
+}
+
+test('a retry after an unknown Teams outcome is not resent and keeps the run incomplete', async () => {
+  const jira = new FakeJira();
+  await teamsAttempt(jira, () => {
+    throw new Error('socket hang up');
+  });
+  const retry = await teamsAttempt(jira, () => new Response('', { status: 202 }));
+  assert.equal(retry.delivered, false);
+  assert.equal(retry.sent.length, 0);
+  assert.match(retry.outcome.failures.join(), /unresolved \(uncertain\); not resent/);
+});
+
+test('a retry after a failed Teams send resends the original card, not one rebuilt from the retry', async () => {
+  const jira = new FakeJira();
+  const created = [{ ...createGroup(), ticketKey: 'LIB-3000', action: 'created' }];
+  const first = await teamsAttempt(jira, () => new Response('', { status: 429 }), {
+    groups: created,
+    newBySeverity: { medium: 1 },
+  });
+  assert.equal(first.delivered, false);
+  const retry = await teamsAttempt(jira, () => new Response('', { status: 202 }));
+  assert.equal(retry.delivered, true);
+  assert.deepEqual(retry.sent[0], first.sent[0]);
+  assert.match(JSON.stringify(retry.sent[0]), /LIB-3000/);
+});
+
+test('a re-planned blocked owner brings its upstream ticket and blocker metadata to the planner', () => {
+  const upstream = { key: 'LIB-24', project: 'LIB', summary: 'x', description: '', statusCategory: 'done' };
+  const owner = {
+    key: 'APP-30',
+    project: 'APP',
+    summary: 'y',
+    description: '',
+    statusCategory: 'new',
+    ownership: {
+      repository: WEB,
+      kind: 'blocked',
+      alerts: { 1: {} },
+      blocker: { type: 'upstream-release-pending', upstreamRef: 'LIB-24', upstreamStatus: 'Open' },
+    },
+  };
+  const alert = liveAlerts().find((item) => item.repository === WEB && item.number === 1);
+  const candidates = selectCandidates([upstream, owner], [alert], { [`${WEB}#1`]: 'APP-30' }, config);
+  assert.deepEqual(candidates.map((ticket) => ticket.key).sort(), ['APP-30', 'LIB-24']);
+  assert.equal(plannerTicket(owner, []).recordedOwnership.blocker.upstreamRef, 'LIB-24');
+});
+
+test('every closed owned alert is looked up in bounded batches, skipping ones already reported', async () => {
+  let active = 0;
+  let peak = 0;
+  const looked = [];
+  const github = {
+    async alert(repository, number) {
+      active++;
+      peak = Math.max(peak, active);
+      await new Promise((resolve) => {
+        setTimeout(resolve, 1);
+      });
+      active--;
+      looked.push(number);
+      return { state: 'fixed' };
+    },
+  };
+  const owned = Array.from({ length: 130 }, (_, index) => {
+    return { id: `${WEB}#${index + 1}`, tickets: ['APP-1'] };
+  });
+  const cleared = await clearedAlerts(github, owned, [], [`${WEB}#1`]);
+  assert.equal(cleared.length, 129);
+  assert.ok(!looked.includes(1) && looked.includes(130));
+  assert.ok(peak <= 10);
+});
+
+test('malformed identifiers and optional text are rejected by the validator without throwing', () => {
+  const args = (planned) => {
+    const alerts = liveAlerts();
+    return {
+      plan: planned,
+      runId: RUN,
+      inventoryDigest: DIGEST,
+      repositories: [
+        { name: WEB, project: 'APP' },
+        { name: EL, project: 'LIB' },
+      ],
+      epicQuarter: '2026-Q4',
+      alerts,
+      aiInput: alerts.map((alert) => `${alert.repository}#${alert.number}`),
+      currentOwner: new Map(),
+      tickets: registerTickets(),
+      now: new Date('2026-11-09T07:45:00Z'),
+    };
+  };
+  const cases = [
+    (planned) => {
+      planned.groups[0].remediationId = [`${WEB}:upgrade`];
+    },
+    (planned) => {
+      planned.groups[0].ticket = ['APP-31'];
+    },
+    (planned) => {
+      planned.groups[0].updateNote = { text: 'not text' };
+    },
+  ];
+  for (const change of cases) {
+    const planned = bootstrapPlan();
+    change(planned);
+    const result = validatePlan(args(planned));
+    assert.equal(result.ok, false);
+    assert.ok(result.errors.some((error) => error.code === 'group-schema'));
+  }
+});
+
+test('Teams lists a ticket once when its update also raised severity, and says On Hold only when it is', () => {
+  const updated = { ...createGroup(), operation: 'extend', ticketKey: 'LIB-44', action: 'extended', severity: 'high' };
+  const raise = { ticket: 'LIB-44', from: 'medium', to: 'high', alerts: [], applied: true };
+  const notHeld = {
+    ...group(`${EL}:pkg-merge`, EL, 'create', undefined, 'low', [106], {
+      ...blocked('no-upstream-patch', 'https://github.com/advisories/GHSA-0000-0000-0007'),
+    }),
+    ticketKey: 'LIB-3001',
+    action: 'created',
+    blockerChanged: true,
+    heldVerified: false,
+    onHold: false,
+  };
+  const outcome = {
+    runId: RUN,
+    complete: false,
+    failures: ['hold LIB-3001: no transition'],
+    newBySeverity: { low: 1 },
+    groups: [updated, notHeld],
+    severityRaises: [raise],
+    needsReview: [],
+    closedMismatches: [],
+    repositories: [{ name: EL }],
+  };
+  const text = JSON.stringify(teamsCard(outcome, { ...config, controlIssue: 'APP-99' }));
+  assert.match(text, /Tickets updated · 1/);
+  assert.equal((text.match(/LIB-44\]/g) ?? []).length, 1);
+  assert.match(text, /LIB-3001\]\([^)]*\) · Low · Blocked, not On Hold/);
+});
+
+test('an unreadable response to a write is an uncertain outcome', async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = async () => new Response('not json', { status: 201 });
+  try {
+    await assert.rejects(
+      request({ service: 'Jira', url: 'https://jira.example/x', method: 'POST', body: {}, label: 'comment create' }),
+      (error) => error.uncertain === true && !/not json/.test(error.message),
+    );
+  } finally {
+    globalThis.fetch = original;
+  }
 });

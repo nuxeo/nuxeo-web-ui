@@ -41,6 +41,7 @@ const GROUP_KEYS = new Set([
 const BLOCKER_KEYS = new Set(['type', 'reason', 'upstreamRef', 'mitigation', 'recheck']);
 const REVIEW_KEYS = new Set(['repository', 'alert', 'candidateTicket', 'missingEvidence']);
 const MISMATCH_KEYS = new Set(['repository', 'alert', 'ticket']);
+const OPTIONAL_TEXT = ['summary', 'remediation', 'rationale', 'updateNote'];
 const REQUIRED_TEXT = {
   create: ['summary', 'remediation', 'rationale', 'teamsLine'],
   extend: ['rationale', 'updateNote', 'teamsLine'],
@@ -101,6 +102,31 @@ function checkIdentity(ctx) {
   return missing.length === 0;
 }
 
+/** Text and list fields: required ones must be present, and any supplied one must be well formed. */
+function checkFields(ctx, group, where) {
+  const { fail } = ctx;
+  for (const field of REQUIRED_TEXT[group.operation].filter((name) => !isText(group[name]))) {
+    fail('group-schema', `${where} needs a non-empty "${field}".`);
+  }
+  // Optional text that is supplied must still be valid text: it may be written to Jira.
+  for (const field of OPTIONAL_TEXT.filter((name) => group[name] !== undefined && !isText(group[name]))) {
+    fail('group-schema', `${where} "${field}" must be non-empty text.`);
+  }
+  if (group.teamsLine !== undefined && !isText(group.teamsLine, MAX_TEAMS_LINE)) {
+    fail('group-schema', `${where} teamsLine must be at most ${MAX_TEAMS_LINE} characters.`);
+  }
+  const criteria = group.acceptanceCriteria;
+  const validCriteria = Array.isArray(criteria) && criteria.length > 0 && criteria.every((item) => isText(item));
+  if ((group.operation === 'create' || criteria !== undefined) && !validCriteria) {
+    fail('group-schema', `${where} needs acceptance criteria as a non-empty list of text.`);
+  }
+  const related = group.relatedTickets ?? [];
+  const validRelated = (key) => typeof key === 'string' && JIRA_KEY.test(key);
+  if (!Array.isArray(related) || related.length > 5 || !related.every(validRelated)) {
+    fail('group-schema', `${where} relatedTickets must be at most 5 Jira keys.`);
+  }
+}
+
 function checkShape(ctx, group, where) {
   const { fail } = ctx;
   for (const key of unknownKeys(group, GROUP_KEYS)) {
@@ -115,27 +141,21 @@ function checkShape(ctx, group, where) {
     fail('group-schema', `${where} has an invalid operation, kind or severity.`);
     return false;
   }
-  if (!REMEDIATION_ID.test(remediationId ?? '') || !remediationId.startsWith(`${repository}:`)) {
+  if (
+    typeof remediationId !== 'string' ||
+    !REMEDIATION_ID.test(remediationId) ||
+    !remediationId.startsWith(`${repository}:`)
+  ) {
     fail('group-schema', `${where} needs a stable remediationId of the form "${repository}:<slug>".`);
   } else if (ctx.remediationIds.has(remediationId)) {
     fail('duplicate-remediation', `${where} reuses remediationId ${remediationId}.`);
   }
   ctx.remediationIds.add(remediationId);
-  for (const field of REQUIRED_TEXT[operation].filter((name) => !isText(group[name]))) {
-    fail('group-schema', `${where} needs a non-empty "${field}".`);
+  if (group.ticket !== undefined && typeof group.ticket !== 'string') {
+    fail('group-schema', `${where} "ticket" must be a Jira key.`);
+    return false;
   }
-  if (group.teamsLine !== undefined && !isText(group.teamsLine, MAX_TEAMS_LINE)) {
-    fail('group-schema', `${where} teamsLine must be at most ${MAX_TEAMS_LINE} characters.`);
-  }
-  const criteria = group.acceptanceCriteria;
-  const validCriteria = Array.isArray(criteria) && criteria.length > 0 && criteria.every((item) => isText(item));
-  if ((operation === 'create' || criteria !== undefined) && !validCriteria) {
-    fail('group-schema', `${where} needs acceptance criteria as a non-empty list of text.`);
-  }
-  const related = group.relatedTickets ?? [];
-  if (!Array.isArray(related) || related.length > 5 || !related.every((key) => JIRA_KEY.test(key))) {
-    fail('group-schema', `${where} relatedTickets must be at most 5 Jira keys.`);
-  }
+  checkFields(ctx, group, where);
   if (!Array.isArray(alerts) || !alerts.length || !alerts.every(Number.isInteger)) {
     fail('group-schema', `${where} must list at least one alert number.`);
     return false;

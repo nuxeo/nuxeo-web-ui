@@ -361,7 +361,8 @@ function findingBlocks(outcome) {
 function ticketSections(outcome, config, controlUrl) {
   const created = outcome.groups.filter((group) => group.action === 'created');
   const updated = outcome.groups.filter((group) => group.action === 'extended' || group.action === 'kept-updated');
-  const raised = outcome.severityRaises.filter((raise) => raise.applied);
+  const updatedKeys = new Set(updated.map((group) => group.ticketKey));
+  const raised = outcome.severityRaises.filter((raise) => raise.applied && !updatedKeys.has(raise.ticket));
   const entry = (group, line) => [
     ticketHeading(config, group.ticketKey, group.severity, shortRepo(group.repository)),
     block(line, { spacing: 'None' }),
@@ -398,7 +399,7 @@ function blockerBlocks(outcome, config) {
     ...blockers
       .slice(0, TEAMS_SECTION_LIMIT)
       .flatMap((group) => [
-        ticketHeading(config, group.ticketKey, group.severity, 'On Hold'),
+        ticketHeading(config, group.ticketKey, group.severity, group.onHold ? 'On Hold' : 'Blocked, not On Hold'),
         block(`${clip(group.blocker.reason, 200)} Recheck: ${clip(group.blocker.recheck, 150)}`, { spacing: 'None' }),
         ...(group.heldVerified
           ? [block(`FYI: ${group.ticketKey} was automatically put On Hold.`, { isSubtle: true, spacing: 'None' })]
