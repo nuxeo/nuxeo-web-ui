@@ -158,7 +158,7 @@ Polymer({
   _handleTokens(e) {
     // Defensive: server responses may omit `entries` (e.g. 404 / empty body) and `dom-if`
     // bindings re-evaluate `_empty(tokens)` synchronously when `tokens` changes.
-    this.tokens = e?.detail?.response?.entries || [];
+    this.tokens = (e && e.detail && e.detail.response && e.detail.response.entries) || [];
   },
 
   _revoke(e) {
@@ -176,7 +176,7 @@ Polymer({
   },
 
   _empty(arr) {
-    return !arr?.length;
+    return !(arr && arr.length);
   },
 
   _formatDate(date) {

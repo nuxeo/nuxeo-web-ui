@@ -160,7 +160,7 @@ export const NuxeoCreateButtonCollisionBehavior = {
 
   /** The tray box as it would sit with no shift applied, or null while it is not rendered. */
   _trayRestingRect() {
-    const tray = this.$?.tray;
+    const tray = this.$ != null ? this.$.tray : undefined;
     if (!tray) {
       return null;
     }
@@ -265,7 +265,7 @@ export const NuxeoCreateButtonCollisionBehavior = {
   },
 
   _applyTrayShift(shift) {
-    const tray = this.$?.tray;
+    const tray = this.$ != null ? this.$.tray : undefined;
     if (!tray || shift === this._trayShift) {
       return;
     }
