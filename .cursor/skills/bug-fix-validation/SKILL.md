@@ -66,7 +66,7 @@ phases.** State the plan up front for the record, then keep going. Track phases 
 
 Useful constants:
 - Atlassian cloudId: `252cce86-035e-4b0e-abd2-3c002935632f` (site `hyland.atlassian.net`)
-- Upstream repo: `nuxeo/nuxeo-web-ui` · bases: `lts-2025` and `maintenance-3.1.x`
+- Upstream repo: `nuxeo/nuxeo-web-ui` · bases: `develop-2025` and `develop-2023`
 - Validation workspace root: `~/Desktop/jira-evidence/<TICKET-ID>/validation/`
 - Code worktree root: `~/Desktop/Projects/WebUI/worktrees/<TICKET-ID>/<role>/`
 
@@ -122,7 +122,7 @@ Useful constants:
 Verify before the first run on a machine; if something is missing, point the user at
 [`.cursor/skills/README.md`](../README.md) "One-time setup" rather than silently continuing:
 Atlassian MCP authenticated (`atlassianUserInfo` succeeds; else `mcp_auth`) · `~/.jira_email` +
-`~/.jira_token` present for attachments · `gh auth status` logged in · Node ≥ 18 (`nvm use 22`) and
+`~/.jira_token` present for attachments · `gh auth status` logged in · Node ≥ 22.13 (`nvm use`) and
 `npm ci` done · Docker Desktop installed (`docker info` succeeds, or `open -a Docker`).
 
 ---
@@ -148,8 +148,8 @@ Collect and understand: summary · description · expected vs actual behaviour �
 labels · components · environment · `issuelinks` · parent story · epic · attachments (screenshots,
 videos) · **every comment**, separating developer comments, QA comments and any stated root cause.
 
-`fixVersions` decides the branches: a `3.1.x` version → `maintenance-3.1.x`; an LTS/2025 version →
-`lts-2025`. Both → validate both. Empty/ambiguous → default to `lts-2025` and say so.
+`fixVersions` decides the branches: a `3.1.x` version → `develop-2023`; an LTS/2025 version →
+`develop-2025`. Both → validate both. Empty/ambiguous → default to `develop-2025` and say so.
 
 An `ELEMENTS-<id>` link usually means the real fix lands in **nuxeo-elements** (shared widgets) — pull
 that ticket and its PR too.
@@ -215,12 +215,12 @@ ticket, say so explicitly in the report — that gap is itself a finding. See
 ## Phase 4 — Environment preparation
 
 Detect what the change needs, then set it up — see [`environment.md`](environment.md) for the full
-matrix and recipes. For this repo the default is **npm** (Node ≥ 18) to build the UI and **Docker** for
+matrix and recipes. For this repo the default is **npm** (Node ≥ 22.13) to build the UI and **Docker** for
 a throwaway Nuxeo server to serve it.
 
 ```bash
 git -C "$NX_VAL_REPO" fetch origin --prune
-nvm use 22 && npm ci          # only if node_modules is stale/missing
+nvm use && npm ci             # only if node_modules is stale/missing
 ```
 
 Restore the `@nuxeo` symlinks if a previous `npm install` replaced them (see `AGENTS.md`), and scope
@@ -229,19 +229,29 @@ with exponential backoff — 5s, 15s, 45s — then record a blocker.
 
 ## Phase 5 — Multi-branch setup (buggy vs fixed, side by side)
 
-Identify the two refs:
-- **Target branch** — where the bug exists: the base (`lts-2025` / `maintenance-3.1.x`) at the commit
-  *before* the fix, or simply the base if the fix is not merged yet.
+Identify the two refs. They must differ by **the fix alone** — anything else ends up in the evidence:
+- **Target branch** — where the bug exists. For an open PR that is the commit the feature branch was
+  cut from, i.e. `git merge-base origin/<dev-branch> origin/<feature-branch>`, **not** the live dev tip. The
+  dev branch collects every ticket, so it will have moved on since the branch was cut, and comparing
+  against its tip puts unrelated merged tickets on the "before" side.
 - **Source branch** — the fix: the PR head branch, or the merge commit on the base.
 
 Bring both up simultaneously on isolated ports and runtimes:
 
 ```bash
+BRANCH=fix-WEBUI-<id>-<summary>-develop-2025
+# Fetching a PR head creates origin/<branch>, never a local branch, so qualify both refs.
+git fetch -q origin develop-2025 "$BRANCH"
+BEFORE=$(git merge-base origin/develop-2025 "origin/$BRANCH")   # stable; the dev tip is not
 bash .cursor/skills/bug-fix-validation/scripts/dual-branch-up.sh <TICKET-ID> \
-  --target lts-2025 --fixed fix-WEBUI-<id>-<summary>-lts-2025
-# already merged? compare the base against itself one commit earlier:
-#   --target lts-2025~1 --fixed lts-2025
-# only have a PR number?   --target lts-2025 --fixed-pr 3259
+  --target "$BEFORE" --fixed "origin/$BRANCH"
+# already merged? use the merge commit and its first parent. Not develop-2025~1:
+# every ticket lands on the dev branch, so its tip is rarely your fix.
+#   SHA=$(gh pr view <n> --repo nuxeo/nuxeo-web-ui --json mergeCommit --jq .mergeCommit.oid)
+#   --target "$SHA^" --fixed "$SHA"
+# only have a PR number? --fixed-pr resolves the head, but still pass a merge-base target:
+#   BRANCH=$(gh pr view <n> --repo nuxeo/nuxeo-web-ui --json headRefName --jq .headRefName)
+#   --target "$(git merge-base origin/develop-2025 "origin/$BRANCH")" --fixed-pr <n>
 ```
 
 The script allocates two free host ports (e.g. `8100` / `8101`), starts one throwaway Nuxeo container per

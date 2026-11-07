@@ -30,6 +30,7 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 import { UploaderBehavior } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-uploader-behavior.js';
+import { NuxeoOptimisticLockingBehavior } from '../behaviors/nuxeo-optimistic-locking-behavior.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
@@ -242,7 +243,13 @@ Polymer({
   `,
 
   is: 'nuxeo-dropzone',
-  behaviors: [NotifyBehavior, UploaderBehavior, FormatBehavior, IronValidatableBehavior],
+  behaviors: [
+    NotifyBehavior,
+    UploaderBehavior,
+    FormatBehavior,
+    IronValidatableBehavior,
+    NuxeoOptimisticLockingBehavior,
+  ],
 
   properties: {
     /**
@@ -449,7 +456,7 @@ Polymer({
     } else {
       data.stopPropagation();
     }
-    const value = this._getFiles(data);
+    const value = this.multiple || this.blobList ? this._getFileList(data) : this._getFile(data);
     const failed = this.files.filter((f) => f.error);
     if (this.multiple) {
       if (!this.value || !Array.isArray(this.value)) {
@@ -469,18 +476,9 @@ Polymer({
     if (this.document && this.xpath) {
       this._legacyImportBatch(value);
     }
-    if (failed.length > 0) {
-      this.notify({
-        message: this.i18n('dropzone.toast.error', failed.map((f) => f.name).join(', ')),
-        duration: 0,
-        dismissible: true,
-      });
-    } else {
-      if (this.document && this.xpath) {
-        await this._legacyUpdateDocument();
-      }
-      this.notify({ message: this.i18n(this.uploadedMessage), close: true });
-      this.invalid = false;
+    if (!(await this._reportUploadOutcome(failed))) {
+      this._setHasFilesUploaded(true);
+      return;
     }
     if (this.invalid) {
       // if we're already displaying an error, we better update it, otherwise the user can be mislead
@@ -489,50 +487,74 @@ Polymer({
     this._setHasFilesUploaded(true);
   },
 
-  _getFiles(data) {
-    let uploadedFile;
-    if (this.multiple || this.blobList) {
-      const files = [];
-      this.files
-        .filter((file) => !file.error)
-        .forEach((file) => {
-          if (data.type === 'nx-blob-picked') {
-            uploadedFile = {
-              providerId: file.providerId,
-              user: file.user,
-              fileId: file.fileId,
-            };
-          } else {
-            uploadedFile = {
-              'upload-batch': data.detail.batchId,
-              'upload-fileId': file.index.toString(),
-            };
-          }
-
-          if (this.valueKey) {
-            const wrappedFile = {};
-            wrappedFile[this.valueKey] = uploadedFile;
-            files.push(wrappedFile);
-          } else {
-            files.push(uploadedFile);
-          }
-        });
-      return files;
+  /**
+   * Tells the user how the upload went, and persists it on the document when this dropzone owns
+   * one. Returns false when a stale write was rejected, so the caller stops rather than reporting
+   * a success that did not happen.
+   */
+  async _reportUploadOutcome(failed) {
+    if (failed.length > 0) {
+      this.notify({
+        message: this.i18n('dropzone.toast.error', failed.map((f) => f.name).join(', ')),
+        duration: 0,
+        dismissible: true,
+      });
+      return true;
     }
+    if (this.document && this.xpath && (await this._legacyUpdateDocument()) === false) {
+      return false;
+    }
+    this.notify({ message: this.i18n(this.uploadedMessage), close: true });
+    this.invalid = false;
+    return true;
+  },
+
+  // Upload payloads for every successfully uploaded file, for the `multiple` and `blobList` modes
+  // whose `value` is an array.
+  _getFileList(data) {
+    const files = [];
+    this.files
+      .filter((file) => !file.error)
+      .forEach((file) => {
+        let uploadedFile;
+        if (data.type === 'nx-blob-picked') {
+          uploadedFile = {
+            providerId: file.providerId,
+            user: file.user,
+            fileId: file.fileId,
+          };
+        } else {
+          uploadedFile = {
+            'upload-batch': data.detail.batchId,
+            'upload-fileId': file.index.toString(),
+          };
+        }
+
+        if (this.valueKey) {
+          const wrappedFile = {};
+          wrappedFile[this.valueKey] = uploadedFile;
+          files.push(wrappedFile);
+        } else {
+          files.push(uploadedFile);
+        }
+      });
+    return files;
+  },
+
+  // Upload payload for the single-blob mode, whose `value` is one object.
+  _getFile(data) {
     if (data.type === 'nx-blob-picked') {
       const file = data.detail.blobs[0];
-      uploadedFile = {
+      return {
         providerId: file.providerId,
         user: file.user,
         fileId: file.fileId,
       };
-    } else {
-      uploadedFile = {
-        'upload-batch': data.detail.batchId,
-        'upload-fileId': '0',
-      };
     }
-    return uploadedFile;
+    return {
+      'upload-batch': data.detail.batchId,
+      'upload-fileId': '0',
+    };
   },
 
   _deleteFile(e) {
@@ -566,13 +588,9 @@ Polymer({
       value == null ||
       (Array.isArray(value) &&
         value.filter(
-          (file) =>
-            !Object.prototype.hasOwnProperty.call(
-              this.valueKey && file[this.valueKey] != null ? file[this.valueKey] : file,
-              'data',
-            ),
+          (file) => !Object.hasOwn(this.valueKey && file[this.valueKey] != null ? file[this.valueKey] : file, 'data'),
         ).length === 0) ||
-      Object.prototype.hasOwnProperty.call(value, 'data')
+      Object.hasOwn(value, 'data')
     ) {
       if (this.uploading) {
         this.cancelBatch();
@@ -625,6 +643,13 @@ Polymer({
     e.preventDefault();
     this._setDraggingFiles(false);
     const droppedFiles = Array.from(e.dataTransfer.files || []);
+    // A single blob dropzone only ever keeps the first file (see `_getFile`), so accepting the
+    // whole drop would upload every file and then silently discard all but one.
+    if (droppedFiles.length > 1 && !this.multiple && !this.blobList) {
+      this._errorMessage = this.i18n('dropzone.invalid.multipleFiles');
+      this.invalid = true;
+      return;
+    }
     this.files = droppedFiles;
     if (this.validate()) {
       this._upload(e.dataTransfer.files);
@@ -642,7 +667,7 @@ Polymer({
       document.retainedProperties &&
       document.retainedProperties.length > 0
     ) {
-      if (document.retainedProperties.indexOf(this.xpath) !== -1) {
+      if (document.retainedProperties.includes(this.xpath)) {
         return false;
       }
     }
@@ -678,17 +703,17 @@ Polymer({
       return false;
     }
     if (this.accept && this.files && this.files.length > 0) {
-      const accepted = this.accept.split(',').map((a) => a.trim().toLowerCase());
+      const accepted = new Set(this.accept.split(',').map((a) => a.trim().toLowerCase()));
 
-      const invalidFile = this.files.find((file) => {
+      const hasInvalidFile = this.files.some((file) => {
         const name = file.name || '';
         const extension = `.${name.split('.').pop().toLowerCase()}`;
         const mime = (file.type || '').toLowerCase();
 
-        return !accepted.includes(extension) && !accepted.includes(mime);
+        return !accepted.has(extension) && !accepted.has(mime);
       });
 
-      if (invalidFile) {
+      if (hasInvalidFile) {
         this._errorMessage = this.i18n('dropzone.invalid.file', this.accept);
         return false;
       }
@@ -750,16 +775,25 @@ Polymer({
       const props = {};
       createNestedObject(props, this._parsedXpath.split('.'));
       this.set(this._parsedXpath, this.get(`document.properties.${this._parsedXpath}`), props);
-      this.$.doc.data = {
+      this.$.doc.data = this.withChangeToken({
         'entity-type': 'document',
         repository: this.document.repository,
         uid: this.document.uid,
         properties: props,
-      };
-      return this.$.doc.put().then((response) => {
-        this.document = response;
-        this.fire('document-updated');
       });
+      return this.$.doc
+        .put()
+        .then((response) => {
+          this.document = response;
+          this.fire('document-updated');
+          return true;
+        })
+        .catch((err) => {
+          if (this.handleConflictError(err)) {
+            return false;
+          }
+          throw err;
+        });
     }
     return Promise.resolve();
   },

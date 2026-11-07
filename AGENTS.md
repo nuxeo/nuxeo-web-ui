@@ -2,14 +2,29 @@
 
 ## Overview
 
-This is a Polymer 3 web application (SPA) for the Nuxeo content services platform. Code ownership: `@nuxeo/ui`. The main development branch is `maintenance-3.1.x` for LTS-2023.
+This is a Polymer 3 web application (SPA) for the Nuxeo content services platform. Code ownership: `@nuxeo/ui`.
+
+## Branching
+
+Tickets are collected on a permanent dev branch per LTS line. They are never merged straight into a release branch.
+
+| LTS line | Branch from / target | Release branch      |
+| -------- | -------------------- | ------------------- |
+| LTS 2025 | `develop-2025`       | `lts-2025`          |
+| LTS 2023 | `develop-2023`       | `maintenance-3.1.x` |
+
+`develop-2023` is the default branch. Most fixes apply to both lines, so raise one PR per line.
+
+Ticket PRs are squashed. The dev → release merge and the release → dev sync PR must use a **merge commit** — squashing breaks the ancestry the sync check relies on, so the next sync re-proposes the whole release branch. Hotfix work on an already-released version still branches from the release branch.
+
+Delete your branch once its PR is merged or closed: cross-repo CI pairs a Web UI PR with a `nuxeo-elements` branch of the same name, so an abandoned branch can be silently picked up by a later, unrelated PR.
 
 ## Build & Validate
 
 Always follow this sequence when making changes:
 
 ```bash
-npm install                  # Install dependencies (Node ≥ 18)
+npm install                  # Install dependencies (Node ≥ 22.13)
 npm run format               # Auto-fix formatting (Prettier → ESLint)
 npm run lint                 # ESLint + Prettier check — must pass
 npm test                     # Web Test Runner unit tests — must pass
@@ -101,6 +116,16 @@ Always use Nuxeo Elements for API calls, never `fetch()`:
 - ESLint: flat config in `eslint.config.mjs`
 - Max line length: 120 characters
 - `Polymer` global is `readonly`, `Nuxeo` is `writable`
+- **Do not use syntax the Polymer analyzer's parser cannot read** in `elements/`, `addons/`, `themes/`, `i18n/`, `index.js` or `legacy.js`:
+  optional chaining (`?.`), nullish coalescing (`??`), optional catch binding (`catch { }`), logical
+  assignment (`||=`, `&&=`, `??=`), class fields, private `#` members, `static { }` blocks, BigInt,
+  numeric separators, `export * as`, top-level `await`, import attributes and regex `d`/`v` flags. The
+  Designer catalog generator (`packages/nuxeo-designer-catalog`) runs `polymer-analyzer` 3.2.4 on these
+  sources; a file using such syntax fails to parse and is dropped from the catalog together with the
+  elements it defines and the ones only reachable through it (WEBUI-1922, WEBUI-2418). ESLint enforces
+  this (`no-restricted-syntax` in `eslint.config.mjs`). Use `a && a.b` when only truthiness is needed,
+  `a != null ? a.b : undefined` when the value is used (`a && a.b` can return `null`, `0` or `''`
+  instead of `undefined`), an explicit `!= null` check instead of `??`, and `catch (e)`.
 
 ## Testing
 
@@ -130,11 +155,32 @@ npm run ftest:dev           # Against localhost:8080 + localhost:5000
 - Page objects: `packages/nuxeo-web-ui-ftest/pages/`
 - Step defs: `packages/nuxeo-web-ui-ftest/features/step_definitions/`
 
+**Adding a feature file also means assigning it a CI shard**, but `npm run format` does that for
+you, and so does staging one, through the `lint-staged` pre-commit hook. `ftest.yaml` runs the
+suite as a 4-way matrix, one Nuxeo server per shard, and `scripts/test/ftest/shards.js` says which
+feature goes where. Either entry point appends an unassigned feature to the shard with the smallest
+total, at an estimated weight marked `~Ns (est.)`; `npm run lint` fails if one is still unassigned,
+or is assigned to more than one shard, or names a file that no longer exists — those last two it
+reports but will not repair. Keep feature filenames to letters, digits, dots, dashes and
+underscores: an apostrophe would leave the manifest unparseable and a comma would break the
+`FTEST_SPECS` list, so a name outside that set is reported for you to rename rather than placed.
+WebdriverIO stays at `maxInstances: 1`: in-process workers would share one server, and
+`search.feature` asserts repo-wide absolute result counts. Run one shard locally with
+`FTEST_SPECS=$(node scripts/test/ftest/shards.js --specs 1) npm run ftest` — the assignment has to
+prefix the command; on its own it is only a shell variable, so the next `npm run ftest` would
+silently run all 46 features.
+
 ## CI Workflow
 
-Push to the `maintenance-3.1.x` branch triggers: **lint → test → a11y → ftest → sonar → build** (all must pass).
+Push to a dev branch (`develop-2025`, `develop-2023`) runs `develop.yaml`, which starts **lint**, **test**, **a11y** and **ftest** in parallel — all must pass. Sonar and CodeQL trigger themselves on the same push. There is no publish step.
+
+Push to a release branch runs `main.yaml` for that line: those four plus **sonar**, again in parallel, then **build**, which depends on all five and does the tag and publish.
 
 PRs run lint and test workflows automatically.
+
+`ftest.yaml` fans out into four shard jobs plus an aggregating `ftests` job. Branch protection
+requires the `ftests` context, so the shards deliberately run under a different job id — a matrix
+job only ever reports `ftests (shard 1)` and never a bare `ftests`.
 
 - CI uses `npm ci` (not `npm install`) for deterministic, lockfile-based installs.
 - `package-lock.json` is committed and must be kept in sync with `package.json`.

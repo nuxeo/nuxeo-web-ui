@@ -525,16 +525,25 @@ Polymer({
       }
     } catch (e) {
       /* Unsafe read during attach/refresh; treat as no rows yet */
-      return [];
     }
     return [];
   },
 
+  // `e?.detail?.value`, spelled out because the Designer catalog's analyzer cannot parse optional chaining.
+  _eventDetailValue(e) {
+    return e != null && e.detail != null ? e.detail.value : undefined;
+  },
+
+  // True when the current view has a `quickFilters` property (`this.view?.quickFilters !== undefined`).
+  _viewHasQuickFilters() {
+    return this.view != null && this.view.quickFilters !== undefined;
+  },
+
   _handleUserQuickFilterToggle(e) {
     let eventFilters = this.quickFilters;
-    if (Array.isArray(e?.detail?.value)) {
+    if (Array.isArray(this._eventDetailValue(e))) {
       eventFilters = e.detail.value;
-    } else if (Array.isArray(e?.target?.quickFilters)) {
+    } else if (Array.isArray(e != null && e.target != null ? e.target.quickFilters : undefined)) {
       eventFilters = e.target.quickFilters;
     }
     const filters = this._cloneQuickFilters(eventFilters);
@@ -546,7 +555,7 @@ Polymer({
     if (this.nxProvider) {
       this.set('nxProvider.quickFilters', filters.slice());
     }
-    if (this.view?.quickFilters !== undefined) {
+    if (this._viewHasQuickFilters()) {
       this.view.quickFilters = filters.slice();
     }
 
@@ -827,7 +836,10 @@ Polymer({
   },
 
   _updateStorage() {
-    const userId = this.$.nxcon.user?.id || this.$.nxcon.user?.uid || this.$.nxcon.user?.username;
+    const userId =
+      (this.$.nxcon.user && this.$.nxcon.user.id) ||
+      (this.$.nxcon.user && this.$.nxcon.user.uid) ||
+      (this.$.nxcon.user != null ? this.$.nxcon.user.username : undefined);
     if (userId && this.name) {
       this._localStorageName = `${userId}-nuxeo-results-${this.name}`;
     }
@@ -885,7 +897,7 @@ Polymer({
       return settings;
     }
     // Only nuxeo-data-table exposes column capability flags; other views (e.g. grid) restore as-is.
-    if (view?.localName !== 'nuxeo-data-table') {
+    if ((view != null ? view.localName : undefined) !== 'nuxeo-data-table') {
       return settings;
     }
     // Without the settings panel capability, do not restore any persisted layout;
@@ -1090,7 +1102,7 @@ Polymer({
 
   _handleViewQuickFiltersSync(e) {
     let incomingFilters;
-    if (Array.isArray(e?.detail?.value)) {
+    if (Array.isArray(this._eventDetailValue(e))) {
       incomingFilters = this._cloneQuickFilters(e.detail.value);
     } else if (this.nxProvider && Array.isArray(this.nxProvider.quickFilters)) {
       incomingFilters = this._cloneQuickFilters(this.nxProvider.quickFilters);
@@ -1109,7 +1121,7 @@ Polymer({
       if (this.nxProvider) {
         this.set('nxProvider.quickFilters', pendingFilters.slice());
       }
-      if (this.view?.quickFilters !== undefined) {
+      if (this._viewHasQuickFilters()) {
         this.view.quickFilters = pendingFilters.slice();
       }
       this._scheduleQuickFilterFetch(this._quickFiltersRequestId);
@@ -1187,7 +1199,7 @@ Polymer({
       if (this.nxProvider) {
         this.set('nxProvider.quickFilters', pendingFilters.slice());
       }
-      if (this.view?.quickFilters !== undefined) {
+      if (this._viewHasQuickFilters()) {
         this.view.quickFilters = pendingFilters.slice();
       }
     } finally {
@@ -1250,11 +1262,15 @@ Polymer({
       const parsed = JSON.parse(decoded);
       return parsed;
     } catch (e) {
-      return {};
+      /* Stored preference values are user data and may predate the current format; fall back to defaults */
     }
+    return {};
   },
 
   // Creates a JSON-safe deep copy of an object to avoid mutating cached/shared preference references.
+  // Deliberately not structuredClone (sonar javascript:S7784): the clone is persisted as JSON to the
+  // preference store, and the `{}` fallback below would turn a DataCloneError into a silent write of
+  // empty preferences, discarding the user's saved column layout instead of surfacing an error.
   _deepClone(obj) {
     try {
       return JSON.parse(JSON.stringify(obj || {}));
@@ -1443,7 +1459,7 @@ Polymer({
     try {
       const prefsMap = await this._getAllGlobalPreferencesOnce();
 
-      if (!Object.prototype.hasOwnProperty.call(prefsMap, providerName)) {
+      if (!Object.hasOwn(prefsMap, providerName)) {
         const empty = {};
         __globalPrefsCache.set(cacheKey, empty);
         this.globalPrefs = empty;
@@ -1452,7 +1468,12 @@ Polymer({
       const parsed = this._parsePrefMapValue(prefsMap[providerName]);
       __globalPrefsCache.set(cacheKey, parsed);
       this.globalPrefs = parsed;
-    } catch (e) {
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('Failed to load global results preferences, falling back to defaults', {
+        provider: providerName,
+        error,
+      });
       this.globalPrefs = {};
     }
   },
@@ -1521,13 +1542,12 @@ Polymer({
   // ------------------------------
 
   // Configures the nuxeo-resource instance to PUT doc-level preferences to /path/<docPath>/@preferences.
+  // The path is left unencoded on purpose: the Nuxeo JS client percent-encodes the whole request path
+  // when it builds the URL, so encoding it here would double-encode names holding a space or any other
+  // reserved character (`My Content` -> `My%2520Content`), which the server resolves to a missing document.
   _configureDocPreferencesResource(docPath) {
     const normalized = docPath.startsWith('/') ? docPath.substring(1) : docPath;
-    const encodedPath = normalized
-      .split('/')
-      .map((segment) => encodeURIComponent(segment))
-      .join('/');
-    this.$.preferences.path = `/path/${encodedPath}/@preferences`;
+    this.$.preferences.path = `/path/${normalized}/@preferences`;
     this.$.preferences.params = null;
     this.$.preferences.enrichers = {};
     this.$.preferences.headers = { accept: 'application/json' };
@@ -1578,7 +1598,7 @@ Polymer({
   _getDocResultsPrefsKey() {
     // Use this.name as primary identifier (includes context like -trashed suffix)
     // Fall back to document.uid if name not available
-    const docId = this.name || this.document?.uid || 'nuxeo-results';
+    const docId = this.name || (this.document && this.document.uid) || 'nuxeo-results';
     return `documentPrefs.${docId}`;
   },
 
@@ -1609,7 +1629,7 @@ Polymer({
         const parsed = JSON.parse(decoded);
         return parsed;
       } catch (e) {
-        return null;
+        /* Stored preference values are user data and may predate the current format; fall back to defaults */
       }
     }
 

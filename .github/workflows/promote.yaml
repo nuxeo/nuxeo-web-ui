@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
           scope: '@nuxeo'
 
@@ -36,6 +36,19 @@ jobs:
 
       # Extract VERSION from x.y.z-rc.n → x.y.z
       - run: echo "VERSION=$(echo '${{ github.event.inputs.version }}' | sed -E 's/-rc\.[0-9]+//')" >> $GITHUB_ENV
+
+      # 3.1.x is lower than the 2025.x versions already published, and npm refuses to apply the
+      # implicit "latest" tag then. Always publish with an explicit tag: "latest" stays on 2025.x.
+      - name: Resolve the npm dist-tag
+        run: |
+          case "$VERSION" in
+            2025.*) echo "NPM_TAG=latest" >> $GITHUB_ENV ;;
+            3.1.*) echo "NPM_TAG=lts-2023" >> $GITHUB_ENV ;;
+            *)
+              echo "::error::No npm dist-tag is mapped for version $VERSION"
+              exit 1
+              ;;
+          esac
 
       - name: Update Nuxeo Web UI version to ${{ env.VERSION }}
         env:
@@ -83,7 +96,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
           pushd packages/nuxeo-web-ui-ftest/
-          npm publish --@nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/
+          npm publish --tag "$NPM_TAG" --@nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/
           popd
 
       - name: Promote Web UI ${{ github.event.inputs.version }} to ${{ env.VERSION }}
@@ -170,4 +183,37 @@ jobs:
           git commit -a -m "Update $OLD_SNAPSHOT to $NEW_SNAPSHOT"
 
       - if: ${{ github.event.inputs.dryRun == 'false' }}
-        run: git push origin ${{ github.event.inputs.referenceBranch }}
+        env:
+          # Via the environment, never interpolated into the command: referenceBranch is
+          # free text from workflow_dispatch.
+          REFERENCE_BRANCH: ${{ github.event.inputs.referenceBranch }}
+        # "--" ends option parsing: referenceBranch is free text, and a ref named like an
+        # option is legal. git push origin "--mirror" is read as git push --mirror origin,
+        # which pushes every ref and prunes the remote. Verified locally.
+        run: git push origin -- "$REFERENCE_BRANCH"
+
+      # Opens the pull request carrying this bump to the dev branch. Runs last and cannot
+      # fail the release: by this point the release is already published.
+      #
+      # Without --ref this resolves the workflow on the repository default branch, where it
+      # lives. If the default branch moves, the workflow has to move with it.
+      - name: Open the pull request syncing this bump to the dev branch
+        if: ${{ github.event.inputs.dryRun == 'false' }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GIT_ADMIN_TOKEN }}
+          # Via the environment, never interpolated into the script: referenceBranch is
+          # free text from workflow_dispatch.
+          REFERENCE_BRANCH: ${{ github.event.inputs.referenceBranch }}
+        run: |
+          # Checked first: the sync workflow takes a choice input, so anything outside the
+          # list fails the dispatch with a 422 that continue-on-error would swallow.
+          case "$REFERENCE_BRANCH" in
+            lts-2025 | maintenance-3.1.x) ;;
+            *)
+              echo "::warning::No dev branch is mapped for $REFERENCE_BRANCH; skipping the sync dispatch."
+              exit 0
+              ;;
+          esac
+          gh workflow run sync-release-to-dev.yaml --repo "$GITHUB_REPOSITORY" \
+            -f release_branch="$REFERENCE_BRANCH"

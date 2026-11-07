@@ -17,6 +17,20 @@ limitations under the License.
 */
 import moment from '@nuxeo/moment';
 
+// The three helpers below spell out `obj?.key`, `el?.getBoundingClientRect?.() ?? null` and the canvas lookup
+// of the resize snapshot, because the Designer catalog's analyzer cannot parse optional chaining.
+const read = (obj, key) => (obj != null ? obj[key] : undefined);
+
+const rectOf = (el) => {
+  const rect = el != null && el.getBoundingClientRect != null ? el.getBoundingClientRect() : undefined;
+  return rect != null ? rect : null;
+};
+
+const canvasOf = (chart) =>
+  (chart && chart.$ && chart.$.canvas) ||
+  (chart && chart.shadowRoot && chart.shadowRoot.querySelector('#canvas')) ||
+  (chart != null && chart.querySelector != null ? chart.querySelector('canvas') : undefined);
+
 /**
  * @polymerBehavior Nuxeo.ChartDataBehavior
  */
@@ -49,9 +63,9 @@ export const ChartDataBehavior = {
           this._logChartResizeDebug('ResizeObserver.callback', {
             entries: entries.map((entry) => {
               return {
-                target: entry.target?.tagName,
-                width: entry.contentRect?.width,
-                height: entry.contentRect?.height,
+                target: entry.target != null ? entry.target.tagName : undefined,
+                width: entry.contentRect != null ? entry.contentRect.width : undefined,
+                height: entry.contentRect != null ? entry.contentRect.height : undefined,
               };
             }),
           });
@@ -104,7 +118,7 @@ export const ChartDataBehavior = {
     const async = typeof this.async === 'function' ? this.async.bind(this) : (fn, waitTime) => setTimeout(fn, waitTime);
     async(() => {
       const root = this.root || this.shadowRoot || this;
-      this._logChartResizeDebug('resizeCharts.schedule', { trigger, rootTag: root?.tagName });
+      this._logChartResizeDebug('resizeCharts.schedule', { trigger, rootTag: root != null ? root.tagName : undefined });
       if (!root || typeof root.querySelectorAll !== 'function') {
         return;
       }
@@ -118,7 +132,7 @@ export const ChartDataBehavior = {
             trigger,
             chartIndex,
             reason: 'missing-resize-method',
-            tagName: chart?.tagName,
+            tagName: chart != null ? chart.tagName : undefined,
           });
           return;
         }
@@ -168,52 +182,52 @@ export const ChartDataBehavior = {
   },
 
   _collectChartResizeSnapshot(chart) {
-    const parent = chart?.parentElement;
-    const canvas = chart?.$?.canvas || chart?.shadowRoot?.querySelector('#canvas') || chart?.querySelector?.('canvas');
-    const chartRect = chart?.getBoundingClientRect?.() ?? null;
-    const parentRect = parent?.getBoundingClientRect?.() ?? null;
+    const parent = read(chart, 'parentElement');
+    const canvas = canvasOf(chart);
+    const chartRect = rectOf(chart);
+    const parentRect = rectOf(parent);
     const computed = chart instanceof Element ? window.getComputedStyle(chart) : null;
     return {
       viewport: {
         devicePixelRatio: window.devicePixelRatio,
         innerWidth: window.innerWidth,
         outerWidth: window.outerWidth,
-        visualViewportWidth: window.visualViewport?.width,
-        visualViewportScale: window.visualViewport?.scale,
+        visualViewportWidth: read(window.visualViewport, 'width'),
+        visualViewportScale: read(window.visualViewport, 'scale'),
       },
       chart: {
-        offsetWidth: chart?.offsetWidth,
-        offsetHeight: chart?.offsetHeight,
-        clientWidth: chart?.clientWidth,
-        clientHeight: chart?.clientHeight,
-        rectWidth: chartRect?.width,
-        rectHeight: chartRect?.height,
+        offsetWidth: read(chart, 'offsetWidth'),
+        offsetHeight: read(chart, 'offsetHeight'),
+        clientWidth: read(chart, 'clientWidth'),
+        clientHeight: read(chart, 'clientHeight'),
+        rectWidth: read(chartRect, 'width'),
+        rectHeight: read(chartRect, 'height'),
       },
       parent: {
-        offsetWidth: parent?.offsetWidth,
-        offsetHeight: parent?.offsetHeight,
-        clientWidth: parent?.clientWidth,
-        clientHeight: parent?.clientHeight,
-        rectWidth: parentRect?.width,
-        rectHeight: parentRect?.height,
+        offsetWidth: read(parent, 'offsetWidth'),
+        offsetHeight: read(parent, 'offsetHeight'),
+        clientWidth: read(parent, 'clientWidth'),
+        clientHeight: read(parent, 'clientHeight'),
+        rectWidth: read(parentRect, 'width'),
+        rectHeight: read(parentRect, 'height'),
       },
       styles: {
-        display: computed?.display,
-        width: computed?.width,
-        minWidth: computed?.minWidth,
-        maxWidth: computed?.maxWidth,
-        flex: computed?.flex,
-        overflow: computed?.overflow,
-        transform: computed?.transform,
+        display: read(computed, 'display'),
+        width: read(computed, 'width'),
+        minWidth: read(computed, 'minWidth'),
+        maxWidth: read(computed, 'maxWidth'),
+        flex: read(computed, 'flex'),
+        overflow: read(computed, 'overflow'),
+        transform: read(computed, 'transform'),
       },
-      chartInstance: { width: chart?.chart?.width, height: chart?.chart?.height },
+      chartInstance: { width: read(read(chart, 'chart'), 'width'), height: read(read(chart, 'chart'), 'height') },
       canvas: {
-        cssWidth: canvas?.style?.width,
-        cssHeight: canvas?.style?.height,
-        width: canvas?.width,
-        height: canvas?.height,
-        clientWidth: canvas?.clientWidth,
-        clientHeight: canvas?.clientHeight,
+        cssWidth: read(read(canvas, 'style'), 'width'),
+        cssHeight: read(read(canvas, 'style'), 'height'),
+        width: read(canvas, 'width'),
+        height: read(canvas, 'height'),
+        clientWidth: read(canvas, 'clientWidth'),
+        clientHeight: read(canvas, 'clientHeight'),
       },
     };
   },
