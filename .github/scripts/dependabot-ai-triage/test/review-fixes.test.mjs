@@ -5,8 +5,8 @@ import { chmodSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from '
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { Executor, apply, postTeams, summarize } from '../apply.mjs';
-import { clearedAlerts, plannerTicket, selectCandidates } from '../collect.mjs';
-import { npmClient } from '../lib/clients.mjs';
+import { clearedAlerts, collect, plannerTicket, selectCandidates } from '../collect.mjs';
+import { anonymouslyReadable, npmClient } from '../lib/clients.mjs';
 import { validatePlan } from '../lib/plan-validator.mjs';
 import { OWNERSHIP_PROPERTY, blockerRecheck, fingerprint, reconcile } from '../lib/reconcile.mjs';
 import { runReport, teamsCard } from '../lib/render.mjs';
@@ -783,4 +783,131 @@ test('completed Teams delivery records survive journal pruning for the 30-day re
   const ids = control.journal.entries.map((entry) => entry.id);
   assert.ok(ids.includes('recent:teams'));
   assert.ok(!ids.includes('old:teams'));
+});
+
+// Independent review: automatic holds and control-issue privacy.
+
+function holdArgs(tickets, groupChange) {
+  const alerts = liveAlerts();
+  const planned = bootstrapPlan();
+  groupChange(planned.groups);
+  return {
+    plan: planned,
+    runId: RUN,
+    inventoryDigest: DIGEST,
+    repositories: [
+      { name: WEB, project: 'APP' },
+      { name: EL, project: 'LIB' },
+    ],
+    epicQuarter: '2026-Q4',
+    alerts,
+    aiInput: alerts.map((alert) => `${alert.repository}#${alert.number}`),
+    currentOwner: new Map(),
+    tickets,
+    now: new Date('2026-11-09T07:45:00Z'),
+  };
+}
+
+test('the planner cannot put a started ticket, or one owning actionable work, On Hold', () => {
+  const makeBlocked = (groups) => {
+    Object.assign(groups[0], blocked('upstream-release-pending', 'LIB-24'));
+  };
+  const started = registerTickets().map((ticket) =>
+    ticket.key === 'APP-31' ? { ...ticket, status: 'In Progress', statusCategory: 'indeterminate' } : ticket,
+  );
+  const codes = (args) => validatePlan(args).errors.map((error) => error.code);
+  assert.ok(codes(holdArgs(started, makeBlocked)).includes('hold-started-ticket'));
+  const actionable = registerTickets().map((ticket) =>
+    ticket.key === 'APP-31' ? { ...ticket, ownership: { kind: 'actionable', alerts: {} } } : ticket,
+  );
+  assert.ok(codes(holdArgs(actionable, makeBlocked)).includes('hold-actionable-ticket'));
+  // A not-started ticket with no recorded actionable work may still be put On Hold.
+  assert.deepEqual(codes(holdArgs(registerTickets(), makeBlocked)), []);
+});
+
+test('a ticket started after validation is not put On Hold, and its ownership is not recorded', async () => {
+  const tickets = registerTickets();
+  const jira = new FakeJira(tickets);
+  const { exec, outcome } = await executor(jira, tickets);
+  const adopt = { ...bootstrapPlan().groups[0], ...blocked('upstream-release-pending', 'LIB-24') };
+  const addLabel = jira.addLabel.bind(jira);
+  jira.addLabel = async (key, label) => {
+    await addLabel(key, label);
+    jira.issues.get(key).fields.status = { name: 'In Progress', statusCategory: { key: 'indeterminate' } };
+  };
+  await exec.update(adopt, {});
+  assert.equal(jira.calls.filter((call) => call.name === 'transition').length, 0);
+  assert.match(outcome.failures.join(), /not put On Hold automatically/);
+  assert.equal(jira.issues.get('APP-31').properties[OWNERSHIP_PROPERTY], undefined);
+});
+
+async function collectWith({ level, publicReadable }) {
+  const work = mkdtempSync(path.join(tmpdir(), 'dat-collect-'));
+  const option = (value, id) => {
+    return { value, id };
+  };
+  const jira = {
+    async issue() {
+      return { fields: { security: { id: level }, labels: ['dependabot-ai-triage-control'] } };
+    },
+    async createFields() {
+      return [
+        {
+          fieldId: 'customfield_12201',
+          allowedValues: [
+            option('Critical', '13603'),
+            option('High', '15789'),
+            option('Medium', '15790'),
+            option('Low', '15791'),
+          ],
+        },
+        { fieldId: 'components', allowedValues: [{ name: 'Web UI' }, { name: 'CI/CD' }] },
+      ];
+    },
+    properties: new Map(),
+    async property(key, name) {
+      return this.properties.get(name) ?? null;
+    },
+    async setProperty(key, name, value) {
+      this.properties.set(name, structuredClone(value));
+    },
+  };
+  const github = {
+    async branchSha() {
+      throw new Error('stop after setup');
+    },
+  };
+  return withEnv({ TRIAGE_WORK_DIR: work, TRIAGE_RUN_ID: RUN, TRIAGE_CONFIG: CONFIG_FILE }, () =>
+    collect({ jira, github, npm: {}, probe: async () => publicReadable }),
+  );
+}
+
+test('the control issue must carry the configured security level and must not be readable anonymously', async () => {
+  const wrongLevel = await collectWith({ level: '99999', publicReadable: false });
+  assert.equal(wrongLevel.lockAcquired, false);
+  assert.match(wrongLevel.failures.join(), /must have security level 11176/);
+  const exposed = await collectWith({ level: '11176', publicReadable: true });
+  assert.equal(exposed.lockAcquired, false);
+  assert.match(exposed.failures.join(), /readable without signing in/);
+  const restricted = await collectWith({ level: '11176', publicReadable: false });
+  assert.equal(restricted.lockAcquired, true);
+});
+
+test('the anonymous probe treats 401/403/404 as private and a readable issue as public', async () => {
+  const original = globalThis.fetch;
+  try {
+    for (const [status, expected] of [
+      [404, false],
+      [401, false],
+      [200, true],
+    ]) {
+      globalThis.fetch = async (url, init) => {
+        assert.equal(init.headers.Authorization, undefined);
+        return new Response(status === 200 ? '{}' : '', { status });
+      };
+      assert.equal(await anonymouslyReadable('https://jira.example', 'APP-99'), expected);
+    }
+  } finally {
+    globalThis.fetch = original;
+  }
 });

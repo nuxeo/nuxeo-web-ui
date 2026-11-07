@@ -1,7 +1,15 @@
 import { readFileSync } from 'node:fs';
 import { shortHash } from './util.mjs';
 
-const REQUIRED = ['jiraSite', 'controlIssue', 'issueTypeId', 'severityField', 'severityOptions', 'holdStatus'];
+const REQUIRED = [
+  'jiraSite',
+  'controlIssue',
+  'controlSecurityLevelId',
+  'issueTypeId',
+  'severityField',
+  'severityOptions',
+  'holdStatus',
+];
 
 /**
  * Static settings come from the reviewed JSON file. The quarterly epic and the execution mode come from

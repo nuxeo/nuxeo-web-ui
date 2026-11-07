@@ -84,6 +84,22 @@ export function npmClient() {
   };
 }
 
+/**
+ * True when the issue can be read without credentials. Used to prove the control issue is not public before
+ * any security data is stored on it; anything other than a clear "not found / not allowed" counts as unproven.
+ */
+export async function anonymouslyReadable(site, key) {
+  try {
+    await request({ service: 'Jira', url: `${site}/rest/api/3/issue/${key}?fields=summary`, label: 'anonymous probe' });
+    return true;
+  } catch (error) {
+    if ([401, 403, 404].includes(error.status)) {
+      return false;
+    }
+    throw error;
+  }
+}
+
 export function jiraClient({ site, email, token }) {
   const credentials = Buffer.from(`${email}:${token}`).toString('base64');
   const call = async (method, target, body, label) => {

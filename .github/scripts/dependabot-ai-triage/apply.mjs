@@ -241,6 +241,7 @@ export class Executor {
       labels: issue.fields.labels ?? [],
       severity: this.config.severityOf(issue.fields[this.config.severityField]?.id),
       onHold: status.name === this.config.holdStatus,
+      category,
       ownership,
     };
   }
@@ -259,6 +260,11 @@ export class Executor {
     const current = await this.jira.issue(key, ['status']);
     if (current.fields.status.name === this.config.holdStatus) {
       return false;
+    }
+    // Last check at write time: work that has started since the plan was validated is never stopped automatically.
+    const category = current.fields.status.statusCategory?.key;
+    if (category && category !== 'new') {
+      throw new Error(`${key} is now ${current.fields.status.name}; it is not put On Hold automatically`);
     }
     const transition = (await this.jira.transitions(key)).find((item) => item.to?.name === this.config.holdStatus);
     if (!transition) {
@@ -359,7 +365,7 @@ export class Executor {
         return { key: result.key };
       }),
     );
-    await this.finish(group, { key: result.key, onHold: false, ownership: null }, alerts, report);
+    await this.finish(group, { key: result.key, onHold: false, category: 'new', ownership: null }, alerts, report);
   }
 
   async applyScope(group, target, added) {

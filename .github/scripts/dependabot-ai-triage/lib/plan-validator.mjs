@@ -255,6 +255,19 @@ function checkTicketState(ctx, group, current, where) {
   if (operation === 'extend' && current.statusCategory !== 'new') {
     ctx.fail('ticket-in-progress', `${where} extends ${ticket}, which is "${current.status}"; create a linked ticket.`);
   }
+  // Moving a ticket On Hold is never automatic for started work or for a ticket that owns actionable findings:
+  // that would stop work which can proceed. Such cases go to needsReview or to a separate blocked ticket.
+  if (group.kind === 'blocked' && !current.onHold) {
+    if (current.statusCategory !== 'new') {
+      ctx.fail(
+        'hold-started-ticket',
+        `${where} would put ${ticket} ("${current.status}") On Hold; report it for review.`,
+      );
+    }
+    if (current.ownership?.kind === 'actionable') {
+      ctx.fail('hold-actionable-ticket', `${where} would put ${ticket}, which owns actionable findings, On Hold.`);
+    }
+  }
   if (!current.onHold || group.kind !== 'actionable') {
     return;
   }

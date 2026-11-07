@@ -36,6 +36,8 @@ A plan is rejected, and nothing is written, unless:
 - no alert owned by another open ticket is claimed, and no owned alert is dropped;
 - tickets that are already in progress are not extended (a new linked ticket is created instead), and closed
   tickets are never targeted;
+- a ticket is never moved On Hold automatically when its work has started or it already owns actionable findings
+  (checked again just before the transition);
 - blocked groups use an external blocker (`no-upstream-patch` only when no major of the package has a fix, or
   `upstream-release-pending`) with upstream reference, mitigation and recheck criteria; major upgrades and
   compatibility work are not blockers;
@@ -51,8 +53,10 @@ only counts. Everything else is in Jira:
   (`dependabot-ai-triage-state`, `dependabot-ai-triage-journal`). A short private report comment is added only when
   a run proposes or makes a change, needs review, or fails; a clean week adds no comment. Each comment lists the
   sources, the counts, one line per affected ticket (with the fix, reason and acceptance criteria only for new or
-  extended tickets) and anything that needs attention. The collector refuses to run if the issue loses its security
-  level or label. Do not close it or put it under an epic.
+  extended tickets) and anything that needs attention. Before storing anything, every run checks that the issue has
+  exactly the configured security level (`controlSecurityLevelId`) and its label, and that it cannot be read without
+  signing in; otherwise the run stops. Who the security level admits is Jira administration: confirm it covers only
+  the intended group. Do not close the issue or put it under an epic.
 - **Remediation tickets** carry their own ownership property.
 
 ## Configuration
@@ -60,6 +64,7 @@ only counts. Everything else is in Jira:
 | Setting                                                                                      | Where                                                                                          |
 | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
 | Repositories, Jira projects, components, labels, supported branches                          | `.github/dependabot-ai-triage.json`                                                            |
+| Control issue and its required security level id                                             | `.github/dependabot-ai-triage.json` (`controlIssue`, `controlSecurityLevelId`)                 |
 | Defect Severity field and option IDs (revalidated against Jira create metadata on every run) | `.github/dependabot-ai-triage.json`                                                            |
 | Copilot CLI version, model, timeout                                                          | `.github/dependabot-ai-triage.json` (`copilot`)                                                |
 | Security epic and quarter                                                                    | Repository variables `SECURITY_EPIC`, `SECURITY_EPIC_QUARTER` (e.g. `NXENG-987`, `2026-Q4`)    |

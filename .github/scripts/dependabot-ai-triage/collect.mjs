@@ -1,7 +1,7 @@
 // Step 1: deterministic collection and reconciliation. Makes no triage decisions.
 import { appendFileSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { githubClient, jiraClient, npmClient } from './lib/clients.mjs';
+import { anonymouslyReadable, githubClient, jiraClient, npmClient } from './lib/clients.mjs';
 import { loadConfig } from './lib/config.mjs';
 import { analyzeLockfile, analyzeManifest, vulnerableParents } from './lib/lockfile.mjs';
 import { OWNED_LABEL, OWNERSHIP_PROPERTY, combinedRange, normalizeAlert, reconcile } from './lib/reconcile.mjs';
@@ -97,13 +97,17 @@ async function verifyProject(jira, config, repo) {
 }
 
 /** Revalidates the control issue's restriction and the Jira field/option IDs before anything is stored. */
-async function verifyJira(jira, config) {
+async function verifyJira(jira, config, probe) {
   const control = await jira.issue(config.controlIssue, ['summary', 'security', 'labels', 'status']);
-  if (!control.fields?.security || !(control.fields.labels ?? []).includes(CONTROL_LABEL)) {
+  const level = control.fields?.security?.id;
+  if (level !== config.controlSecurityLevelId || !(control.fields.labels ?? []).includes(CONTROL_LABEL)) {
     throw new PhaseError(
-      `Control issue ${config.controlIssue} must have a security level and the "${CONTROL_LABEL}" label ` +
-        'before it may store triage state.',
+      `Control issue ${config.controlIssue} must have security level ${config.controlSecurityLevelId} and the ` +
+        `"${CONTROL_LABEL}" label before it may store triage state.`,
     );
+  }
+  if (await probe(config.jiraSite, config.controlIssue)) {
+    throw new PhaseError(`Control issue ${config.controlIssue} is readable without signing in; refusing to use it.`);
   }
   const problems = (await Promise.all(config.repositories.map((repo) => verifyProject(jira, config, repo)))).flat();
   if (problems.length) {
@@ -514,7 +518,7 @@ function configurationWarnings(config) {
 
 async function acquire(ctx, inventory) {
   try {
-    await verifyJira(ctx.jira, ctx.config);
+    await verifyJira(ctx.jira, ctx.config, ctx.probe);
     inventory.previousState = await ctx.control.load();
     await ctx.control.acquireLock(ctx.runId);
     inventory.lockAcquired = true;
@@ -549,6 +553,7 @@ function defaultClients(config) {
     jira: jiraClient({ site: config.jiraSite, email: env('JIRA_EMAIL'), token: env('JIRA_API_TOKEN') }),
     github: githubClient(env('GH_TOKEN')),
     npm: npmClient(),
+    probe: anonymouslyReadable,
   };
 }
 
@@ -559,7 +564,7 @@ export async function collect(clients) {
   const runId = env('TRIAGE_RUN_ID');
   rmSync(work, { recursive: true, force: true });
   mkdirSync(work, { recursive: true });
-  const { jira, github, npm } = clients ?? defaultClients(config);
+  const { jira, github, npm, probe = anonymouslyReadable } = clients ?? defaultClients(config);
   const ctx = {
     work,
     config,
@@ -567,6 +572,7 @@ export async function collect(clients) {
     jira,
     github,
     npm,
+    probe,
     control: new ControlState(jira, config.controlIssue),
     failures: [],
     warnings: configurationWarnings(config),

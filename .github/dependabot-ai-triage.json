@@ -2,6 +2,7 @@
   "schemaVersion": 1,
   "jiraSite": "https://hyland.atlassian.net",
   "controlIssue": "WEBUI-2435",
+  "controlSecurityLevelId": "11176",
   "issueTypeId": "10004",
   "severityField": "customfield_12201",
   "severityOptions": { "critical": "13603", "high": "15789", "medium": "15790", "low": "15791" },

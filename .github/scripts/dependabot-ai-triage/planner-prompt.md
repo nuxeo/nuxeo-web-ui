@@ -88,6 +88,10 @@ Decide from the evidence whether the fix can be done now on the supported branch
     example a Web UI finding that arrives through `@nuxeo/nuxeo-ui-elements` and needs an Elements release. Use the
     upstream Jira key or a GitHub/npm URL as `upstreamRef`.
 - Keep blocked findings in separate groups from independently actionable findings, even for the same package.
+- Never mark a group targeting an existing ticket as `blocked` when that ticket has started (`statusCategory` is not
+  `new`) or already owns actionable findings (`recordedOwnership.kind` is `actionable`): the ticket would be moved
+  On Hold and stop work that can proceed. Create a separate blocked ticket for the blocked findings, or use
+  `needsReview` for alerts the started ticket already covers.
 - A blocked group needs `blocker` with `type`, specific `reason`, `upstreamRef`, `mitigation` (or
   "none established") and `recheck` (the concrete condition to resume).
 
