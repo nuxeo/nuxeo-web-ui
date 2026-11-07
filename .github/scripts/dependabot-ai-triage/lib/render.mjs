@@ -148,88 +148,92 @@ function chunks(items, size = 10) {
 const listSection = (title, items, size) => (items.length ? [adfHeading(title), ...chunks(items, size)] : []);
 
 function sourceLine(repo) {
-  const shas = Object.entries(repo.branchShas ?? {})
-    .map(([branch, sha]) => `${branch}@${sha.slice(0, 10)}`)
-    .join(', ');
-  const status = repo.complete ? 'complete' : 'FAILED';
-  return `${repo.name}: ${status} · ${repo.open} open alert(s) · ${repo.pages} page(s) · retrieved ${
-    repo.retrievedAt ?? 'n/a'
-  } · branches ${shas}`;
+  const status = repo.complete ? `${repo.open} alert(s), ${repo.pages} page(s), complete` : 'FAILED';
+  return `${shortRepo(repo.name)}: ${status}`;
 }
 
-function countLines(outcome) {
+function summaryLine(outcome) {
   const { counts } = outcome;
-  const label = outcome.firstReconciliation ? 'Untriaged at first reconciliation' : 'Newly untriaged';
+  const label = outcome.firstReconciliation ? 'untriaged at first reconciliation' : 'newly untriaged';
   // Without a validated plan the number of untriaged findings is unknown, not zero.
   const untriaged = outcome.planDetermined
     ? countLine(outcome.newBySeverity)
     : `not determined (no validated plan; ${counts.alerts - counts.covered} alert(s) awaiting triage)`;
-  return [
-    `${counts.alerts} open alert(s) across ${counts.uniqueAdvisories} unique advisory(ies). One advisory can raise ` +
-      'several alerts (one per manifest/lockfile), and one ticket can own several alerts.',
-    `Adequately covered by existing tickets: ${counts.covered}`,
-    `${label}: ${untriaged}`,
-    `Carried over from earlier runs: ${counts.carried}`,
-    `Tickets to create: ${counts.create} · extend: ${counts.extend} · adopt existing coverage: ${counts.adopt}`,
-  ];
+  return (
+    `${counts.alerts} open alert(s) (${counts.uniqueAdvisories} advisories) · ${counts.covered} already covered · ` +
+    `${label}: ${untriaged}`
+  );
 }
 
-function groupLine(group, site) {
-  const target = group.ticketKey ? adfLink(group.ticketKey, browse(site, group.ticketKey)) : adfText('(new ticket)');
-  const lines = [
-    ` · ${group.action} · ${titleCase(group.severity)} · ${group.kind} · ${group.repository} · alerts ${group.alerts.join(', ')}`,
-    group.summary ?? '',
-    `Remediation: ${group.remediation ?? '-'}`,
-    `Rationale: ${group.rationale}`,
-  ];
+const ACTION_LABEL = {
+  'proposed create': 'to create',
+  created: 'created',
+  'proposed extend': 'to extend',
+  extended: 'extended',
+  'proposed adopt': 'existing ticket; ownership to record',
+  adopted: 'existing ticket; ownership recorded',
+  'proposed keep': 'finding changed',
+  'kept-updated': 'finding changed; note added',
+};
+
+function isReportable(group) {
+  return group.action !== 'kept' && (group.action !== 'proposed keep' || Boolean(group.updateNote));
+}
+
+/** One line for recorded ownership; full detail only where ticket scope is created or extended. */
+function groupEntry(group, site) {
+  const target = group.ticketKey ? adfLink(group.ticketKey, browse(site, group.ticketKey)) : adfText('New ticket');
+  const alerts = group.alerts.length === 1 ? `alert ${group.alerts[0]}` : `alerts ${group.alerts.join(', ')}`;
+  const blocked = group.kind === 'blocked' ? ' · blocked' : '';
+  const head = ` · ${ACTION_LABEL[group.action] ?? group.action} · ${titleCase(group.severity)}${blocked} · ${shortRepo(
+    group.repository,
+  )} · ${alerts}`;
+  if (!['create', 'extend'].includes(group.operation)) {
+    return [target, adfText(head)];
+  }
+  const lines = [head, group.summary ?? group.updateNote ?? '', `Fix: ${group.remediation ?? group.updateNote ?? '-'}`];
+  lines.push(`Why: ${group.rationale}`);
   if (group.blocker) {
-    lines.push(`Blocker: ${group.blocker.reason} (recheck: ${group.blocker.recheck})`);
+    lines.push(`Blocked by: ${group.blocker.reason} Recheck: ${group.blocker.recheck}`);
   }
   if (group.acceptanceCriteria) {
-    lines.push(`Acceptance: ${group.acceptanceCriteria.join(' | ')}`);
+    lines.push(`Done when: ${group.acceptanceCriteria.join(' | ')}`);
   }
-  return [target, adfText(lines.join('\n'))];
+  return [target, adfText(lines.filter(Boolean).join('\n'))];
 }
 
-function detailSections(outcome) {
+function attentionLines(outcome) {
   return [
-    ...listSection(
-      'Severity raises',
-      outcome.severityRaises.map(
-        (raise) => `${raise.ticket}: ${raise.from ?? 'unset'} → ${raise.to} (${raise.alerts.join(', ')})`,
-      ),
+    ...outcome.failures.map((failure) => `Failure: ${failure}`),
+    ...outcome.severityRaises.map(
+      (raise) => `Severity: ${raise.ticket} ${raise.from ?? 'unset'} → ${raise.to} (${raise.alerts.join(', ')})`,
     ),
-    ...listSection(
-      'Closed-ticket / open-alert mismatches',
-      outcome.closedMismatches.map((item) => `${item.id} is open but owned only by closed ${item.tickets.join(', ')}`),
+    ...outcome.needsReview.map(
+      (item) =>
+        `Needs review: ${alertId(item.repository, item.alert)} · candidate ${item.candidateTicket} · ${item.missingEvidence}`,
     ),
-    ...listSection(
-      'Needs review',
-      outcome.needsReview.map(
-        (item) =>
-          `${alertId(item.repository, item.alert)} · candidate ${item.candidateTicket} · ${item.missingEvidence}`,
-      ),
-    ),
-    ...listSection(
-      'Ambiguous ownership',
-      outcome.ambiguous.map((item) => `${item.id} recorded on ${item.tickets.join(', ')}`),
-    ),
-    ...listSection(
-      'Owned alerts no longer open',
-      outcome.cleared.map((item) => `${item.id} (${item.state}) · ${item.tickets.join(', ')}`),
-    ),
-    ...listSection(
-      'Validator warnings',
-      outcome.warnings.map((warning) => `${warning.code}: ${warning.message}`),
-    ),
-    ...listSection('Failures', outcome.failures),
-    ...listSection(
-      'Actions',
-      outcome.actions.map(
-        (action) => `${action.status} · ${action.kind} · ${action.target ?? ''} ${action.detail ?? ''}`,
-      ),
-    ),
+    ...outcome.closedMismatches
+      .filter((item) => item.isNew)
+      .map((item) => `Closed ticket, open alert: ${item.id} is owned only by ${item.tickets.join(', ')}`),
+    ...outcome.ambiguous.map((item) => `Ambiguous: ${item.id} is recorded on ${item.tickets.join(', ')}`),
+    ...outcome.cleared
+      .filter((item) => item.isNew)
+      .map((item) => `Alert closed on GitHub: ${item.id} (${item.state}) · ${item.tickets.join(', ')}`),
+    ...outcome.warnings.map((warning) => `Note: ${warning.message}`),
+    ...outcome.actions
+      .filter((action) => action.status === 'failed' || action.status === 'uncertain')
+      .map((action) => `Write ${action.status}: ${action.kind} ${action.target ?? ''} ${action.detail ?? ''}`),
   ];
+}
+
+/** Clean weeks post no comment: the hidden state and the Teams message are enough. */
+export function reportNeeded(outcome) {
+  return (
+    !outcome.complete ||
+    outcome.validationErrors.length > 0 ||
+    outcome.groups.some(isReportable) ||
+    attentionLines(outcome).length > 0
+  );
 }
 
 function splitDocuments(sections) {
@@ -248,31 +252,28 @@ function splitDocuments(sections) {
   });
 }
 
-/** Private, complete run report stored as control-issue comments. Returns one or more ADF documents. */
+/** Short private run report for the control issue. Returns one or more ADF documents. */
 export function runReport(outcome, config) {
-  const status = outcome.complete ? 'Complete' : 'INCOMPLETE';
-  const header =
-    `${status} · started ${outcome.startedAt} · config ${outcome.configRevision} · ` +
-    `epic ${config.epic} (${config.epicQuarter})`;
-  const groupLines = outcome.groups.map((group) => groupLine(group, config.jiraSite));
+  const status = outcome.complete ? 'complete' : 'INCOMPLETE';
   const rejected = outcome.validationErrors.length
     ? [
-        adfHeading('Plan rejected by validator'),
+        adfHeading('Plan rejected by the validator; nothing was applied'),
         adfCode(
-          clip(outcome.validationErrors.map((error) => `${error.code}: ${error.message}`).join('\n'), 12000),
+          clip(outcome.validationErrors.map((error) => `${error.code}: ${error.message}`).join('\n'), 6000),
           'text',
         ),
       ]
     : [];
   return splitDocuments([
-    adfHeading(`Dependabot AI triage ${outcome.mode} · run ${outcome.runId}`, 2),
-    adfParagraph(adfText(header)),
-    adfHeading('Sources'),
-    adfBullets(outcome.repositories.map(sourceLine)),
-    adfHeading('Counts'),
-    adfBullets(countLines(outcome)),
-    ...listSection('Proposed or applied groups', groupLines, 5),
-    ...detailSections(outcome),
+    adfHeading(`Dependabot triage ${outcome.mode} · ${status} · run ${outcome.runId}`, 3),
+    adfParagraph(adfText(`Sources: ${outcome.repositories.map(sourceLine).join(' · ')}`)),
+    adfParagraph(adfText(summaryLine(outcome))),
+    ...listSection(
+      'Tickets',
+      outcome.groups.filter(isReportable).map((group) => groupEntry(group, config.jiraSite)),
+      5,
+    ),
+    ...listSection('Needs attention', attentionLines(outcome)),
     ...rejected,
   ]);
 }

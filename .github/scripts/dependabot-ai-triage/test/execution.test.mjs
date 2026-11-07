@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Executor, postTeams, summarize } from '../apply.mjs';
 import { OWNED_LABEL, OWNERSHIP_PROPERTY } from '../lib/reconcile.mjs';
-import { runReport, teamsCard, ticketDescription } from '../lib/render.mjs';
+import { reportNeeded, runReport, teamsCard, ticketDescription } from '../lib/render.mjs';
 import { ControlState, JOURNAL_PROPERTY } from '../lib/state.mjs';
 import { RUN, EL, WEB, blocked, bootstrapPlan, group, liveAlerts, registerTickets } from './fixtures.mjs';
 
@@ -483,6 +483,46 @@ test('an incomplete report never shows zero untriaged findings when no plan was 
   assert.match(report(false), /not determined \(no validated plan; 24 alert\(s\) awaiting triage\)/);
   assert.doesNotMatch(report(false), /0 Medium/);
   assert.match(report(true), /0 Medium/);
+});
+
+const reportOutcome = (extra = {}) => {
+  return {
+    ...baseOutcome({ mode: 'preview', planDetermined: true, firstReconciliation: true }),
+    counts: { alerts: 24, uniqueAdvisories: 11, covered: 0, carried: 0, create: 1, extend: 0, adopt: 8 },
+    cleared: [],
+    ambiguous: [],
+    warnings: [],
+    actions: [],
+    validationErrors: [],
+    ...extra,
+  };
+};
+
+test('a clean week posts no report comment; changes, problems and newly closed alerts do', () => {
+  assert.equal(reportNeeded(reportOutcome({ groups: [] })), false);
+  const kept = { ...bootstrapPlan().groups[0], operation: 'keep', action: 'kept' };
+  assert.equal(reportNeeded(reportOutcome({ groups: [kept] })), false);
+  const cleared = { id: `${WEB}#643`, state: 'fixed', tickets: ['WEBUI-2431'] };
+  assert.equal(reportNeeded(reportOutcome({ cleared: [{ ...cleared, isNew: false }] })), false);
+  assert.equal(reportNeeded(reportOutcome({ cleared: [{ ...cleared, isNew: true }] })), true);
+  assert.equal(reportNeeded(reportOutcome({ complete: false, failures: ['x'] })), true);
+  assert.equal(reportNeeded(reportOutcome({ groups: [{ ...createGroup(), action: 'proposed create' }] })), true);
+});
+
+test('the report is short: one line per adopted ticket, detail only for new or extended scope', () => {
+  const groups = bootstrapPlan().groups.map((item) => {
+    return { ...item, ticketKey: item.ticket, action: `proposed ${item.operation}` };
+  });
+  const [document] = runReport(reportOutcome({ groups, newBySeverity: { medium: 1 } }), config);
+  const lines = JSON.stringify(document);
+  assert.match(
+    lines,
+    /WEBUI-2431.*existing ticket; ownership to record · Medium · nuxeo-web-ui · alerts 643, 644, 645/,
+  );
+  assert.equal((lines.match(/Why: /g) ?? []).length, 1);
+  assert.match(lines, /New ticket.*to create · Medium · nuxeo-elements · alert 299/);
+  assert.doesNotMatch(lines, /Rationale for the regression fixture[^"]*WEBUI-2431/);
+  assert.ok(lines.length < 6000, `report is ${lines.length} characters`);
 });
 
 test('large reports are split into several Jira comments instead of truncated', () => {

@@ -9,11 +9,11 @@ Workflow: [`.github/workflows/dependabot-ai-triage.yaml`](../../workflows/depend
 
 ## How a run works
 
-| Step       | Script        | AI? | What it does                                                                                                                                                                                                                                                    |
-| ---------- | ------------- | --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. Collect | `collect.mjs` | No  | Locks the run, reads **every** open alert (paginated, per-repository completion recorded), reads Jira tickets with their ownership property, reconciles alerts by exact lookup, and gathers lockfile/npm evidence only for alerts that are unowned or changed.  |
-| 2. Plan    | `plan.mjs`    | Yes | Runs Copilot CLI with `planner-prompt.md`. The agent can only read the planner input files (`view`, `glob`, `grep`); no shell, network, MCP servers or credentials other than the Copilot token. Output: a JSON plan.                                           |
-| 3. Apply   | `apply.mjs`   | No  | Validates the plan (`lib/plan-validator.mjs`). In automatic mode it creates/extends tickets, records ownership, raises severity, moves blocked tickets On Hold and posts the Teams card. Every run posts a private report to the control issue and saves state. |
+| Step       | Script        | AI? | What it does                                                                                                                                                                                                                                                                                                    |
+| ---------- | ------------- | --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Collect | `collect.mjs` | No  | Locks the run, reads **every** open alert (paginated, per-repository completion recorded), reads Jira tickets with their ownership property, reconciles alerts by exact lookup, and gathers lockfile/npm evidence only for alerts that are unowned or changed.                                                  |
+| 2. Plan    | `plan.mjs`    | Yes | Runs Copilot CLI with `planner-prompt.md`. The agent can only read the planner input files (`view`, `glob`, `grep`); no shell, network, MCP servers or credentials other than the Copilot token. Output: a JSON plan.                                                                                           |
+| 3. Apply   | `apply.mjs`   | No  | Validates the plan (`lib/plan-validator.mjs`). In automatic mode it creates/extends tickets, records ownership, raises severity, moves blocked tickets On Hold and posts the Teams card. Saves state on the control issue and adds a short private report there when something changed, needs review or failed. |
 
 Ownership is never inferred from description text. When a ticket owns alerts, the executor writes the Jira issue
 property `dependabot-ai-triage-ownership` (alert numbers and fingerprints) and adds the `dependabot-ai-triage`
@@ -45,8 +45,11 @@ only counts. Everything else is in Jira:
 
 - **Control issue** (`controlIssue` in the config, currently WEBUI-2435, security level _Internal_, label
   `dependabot-ai-triage-control`). Holds the run lock, checkpoint and action journal as hidden issue properties
-  (`dependabot-ai-triage-state`, `dependabot-ai-triage-journal`) and one private report comment per run. The
-  collector refuses to run if the issue loses its security level or label. Do not close it or put it under an epic.
+  (`dependabot-ai-triage-state`, `dependabot-ai-triage-journal`). A short private report comment is added only when
+  a run proposes or makes a change, needs review, or fails; a clean week adds no comment. Each comment lists the
+  sources, the counts, one line per affected ticket (with the fix, reason and acceptance criteria only for new or
+  extended tickets) and anything that needs attention. The collector refuses to run if the issue loses its security
+  level or label. Do not close it or put it under an epic.
 - **Remediation tickets** carry their own ownership property.
 
 ## Configuration

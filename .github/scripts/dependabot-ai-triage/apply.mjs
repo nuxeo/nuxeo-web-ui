@@ -5,7 +5,15 @@ import { jiraClient } from './lib/clients.mjs';
 import { loadConfig } from './lib/config.mjs';
 import { validatePlan } from './lib/plan-validator.mjs';
 import { OWNED_LABEL, OWNERSHIP_PROPERTY, fingerprint } from './lib/reconcile.mjs';
-import { extendComment, holdComment, runReport, severityComment, teamsCard, ticketDescription } from './lib/render.mjs';
+import {
+  extendComment,
+  holdComment,
+  reportNeeded,
+  runReport,
+  severityComment,
+  teamsCard,
+  ticketDescription,
+} from './lib/render.mjs';
 import { ControlState } from './lib/state.mjs';
 import { SEVERITY_RANK, alertId, isMainModule, log, mapSequential, request, shortHash } from './lib/util.mjs';
 
@@ -474,6 +482,7 @@ function describe(outcome, inventory, plan) {
   const summary = summarize(inventory, plan);
   const reconciliation = inventory.reconciliation ?? {};
   const reported = new Set(inventory.previousState?.reportedMismatches ?? []);
+  const reportedCleared = new Set(inventory.previousState?.reportedCleared ?? []);
   const groups = plan?.groups ?? [];
   const byOperation = (operation) => groups.filter((group) => group.operation === operation).length;
   const planMismatches = (plan?.closedTicketMismatches ?? []).map((item) => {
@@ -492,6 +501,10 @@ function describe(outcome, inventory, plan) {
       ...planMismatches,
     ],
     ambiguous: reconciliation.ambiguous ?? [],
+    // Alerts closed on GitHub are reported once, not every week.
+    cleared: outcome.cleared.map((item) => {
+      return { ...item, isNew: !reportedCleared.has(item.id) };
+    }),
     needsReview: plan?.needsReview ?? [],
     groups: groups.map((group) => {
       return { ...group, ticketKey: group.ticket, action: `proposed ${group.operation}` };
@@ -509,6 +522,9 @@ function describe(outcome, inventory, plan) {
 }
 
 async function publishReport(jira, config, outcome) {
+  if (!reportNeeded(outcome)) {
+    return;
+  }
   try {
     await mapSequential(runReport(outcome, config), (document) => jira.addComment(config.controlIssue, document));
   } catch (error) {
@@ -536,6 +552,7 @@ async function saveState(control, outcome, inventory) {
       lastSuccess: record,
       pendingUnowned: (outcome.untriaged ?? []).filter((id) => pending.has(id)),
       reportedMismatches: outcome.closedMismatches.map((item) => item.id),
+      reportedCleared: outcome.cleared.map((item) => item.id),
     });
   } else {
     await control.saveState({ lastFailure: { ...record, failures: outcome.failures.slice(0, 20) } });
