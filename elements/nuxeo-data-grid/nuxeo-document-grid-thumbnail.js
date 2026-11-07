@@ -23,7 +23,8 @@ import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-download-button.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-favorites-toggle-button.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag.js';
-import { applyThumbnailFallback, blurSelectionCheckOnPointerDeselect } from '../common-utils.js';
+import { blurSelectionCheckOnPointerDeselect } from '../common-utils.js';
+import { NuxeoRecycledThumbnailBehavior } from '../behaviors/nuxeo-recycled-thumbnail-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
@@ -100,6 +101,15 @@ Polymer({
         left: 0;
         right: 0;
         margin: auto;
+        opacity: 0;
+      }
+
+      /* WEBUI-340: the transition lives on the loaded state only, so revealing the thumbnail fades
+         in while hiding it (on recycle) is instant — a fade-out would keep the stale image on
+         screen, which is exactly what we are trying to avoid. */
+      .thumbnailContainer img[loaded] {
+        opacity: 1;
+        transition: opacity 0.15s ease-in;
       }
 
       .dataContainer {
@@ -218,7 +228,14 @@ Polymer({
 
     <div class="bubbleBox grid-box" selection-mode$="[[selectionMode]]">
       <div class="thumbnailContainer" on-tap="handleClick" tabindex="0">
-        <img crossorigin="anonymous" src="[[_thumbnail(doc)]]" on-error="_onError" alt$="[[doc.title]]" />
+        <img
+          crossorigin="anonymous"
+          src="[[_thumbnailSrc]]"
+          loaded$="[[_thumbnailLoaded]]"
+          on-load="_onLoad"
+          on-error="_onError"
+          alt$="[[doc.title]]"
+        />
       </div>
       <template is="dom-if" if="[[_hasDocument(doc)]]">
         <a
@@ -255,7 +272,7 @@ Polymer({
   `,
 
   is: 'nuxeo-document-grid-thumbnail',
-  behaviors: [FormatBehavior, RoutingBehavior],
+  behaviors: [FormatBehavior, RoutingBehavior, NuxeoRecycledThumbnailBehavior],
 
   properties: {
     doc: {
@@ -287,29 +304,6 @@ Polymer({
 
   observers: ['_selectedItemsChanged(selectedItems.splices)', '_updateAriaLabel(doc)'],
 
-  _thumbnail(doc) {
-    if (
-      doc &&
-      doc.uid &&
-      doc.contextParameters &&
-      doc.contextParameters.thumbnail &&
-      doc.contextParameters.thumbnail.url
-    ) {
-      if (!this.isFollowRedirectEnabled()) {
-        const splitter = doc.contextParameters.thumbnail.url.indexOf('?') > -1 ? '&' : '?';
-        doc.contextParameters.thumbnail.url = `${doc.contextParameters.thumbnail.url}${splitter}clientReason=view`;
-      }
-      return doc.contextParameters.thumbnail.url;
-    }
-    return '';
-  },
-
-  isFollowRedirectEnabled() {
-    const followRedirect =
-      Nuxeo && Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.url && Nuxeo.UI.config.url.followRedirect;
-    return followRedirect ? String(followRedirect).toLowerCase() === 'true' : false;
-  },
-
   handleClick(e) {
     if (this.selectionMode) {
       this._toogleSelect(e);
@@ -334,7 +328,7 @@ Polymer({
     // range. A keyboard activation can also reach us as a synthetic tap wrapping the original
     // keydown (nuxeo-default-search-results._triggerItemToggle), so the guard reads that source
     // event rather than the wrapper.
-    const source = e.type === 'tap' ? e.detail?.sourceEvent || {} : e;
+    const source = e.type === 'tap' ? (e.detail && e.detail.sourceEvent) || {} : e;
     if (typeof source.key !== 'string') {
       if (e.type === 'tap') {
         this._toogleSelect(e);
@@ -372,18 +366,12 @@ Polymer({
     // the host as a single labelled link makes it announce just the document title once; inner controls
     // still announce their own labels when focus lands on them. This is a screen-reader-only hint: it
     // adds no keyboard listener, so navigation and selection behavior are unchanged.
-    if (doc?.uid && doc.title) {
+    if (doc && doc.uid && doc.title) {
       this.setAttribute('role', 'link');
       this.setAttribute('aria-label', doc.title);
     } else {
       this.removeAttribute('role');
       this.removeAttribute('aria-label');
     }
-  },
-
-  // ELEMENTS-1616: show a transparent pixel instead of a broken-image icon when a
-  // (cross-origin) thumbnail fails to load, matching nuxeo-document-thumbnail.
-  _onError(e) {
-    applyThumbnailFallback(e.target);
   },
 });

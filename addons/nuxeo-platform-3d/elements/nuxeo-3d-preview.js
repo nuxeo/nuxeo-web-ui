@@ -21,6 +21,7 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import '@nuxeo/nuxeo-elements/nuxeo-document.js';
 import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import { NuxeoOptimisticLockingBehavior } from '../../../elements/behaviors/nuxeo-optimistic-locking-behavior.js';
 import './nuxeo-3d-viewer.js';
 
 /**
@@ -102,7 +103,7 @@ Polymer({
     },
   },
 
-  behaviors: [NotifyBehavior, I18nBehavior],
+  behaviors: [NotifyBehavior, I18nBehavior, NuxeoOptimisticLockingBehavior],
 
   created() {
     this._createMethodObserver('_valueChanged(document.properties.file:content)', true);
@@ -114,17 +115,8 @@ Polymer({
     }
     const props = {};
     props['file:content'] = this.document.properties['file:content'];
-    this.$.doc.data = {
-      'entity-type': 'document',
-      repository: this.document.repository,
-      uid: this.document.uid,
-      properties: props,
-    };
-
-    this.$.doc.put().then((response) => {
-      this.document = response;
+    return this.updateDocumentProperties(props, () => {
       this.notify({ message: this.i18n(this.uploadedMessage) });
-      this.fire('document-updated');
     });
   },
 

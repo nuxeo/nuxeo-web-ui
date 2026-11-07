@@ -48,7 +48,7 @@ suite('nuxeo-dropzone', () => {
     test('builds single upload payload for uploader batch', () => {
       const data = { type: 'batchFinished', detail: { batchId: 'batch-1' } };
 
-      expect(element._getFiles(data)).to.eql({
+      expect(element._getFile(data)).to.eql({
         'upload-batch': 'batch-1',
         'upload-fileId': '0',
       });
@@ -60,7 +60,7 @@ suite('nuxeo-dropzone', () => {
         detail: { blobs: [{ providerId: 'drive', user: 'jdoe', fileId: 'blob-id' }] },
       };
 
-      expect(element._getFiles(data)).to.eql({
+      expect(element._getFile(data)).to.eql({
         providerId: 'drive',
         user: 'jdoe',
         fileId: 'blob-id',
@@ -72,7 +72,7 @@ suite('nuxeo-dropzone', () => {
       element.valueKey = 'file';
       element.files = [{ index: 0 }, { index: 1, error: true }, { index: 2 }];
 
-      const files = element._getFiles({ type: 'batchFinished', detail: { batchId: 'batch-2' } });
+      const files = element._getFileList({ type: 'batchFinished', detail: { batchId: 'batch-2' } });
 
       expect(files).to.eql([
         { file: { 'upload-batch': 'batch-2', 'upload-fileId': '0' } },
@@ -87,12 +87,28 @@ suite('nuxeo-dropzone', () => {
         { providerId: 'drive', user: 'jdoe', fileId: 'f-2' },
       ];
 
-      const files = element._getFiles({ type: 'nx-blob-picked', detail: {} });
+      const files = element._getFileList({ type: 'nx-blob-picked', detail: {} });
 
       expect(files).to.eql([
         { providerId: 'drive', user: 'jdoe', fileId: 'f-1' },
         { providerId: 'drive', user: 'jdoe', fileId: 'f-2' },
       ]);
+    });
+
+    test('importBatch stores a list for blobList and an object for a single blob', async () => {
+      const batch = (batchId) => {
+        return { type: 'batchFinished', detail: { batchId }, stopPropagation: () => {} };
+      };
+
+      element.files = [{ index: 0 }];
+      element.blobList = true;
+      await element.importBatch(batch('batch-3'));
+      expect(element.value).to.eql([{ 'upload-batch': 'batch-3', 'upload-fileId': '0' }]);
+
+      element.files = [{ index: 0 }];
+      element.blobList = false;
+      await element.importBatch(batch('batch-4'));
+      expect(element.value).to.eql({ 'upload-batch': 'batch-4', 'upload-fileId': '0' });
     });
   });
 
@@ -214,6 +230,72 @@ suite('nuxeo-dropzone', () => {
       expect(uploadSpy.calledOnceWithExactly(event.dataTransfer.files)).to.eql(true);
     });
 
+    test('drop of several files is rejected when multiple is false', () => {
+      const uploadStub = sinon.stub(element, '_upload');
+      sinon.stub(element, 'validate').returns(true);
+      element.multiple = false;
+      element.files = [{ name: 'kept.txt' }];
+      const event = {
+        preventDefault: sinon.spy(),
+        dataTransfer: { files: [{ name: 'f1.txt' }, { name: 'f2.txt' }] },
+      };
+
+      element._drop(event);
+
+      expect(uploadStub).to.not.have.been.called;
+      expect(element.files).to.eql([{ name: 'kept.txt' }]);
+      expect(element.invalid).to.eql(true);
+      expect(element._errorMessage).to.eql('dropzone.invalid.multipleFiles');
+      element.validate.restore();
+      uploadStub.restore();
+    });
+
+    test('drop of a single file is still accepted when multiple is false', () => {
+      const uploadStub = sinon.stub(element, '_upload');
+      sinon.stub(element, 'validate').returns(true);
+      element.multiple = false;
+      const files = [{ name: 'f1.txt' }];
+      const event = { preventDefault: sinon.spy(), dataTransfer: { files } };
+
+      element._drop(event);
+
+      expect(uploadStub).to.have.been.calledOnceWithExactly(files);
+      expect(element.files).to.eql(files);
+      element.validate.restore();
+      uploadStub.restore();
+    });
+
+    test('drop of several files is accepted when multiple is true', () => {
+      const uploadStub = sinon.stub(element, '_upload');
+      sinon.stub(element, 'validate').returns(true);
+      element.multiple = true;
+      const files = [{ name: 'f1.txt' }, { name: 'f2.txt' }];
+      const event = { preventDefault: sinon.spy(), dataTransfer: { files } };
+
+      element._drop(event);
+
+      expect(uploadStub).to.have.been.calledOnceWithExactly(files);
+      expect(element.files).to.eql(files);
+      element.validate.restore();
+      uploadStub.restore();
+    });
+
+    test('drop of several files is accepted for a legacy blob list', () => {
+      const uploadStub = sinon.stub(element, '_upload');
+      sinon.stub(element, 'validate').returns(true);
+      element.multiple = false;
+      element.blobList = true;
+      const files = [{ name: 'f1.txt' }, { name: 'f2.txt' }];
+      const event = { preventDefault: sinon.spy(), dataTransfer: { files } };
+
+      element._drop(event);
+
+      expect(uploadStub).to.have.been.calledOnceWithExactly(files);
+      expect(element.files).to.eql(files);
+      element.validate.restore();
+      uploadStub.restore();
+    });
+
     test('upload keeps uploaded files for single and multiple mode', () => {
       const uploadFilesSpy = sinon.spy(element, 'uploadFiles');
       const firstFile = { name: 'f1.txt' };
@@ -294,6 +376,29 @@ suite('nuxeo-dropzone', () => {
       expect(element.hasFilesUploaded).to.eql(true);
       expect(legacyStub).to.have.been.calledOnce;
       expect(notifySpy.lastCall.args[0].message).to.eql('dropzone.uploaded');
+      notifySpy.restore();
+      legacyStub.restore();
+    });
+
+    test('importBatch does not report success when the document update conflicts', async () => {
+      const notifySpy = sinon.spy(element, 'notify');
+      const legacyStub = sinon.stub(element, '_legacyUpdateDocument').resolves(false);
+      element.xpath = 'file:content';
+      element.document = { uid: 'doc-1' };
+      element.files = [{ name: 'ok.txt', index: 0 }];
+      element.uploadedFiles = [{ name: 'ok.txt' }];
+      element.invalid = true;
+
+      await element.importBatch({
+        type: 'batchFinished',
+        stopPropagation: sinon.spy(),
+        detail: { batchId: 'batch-3' },
+      });
+
+      expect(legacyStub).to.have.been.calledOnce;
+      expect(notifySpy).to.not.have.been.called;
+      expect(element.invalid).to.eql(true);
+      expect(element.hasFilesUploaded).to.eql(true);
       notifySpy.restore();
       legacyStub.restore();
     });
@@ -398,6 +503,56 @@ suite('nuxeo-dropzone', () => {
       const after = getComputedStyle(label, '::after');
       expect(after.content.replace(/"/g, '')).to.equal('*');
       expect(after.color).to.equal(invalidColor);
+    });
+  });
+
+  // WEBUI-1820: the legacy dropzone update is a document write, so it takes part in optimistic locking
+  suite('optimistic locking', () => {
+    setup(() => {
+      element.updateDocument = true;
+      element.xpath = 'file:content';
+      element.document = {
+        uid: 'doc-1',
+        repository: 'default',
+        changeToken: '5-2',
+        properties: { 'file:content': { name: 'new.pdf' } },
+      };
+      sinon.stub(element, 'notify');
+      sinon.stub(element, 'fire');
+    });
+
+    teardown(() => {
+      element.notify.restore();
+      element.fire.restore();
+      if (element.$.doc.put.restore) {
+        element.$.doc.put.restore();
+      }
+    });
+
+    test('sends the change token of the loaded document', async () => {
+      sinon.stub(element.$.doc, 'put').resolves({ uid: 'doc-1' });
+      const succeeded = await element._legacyUpdateDocument();
+      expect(element.$.doc.data.changeToken).to.eql('5-2');
+      expect(succeeded).to.eql(true);
+    });
+
+    test('reports a conflict and reloads when the write is stale', async () => {
+      sinon.stub(element.$.doc, 'put').rejects({ status: 409 });
+      const succeeded = await element._legacyUpdateDocument();
+      expect(succeeded).to.eql(false);
+      expect(element.notify).to.have.been.calledOnce;
+      expect(element.notify.firstCall.args[0].message).to.eql(element.i18n('documentUpdate.conflict'));
+      expect(element.fire).to.have.been.calledWith('document-updated');
+    });
+
+    test('still rejects other failures', async () => {
+      sinon.stub(element.$.doc, 'put').rejects({ status: 500 });
+      let caught;
+      await element._legacyUpdateDocument().catch((err) => {
+        caught = err;
+      });
+      expect(caught).to.eql({ status: 500 });
+      expect(element.notify).to.not.have.been.called;
     });
   });
 });
