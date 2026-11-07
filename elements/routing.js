@@ -16,6 +16,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 import page from '@nuxeo/page/page.mjs';
+import { restoreQueryDelimiter } from './routing-url.js';
 
 const { app } = Nuxeo.UI;
 
@@ -296,6 +297,16 @@ app.router = {
     }
   },
 };
+
+// WEBUI-2376: a route restored by Nuxeo after authentication comes back with its `?` encoded as
+// `%3F`. Put the delimiter back before page.js dispatches, otherwise the initial route resolves to a
+// document path that does not exist. replaceState (not a hash assignment) so the corrected URL does
+// not add a history entry the user can go "back" into.
+const restoredHash = restoreQueryDelimiter(globalThis.location.hash);
+if (restoredHash) {
+  const { pathname, search } = globalThis.location;
+  globalThis.history.replaceState(globalThis.history.state, '', `${pathname}${search}${restoredHash}`);
+}
 
 // Register the router (above) before starting page.js. Starting page.js dispatches the initial
 // route, which triggers the first document fetch and renders the first page. `navigateTo`/`urlFor`
