@@ -64,14 +64,18 @@ function encodeQueryParams(path) {
 // flagged as default — but only when the path is actually under that base, so an
 // arbitrary same-origin URL is not misclassified as the default repository.
 function repositoryNameForPath(pathname) {
-  const repositories = Nuxeo?.UI?.repositories || [];
+  const repositories = (Nuxeo && Nuxeo.UI && Nuxeo.UI.repositories) || [];
   const current = repositories.find((repo) => repo.href && pathname.startsWith(repo.href));
   if (current) {
     return current.name;
   }
   const base = (app.baseUrl || '').replace(/\/$/, '');
   const underBase = !base || pathname === base || pathname.startsWith(`${base}/`);
-  return underBase ? repositories.find((repo) => repo.isDefault)?.name : undefined;
+  if (!underBase) {
+    return undefined;
+  }
+  const defaultRepository = repositories.find((repo) => repo.isDefault);
+  return defaultRepository != null ? defaultRepository.name : undefined;
 }
 
 // Convenience wrapper for the pathname currently being browsed.
@@ -132,7 +136,10 @@ page('/browse', () => {
 });
 
 // /browse/<path>@<action>
-page(/\/browse\/([\s\S]*)?/, (data) => {
+// Anchored so that `/browse/` is only recognised at the start of the route, matching the
+// other regex route below. Unanchored, a path such as `/admin/browse/x` matched here and
+// was loaded as a browse path, because page() tries routes in registration order.
+page(/^\/browse\/([\s\S]*)/, (data) => {
   if (!data.state.contentView) {
     app.currentContentView = null;
   }
@@ -210,20 +217,21 @@ app.router = {
   useHashbang: true,
 
   browse(path, subPage) {
-    return `/browse${
-      path
-        ? path
-            .split('/')
-            .map((n) => encodeURIComponent(n))
-            .join('/')
-        : ''
-    }${subPage ? `?p=${encodeURIComponent(subPage)}` : ''}`;
+    const encodedPath = path
+      ? path
+          .split('/')
+          .map((n) => encodeURIComponent(n))
+          .join('/')
+      : '';
+    const query = subPage ? `?p=${encodeURIComponent(subPage)}` : '';
+    return `/browse${encodedPath}${query}`;
   },
 
   document(idOrPath, subPage) {
     const isId = idOrPath && !idOrPath.startsWith('/');
     if (isId) {
-      return `/doc/${idOrPath}${subPage ? `?p=${encodeURIComponent(subPage)}` : ''}`;
+      const query = subPage ? `?p=${encodeURIComponent(subPage)}` : '';
+      return `/doc/${idOrPath}${query}`;
     }
     return app.router.browse(idOrPath, subPage);
   },
@@ -241,7 +249,8 @@ app.router = {
   },
 
   tasks(id) {
-    return `/tasks${typeof id === 'undefined' ? '' : `/${id}`}`;
+    const suffix = id === undefined ? '' : `/${id}`;
+    return `/tasks${suffix}`;
   },
 
   administration(tab) {

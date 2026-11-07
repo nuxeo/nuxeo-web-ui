@@ -27,7 +27,7 @@ limitations under the License.
 
     <!-- Full Text -->
     <nuxeo-input
-      role="widget"
+      data-widget
       id="searchInput"
       label="[[i18n('assetsSearch.fullText')]]"
       value="{{searchTerm}}"
@@ -40,7 +40,7 @@ limitations under the License.
     </nuxeo-input>
 
     <!-- Asset type -->
-    <div role="widget">
+    <div data-widget>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.system_primaryType_agg]]"
         value="{{params.system_primaryType_agg}}"
@@ -51,7 +51,7 @@ limitations under the License.
     </div>
 
     <!-- Asset format -->
-    <div role="widget">
+    <div data-widget>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.system_mimetype_agg]]"
         value="{{params.system_mimetype_agg}}"
@@ -62,7 +62,7 @@ limitations under the License.
     </div>
 
     <!-- Asset Width -->
-    <div role="widget">
+    <div data-widget>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.asset_width_agg]]"
         value="{{params.asset_width_agg}}"
@@ -73,7 +73,7 @@ limitations under the License.
     </div>
 
     <!-- Asset Height -->
-    <div role="widget">
+    <div data-widget>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.asset_height_agg]]"
         value="{{params.asset_height_agg}}"
@@ -84,7 +84,7 @@ limitations under the License.
     </div>
 
     <!-- Color Profile -->
-    <div role="widget">
+    <div data-widget>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.color_profile_agg]]"
         value="{{params.color_profile_agg}}"
@@ -95,7 +95,7 @@ limitations under the License.
     </div>
 
     <!-- Color Depth -->
-    <div role="widget">
+    <div data-widget>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.color_depth_agg]]"
         value="{{params.color_depth_agg}}"
@@ -106,7 +106,7 @@ limitations under the License.
     </div>
 
     <!-- Video Duration -->
-    <div role="widget">
+    <div data-widget>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.video_duration_agg]]"
         value="{{params.video_duration_agg}}"

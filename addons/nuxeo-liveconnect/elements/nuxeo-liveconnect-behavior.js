@@ -80,16 +80,16 @@ export const LiveConnectBehavior = {
       }
       try {
         origins.add(new URL(value, window.location.href).origin);
-      } catch {
+      } catch (e) {
         // not a resolvable URL, nothing to allow
       }
     };
-    const resource = this.$?.oauth2;
-    const connection = resource?.$?.nx;
-    addOrigin(connection?.url);
+    const resource = this.$ != null ? this.$.oauth2 : undefined;
+    const connection = resource != null && resource.$ != null ? resource.$.nx : undefined;
+    addOrigin(connection != null ? connection.url : undefined);
     try {
       addOrigin(new URL(url, window.location.href).searchParams.get('redirect_uri'));
-    } catch {
+    } catch (e) {
       // authorization URL not parseable, rely on the connection origin
     }
     return origins;
