@@ -312,6 +312,17 @@ function ticketHeading(config, key, severity, tail) {
   });
 }
 
+/** "1 High finding needs attention." / "2 Critical and 1 High findings need attention." (zero counts omitted). */
+export function attentionText(bySeverity) {
+  const parts = ['critical', 'high']
+    .filter((severity) => bySeverity[severity])
+    .map((severity) => `${bySeverity[severity]} ${titleCase(severity)}`);
+  const total = (bySeverity.critical ?? 0) + (bySeverity.high ?? 0);
+  return total === 1
+    ? `${parts.join(' and ')} finding needs attention.`
+    : `${parts.join(' and ')} findings need attention.`;
+}
+
 function findingBlocks(outcome) {
   const fresh = outcome.newBySeverity;
   const label = outcome.firstReconciliation ? 'Untriaged findings (first reconciliation)' : 'New findings';
@@ -323,7 +334,7 @@ function findingBlocks(outcome) {
   if (!fresh.critical && !fresh.high) {
     return [...blocks, block('No new Critical or High findings.')];
   }
-  const attention = `⚠️ **${fresh.critical ?? 0} Critical and ${fresh.high ?? 0} High finding(s) need attention.**`;
+  const attention = `⚠️ **${attentionText(fresh)}**`;
   return [
     ...blocks,
     ...(fresh.critical ? [] : [block('No new Critical findings.')]),

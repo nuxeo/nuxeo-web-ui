@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Executor, postTeams, summarize } from '../apply.mjs';
 import { OWNED_LABEL, OWNERSHIP_PROPERTY } from '../lib/reconcile.mjs';
-import { reportNeeded, runReport, teamsCard, ticketDescription } from '../lib/render.mjs';
+import { attentionText, reportNeeded, runReport, teamsCard, ticketDescription } from '../lib/render.mjs';
 import { ControlState, JOURNAL_PROPERTY } from '../lib/state.mjs';
 import { RUN, EL, WEB, blocked, bootstrapPlan, group, liveAlerts, registerTickets } from './fixtures.mjs';
 
@@ -420,7 +420,8 @@ test('Teams: High findings are highlighted, created tickets listed, FYI only aft
     teamsCard(baseOutcome({ newBySeverity: { high: 1, low: 1 }, groups: [created, held] }), teamsConfig),
   );
   assert.match(textBlocks, /No new Critical findings\./);
-  assert.match(textBlocks, /0 Critical and 1 High finding\(s\) need attention/);
+  assert.match(textBlocks, /1 High finding needs attention\./);
+  assert.doesNotMatch(textBlocks, /0 Critical and/);
   assert.match(textBlocks, /Tickets created · 2/);
   assert.match(
     textBlocks,
@@ -433,6 +434,16 @@ test('Teams: High findings are highlighted, created tickets listed, FYI only aft
     cardText(teamsCard(baseOutcome({ newBySeverity: { low: 1 }, groups: [held] }), teamsConfig)),
     /FYI: ELEMENTS-3001 was automatically put On Hold\./,
   );
+});
+
+test('Teams: the attention line names only nonzero Critical/High counts', () => {
+  assert.equal(attentionText({ high: 1 }), '1 High finding needs attention.');
+  assert.equal(attentionText({ critical: 1 }), '1 Critical finding needs attention.');
+  assert.equal(attentionText({ critical: 2, high: 1, medium: 4 }), '2 Critical and 1 High findings need attention.');
+  assert.equal(attentionText({ high: 3 }), '3 High findings need attention.');
+  const card = cardText(teamsCard(baseOutcome({ newBySeverity: { critical: 1 } }), teamsConfig));
+  assert.match(card, /1 Critical finding needs attention\./);
+  assert.doesNotMatch(card, /No new Critical findings/);
 });
 
 test('Teams: unchanged historical blockers (adoptions) are not repeated', () => {
