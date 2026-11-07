@@ -211,9 +211,14 @@ test('closed tickets are reported as mismatches, never targeted', () => {
   assert.equal(validatePlan(bootstrapArgs(reported, { tickets })).ok, true);
 });
 
-test('text that mentions an alert the group does not own is flagged', () => {
-  const plan = bootstrapPlan();
-  find(plan, 'WEBUI-2431').rationale = 'Same fix as alert 517 in the root lockfile.';
-  const result = validatePlan(bootstrapArgs(plan));
-  assert.ok(result.warnings.some((warning) => warning.code === 'text-mentions-unowned-alert'));
+test('ticket scope text that mentions an alert the group does not own is flagged; rationale context is not', () => {
+  const flagged = (plan) =>
+    validatePlan(bootstrapArgs(plan)).warnings.some((warning) => warning.code === 'text-mentions-unowned-alert');
+  const scope = bootstrapPlan();
+  find(scope, `${EL}:minimatch-globparts`).remediation = 'Also clears alert 295 in the same lockfile.';
+  assert.equal(flagged(scope), true);
+  const context = bootstrapPlan();
+  find(context, 'WEBUI-2430').rationale = 'Ftest alert 542 belongs to WEBUI-2384 and does not wait for this hold.';
+  find(context, `${EL}:minimatch-globparts`).rationale = 'Alert 295 is deepmerge and stays in ELEMENTS-2145.';
+  assert.equal(flagged(context), false);
 });

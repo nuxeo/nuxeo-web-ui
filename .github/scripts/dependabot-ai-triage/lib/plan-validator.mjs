@@ -295,8 +295,13 @@ function checkBlocker(ctx, group, owned, where) {
   }
 }
 
+// Only text that becomes ticket scope (summary, fix, acceptance) is checked; a rationale may legitimately say
+// which other ticket owns an alert, and adopt/keep text is never written to the ticket.
 function checkText(ctx, group, owned, where) {
-  const text = ['summary', 'remediation', 'rationale', 'updateNote', 'teamsLine']
+  if (group.operation !== 'create' && group.operation !== 'extend') {
+    return;
+  }
+  const text = ['summary', 'remediation', 'updateNote', 'teamsLine']
     .map((field) => group[field] ?? '')
     .concat(group.acceptanceCriteria ?? [])
     .join('\n');
