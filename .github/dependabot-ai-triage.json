@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "jiraSite": "https://hyland.atlassian.net",
+  "controlIssue": "WEBUI-2435",
+  "issueTypeId": "10004",
+  "severityField": "customfield_12201",
+  "severityOptions": { "critical": "13603", "high": "15789", "medium": "15790", "low": "15791" },
+  "priorityBySeverity": null,
+  "holdStatus": "On Hold",
+  "linkType": "Relates",
+  "labels": ["Security", "dependabot"],
+  "repositories": [
+    {
+      "name": "nuxeo/nuxeo-web-ui",
+      "project": "WEBUI",
+      "component": "Web UI",
+      "labels": ["WebUI"],
+      "branches": ["develop-2025", "develop-2023"]
+    },
+    {
+      "name": "nuxeo/nuxeo-elements",
+      "project": "ELEMENTS",
+      "component": "CI/CD",
+      "labels": ["WebUI", "nuxeo-elements"],
+      "branches": ["develop-2025", "develop-2023"]
+    }
+  ],
+  "timezone": "Asia/Kolkata",
+  "maxInventoryAgeHours": 3,
+  "copilot": { "cliVersion": "1.0.106", "model": "claude-sonnet-5.5", "timeoutMinutes": 20 },
+  "teams": {
+    "destination": "Nuxeo → WebUI - Collaboration",
+    "teamId": "ad255eac-ac6b-44d7-8387-32f432636f96",
+    "channelId": "19:0e6d8679473941c1b4f1b0e719eb4907@thread.tacv2"
+  }
+}
