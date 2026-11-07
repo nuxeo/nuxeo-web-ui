@@ -33,9 +33,6 @@ jobs:
     runs-on:
       group: medium-4cpu-runners
     steps:
-      - uses: catchpoint/workflow-telemetry-action@94c3c3d9567a0205de6da68a76c428ce4e769af1 # v2
-        with:
-          comment_on_pr: false
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can
       # access it and copies all sources into ZIP file for submitting for
       # analysis. Replace this section with your applications build steps

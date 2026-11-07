@@ -180,7 +180,7 @@ Polymer({
    */
   _ensureTaskParams() {
     const existing = this.$.tasksProvider.params;
-    if (existing?.userId) {
+    if (existing && existing.userId) {
       this._ensureTaskParamsPromise = null;
       return Promise.resolve();
     }
@@ -191,7 +191,7 @@ Polymer({
       .connect()
       .then((user) => {
         const current = this.$.tasksProvider.params;
-        if (!current?.userId && user?.id != null) {
+        if (!(current && current.userId) && (user != null ? user.id : undefined) != null) {
           this.$.tasksProvider.params = { ...current, userId: user.id };
         }
         this._ensureTaskParamsPromise = null;

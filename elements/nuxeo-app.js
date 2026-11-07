@@ -1096,8 +1096,8 @@ Polymer({
       this.$.task
         .get()
         .then((task) => {
-          const targetDoc = task?.targetDocumentIds?.[0];
-          if (task?.state === 'ended' && targetDoc?.uid) {
+          const targetDoc = task != null && task.targetDocumentIds != null ? task.targetDocumentIds[0] : undefined;
+          if ((task != null ? task.state : undefined) === 'ended' && targetDoc && targetDoc.uid) {
             this._loadDocument({ uid: targetDoc.uid, path: targetDoc.path, page: 'browse' }, { applyState: false })
               .then((doc) => {
                 this._navigateAfterTaskProcessed(doc);
@@ -1128,7 +1128,9 @@ Polymer({
       this.loading = false;
       return;
     }
-    const nextTaskId = doc.contextParameters?.pendingTasks?.find((task) => task?.id)?.id;
+    const pendingTasks = doc.contextParameters != null ? doc.contextParameters.pendingTasks : undefined;
+    const nextTask = pendingTasks != null ? pendingTasks.find((task) => task && task.id) : undefined;
+    const nextTaskId = nextTask != null ? nextTask.id : undefined;
     if (nextTaskId) {
       this.navigateTo('tasks', nextTaskId);
       return;
@@ -1139,20 +1141,28 @@ Polymer({
   },
 
   _handleTaskLoadError(error) {
-    if (error?.status === 403) {
+    if ((error != null ? error.status : undefined) === 403) {
       this._fetchTaskCount();
       this.navigateTo('tasks');
     } else {
-      this.showError(error?.status, this.i18n('browse.error'), error?.message);
+      this.showError(
+        error != null ? error.status : undefined,
+        this.i18n('browse.error'),
+        error != null ? error.message : undefined,
+      );
     }
     this.loading = false;
   },
 
   _handleDocumentRefreshError(err) {
-    if (err?.['entity-type'] === 'exception' && err.status === 403) {
+    if ((err != null ? err['entity-type'] : undefined) === 'exception' && err.status === 403) {
       this.navigateTo('tasks');
     } else {
-      this.showError(err?.status, this.i18n('browse.error'), err?.message);
+      this.showError(
+        err != null ? err.status : undefined,
+        this.i18n('browse.error'),
+        err != null ? err.message : undefined,
+      );
     }
     this.loading = false;
   },
@@ -1473,7 +1483,7 @@ Polymer({
   },
 
   _toggleDrawer(e) {
-    const selectedItemDetailSelected = e?.detail?.selected || 0;
+    const selectedItemDetailSelected = (e && e.detail && e.detail.selected) || 0;
     if (this._selected === selectedItemDetailSelected && this.drawerOpened) {
       requestAnimationFrame(() => {
         this._closeDrawer();
@@ -1502,7 +1512,7 @@ Polymer({
    * slotted item without a state until the first toggle.
    */
   _updateDrawerItemsAria() {
-    const menu = this.$?.menu;
+    const menu = this.$ != null ? this.$.menu : undefined;
     if (!menu) {
       return;
     }
@@ -1548,7 +1558,7 @@ Polymer({
   },
 
   _refreshAndFetchTasks(e) {
-    const taskProcessed = e?.type === 'workflowTaskProcessed';
+    const taskProcessed = (e != null ? e.type : undefined) === 'workflowTaskProcessed';
     // let's refresh the current document since it might have been changed (ex: state and version)
     if (this.currentDocument) {
       const loadOptions = taskProcessed ? { applyState: false } : {};
@@ -1639,7 +1649,7 @@ Polymer({
         result += user.properties.lastName;
       }
       if (result.length === 0) {
-        result = user.properties?.username || user.name || user.id;
+        result = (user.properties && user.properties.username) || user.name || user.id;
       }
       return result;
     }
@@ -2034,7 +2044,7 @@ Polymer({
    * timer fires, so setting that instead would be undone (WEBUI-1880).
    */
   _muteSnackbarLabel(toast) {
-    const label = toast.mdcRoot?.querySelector('.mdc-snackbar__label');
+    const label = toast.mdcRoot != null ? toast.mdcRoot.querySelector('.mdc-snackbar__label') : undefined;
     if (label) {
       label.setAttribute('aria-hidden', 'true');
     }
@@ -2049,7 +2059,7 @@ Polymer({
    * Narrator does not reliably observe live regions nested in shadow DOM.
    */
   _getAnnouncer() {
-    if (!this._announcer?.isConnected) {
+    if (!(this._announcer && this._announcer.isConnected)) {
       let announcer = document.getElementById(ANNOUNCER_ID);
       if (!announcer) {
         announcer = document.createElement('div');
@@ -2258,7 +2268,7 @@ Polymer({
    *     from re-entering `_updateIsNarrow` to avoid feedback loops.
    */
   _runLayoutNotify({ includeWindowResize = true } = {}) {
-    const drawerPanel = this.$?.drawerPanel;
+    const drawerPanel = this.$ != null ? this.$.drawerPanel : undefined;
     if (drawerPanel && typeof drawerPanel.notifyResize === 'function') {
       drawerPanel.notifyResize();
     }

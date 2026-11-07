@@ -29,3 +29,4 @@ This directory contains all Polymer 3 web components for Nuxeo Web UI.
 
 - Prettier: 120 chars, single quotes, trailing commas, semicolons
 - `Polymer` is a readonly global, `Nuxeo` is writable
+- Do not use `?.`, `??`, `catch { }` or other post-ES2019 syntax — the Designer catalog generator (`polymer-analyzer` 3.2.4) cannot parse it and drops the file and the elements it defines from the catalog (ESLint enforces this). Use `a && a.b` (truthiness only), `a != null ? a.b : undefined` (value used), an explicit `!= null` check instead of `??`, or `catch (e)`.

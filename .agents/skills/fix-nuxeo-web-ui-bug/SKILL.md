@@ -418,7 +418,9 @@ gh pr view <pr> --repo nuxeo/nuxeo-web-ui --json statusCheckRollup \
   fix on the branch, re-run the gate, push.
 - Known flake (e.g. `nuxeo-document-tree` "Tree should collapse…") that passes locally →
   re-run, don't "fix": `gh run rerun <run-id> --failed`.
-- Telemetry noise (`catchpoint/workflow-telemetry-action` 403s, Node-20 deprecation) is not a failure.
+- Node-20 deprecation warnings are noise, not a failure. A job that fails in seconds with
+  `Unable to resolve action ...` is **not** noise: an action the workflow depends on is gone, and no
+  re-run will fix it (`catchpoint/workflow-telemetry-action` was removed this way after it 404ed).
 - **Apply every post-PR change to both PRs.** Any fix after the PRs exist — review feedback
   (Copilot/Sonar/reviewers), CI fixes, follow-ups — must land on **every** base branch, not just one.
   Commit once (signed), cherry-pick the same commit onto each other base, re-run the gate, push, and
