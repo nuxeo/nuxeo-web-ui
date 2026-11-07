@@ -115,6 +115,39 @@ suite('entry-url', () => {
       );
     });
 
+    test('keeps a value that merely ends with the same text as the search string', () => {
+      // Only an appended copy that carries a credential is residue of the bug. Here `?lang=fr` is part
+      // of `q`, so it must survive intact while the outer parameter is still merged onto the route.
+      expect(
+        normalizeEntryUrl(location('/nuxeo/ui/', '?lang=fr', '#!/search/full?q=https://example.test/?lang=fr')),
+      ).to.equal('/nuxeo/ui/#!/search/full?q=https%3A%2F%2Fexample.test%2F%3Flang%3Dfr&lang=fr');
+    });
+
+    test('repairs an address that was revisited and so carries the appended query several times', () => {
+      // Each visit appended another copy. Removing only the last one left the tab name corrupted.
+      expect(
+        normalizeEntryUrl(
+          location(
+            '/nuxeo/ui/',
+            '?lang=fr&token=abc123',
+            '#!/doc/xyz?p=permissions?lang=fr&token=abc123?lang=fr&token=abc123',
+          ),
+        ),
+      ).to.equal('/nuxeo/ui/#!/doc/xyz?p=permissions&lang=fr');
+    });
+
+    test('recovers the tab name after the login redirect has cleared the query string', () => {
+      // With `location.search` gone there is no copy to strip, so the tab name is recovered from the
+      // parameter that swallowed the separator instead of being left as an invalid `permissions?lang=fr`.
+      expect(normalizeEntryUrl(location('/nuxeo/ui/', '', '#!/doc/xyz?p=permissions?lang=fr&token=abc123'))).to.equal(
+        '/nuxeo/ui/#!/doc/xyz?p=permissions&lang=fr',
+      );
+    });
+
+    test('leaves a question mark in the tab name alone when no credential is involved', () => {
+      expect(normalizeEntryUrl(location('/nuxeo/ui/', '', '#!/doc/xyz?p=permissions?lang=fr'))).to.be.null;
+    });
+
     test('keeps a percent-encoded question mark that is genuinely part of a value', () => {
       expect(normalizeEntryUrl(location('/nuxeo/ui/', '?token=abc123', '#!/search/full?q=why%3F'))).to.equal(
         '/nuxeo/ui/#!/search/full?q=why%3F',

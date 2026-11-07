@@ -56,33 +56,75 @@ const EMBEDDED_CREDENTIAL = new RegExp(`[?&](?:${CREDENTIAL_PARAMS.join('|')})=`
 const DUPLICATED_CREDENTIAL_SEPARATOR = new RegExp(String.raw`\?(?=(?:${CREDENTIAL_PARAMS.join('|')})=)`, 'g');
 
 /**
+ * The document tab, the only query parameter this app reads or writes (`nuxeo-browser._updateUrl`,
+ * `routing.js`). Its values are tab names, which never contain a `?`.
+ */
+const TAB_PARAM = 'p';
+
+/**
+ * When the query carries a credential, a `?` inside the tab name is the separator page.js lost when
+ * it appended `location.search`, even if the copy's own parameters came first (`p=permissions?lang=fr&token=t`).
+ * Keep the tab name that precedes it and treat what follows as the parameters it swallowed. Restricting
+ * this to the tab is deliberate: any other value may legitimately hold a `?`, and is left as data.
+ *
+ * @param {URLSearchParams} params the parsed query
+ * @return {URLSearchParams} `params`, with a tab name that swallowed a separator split back apart
+ */
+function recoverTab(params) {
+  const tab = params.get(TAB_PARAM);
+  if (tab === null || !tab.includes('?') || !CREDENTIAL_PARAMS.some((param) => params.has(param))) {
+    return params;
+  }
+  const separator = tab.indexOf('?');
+  const recovered = new URLSearchParams();
+  params.forEach((value, key) => {
+    if (key !== TAB_PARAM || value !== tab) {
+      recovered.append(key, value);
+      return;
+    }
+    // An empty name means nothing usable is left of the tab, so the route falls back to its default.
+    if (separator > 0) {
+      recovered.append(TAB_PARAM, tab.slice(0, separator));
+    }
+    new URLSearchParams(tab.slice(separator + 1)).forEach((v, k) => recovered.append(k, v));
+  });
+  return recovered;
+}
+
+/**
  * Parse a query string that a previous visit may already have corrupted. Users bookmark and
  * re-share the addresses this bug produced, so those shapes have to be repaired rather than carried
  * forward.
- */
-/**
+ *
  * Two limits are deliberate, because closing either costs more on the addresses that do occur than
- * it saves on the ones that do not. Every query parameter this app reads or writes is `p`, the
- * document tab (`nuxeo-browser._updateUrl`, `routing.js`), whose values are tab names.
+ * it saves on the ones that do not.
  *
  * - A `?<credential>=` inside a value that is genuinely data is treated as a lost separator. Only a
  *   parameter the app never writes could carry one; identifying residue by the credential's value
  *   instead stops a bookmark being repaired once the login redirect has cleared `location.search`.
  * - Repeated keys collapse to the first value. `URLSearchParams.get()` already returned that, and
  *   collapsing them is what folds the appended copies back into one clean address.
+ *
+ * @param {string} query the query string to parse, without its leading `?`
+ * @param {string} [appended] the `location.search` page.js may have appended to `query`, if known
+ * @return {URLSearchParams} the repaired parameters
  */
 function parseQuery(query, appended) {
   // page.js appended `location.search` verbatim, so while we still have that string the lost
   // separator is just the `?` that begins the literal copy - whatever order its parameters are in,
-  // and once per visit. Repair those first, then fall back to the credential heuristic below for a
-  // copy whose `location.search` the server's login redirect has since dropped.
+  // and once per visit. Remove every trailing copy outright: the caller merges the outer parameters
+  // back in once afterwards, so keeping them here would only duplicate them (and, by rewriting the
+  // copy's `?`, stop the next one from matching). Only a copy that carries a credential is residue of
+  // this bug; a value that merely ends with the same text (`q=https://x/?lang=fr`) is data.
   let repaired = query;
-  if (appended && appended.length > 1) {
+  if (appended && appended.length > 1 && EMBEDDED_CREDENTIAL.test(appended)) {
     while (repaired.endsWith(appended)) {
-      repaired = `${repaired.slice(0, -appended.length)}&${appended.slice(1)}`;
+      repaired = repaired.slice(0, -appended.length);
     }
   }
-  return new URLSearchParams(repaired.replace(DUPLICATED_CREDENTIAL_SEPARATOR, '&'));
+  // Otherwise fall back to the credential heuristic, for a copy whose `location.search` the server's
+  // login redirect has since dropped.
+  return recoverTab(new URLSearchParams(repaired.replace(DUPLICATED_CREDENTIAL_SEPARATOR, '&')));
 }
 
 /**
