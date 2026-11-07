@@ -80,5 +80,9 @@
 
     <!-- Client-side inactivity timeout (minutes) after which the session is ended and the user is sent to the timeout login page (login.jsp?nxtimeout=true); backed by nuxeo.conf session.timeout. Any value that is not a positive number (<= 0, or non-numeric such as NaN) disables the timer. -->
     <property name="org.nuxeo.web.ui.session.timeout">${session.timeout:=60}</property>
+
+    <!-- Nuxeo timezone setting -->
+    <property name="org.nuxeo.web.ui.timezone">${org.nuxeo.web.ui.timezone:=}</property>
+
   </extension>
 </component>
