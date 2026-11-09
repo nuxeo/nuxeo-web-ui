@@ -27,7 +27,8 @@ limitations under the License.
  *
  * It analyzes the same entry points as the generator, with the same analyzer, and fails when:
  *   - a file cannot be parsed or loaded (warning codes `parse-error` and `could-not-load`), or
- *   - an element or behavior that was lost this way before is no longer found.
+ *   - an element or behavior that was lost this way before is no longer found (a short safety net, see
+ *     EXPECTED_ELEMENTS; not the full catalog).
  *
  * Usage: node src/check-sources.js [web-ui-root]   (defaults to the repository this package lives in)
  */
@@ -49,7 +50,17 @@ const ALLOWED_FAILURES = [
   },
 ];
 
-// Elements and behaviors that went missing from the catalog in WEBUI-1922 / WEBUI-2418.
+// Second check, run after the main one. NOT the full catalog and NOT a count.
+//
+// The main check (SYNTAX_WARNINGS above) already covers every file the catalog reaches, with no list to
+// maintain. These names are a short safety net on top of it:
+//   - they prove the analysis really ran and found the important elements, so the check cannot pass
+//     without having analyzed anything (e.g. a broken install);
+//   - they catch an element that is lost without any parse warning, e.g. when its import is removed.
+// They are the elements and behaviors that went missing from the catalog in WEBUI-1922 / WEBUI-2418,
+// including nuxeo-search-form, nuxeo-app and nuxeo-results. Elements not listed here are still covered by
+// the main check. The total number of elements is only printed: adding or removing an element on purpose
+// must not break CI. Remove a name here only if that element is deliberately removed from Web UI.
 const EXPECTED_ELEMENTS = [
   'nuxeo-announcement-banner',
   'nuxeo-announcement-management',
@@ -165,11 +176,15 @@ async function main() {
   const missingBehaviors = EXPECTED_BEHAVIORS.filter((name) => !behaviors.has(name));
 
   info(`Analyzed ${sourcePaths.length} catalog entry points in ${Date.now() - started} ms:`);
-  info(`  ${elements.size} elements, ${behaviors.size} behaviors`);
+  info(`  ${elements.size} elements, ${behaviors.size} behaviors found (total for information only, not checked)`);
+  info(
+    `  safety net: ${EXPECTED_ELEMENTS.length - missingElements.length}/${EXPECTED_ELEMENTS.length} key elements, ` +
+      `${EXPECTED_BEHAVIORS.length - missingBehaviors.length}/${EXPECTED_BEHAVIORS.length} key behaviors present`,
+  );
   allowed.forEach((a) => info(`  allowed: ${a.file} (${a.reason})`));
 
   if (!failures.size && !missingElements.length && !missingBehaviors.length) {
-    info('OK: every file parses and every expected element and behavior is found.');
+    info('OK: every file the catalog reaches parses, and every key element and behavior is present.');
     return 0;
   }
 
@@ -184,10 +199,10 @@ async function main() {
     });
   }
   if (missingElements.length) {
-    console.error(`\nExpected elements not found: ${missingElements.join(', ')}`);
+    console.error(`\nKey elements missing (safety net): ${missingElements.join(', ')}`);
   }
   if (missingBehaviors.length) {
-    console.error(`\nExpected behaviors not found: ${missingBehaviors.join(', ')}`);
+    console.error(`\nKey behaviors missing (safety net): ${missingBehaviors.join(', ')}`);
   }
   console.error(
     '\nThe Designer catalog would lose these files and the elements they define (WEBUI-2418). Rewrite syntax ' +
