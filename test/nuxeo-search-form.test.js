@@ -239,13 +239,25 @@ suite('nuxeo-search-form', () => {
       const tabs = $('#viewTabs');
       expect(tabs.selected).to.equal('filters');
       expect($('#toogleFilter').getAttribute('aria-selected')).to.equal('true');
-      expect($('.view-tabs').classList.contains('queue-view')).to.be.false;
 
       searchForm.queue = true;
       await flush();
       expect(tabs.selected).to.equal('queue');
       expect($('#toogleQueue').getAttribute('aria-selected')).to.equal('true');
-      expect($('.view-tabs').classList.contains('queue-view')).to.be.true;
+      expect($('#toogleFilter').getAttribute('aria-selected')).to.equal('false');
+    });
+
+    test('the unselected tab is styled the same in both views', async () => {
+      const criteria = $('#toogleFilter');
+      const queue = $('#toogleQueue');
+      const look = (tab) => {
+        const style = getComputedStyle(tab);
+        return [style.borderTopStyle, style.borderRadius, style.marginTop, style.height].join('|');
+      };
+      const queueUnselected = look(queue);
+      searchForm.queue = true;
+      await flush();
+      expect(look(criteria)).to.equal(queueUnselected);
     });
 
     test('choosing the queue tab calls the existing queue toggle', () => {
@@ -337,7 +349,7 @@ suite('nuxeo-search-form', () => {
       await flush();
       const tabs = queueForm.shadowRoot.querySelector('#viewTabs');
       expect(tabs.selected).to.equal('queue');
-      expect(queueForm.shadowRoot.querySelector('.view-tabs').classList.contains('queue-view')).to.be.true;
+      expect(queueForm.shadowRoot.querySelector('#toogleQueue').getAttribute('aria-selected')).to.equal('true');
     });
 
     test('a queue only form keeps its title and shows no tabs or saved search', async () => {
@@ -395,8 +407,6 @@ suite('nuxeo-search-form', () => {
     test('computes the view tab bindings', () => {
       expect(searchForm._computeSelectedView(true)).to.equal('queue');
       expect(searchForm._computeSelectedView(false)).to.equal('filters');
-      expect(searchForm._computeViewTabsClass(true)).to.equal('queue-view');
-      expect(searchForm._computeViewTabsClass(false)).to.equal('');
       expect(searchForm._computeContainerClass(true)).to.equal('');
       expect(searchForm._computeContainerClass(false)).to.equal('with-view-tabs');
       expect(searchForm._computePanelRole(true)).to.be.null;
