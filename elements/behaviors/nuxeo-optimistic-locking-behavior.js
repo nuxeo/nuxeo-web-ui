@@ -42,7 +42,7 @@ export const NuxeoOptimisticLockingBehavior = {
    */
   withChangeToken(data, doc) {
     const source = doc || this.document;
-    if (source?.changeToken) {
+    if (source && source.changeToken) {
       data.changeToken = source.changeToken;
     }
     return data;
