@@ -352,6 +352,44 @@ suite('nuxeo-search-form', () => {
       expect(root.querySelector('#actionsDropdown')).to.be.null;
       expect(root.querySelector('#search-container').classList.contains('with-view-tabs')).to.be.false;
       expect(root.querySelector('.header h1').textContent.trim()).to.equal('Queue');
+      // Without tabs the views are plain containers, and the queue keeps its list semantics.
+      ['#filters', '#queue'].forEach((selector) => {
+        expect(root.querySelector(selector).hasAttribute('role')).to.be.false;
+        expect(root.querySelector(selector).hasAttribute('aria-labelledby')).to.be.false;
+      });
+      expect(root.querySelector('#list').getAttribute('role')).to.equal('list');
+    });
+
+    test('each tab controls its view, which is labelled by the tab', () => {
+      expect($('#viewTabs').getAttribute('role')).to.equal('tablist');
+      [
+        ['#toogleFilter', 'filters'],
+        ['#toogleQueue', 'queue'],
+      ].forEach(([tabSelector, panelId]) => {
+        const tab = $(tabSelector);
+        expect(tab.getAttribute('role')).to.equal('tab');
+        expect(tab.getAttribute('aria-controls')).to.equal(panelId);
+        const panel = searchForm.shadowRoot.getElementById(panelId);
+        expect(panel.getAttribute('role')).to.equal('tabpanel');
+        expect(panel.getAttribute('aria-labelledby')).to.equal(tab.id);
+      });
+      // The list role moved from the queue container to the data list inside the queue panel.
+      expect($('#queue #list').getAttribute('role')).to.equal('list');
+    });
+
+    test('labels use the drawer text color and the selected one is told apart by weight', async () => {
+      const criteria = $('#toogleFilter');
+      const queue = $('#toogleQueue');
+      // Selected and unselected labels share one color, so selection never relies on the primary color.
+      expect(getComputedStyle(criteria).color).to.equal(getComputedStyle(queue).color);
+      expect(Number(getComputedStyle(criteria).fontWeight)).to.be.greaterThan(
+        Number(getComputedStyle(queue).fontWeight),
+      );
+      searchForm.queue = true;
+      await flush();
+      expect(Number(getComputedStyle(queue).fontWeight)).to.be.greaterThan(
+        Number(getComputedStyle(criteria).fontWeight),
+      );
     });
 
     test('computes the view tab bindings', () => {
@@ -361,6 +399,10 @@ suite('nuxeo-search-form', () => {
       expect(searchForm._computeViewTabsClass(false)).to.equal('');
       expect(searchForm._computeContainerClass(true)).to.equal('');
       expect(searchForm._computeContainerClass(false)).to.equal('with-view-tabs');
+      expect(searchForm._computePanelRole(true)).to.be.null;
+      expect(searchForm._computePanelRole(false)).to.equal('tabpanel');
+      expect(searchForm._computePanelLabel(true, 'toogleQueue')).to.be.null;
+      expect(searchForm._computePanelLabel(false, 'toogleQueue')).to.equal('toogleQueue');
     });
   });
 

@@ -150,7 +150,7 @@ Polymer({
         padding: 0 8px;
         box-sizing: border-box;
         font-size: 0.95rem;
-        font-weight: 600;
+        font-weight: 500;
         color: var(--nuxeo-drawer-text);
       }
 
@@ -158,12 +158,16 @@ Polymer({
         border-inline-start: 1px solid var(--divider-color);
       }
 
+      /* The labels keep the drawer text color, which has enough contrast in every theme, so the selected tab is
+         told apart by its weight and the selection bar rather than by color alone. */
       .view-tabs paper-tab.iron-selected {
-        color: var(--nuxeo-primary-color);
+        font-weight: 700;
       }
 
+      /* Dark themes define a bright focus outline; elsewhere fall back to the drawer text color. */
       .view-tabs paper-tab:focus-visible {
-        @apply --hyland-focus-ring;
+        outline: var(--nuxeo-focus-outline, 2px solid var(--nuxeo-drawer-text));
+        outline-offset: -2px;
       }
 
       .view-tabs iron-icon {
@@ -187,8 +191,7 @@ Polymer({
       }
 
       .view-tabs.queue-view paper-tab.search-criteria-tab:hover {
-        border-color: var(--nuxeo-primary-color);
-        color: var(--nuxeo-primary-color);
+        box-shadow: inset 0 0 0 1px var(--nuxeo-drawer-text);
       }
 
       nuxeo-select {
@@ -405,11 +408,11 @@ Polymer({
             selected="[[_computeSelectedView(queue)]]"
             on-iron-activate="_viewTabActivated"
           >
-            <paper-tab id="toogleFilter" name="filters" class="search-criteria-tab">
+            <paper-tab id="toogleFilter" name="filters" class="search-criteria-tab" aria-controls="filters">
               <iron-icon icon="nuxeo:filter"></iron-icon>
               <span class="ellipsis">[[i18n('searchForm.searchCriteria')]]</span>
             </paper-tab>
-            <paper-tab id="toogleQueue" name="queue" class="queue-tab">
+            <paper-tab id="toogleQueue" name="queue" class="queue-tab" aria-controls="queue">
               <iron-icon icon="nuxeo:view-list"></iron-icon>
               <span class="ellipsis">[[i18n('searchForm.queue')]]</span>
             </paper-tab>
@@ -439,7 +442,13 @@ Polymer({
       </div>
 
       <div class$="content [[_computeDisplayAutoControl(displayAutoControl)]]">
-        <div id="filters" class="filters loadable" hidden$="{{queue}}">
+        <div
+          id="filters"
+          class="filters loadable"
+          hidden$="{{queue}}"
+          role$="[[_computePanelRole(onlyQueue)]]"
+          aria-labelledby$="[[_computePanelLabel(onlyQueue, 'toogleFilter')]]"
+        >
           <nuxeo-search-form-layout
             id="layout"
             provider="[[provider]]"
@@ -451,7 +460,14 @@ Polymer({
           <paper-spinner-lite active$="[[loading]]" hidden$="[[!loading]]"></paper-spinner-lite>
         </div>
 
-        <div id="queue" hidden$="{{!queue}}" role="list">
+        <!-- Each view is the panel of its tab. Queue only forms render no tabs, so their views stay plain
+             containers. The list role sits on the data list, so the queue keeps its list semantics. -->
+        <div
+          id="queue"
+          hidden$="{{!queue}}"
+          role$="[[_computePanelRole(onlyQueue)]]"
+          aria-labelledby$="[[_computePanelLabel(onlyQueue, 'toogleQueue')]]"
+        >
           <template is="dom-if" if="[[_displayQuickFilters(_quickFilters)]]">
             <nuxeo-quick-filters quick-filters="{{_quickFilters}}" on-quick-filters-changed="refresh">
             </nuxeo-quick-filters>
@@ -459,6 +475,7 @@ Polymer({
           <nuxeo-data-list
             nx-provider="provider"
             id="list"
+            role="list"
             selected-item="{{selectedDocument}}"
             empty-label="[[i18n('searchForm.queue.noResults')]]"
             empty-label-when-filtered
@@ -1002,6 +1019,14 @@ Polymer({
 
   _computeContainerClass(onlyQueue) {
     return onlyQueue ? '' : 'with-view-tabs';
+  },
+
+  _computePanelRole(onlyQueue) {
+    return onlyQueue ? null : 'tabpanel';
+  },
+
+  _computePanelLabel(onlyQueue, tabId) {
+    return onlyQueue ? null : tabId;
   },
 
   _computedClass(isSelected) {
