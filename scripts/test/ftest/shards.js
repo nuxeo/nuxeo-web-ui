@@ -136,13 +136,19 @@ const SHARDS = [
  */
 function matrixShards(relativePath) {
   const lines = fs.readFileSync(path.join(REPO_ROOT, relativePath), 'utf8').split('\n');
-  const start = lines.findIndex((line) => /^\s*shard:/.test(line));
+  /*
+   * `shard:` is the matrix key itself, which ftest.yaml writes literally. cross-repo.yaml sizes its
+   * matrix at run time from a probe job, so the literal list lives in `FTEST_SHARDS` instead and
+   * the matrix reads an expression; the intended shards are still stated statically, which is all
+   * this check needs. A workflow declaring neither is reported rather than assumed correct.
+   */
+  const start = lines.findIndex((line) => /^\s*(shard|FTEST_SHARDS):/.test(line));
   if (start === -1) {
     return null;
   }
 
-  // `shard: [1, 2, 3, 4]`
-  const inline = /^\s*shard:\s*\[([^\]]*)\]/.exec(lines[start]);
+  // `shard: [1, 2, 3, 4]` or `FTEST_SHARDS: '[1, 2, 3, 4]'`
+  const inline = /^\s*(?:shard|FTEST_SHARDS):\s*'?\[([^\]]*)\]/.exec(lines[start]);
   let items;
   if (inline) {
     items = inline[1].split(',');
