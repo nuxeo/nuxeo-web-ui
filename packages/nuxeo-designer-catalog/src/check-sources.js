@@ -33,6 +33,7 @@ limitations under the License.
  */
 const fs = require('node:fs');
 const path = require('node:path');
+const { fileURLToPath } = require('node:url');
 const { Analyzer, Analysis, FsUrlLoader, PackageUrlResolver } = require('polymer-analyzer');
 
 const catalogPackages = require('../data/applications/nuxeo/2023.0/catalog-packages.json');
@@ -97,7 +98,8 @@ const { sourcePaths } = catalogPackages.packages.find((pkg) => pkg.isApplication
 
 const info = (message) => process.stdout.write(`${message}\n`);
 
-const toRepoPath = (url) => path.relative(root, decodeURIComponent(new URL(url).pathname));
+// Forward slashes on every OS, so paths match ALLOWED_FAILURES and read the same in CI and locally.
+const toRepoPath = (url) => path.relative(root, fileURLToPath(url)).split(path.sep).join('/');
 
 // A `could-not-load` warning is reported on the import statement of the importing file. Find the import it
 // belongs to, so the file that actually failed to parse can be named.
