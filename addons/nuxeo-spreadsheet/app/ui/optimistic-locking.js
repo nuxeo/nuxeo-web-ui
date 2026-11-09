@@ -16,7 +16,7 @@ const CONFLICT_STATUS = 409;
  * submitted, not when it is built, or the next write is rejected as a stale one of our own.
  */
 export function stampChangeToken(dirtyDocument, document) {
-  if (document?.changeToken) {
+  if (document && document.changeToken) {
     dirtyDocument.changeToken = document.changeToken;
   }
   return dirtyDocument;
@@ -40,7 +40,7 @@ export function createDirtyDocument(document) {
  * that same row would be rejected as a stale write even though nobody else touched it.
  */
 export function applySavedChangeToken(document, response) {
-  if (document && response?.changeToken) {
+  if (document && response && response.changeToken) {
     document.changeToken = response.changeToken;
   }
 }
@@ -55,7 +55,7 @@ export function applySavedChangeToken(document, response) {
  * recognisable at all; `status` is kept for a caller that already unwrapped it.
  */
 function saveErrorStatus(error) {
-  return error?.status || error?.response?.status;
+  return (error && error.status) || (error && error.response && error.response.status);
 }
 
 export function markSaveError(dirtyDocument, error) {
