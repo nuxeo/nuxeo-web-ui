@@ -32,7 +32,7 @@ limitations under the License.
 
     <nuxeo-resource id="user" path="/user"></nuxeo-resource>
 
-    <div role="widget" class="participants">
+    <div data-widget class="participants">
       <label>[[i18n('wf.serialDocumentReview.participants')]]</label>
       <template is="dom-if" if="[[_hasActorType(task.variables.participants, 'group')]]">
         <nuxeo-tags type="group" items="[[_getActorsByType(task.variables.participants, 'group')]]"></nuxeo-tags>
@@ -42,13 +42,13 @@ limitations under the License.
       </template>
     </div>
 
-    <div role="widget">
+    <div data-widget>
       <label>[[i18n('wf.serialDocumentReview.initiatorComment')]]</label>
       <div>[[task.variables.initiatorComment]]</div>
     </div>
 
     <nuxeo-textarea
-      role="widget"
+      data-widget
       label="[[i18n('wf.serialDocumentReview.comment')]]"
       value="{{task.variables.comment}}"
       always-float-label

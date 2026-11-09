@@ -10,7 +10,7 @@
 Nuxeo Web UI is the standard web application for the Nuxeo content services platform, built with **Polymer 3** (mostly legacy `Polymer({…})` factory pattern) and backed by the **@nuxeo/nuxeo-elements** library of web components. Licensed Apache 2.0, owned by Hyland Software.
 
 - **Runtime**: Browser (no server-side JS in production)
-- **Node**: ≥ 18
+- **Node**: ≥ 22.13 (CI runs 24)
 - **Build**: Webpack 5
 - **Package manager**: npm (no yarn/pnpm)
 - **Java**: 17 (Maven wraps the frontend build for marketplace packaging)
@@ -46,20 +46,20 @@ scripts/              → Build helpers (merge-messages.js, test/unit/, test/fte
 
 ## Commands
 
-| Task | Command | Notes |
-|---|---|---|
-| Install | `npm install` | Also runs `check-engine` and installs sub-packages |
-| Dev server | `npm start` | Webpack dev server at `:5000`, proxies to Nuxeo at `NUXEO_HOST` (default `localhost:8080`) |
-| Lint | `npm run lint` | ESLint (flat config) + Prettier check |
-| Format | `npm run format` | Prettier write → ESLint fix |
-| Unit tests | `npm test` | Web Test Runner + Chrome headless; 1 runner file, all suites via `test/load-all-tests.js` |
-| Unit tests (watch) | `npm run test:watch` | Auto-rerun on changes (no coverage) |
-| Functional tests | `npm run ftest` | WebdriverIO + Cucumber, requires running Nuxeo server |
-| Production build | `npm run build` | Output in `dist/` |
-| Bundle analysis | `npm run build:analyze` | Webpack bundle analyzer |
-| Maven full build | `mvn clean install` | Builds marketplace ZIP |
-| Maven + ftests | `mvn clean install -Pftest` | Builds + runs functional tests |
-| Link nuxeo-elements | See `.github/skills/link-nuxeo-elements/SKILL.md` | Manual symlinks for `node_modules/@nuxeo/*` → sibling `nuxeo-elements` repo |
+| Task                | Command                                           | Notes                                                                                      |
+| ------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Install             | `npm install`                                     | Also runs `check-engine` and installs sub-packages                                         |
+| Dev server          | `npm start`                                       | Webpack dev server at `:5000`, proxies to Nuxeo at `NUXEO_HOST` (default `localhost:8080`) |
+| Lint                | `npm run lint`                                    | ESLint (flat config) + Prettier check                                                      |
+| Format              | `npm run format`                                  | Prettier write → ESLint fix                                                                |
+| Unit tests          | `npm test`                                        | Web Test Runner + Chrome headless; 1 runner file, all suites via `test/load-all-tests.js`  |
+| Unit tests (watch)  | `npm run test:watch`                              | Auto-rerun on changes (no coverage)                                                        |
+| Functional tests    | `npm run ftest`                                   | WebdriverIO + Cucumber, requires running Nuxeo server                                      |
+| Production build    | `npm run build`                                   | Output in `dist/`                                                                          |
+| Bundle analysis     | `npm run build:analyze`                           | Webpack bundle analyzer                                                                    |
+| Maven full build    | `mvn clean install`                               | Builds marketplace ZIP                                                                     |
+| Maven + ftests      | `mvn clean install -Pftest`                       | Builds + runs functional tests                                                             |
+| Link nuxeo-elements | See `.github/skills/link-nuxeo-elements/SKILL.md` | Manual symlinks for `node_modules/@nuxeo/*` → sibling `nuxeo-elements` repo                |
 
 ## Coding Conventions
 
@@ -76,6 +76,7 @@ scripts/              → Build helpers (merge-messages.js, test/unit/, test/fte
 - **ESLint**: Flat config (`eslint.config.mjs`), `eslint-plugin-html` for `.html` files, `eslint-plugin-wc` for web component rules
 - **Max line length**: 120 characters
 - **`Polymer` global**: Declared as `readonly` in ESLint; `Nuxeo` is `writable`
+- **No `?.`, `??`, `catch { }`, `||=`/`&&=`/`??=`, class fields, private `#` members or other post-ES2019 syntax** in `elements/`, `addons/`, `themes/`, `i18n/`, `index.js` or `legacy.js` — the Designer catalog generator (`polymer-analyzer` 3.2.4) cannot parse it and drops the file and the elements it defines from the catalog. ESLint (`no-restricted-syntax`) enforces it. Use `a && a.b` (truthiness only), `a != null ? a.b : undefined` (value used), an explicit `!= null` check instead of `??`, or `catch (e)`.
 - Run `npm run format` before committing (enforced by husky + lint-staged).
 
 ### Naming
@@ -139,13 +140,13 @@ See `.github/skills/link-nuxeo-elements/SKILL.md` for full details and custom pa
 
 ## Environment Variables
 
-| Variable | Purpose |
-|---|---|
-| `NUXEO_URL` | Nuxeo server URL for Web UI (default: `/nuxeo`) |
-| `NUXEO_HOST` | Dev server proxy target (default: `localhost:8080`) |
-| `NUXEO_PACKAGES` | Space/comma-separated list of addon packages to bundle |
-| `NUXEO_ELEMENTS_DIR` | Convenience shell variable for the manual nuxeo-elements symlink procedure; not read by the app/build tooling |
-| `NUXEO_WEB_UI_VERSION` | Docker image version tag |
-| `NUXEO_VERSION` | Nuxeo server Docker image version |
-| `NUXEO_DEV_MODE` | Enable Nuxeo dev mode in Docker |
-| `NUXEO_CLID` | Nuxeo license key for Docker |
+| Variable               | Purpose                                                                                                       |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `NUXEO_URL`            | Nuxeo server URL for Web UI (default: `/nuxeo`)                                                               |
+| `NUXEO_HOST`           | Dev server proxy target (default: `localhost:8080`)                                                           |
+| `NUXEO_PACKAGES`       | Space/comma-separated list of addon packages to bundle                                                        |
+| `NUXEO_ELEMENTS_DIR`   | Convenience shell variable for the manual nuxeo-elements symlink procedure; not read by the app/build tooling |
+| `NUXEO_WEB_UI_VERSION` | Docker image version tag                                                                                      |
+| `NUXEO_VERSION`        | Nuxeo server Docker image version                                                                             |
+| `NUXEO_DEV_MODE`       | Enable Nuxeo dev mode in Docker                                                                               |
+| `NUXEO_CLID`           | Nuxeo license key for Docker                                                                                  |

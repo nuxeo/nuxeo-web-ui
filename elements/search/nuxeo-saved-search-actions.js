@@ -171,6 +171,6 @@ Polymer({
   },
 
   _hasPermissions() {
-    return this.searchDoc ? this.searchDoc.contextParameters.permissions.indexOf('WriteProperties') > -1 : false;
+    return this.searchDoc ? this.searchDoc.contextParameters.permissions.includes('WriteProperties') : false;
   },
 });

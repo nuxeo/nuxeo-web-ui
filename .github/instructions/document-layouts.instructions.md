@@ -42,7 +42,7 @@ These use `<dom-module>` with inline `<script>`. The `Polymer` and `Nuxeo` globa
         @apply --paper-card;
       }
     </style>
-    <nuxeo-document-viewer role="widget" document="[[document]]"></nuxeo-document-viewer>
+    <nuxeo-document-viewer data-widget document="[[document]]"></nuxeo-document-viewer>
   </template>
 
   <script>
@@ -90,7 +90,7 @@ Polymer({
 
 - **Behavior**: Always use `Nuxeo.LayoutBehavior` — it provides `document`, `i18n`, and layout lifecycle methods
 - **Document binding**: Properties are bound to `document.properties['schema:field']` via `[[document.properties.dc:title]]` or `{{document.properties.dc:title}}`
-- **Widgets**: Use `role="widget"` attribute on form fields so the layout system can discover them
+- **Widgets**: Use the `data-widget` attribute on form fields so the layout system can discover them. The older `role="widget"` marker is still supported and existing layouts keep working, but it is not a valid ARIA role, so new layouts must use `data-widget` (see WEBUI-2229)
 - **Two-way binding**: Edit and create layouts use `{{...}}` for form fields; view and metadata layouts use `[[...]]`
 - **Nuxeo elements**: Use `<nuxeo-input>`, `<nuxeo-textarea>`, `<nuxeo-date-picker>`, `<nuxeo-select>`, `<nuxeo-directory-suggestion>`, `<nuxeo-user-suggestion>`, `<nuxeo-tag-suggestion>` for form fields
 - **JSDoc `@doctype`**: The `@doctype` annotation in the `document` property declaration associates the layout with a document type

@@ -118,6 +118,29 @@
   </template>
 </nuxeo-slot-content>
 
+<nuxeo-slot-content name="adminAnnouncementMenuItem" slot="ADMINISTRATION_MENU" order="70">
+  <template>
+    <nuxeo-filter user="[[user]]" expression="user.isAdministrator">
+      <template>
+        <nuxeo-menu-item
+          name="announcement"
+          label="announcementManagement.heading"
+          route="administration:announcement"
+        ></nuxeo-menu-item>
+      </template>
+    </nuxeo-filter>
+  </template>
+</nuxeo-slot-content>
+<nuxeo-slot-content name="adminAnnouncementPage" slot="ADMINISTRATION_PAGES" order="70">
+  <template>
+    <nuxeo-filter user="[[user]]" expression="user.isAdministrator">
+      <template>
+        <nuxeo-announcement-management name="announcement" id="announcement"></nuxeo-announcement-management>
+      </template>
+    </nuxeo-filter>
+  </template>
+</nuxeo-slot-content>
+
 <!-- ANALYTICS -->
 
 <nuxeo-slot-content name="analyticsDocumentDistributionItem" slot="ANALYTICS_ITEMS" order="10">

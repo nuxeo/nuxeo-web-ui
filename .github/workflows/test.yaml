@@ -31,10 +31,6 @@ jobs:
       contents: read
 
     steps:
-      - uses: catchpoint/workflow-telemetry-action@94c3c3d9567a0205de6da68a76c428ce4e769af1 # v2
-        with:
-          comment_on_pr: false
-
       - uses: actions/checkout@v6
         with:
           # Honour an explicit workflow_call branch. Empty on pull_request, which leaves
@@ -45,7 +41,7 @@ jobs:
         with:
           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
           scope: '@nuxeo'
-          node-version: 22
+          node-version: 24
 
       - name: Cache npm dependencies
         uses: actions/cache@v5
@@ -105,7 +101,7 @@ jobs:
           # Both repositories generate sync/<release>-to-<dev> from the same template, so a match
           # on that name means "a workflow made one here too", not "the paired work lives here".
           # Pairing on it would test the merged dev work against the other repo's release snapshot.
-          case "$HEAD_REF" in sync/*) HEAD_REF="" ;; esac
+          case "$HEAD_REF" in sync/*) HEAD_REF="" ;; *) ;; esac
           # Queried as a full ref: ls-remote matches patterns against the tail of a ref name,
           # so a bare "fix/foo" would also match a branch called "feature/fix/foo" and we would
           # then try to check out a branch that does not exist.
