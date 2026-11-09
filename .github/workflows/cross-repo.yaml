@@ -60,6 +60,11 @@ env:
   # so that matched until now; a develop-20XX run would have been sent to released code.
   REFERENCE_BRANCH: ${{ github.ref_name }}
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
+  # The shard list, kept here as a literal rather than inlined in the matrix because the matrix is
+  # sized at run time by the `probe` job and `scripts/test/ftest/shards.js --check` has to be able
+  # to read the intended shards statically to cross-check them against the manifest. `probe` either
+  # passes this through or replaces it with the single `serial` arm; it never invents numbers.
+  FTEST_SHARDS: '[1, 2, 3, 4]'
 
 jobs:
   # The ONLY job name the Elements side depends on. nuxeo/ui-team-gh-actions/trigger-workflow
@@ -78,6 +83,83 @@ jobs:
       - env:
           CALLER_ID: ${{ github.event.inputs.caller_id }}
         run: echo "run identifier $CALLER_ID"
+
+  # Sharding needs two things from the Web UI checkout, and the checkout is not necessarily this
+  # branch: `pick_nuxeo_web_ui_branch` below selects a same-named branch when one exists and
+  # otherwise falls back to the line's release branch. `maintenance-3.1.x` and `lts-2025` have
+  # neither `scripts/test/ftest/shards.js` nor `FTEST_SPECS` handling in `wdio.conf.js` until the
+  # dev-to-release merge carries them over, and the Elements cross-repo check dispatches against
+  # those refs as well as the dev ones. Sharding such a checkout unconditionally would fail every
+  # shard on the missing helper - and supplying only the helper would be worse, because without
+  # `FTEST_SPECS` each shard silently runs all 46 features.
+  #
+  # So probe the checkout and let the matrix size follow: four shards where both capabilities are
+  # present, one unsharded run where they are not. Once both release branches have the sharding this
+  # job always reports four and can be removed along with the `serial` arm.
+  probe:
+    name: Probe the Web UI checkout for sharding support
+    needs: id
+    if: ${{ github.event.inputs.skip_ftests == 'false' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      shards: ${{ steps.probe.outputs.shards }}
+      branch: ${{ steps.probe.outputs.branch }}
+    steps:
+      - name: Resolve the line to pair on
+        env:
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          case "$REF_NAME" in
+            maintenance-3.1.x | lts-20[0-9][0-9] | develop-20[0-9][0-9]) ;;
+            *) REF_NAME=maintenance-3.1.x ;;
+          esac
+          echo "REFERENCE_BRANCH=$REF_NAME" >> "$GITHUB_ENV"
+
+      # Deliberately the same resolution as the `build` and `ftests` jobs rather than a shared
+      # output they consume: those jobs resolve for themselves today, and making them depend on this
+      # one would couple the whole run to a job that exists only to size a matrix.
+      - name: Probe the resolved Web UI branch
+        id: probe
+        env:
+          CANDIDATE: ${{ github.event.inputs.branch_name }}
+          FALLBACK: ${{ env.REFERENCE_BRANCH }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="$FALLBACK"
+          case "$CANDIDATE" in sync/*) CANDIDATE="" ;; *) ;; esac
+          if [ -n "$CANDIDATE" ] && git ls-remote --exit-code --heads \
+               https://github.com/nuxeo/nuxeo-web-ui "refs/heads/$CANDIDATE" >/dev/null 2>&1; then
+            BRANCH="$CANDIDATE"
+          fi
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+          echo "Probing nuxeo/nuxeo-web-ui@$BRANCH for sharding support"
+
+          HELPER=no
+          if gh api "repos/nuxeo/nuxeo-web-ui/contents/scripts/test/ftest/shards.js?ref=$BRANCH" \
+               --jq .sha >/dev/null 2>&1; then
+            HELPER=yes
+          fi
+
+          # The helper alone is not enough: the runner has to honour FTEST_SPECS or every shard runs
+          # the whole suite. Checked by content because there is no other signal for it.
+          SPECS=no
+          if gh api "repos/nuxeo/nuxeo-web-ui/contents/packages/nuxeo-web-ui-ftest/wdio.conf.js?ref=$BRANCH" \
+               --jq .content 2>/dev/null | base64 -d 2>/dev/null | grep -q FTEST_SPECS; then
+            SPECS=yes
+          fi
+
+          echo "shards.js present: $HELPER"
+          echo "FTEST_SPECS honoured: $SPECS"
+          if [ "$HELPER" = yes ] && [ "$SPECS" = yes ]; then
+            echo "shards=$FTEST_SHARDS" >> "$GITHUB_OUTPUT"
+            echo "Sharding supported - dispatching $FTEST_SHARDS."
+          else
+            echo 'shards=["serial"]' >> "$GITHUB_OUTPUT"
+            echo "::warning::nuxeo/nuxeo-web-ui@$BRANCH does not support shard selection" \
+              "(shards.js: $HELPER, FTEST_SPECS: $SPECS); running the functional tests unsharded."
+          fi
 
   # Everything that must happen exactly once per run: lint, unit tests, the Nuxeo package build,
   # the optional metrics report and the a11y checks. The functional tests used to run here too, in
@@ -302,8 +384,10 @@ jobs:
   # succeeded or was skipped, so a failing shard already fails the Elements check on its own and an
   # aggregator would add nothing but a job to maintain.
   ftests:
-    name: Ftests (shard ${{ matrix.shard }})
-    needs: id
+    # Reads `Ftests (1)` .. `Ftests (4)` when sharded, `Ftests (serial)` when the probe found a
+    # checkout that cannot select specs.
+    name: Ftests (${{ matrix.shard }})
+    needs: [id, probe]
     # `== 'false'`, not `!= 'true'`, to preserve exactly when the functional tests used to run: the
     # shell above assembled the `ftest` profile under `[ "$SKIP_FTESTS" = "false" ]`, so an absent
     # or malformed input meant no functional tests rather than running them. Skipped jobs count as
@@ -317,7 +401,9 @@ jobs:
       # the suite, and losing their results turns one known failure into an unknown amount of them.
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4]
+        # `[1, 2, 3, 4]`, or `["serial"]` for a checkout without shard selection - see `probe`.
+        # Sizing the matrix is what keeps the unsharded path from being a second copy of this job.
+        shard: ${{ fromJSON(needs.probe.outputs.shards) }}
 
     steps:
       - uses: actions/setup-node@v6
@@ -431,7 +517,10 @@ jobs:
 
       # Resolved in its own step rather than inline below so that the shard -> feature mapping has
       # exactly one home, which the same script can then guard against drift.
+      # Skipped on the `serial` arm: that checkout has no `shards.js` to run, and leaving
+      # FTEST_SPECS unset is exactly what makes `wdio.conf.js` fall back to the whole suite.
       - name: Resolve this shard's feature files
+        if: matrix.shard != 'serial'
         env:
           SHARD: ${{ matrix.shard }}
         run: |
