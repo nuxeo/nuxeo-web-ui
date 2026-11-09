@@ -15,14 +15,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { fixture, html, flush } from '@nuxeo/testing-helpers';
+import { fixture, html, flush, pressAndReleaseKeyOn, tap } from '@nuxeo/testing-helpers';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-directory-suggestion.js';
 import '../elements/search/nuxeo-search-form.js';
 
 window.nuxeo.I18n.language = 'en';
 window.nuxeo.I18n.en = window.nuxeo.I18n.en || {};
-window.nuxeo.I18n.en['searchForm.searchFilters'] = 'Search Filters';
+window.nuxeo.I18n.en['searchForm.searchFilters'] = 'Saved search';
 window.nuxeo.I18n.en['searchForm.searchFilters.placeholder'] = 'Select a saved search';
+window.nuxeo.I18n.en['searchForm.searchCriteria'] = 'Search criteria';
+window.nuxeo.I18n.en['searchForm.queue'] = 'Queue';
 
 suite('nuxeo-search-form', () => {
   let searchForm;
@@ -36,12 +38,12 @@ suite('nuxeo-search-form', () => {
   test('gives the saved searches dropdown an always visible label (WEBUI-489)', () => {
     const actionsDropdown = searchForm.shadowRoot.querySelector('#actionsDropdown');
     expect(actionsDropdown).to.exist;
-    expect(actionsDropdown.label).to.equal('Search Filters');
+    expect(actionsDropdown.label).to.equal('Saved search');
     expect(actionsDropdown.placeholder).to.equal('Select a saved search');
 
     const visibleLabel = actionsDropdown.shadowRoot.querySelector('label.label');
     expect(visibleLabel).to.exist;
-    expect(visibleLabel.textContent.trim()).to.equal('Search Filters');
+    expect(visibleLabel.textContent.trim()).to.equal('Saved search');
     expect(visibleLabel.hasAttribute('hidden')).to.be.false;
 
     const input = actionsDropdown.shadowRoot.querySelector(
@@ -205,6 +207,161 @@ suite('nuxeo-search-form', () => {
 
     searchForm.displayQueueAndNavigateToFirst();
     expect(displayQueueSpy).to.have.been.calledWith(0);
+  });
+
+  suite('search criteria and queue tabs (WEBUI-1772)', () => {
+    const $ = (selector) => searchForm.shadowRoot.querySelector(selector);
+
+    teardown(() => {
+      sinon.restore();
+    });
+
+    test('renders a search criteria tab and a queue tab above the saved search', () => {
+      const tabs = $('#viewTabs');
+      expect(tabs).to.exist;
+      const criteria = $('#toogleFilter');
+      const queue = $('#toogleQueue');
+      expect(criteria.localName).to.equal('paper-tab');
+      expect(queue.localName).to.equal('paper-tab');
+      expect(criteria.textContent.trim()).to.equal('Search criteria');
+      expect(queue.textContent.trim()).to.equal('Queue');
+      expect(criteria.querySelector('iron-icon').icon).to.equal('nuxeo:filter');
+      expect(queue.querySelector('iron-icon').icon).to.equal('nuxeo:view-list');
+      // The tabs come first and the saved search stays in the header, shared by both views.
+      const container = $('#search-container');
+      expect(container.classList.contains('with-view-tabs')).to.be.true;
+      expect(container.firstElementChild.classList.contains('view-tabs')).to.be.true;
+      expect($('.header #actionsDropdown')).to.exist;
+      expect($('paper-icon-button.switch')).to.be.null;
+    });
+
+    test('the selected tab follows the queue property', async () => {
+      const tabs = $('#viewTabs');
+      expect(tabs.selected).to.equal('filters');
+      expect($('#toogleFilter').getAttribute('aria-selected')).to.equal('true');
+      expect($('.view-tabs').classList.contains('queue-view')).to.be.false;
+
+      searchForm.queue = true;
+      await flush();
+      expect(tabs.selected).to.equal('queue');
+      expect($('#toogleQueue').getAttribute('aria-selected')).to.equal('true');
+      expect($('.view-tabs').classList.contains('queue-view')).to.be.true;
+    });
+
+    test('choosing the queue tab calls the existing queue toggle', () => {
+      const displayQueue = sinon.stub(searchForm, 'displayQueueAndNavigateToFirst');
+      const displayFilters = sinon.stub(searchForm, '_displayFiltersTapped');
+      tap($('#toogleQueue'));
+      expect(displayQueue).to.have.been.calledOnce;
+      expect(displayFilters).to.not.have.been.called;
+    });
+
+    test('choosing the search criteria tab from the queue calls the existing filters toggle', async () => {
+      searchForm.queue = true;
+      await flush();
+      const displayQueue = sinon.stub(searchForm, 'displayQueueAndNavigateToFirst');
+      const displayFilters = sinon.stub(searchForm, '_displayFiltersTapped');
+      tap($('#toogleFilter'));
+      expect(displayFilters).to.have.been.calledOnce;
+      expect(displayQueue).to.not.have.been.called;
+    });
+
+    test('the tabs can be chosen with the keyboard', async () => {
+      const displayQueue = sinon.stub(searchForm, 'displayQueueAndNavigateToFirst');
+      const queueTab = $('#toogleQueue');
+      queueTab.focus();
+      pressAndReleaseKeyOn(queueTab, 13, [], 'Enter');
+      // paper-tab turns Enter into a click asynchronously.
+      await new Promise((resolve) => {
+        setTimeout(resolve, 20);
+      });
+      expect(displayQueue).to.have.been.calledOnce;
+    });
+
+    test('choosing the tab that is already selected does nothing', async () => {
+      const displayQueue = sinon.stub(searchForm, 'displayQueueAndNavigateToFirst');
+      const displayFilters = sinon.stub(searchForm, '_displayFiltersTapped');
+      tap($('#toogleFilter'));
+      searchForm.queue = true;
+      await flush();
+      tap($('#toogleQueue'));
+      expect(displayQueue).to.not.have.been.called;
+      expect(displayFilters).to.not.have.been.called;
+    });
+
+    test('the tabs only show the view the form displays', () => {
+      // With the toggle stubbed the view does not change, so the tab must not change either.
+      sinon.stub(searchForm, 'displayQueueAndNavigateToFirst');
+      tap($('#toogleQueue'));
+      expect($('#viewTabs').selected).to.equal('filters');
+      expect(searchForm.queue).to.be.false;
+    });
+
+    test('switches the view and routes exactly as the former toggle did', async () => {
+      searchForm.visible = true;
+      sinon.stub(searchForm.$.list, 'fetch').resolves();
+      const displayQueue = sinon.spy(searchForm, 'displayQueue');
+      const searchResults = sinon.spy();
+      searchForm.addEventListener('search-results', searchResults);
+      const displayFiltersEvent = sinon.spy();
+      searchForm.addEventListener('display-filters', displayFiltersEvent);
+
+      tap($('#toogleQueue'));
+      expect(searchForm.queue).to.be.true;
+      expect(displayQueue).to.have.been.calledWith(0, true);
+      await flush();
+      expect($('#viewTabs').selected).to.equal('queue');
+      expect($('#queue').hidden).to.be.false;
+      expect($('#filters').hidden).to.be.true;
+
+      tap($('#toogleFilter'));
+      expect(searchForm.queue).to.be.false;
+      expect(displayFiltersEvent).to.have.been.calledOnce;
+      expect(searchResults).to.have.been.calledOnce;
+      await flush();
+      expect($('#viewTabs').selected).to.equal('filters');
+      expect($('#filters').hidden).to.be.false;
+      expect($('#queue').hidden).to.be.true;
+    });
+
+    test('keeps the tab activation inside the form', () => {
+      sinon.stub(searchForm, 'displayQueueAndNavigateToFirst');
+      const outside = sinon.spy();
+      searchForm.addEventListener('iron-activate', outside);
+      tap($('#toogleQueue'));
+      expect(outside).to.not.have.been.called;
+    });
+
+    test('a form that starts in the queue selects the queue tab', async () => {
+      const queueForm = await fixture(html`<nuxeo-search-form provider="expired_search" queue></nuxeo-search-form>`);
+      await flush();
+      const tabs = queueForm.shadowRoot.querySelector('#viewTabs');
+      expect(tabs.selected).to.equal('queue');
+      expect(queueForm.shadowRoot.querySelector('.view-tabs').classList.contains('queue-view')).to.be.true;
+    });
+
+    test('a queue only form keeps its title and shows no tabs or saved search', async () => {
+      const queueOnly = await fixture(
+        html`<nuxeo-search-form provider="default_search" queue only-queue></nuxeo-search-form>`,
+      );
+      // `label` is not a declared property, so it has to be set as one rather than as an attribute.
+      queueOnly.label = 'searchForm.queue';
+      await flush();
+      const root = queueOnly.shadowRoot;
+      expect(root.querySelector('#viewTabs')).to.be.null;
+      expect(root.querySelector('#actionsDropdown')).to.be.null;
+      expect(root.querySelector('#search-container').classList.contains('with-view-tabs')).to.be.false;
+      expect(root.querySelector('.header h1').textContent.trim()).to.equal('Queue');
+    });
+
+    test('computes the view tab bindings', () => {
+      expect(searchForm._computeSelectedView(true)).to.equal('queue');
+      expect(searchForm._computeSelectedView(false)).to.equal('filters');
+      expect(searchForm._computeViewTabsClass(true)).to.equal('queue-view');
+      expect(searchForm._computeViewTabsClass(false)).to.equal('');
+      expect(searchForm._computeContainerClass(true)).to.equal('');
+      expect(searchForm._computeContainerClass(false)).to.equal('with-view-tabs');
+    });
   });
 
   test('computes list item class and quick filters visibility', () => {
