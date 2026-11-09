@@ -112,14 +112,17 @@ const info = (message) => process.stdout.write(`${message}\n`);
 // Forward slashes on every OS, so paths match ALLOWED_FAILURES and read the same in CI and locally.
 const toRepoPath = (url) => path.relative(root, fileURLToPath(url)).split(path.sep).join('/');
 
+// Compares two { line, column } positions: true when a comes before b or is at the same place.
+const notAfter = (a, b) => a.line < b.line || (a.line === b.line && a.column <= b.column);
+
 // A `could-not-load` warning is reported on the import statement of the importing file. Find the import it
-// belongs to, so the file that actually failed to parse can be named.
+// belongs to, so the file that actually failed to parse can be named. Lines and columns are both compared, so
+// two imports on one line (`import 'a'; import 'b';`) are never confused.
 function failedFile(warning, imports) {
   const { file, start } = warning.sourceRange;
   if (warning.code === 'could-not-load') {
     const imp = imports.find(
-      (i) =>
-        i.sourceRange?.file === file && i.sourceRange.start.line <= start.line && i.sourceRange.end.line >= start.line,
+      (i) => i.sourceRange?.file === file && notAfter(i.sourceRange.start, start) && notAfter(start, i.sourceRange.end),
     );
     if (imp && imp.url) {
       return { file: toRepoPath(imp.url), importer: toRepoPath(file) };
