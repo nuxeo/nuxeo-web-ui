@@ -125,6 +125,10 @@ Polymer({
       :host(:focus-within) .shortcut-hint {
         display: none;
       }
+
+      .secondary {
+        color: var(--nuxeo-selection-popup-close-button-color, #3f51b5);
+      }
     </style>
 
     <div class="horizontal center layout" id="content">
