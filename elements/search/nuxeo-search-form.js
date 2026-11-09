@@ -177,23 +177,6 @@ Polymer({
         margin-inline-end: 8px;
       }
 
-      /* In the queue view the search criteria tab is the way back to the search, so it reads as a button. */
-      .view-tabs.queue-view paper-tab.search-criteria-tab {
-        height: auto;
-        margin: 8px 0;
-        margin-inline-end: 6px;
-        border: 1px solid var(--nuxeo-drawer-text);
-        border-radius: 4px;
-      }
-
-      .view-tabs.queue-view paper-tab.search-criteria-tab + paper-tab {
-        border-inline-start: none;
-      }
-
-      .view-tabs.queue-view paper-tab.search-criteria-tab:hover {
-        box-shadow: inset 0 0 0 1px var(--nuxeo-drawer-text);
-      }
-
       nuxeo-select {
         width: 100%;
         margin-right: 56px;
@@ -400,7 +383,7 @@ Polymer({
         <!-- The tabs only switch the view: the selected tab follows "queue", and choosing a tab calls the
              same methods the former icon toggle did, so routing and the queue selection are unchanged. The
              toogleFilter / toogleQueue ids are kept for the tests and scripts that select them. -->
-        <div class$="view-tabs [[_computeViewTabsClass(queue)]]">
+        <div class="view-tabs">
           <paper-tabs
             id="viewTabs"
             noink
@@ -408,11 +391,11 @@ Polymer({
             selected="[[_computeSelectedView(queue)]]"
             on-iron-activate="_viewTabActivated"
           >
-            <paper-tab id="toogleFilter" name="filters" class="search-criteria-tab" aria-controls="filters">
+            <paper-tab id="toogleFilter" name="filters" aria-controls="filters">
               <iron-icon icon="nuxeo:filter"></iron-icon>
               <span class="ellipsis">[[i18n('searchForm.searchCriteria')]]</span>
             </paper-tab>
-            <paper-tab id="toogleQueue" name="queue" class="queue-tab" aria-controls="queue">
+            <paper-tab id="toogleQueue" name="queue" aria-controls="queue">
               <iron-icon icon="nuxeo:view-list"></iron-icon>
               <span class="ellipsis">[[i18n('searchForm.queue')]]</span>
             </paper-tab>
@@ -1011,10 +994,6 @@ Polymer({
 
   _computeSelectedView(queue) {
     return queue ? 'queue' : 'filters';
-  },
-
-  _computeViewTabsClass(queue) {
-    return queue ? 'queue-view' : '';
   },
 
   _computeContainerClass(onlyQueue) {
