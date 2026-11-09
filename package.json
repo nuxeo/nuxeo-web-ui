@@ -119,6 +119,7 @@
     "lint:prettier": "prettier \"**/*.{js,html}\" --list-different || (echo '↑↑ these files are not prettier formatted ↑↑' && exit 1)",
     "format:prettier": "prettier \"**/*.{js,html}\" --write",
     "lint:ftest-shards": "node scripts/test/ftest/shards.js --check",
+    "check:catalog": "node packages/nuxeo-designer-catalog/src/check-sources.js",
     "format:ftest-shards": "node scripts/test/ftest/shards.js --place",
     "lint": " npm run lint:eslint && npm run lint:prettier && npm run lint:ftest-shards",
     "win-lint": " npm run lint:eslint && npm run lint:prettier && npm run lint:ftest-shards",
