@@ -55,7 +55,7 @@ export function applySavedChangeToken(document, response) {
  * recognisable at all; `status` is kept for a caller that already unwrapped it.
  */
 function saveErrorStatus(error) {
-  return (error && error.status) || (error != null && error.response != null ? error.response.status : undefined);
+  return (error && error.status) || (error && error.response && error.response.status);
 }
 
 export function markSaveError(dirtyDocument, error) {
