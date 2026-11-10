@@ -96,12 +96,16 @@ the variables were not updated, the run still reconciles and reports, but refuse
   Applies the plan, then posts the Teams card. Every Jira/Teams write is reserved in the journal before it is made.
   Each target is re-read just before it is changed; a ticket closed, started or re-owned since collection is left
   alone and reported. Before a new ticket is created, ownership and matching tickets are re-read, so work recorded
-  while the planner ran is never duplicated. Links to related tickets are made before ownership is recorded; a link
-  that fails is kept in the run state and retried by later runs. The ownership property is written **last**, after the scope, severity and On Hold changes are
-  verified, so an interrupted run leaves those alerts unowned and they are simply planned again. A write whose
-  outcome is unknown (timeout, 5xx) stops further writes and is never blindly repeated; the next automatic run
-  reconciles it from Jira before writing anything (whether the link exists, the ticket is On Hold, the ownership
-  property is written by that run, or every comment of that action, each carrying its own action marker, is present). Preview only reports it. A Teams post whose delivery is unknown is not resent, and no Teams message is
+  while the planner ran is never duplicated. Label and severity changes, the scope comment, the "severity raised"
+  comment, the On Hold transition and its reason comment are separate journal steps, so a retry repeats only the
+  unfinished ones. Links to related tickets are made before ownership is recorded; a link or "severity raised"
+  comment that fails is kept in the run state and retried by later runs, and the ticket's ownership waits for it.
+  The ownership property is written **last**, after the scope, severity and On Hold changes are verified, so an
+  interrupted run leaves those alerts unowned and they are simply planned again. A write whose outcome is unknown
+  (timeout, 5xx) stops further writes and is never blindly repeated; the next automatic run reconciles it from Jira
+  before writing anything (whether the link exists, the ticket is On Hold or has the raised severity, the ownership
+  property is written by that run, or the comment carrying that step's own marker is present). Preview only reports
+  it. A Teams post whose delivery is unknown is not resent, and no Teams message is
   sent when the private journal is unavailable. Re-running the same workflow run does not repeat completed writes.
 
 The checkpoint advances only after a complete automatic run. Collection, planning, validation or write failures make

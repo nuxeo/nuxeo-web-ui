@@ -1040,11 +1040,11 @@ test('a failed link keeps ownership unrecorded and is retried by a later run', a
   await exec.create({ ...createGroup(), relatedTickets: ['LIB-44'] }, report);
   assert.match(outcome.failures.join(), /link/);
   assert.equal(jira.issues.get(report.ticketKey).properties[OWNERSHIP_PROPERTY], undefined);
-  assert.deepEqual(exec.pendingLinks, [
+  assert.deepEqual(exec.pendingWrites, [
     { id: `${RUN}:${report.ticketKey}:link:LIB-44`, from: report.ticketKey, to: 'LIB-44' },
   ]);
   const later = await executor(jira, tickets, { runId: 'later-run' });
-  const remaining = await later.exec.replayLinks(exec.pendingLinks);
+  const remaining = await later.exec.replayPending(exec.pendingWrites);
   assert.deepEqual(remaining, []);
   assert.equal(jira.calls.filter((call) => call.name === 'link').length, 2);
 });
@@ -1138,7 +1138,7 @@ test('a link with an unknown outcome is not queued for replay; recovery reconcil
   };
   const report = {};
   await exec.create({ ...createGroup(), relatedTickets: ['LIB-44'] }, report);
-  assert.deepEqual(exec.pendingLinks, []);
+  assert.deepEqual(exec.pendingWrites, []);
   const id = `${RUN}:${report.ticketKey}:link:LIB-44`;
   assert.equal(control.find(id).status, 'uncertain');
   jira.link = realLink;
@@ -1157,7 +1157,7 @@ test('replayed links keep their original journal id', async () => {
   const { exec, control } = await executor(jira, tickets);
   const id = 'earlier:LIB-3000:link:LIB-44';
   jira.issues.set('LIB-3000', { key: 'LIB-3000', fields: { labels: [] }, properties: {}, comments: [] });
-  const remaining = await exec.replayLinks([{ id, from: 'LIB-3000', to: 'LIB-44' }]);
+  const remaining = await exec.replayPending([{ id, from: 'LIB-3000', to: 'LIB-44' }]);
   assert.deepEqual(remaining, []);
   assert.equal(control.find(id).status, 'done');
 });
@@ -1294,11 +1294,11 @@ test('a link that recovery confirms missing is queued under its original id and 
   await control.settle(id, 'uncertain', {});
   const { exec, outcome } = await executor(jira, tickets);
   await exec.recover();
-  assert.deepEqual(exec.pendingLinks, [{ id, from: 'LIB-700', to: 'LIB-44' }]);
-  exec.blockedLinks.add('LIB-700');
+  assert.deepEqual(exec.pendingWrites, [{ id, from: 'LIB-700', to: 'LIB-44' }]);
+  exec.blockedTickets.add('LIB-700');
   const done = await exec.finish(createGroup(), { key: 'LIB-700', onHold: false, ownership: null }, [], {});
   assert.equal(done, false);
-  assert.match(outcome.failures.join(), /ownership waits until its pending issue links are created/);
+  assert.match(outcome.failures.join(), /ownership waits until its pending links and comments are written/);
   assert.equal(jira.issues.get('LIB-700').properties[OWNERSHIP_PROPERTY], undefined);
 });
 
@@ -1393,10 +1393,10 @@ test('an extension writes its marker in every comment it posts', async () => {
   const { exec, control } = await executor(jira, tickets);
   const extend = group(`${EL}:refresh`, EL, 'extend', 'LIB-44', 'critical', [104, 105, 107], { updateNote: 'x' });
   await exec.update(extend, {});
-  const entry = control.journal.entries.find((item) => item.kind === 'extend');
-  assert.equal(entry.recovery.markers.length, 2);
+  const steps = control.journal.entries.filter((item) => item.recovery?.markers);
+  assert.deepEqual(steps.map((item) => item.kind).sort(), ['scope-comment', 'severity-comment']);
   const texts = jira.issues.get('LIB-44').comments.map((comment) => JSON.stringify(comment));
-  for (const marker of entry.recovery.markers) {
+  for (const marker of steps.flatMap((item) => item.recovery.markers)) {
     assert.ok(texts.some((text) => text.includes(marker)));
   }
 });
@@ -1439,4 +1439,60 @@ test('no upgrade is inferred when neither an installed version nor a patched rel
   const packument = { 'dist-tags': { latest: '2.0.0' }, versions: { '1.0.0': {}, '2.0.0': {} } };
   const alert = { firstPatched: null, advisoryRanges: [{ range: '>= 2.0.0', firstPatched: null }] };
   assert.equal(npmSummary(packument, alert, []).fixAboveInstalled, null);
+});
+
+// Review round on 8c6fd0baf / 3a005c9e6.
+
+test('a retry posts only the missing severity comment and never repeats the scope comment', async () => {
+  const tickets = registerTickets();
+  const jira = new FakeJira(tickets);
+  const addComment = jira.addComment.bind(jira);
+  let failSeverity = true;
+  jira.addComment = async (key, body) => {
+    if (failSeverity && JSON.stringify(body).includes('severity raised')) {
+      failSeverity = false;
+      throw Object.assign(new Error('addComment failed'), { status: 400 });
+    }
+    return addComment(key, body);
+  };
+  const extend = group(`${EL}:refresh`, EL, 'extend', 'LIB-44', 'critical', [104, 105, 107], { updateNote: 'x' });
+  const first = await executor(jira, tickets);
+  await first.exec.update(extend, {});
+  assert.equal(jira.issues.get('LIB-44').properties[OWNERSHIP_PROPERTY], undefined);
+  assert.deepEqual(
+    first.exec.pendingWrites.map((item) => item.kind),
+    ['severity-comment'],
+  );
+  const retry = await executor(jira, tickets);
+  await retry.exec.update(extend, {});
+  const texts = jira.issues.get('LIB-44').comments.map((comment) => JSON.stringify(comment));
+  assert.equal(texts.filter((text) => text.includes('scope extended') || text.includes('finding update')).length, 1);
+  assert.equal(texts.filter((text) => text.includes('severity raised')).length, 1);
+  assert.ok(jira.issues.get('LIB-44').properties[OWNERSHIP_PROPERTY]);
+});
+
+test('a confirmed severity raise from an interrupted run still gets its explaining comment', async () => {
+  const tickets = registerTickets();
+  const jira = new FakeJira(tickets);
+  jira.issues.get('LIB-44').fields[config.severityField] = { id: severityId('critical') };
+  const control = new ControlState(jira, config.controlIssue);
+  await control.load();
+  const id = 'old:LIB-44:extend:sig';
+  const raise = { from: 'high', to: 'critical', alerts: ['#104'] };
+  await control.reserve({
+    id,
+    kind: 'extend',
+    target: 'LIB-44',
+    runId: 'old',
+    recovery: { key: 'LIB-44', raiseTo: 'critical', raise },
+  });
+  await control.settle(id, 'uncertain', {});
+  const { exec } = await executor(jira, tickets);
+  await exec.recover();
+  assert.deepEqual(exec.pendingWrites, [
+    { id: `${id}:severity-comment`, kind: 'severity-comment', key: 'LIB-44', raise },
+  ]);
+  assert.deepEqual(await exec.replayPending(exec.pendingWrites), []);
+  const marker = actionMarker(`${id}:severity-comment`, 'severity');
+  assert.ok(jira.issues.get('LIB-44').comments.some((comment) => JSON.stringify(comment).includes(marker)));
 });

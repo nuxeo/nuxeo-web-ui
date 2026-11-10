@@ -193,6 +193,10 @@ export class ControlState {
     return this.journal.entries.find((entry) => entry.id === id);
   }
 
+  has(id) {
+    return this.journal.entries.some((entry) => entry.id === id);
+  }
+
   async persistJournal() {
     // Keep the property under Jira's size limit by dropping the oldest resolved entries. Reserved and uncertain
     // entries are kept: they are what stops an interrupted write (or Teams send) from being repeated.
