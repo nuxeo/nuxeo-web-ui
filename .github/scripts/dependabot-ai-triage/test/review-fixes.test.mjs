@@ -1584,6 +1584,7 @@ test('an uncertain raise on a ticket without Defect Severity is recovered as not
 
 test('a workspace package.json alert is analysed from the root lockfile', async () => {
   const files = {
+    'package.json': { workspaces: ['ui'], overrides: { 'pkg-a': '1.3.0' }, engines: { node: '>=22' } },
     'ui/package.json': { name: 'ui', dependencies: { 'pkg-a': '^1.0.0' } },
     'package-lock.json': {
       lockfileVersion: 3,
@@ -1601,6 +1602,8 @@ test('a workspace package.json alert is analysed from the root lockfile', async 
   assert.equal(evidence.lockfile, 'package-lock.json');
   assert.equal(evidence.instances[0].version, '1.2.0');
   assert.equal(evidence.declarations[0].spec, '^1.0.0');
+  assert.deepEqual(evidence.engines, { node: '>=22' });
+  assert.ok(evidence.overrides.length > 0);
   delete files['package-lock.json'].packages.ui;
   assert.equal((await branchEvidence(readJson, alert, 'sha')).kind, 'manifest');
 });
