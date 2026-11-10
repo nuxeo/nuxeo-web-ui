@@ -765,7 +765,7 @@ Polymer({
       // This fetch can be the one that first populates the queue, so it has to spend a pending
       // replay too: left armed, a later visibility fetch would re-select the displayed document
       // after a deliberate clear (WEBUI-2303).
-      Promise.resolve(this.$.list.fetch()).then(() => this._selectPendingCurrentDocument());
+      void Promise.resolve(this.$.list.fetch()).then(() => this._selectPendingCurrentDocument());
     }
     if (this.results) {
       this.results.reset();
