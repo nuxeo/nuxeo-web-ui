@@ -1,4 +1,4 @@
-import { mapSequential } from './util.mjs';
+import { jsonBytes, mapSequential } from './util.mjs';
 
 export const STATE_PROPERTY = 'dependabot-ai-triage-state';
 export const JOURNAL_PROPERTY = 'dependabot-ai-triage-journal';
@@ -62,7 +62,7 @@ export function shardCleared(record, budget = PROPERTY_BUDGET) {
     for (const range of ranges) {
       const candidate = structuredClone(current);
       candidate.repositories[repository] = [...(candidate.repositories[repository] ?? []), range];
-      if (JSON.stringify(candidate).length > budget && Object.keys(current.repositories).length) {
+      if (jsonBytes(candidate) > budget && Object.keys(current.repositories).length) {
         shards.push(current);
         current = { repositories: { [repository]: [range] } };
       } else {
@@ -91,7 +91,7 @@ export class ControlState {
 
   async saveState(changes) {
     const next = { schemaVersion: 1, ...this.state, ...changes };
-    if (JSON.stringify(next).length > PROPERTY_BUDGET) {
+    if (jsonBytes(next) > PROPERTY_BUDGET) {
       throw new Error('Run state would exceed the Jira property size limit; it was not saved.');
     }
     this.state = next;
@@ -126,7 +126,11 @@ export class ControlState {
 
   /** Keeps the Teams card of a run so a retried delivery sends exactly what that run reported. */
   storeCard(runId, card) {
-    return this.jira.setProperty(this.issueKey, `${CARD_PROPERTY}-${runId}`, { runId, card });
+    const stored = { runId, card };
+    if (jsonBytes(stored) > PROPERTY_BUDGET) {
+      throw new Error('Teams card would exceed the Jira property size limit; it was not stored or sent.');
+    }
+    return this.jira.setProperty(this.issueKey, `${CARD_PROPERTY}-${runId}`, stored);
   }
 
   async storedCard(runId) {
@@ -200,7 +204,7 @@ export class ControlState {
   async persistJournal() {
     // Keep the property under Jira's size limit by dropping the oldest resolved entries. Reserved and uncertain
     // entries are kept: they are what stops an interrupted write (or Teams send) from being repeated.
-    while (JSON.stringify(this.journal).length > JOURNAL_BUDGET) {
+    while (jsonBytes(this.journal) > JOURNAL_BUDGET) {
       const index = this.journal.entries.findIndex((entry) => this.prunable(entry));
       if (index < 0) {
         throw new Error('Action journal is full of unresolved writes; manual reconciliation required.');

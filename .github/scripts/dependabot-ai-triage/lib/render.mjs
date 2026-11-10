@@ -9,12 +9,15 @@ import {
   adfText,
   alertId,
   clip,
+  jsonBytes,
   titleCase,
 } from './util.mjs';
 
 const SEVERITY_ICON = { critical: '🔴', high: '🟠', medium: '🟡', low: '🔵' };
 const TEAMS_SECTION_LIMIT = 15;
 const COMMENT_BUDGET = 28000;
+// Teams webhooks reject payloads above about 28 KB, and the card is also stored in one Jira property.
+const CARD_BUDGET = 24000;
 
 const browse = (site, key) => `${site}/browse/${key}`;
 const shortRepo = (name) => name.split('/')[1];
@@ -453,13 +456,27 @@ export function teamsCard(outcome, config, now = new Date()) {
     );
   }
   const repositories = outcome.repositories.map((item) => shortRepo(item.name)).join(', ');
-  body.push(
-    block(`Repositories: ${repositories} · [Full report](${controlUrl}) · Run ID: ${outcome.runId}`, {
-      isSubtle: true,
-      separator: true,
-      size: 'Small',
-    }),
-  );
+  const footer = block(`Repositories: ${repositories} · [Full report](${controlUrl}) · Run ID: ${outcome.runId}`, {
+    isSubtle: true,
+    separator: true,
+    size: 'Small',
+  });
+  return cardEnvelope(fitCard(body, footer, controlUrl));
+}
+
+/** Drops trailing detail blocks until the card fits its byte budget; the omitted lines stay in the full report. */
+function fitCard(body, footer, controlUrl) {
+  const kept = [...body];
+  let omitted = 0;
+  const notice = () => block(`${omitted} more line(s) are in the [full report](${controlUrl}).`, { isSubtle: true });
+  while (kept.length > 1 && jsonBytes(cardEnvelope([...kept, ...(omitted ? [notice()] : []), footer])) > CARD_BUDGET) {
+    kept.pop();
+    omitted += 1;
+  }
+  return [...kept, ...(omitted ? [notice()] : []), footer];
+}
+
+function cardEnvelope(body) {
   return {
     type: 'message',
     attachments: [

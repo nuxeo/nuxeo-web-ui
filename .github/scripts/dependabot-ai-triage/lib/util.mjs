@@ -262,6 +262,11 @@ export function adfDoc(content) {
   return { type: 'doc', version: 1, content: content.filter(Boolean) };
 }
 
+/** UTF-8 size of a JSON payload: Jira property and Teams payload limits are in bytes. */
+export function jsonBytes(value) {
+  return Buffer.byteLength(JSON.stringify(value), 'utf8');
+}
+
 export function clip(value, limit) {
   const text = String(value ?? '');
   return text.length > limit ? `${text.slice(0, limit - 1)}…` : text;

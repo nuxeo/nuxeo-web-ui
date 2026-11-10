@@ -4,8 +4,16 @@ import assert from 'node:assert/strict';
 import { chmodSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { Executor, actionMarker, apply, postTeams, summarize } from '../apply.mjs';
-import { clearedAlerts, collect, npmSummary, plannerTicket, selectCandidates, ticketQueries } from '../collect.mjs';
+import { Executor, actionMarker, apply, postTeams, runPending, summarize } from '../apply.mjs';
+import {
+  branchEvidence,
+  clearedAlerts,
+  collect,
+  npmSummary,
+  plannerTicket,
+  selectCandidates,
+  ticketQueries,
+} from '../collect.mjs';
 import { anonymouslyReadable, npmClient } from '../lib/clients.mjs';
 import { validatePlan } from '../lib/plan-validator.mjs';
 import { OWNED_LABEL, OWNERSHIP_PROPERTY, blockerRecheck, fingerprint, reconcile } from '../lib/reconcile.mjs';
@@ -1495,4 +1503,163 @@ test('a confirmed severity raise from an interrupted run still gets its explaini
   assert.deepEqual(await exec.replayPending(exec.pendingWrites), []);
   const marker = actionMarker(`${id}:severity-comment`, 'severity');
   assert.ok(jira.issues.get('LIB-44').comments.some((comment) => JSON.stringify(comment).includes(marker)));
+});
+
+// Review round on 1fa926ca5 / 6cea961ed.
+
+test('queued writes skipped after an uncertain replay stay queued', async () => {
+  const tickets = registerTickets();
+  const jira = new FakeJira(tickets);
+  for (const key of ['LIB-700', 'LIB-701']) {
+    jira.issues.set(key, { key, fields: { labels: [], issuelinks: [] }, properties: {}, comments: [] });
+  }
+  jira.failNext = { name: 'link', error: { uncertain: true } };
+  const { exec } = await executor(jira, tickets);
+  const queued = [
+    { id: 'old:LIB-700:link:LIB-44', from: 'LIB-700', to: 'LIB-44' },
+    { id: 'old:LIB-701:link:LIB-44', from: 'LIB-701', to: 'LIB-44' },
+  ];
+  const remaining = await exec.replayPending(queued);
+  assert.deepEqual(
+    remaining.map((item) => item.id),
+    queued.map((item) => item.id),
+  );
+});
+
+test('the severity explanation is written even when the scope comment fails', async () => {
+  const tickets = registerTickets();
+  const jira = new FakeJira(tickets);
+  const addComment = jira.addComment.bind(jira);
+  jira.addComment = async (key, body) => {
+    if (JSON.stringify(body).includes('scope extended') || JSON.stringify(body).includes('finding update')) {
+      throw Object.assign(new Error('addComment failed'), { status: 400 });
+    }
+    return addComment(key, body);
+  };
+  const { exec } = await executor(jira, tickets);
+  const extend = group(`${EL}:refresh`, EL, 'extend', 'LIB-44', 'critical', [104, 105, 107], { updateNote: 'x' });
+  await exec.update(extend, {});
+  const texts = jira.issues.get('LIB-44').comments.map((comment) => JSON.stringify(comment));
+  assert.equal(texts.filter((text) => text.includes('severity raised')).length, 1);
+  assert.equal(jira.issues.get('LIB-44').properties[OWNERSHIP_PROPERTY], undefined);
+});
+
+test('ownership recovery requires the exact write, not an earlier write of the same run', async () => {
+  const tickets = registerTickets();
+  const jira = new FakeJira(tickets);
+  jira.issues.get('LIB-44').properties[OWNERSHIP_PROPERTY] = {
+    updatedBy: 'run-1',
+    writeId: 'run-1:LIB-44:ownership:a',
+  };
+  const control = new ControlState(jira, config.controlIssue);
+  await control.load();
+  const id = 'run-1:LIB-44:ownership:b';
+  await control.reserve({ id, kind: 'ownership', target: 'LIB-44', runId: 'run-1', recovery: { key: 'LIB-44' } });
+  await control.settle(id, 'uncertain', {});
+  const { exec } = await executor(jira, tickets);
+  await exec.recover();
+  const reloaded = new ControlState(jira, config.controlIssue);
+  await reloaded.load();
+  assert.equal(reloaded.find(id).status, 'not-applied');
+});
+
+test('an uncertain raise on a ticket without Defect Severity is recovered as not applied', async () => {
+  const tickets = registerTickets();
+  const jira = new FakeJira(tickets);
+  jira.issues.get('LIB-44').fields[config.severityField] = null;
+  jira.issues.get('LIB-44').fields.labels.push(OWNED_LABEL);
+  const control = new ControlState(jira, config.controlIssue);
+  await control.load();
+  const id = 'old:LIB-44:adopt:sig';
+  const recovery = { key: 'LIB-44', raiseTo: 'high', raise: { from: null, to: 'high', alerts: [] } };
+  await control.reserve({ id, kind: 'adopt', target: 'LIB-44', runId: 'old', recovery });
+  await control.settle(id, 'uncertain', {});
+  const { exec } = await executor(jira, tickets);
+  await exec.recover();
+  const reloaded = new ControlState(jira, config.controlIssue);
+  await reloaded.load();
+  assert.equal(reloaded.find(id).status, 'not-applied');
+  assert.deepEqual(exec.pendingWrites, []);
+});
+
+test('a workspace package.json alert is analysed from the root lockfile', async () => {
+  const files = {
+    'ui/package.json': { name: 'ui', dependencies: { 'pkg-a': '^1.0.0' } },
+    'package-lock.json': {
+      lockfileVersion: 3,
+      packages: {
+        '': { workspaces: ['ui'] },
+        ui: { name: 'ui', dependencies: { 'pkg-a': '^1.0.0' } },
+        'node_modules/pkg-a': { version: '1.2.0' },
+      },
+    },
+  };
+  const readJson = async (sha, file) => files[file] ?? null;
+  const alert = { package: 'pkg-a', manifest: 'ui/package.json', advisoryRanges: [{ range: '< 1.3.0' }] };
+  const evidence = await branchEvidence(readJson, alert, 'sha');
+  assert.equal(evidence.kind, 'lockfile');
+  assert.equal(evidence.lockfile, 'package-lock.json');
+  assert.equal(evidence.instances[0].version, '1.2.0');
+  assert.equal(evidence.declarations[0].spec, '^1.0.0');
+  delete files['package-lock.json'].packages.ui;
+  assert.equal((await branchEvidence(readJson, alert, 'sha')).kind, 'manifest');
+});
+
+test('a large Teams card is trimmed to its byte budget and points to the full report', () => {
+  const groups = Array.from({ length: 15 }, (_, index) => {
+    return {
+      ...group(`${EL}:big-${index}`, EL, 'create', undefined, 'high', [index]),
+      action: 'created',
+      ticketKey: `LIB-${index}`,
+      teamsLine: '€'.repeat(2000),
+    };
+  });
+  const card = teamsCard(
+    {
+      runId: RUN,
+      complete: true,
+      failures: [],
+      newBySeverity: { high: 15 },
+      groups,
+      severityRaises: [],
+      needsReview: [],
+      closedMismatches: [],
+      repositories: [{ name: WEB }, { name: EL }],
+    },
+    { ...config, controlIssue: 'APP-99' },
+  );
+  assert.ok(Buffer.byteLength(JSON.stringify(card), 'utf8') <= 24000);
+  assert.match(JSON.stringify(card), /more line\(s\) are in the \[full report\]/);
+  assert.match(JSON.stringify(card), /Run ID/);
+});
+
+test('writes queued before a later group throws are still saved', async () => {
+  const tickets = registerTickets();
+  const jira = new FakeJira(tickets);
+  const { exec, control, outcome } = await executor(jira, tickets);
+  exec.execute = async () => {
+    exec.pendingWrites.push({ id: 'run:LIB-700:link:LIB-44', from: 'LIB-700', to: 'LIB-44' });
+    throw new Error('boom');
+  };
+  await assert.rejects(runPending(exec, control, outcome, bootstrapPlan()), /boom/);
+  const saved = await jira.property(config.controlIssue, 'dependabot-ai-triage-state');
+  assert.deepEqual(
+    saved.pendingWrites.map((item) => item.id),
+    ['run:LIB-700:link:LIB-44'],
+  );
+});
+
+test('a retry whose journal record was pruned does not post its comment twice', async () => {
+  const tickets = registerTickets();
+  const jira = new FakeJira(tickets);
+  const extend = group(`${EL}:refresh`, EL, 'extend', 'LIB-44', 'high', [104, 105, 107], { updateNote: 'x' });
+  const first = await executor(jira, tickets);
+  first.exec.finish = async () => false;
+  await first.exec.update(extend, {});
+  const comments = jira.issues.get('LIB-44').comments.length;
+  const pruned = await executor(jira, tickets);
+  pruned.control.journal.entries = [];
+  pruned.exec.finish = async () => false;
+  await pruned.exec.update(extend, {});
+  assert.equal(jira.issues.get('LIB-44').comments.length, comments);
 });
