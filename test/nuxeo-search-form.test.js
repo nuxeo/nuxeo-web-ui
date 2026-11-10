@@ -895,6 +895,53 @@ suite('nuxeo-search-form', () => {
       selectSpy.restore();
     });
 
+    test('refresh with results present waits for the shared provider before spending the replay', async () => {
+      searchForm.currentDocument = entries[1];
+      expect(searchForm.__queueSelectionPending).to.be.true;
+
+      // the results request aborts the queue request, which settles first with the queue empty
+      let settleQueue;
+      let settleResults;
+      const fetchStub = sinon
+        .stub(searchForm.$.list, 'fetch')
+        .returns(new Promise((resolve) => (settleQueue = resolve)));
+      const resultsFetchStub = sinon
+        .stub(searchForm, '_fetch')
+        .returns(new Promise((resolve) => (settleResults = resolve)));
+      searchForm.results = { reset: sinon.spy() };
+      const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+
+      searchForm.refresh();
+      settleQueue();
+      await settle();
+      expect(searchForm.__queueSelectionPending).to.be.true;
+
+      searchForm.$.list.items = entries.map((entry) => Object.assign({}, entry));
+      settleResults();
+      await settle();
+
+      expect(selectSpy).to.have.been.calledOnce;
+      expect(searchForm.selectedDocument.uid).to.equal('uid-2');
+      expect(searchForm.__queueSelectionPending).to.not.be.true;
+
+      fetchStub.restore();
+      resultsFetchStub.restore();
+      selectSpy.restore();
+    });
+
+    test('a rejected fetch releases the in-flight count', async () => {
+      const fetchStub = sinon.stub(searchForm.$.list, 'fetch').returns(Promise.reject(new Error('boom')));
+      let error;
+      try {
+        await searchForm._fetchQueue();
+      } catch (e) {
+        error = e;
+      }
+      expect(error.message).to.equal('boom');
+      expect(searchForm.__pendingFetches).to.equal(0);
+      fetchStub.restore();
+    });
+
     test('a successful empty result still spends the replay', async () => {
       searchForm.currentDocument = entries[1];
       const fetchStub = sinon.stub(searchForm.$.list, 'fetch').resolves();

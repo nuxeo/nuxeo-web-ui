@@ -745,7 +745,7 @@ Polymer({
         }
       }
       if (this.queue) {
-        this._fetchQueue().then((latest) => latest && this._selectPendingCurrentDocument());
+        this._fetchQueue().then((idle) => idle && this._selectPendingCurrentDocument());
       } else if (this.auto) {
         this._fetch(this.$.provider);
       }
@@ -765,11 +765,12 @@ Polymer({
       // This fetch can be the one that first populates the queue, so it has to spend a pending
       // replay too: left armed, a later visibility fetch would re-select the displayed document
       // after a deliberate clear (WEBUI-2303).
-      void this._fetchQueue().then((latest) => latest && this._selectPendingCurrentDocument());
+      void this._fetchQueue().then((idle) => idle && this._selectPendingCurrentDocument());
     }
     if (this.results) {
       this.results.reset();
-      this._fetch(this.results);
+      // Shares the provider with the queue, so it can abort the queue request above: track it too.
+      void this._trackFetch(this._fetch(this.results)).then((idle) => idle && this._selectPendingCurrentDocument());
     }
   },
 
@@ -789,7 +790,7 @@ Polymer({
       if (restoreSelection) {
         selectedUid = this.selectedDocument != null ? this.selectedDocument.uid : undefined;
       }
-      this._fetchQueue().then((latest) => {
+      this._fetchQueue().then((idle) => {
         if (typeof index === 'number') {
           // An explicit index is the caller's own selection and wins over a pending replay.
           this.__queueSelectionPending = false;
@@ -797,7 +798,7 @@ Polymer({
           this.$.list.scrollToIndex(targetIndex);
           this.$.list.selectIndex(targetIndex);
           this._navigateToQueueItem(targetIndex);
-        } else if (latest) {
+        } else if (idle) {
           this._selectPendingCurrentDocument();
         }
       });
@@ -805,12 +806,22 @@ Polymer({
   },
 
   _fetchQueue() {
-    // An overlapping fetch aborts the previous one, and the page provider still fulfils the aborted
-    // request with an empty queue. Resolve with whether this is the latest fetch, so that only
-    // the one that is not superseded can spend the pending replay (WEBUI-2303).
-    this.__queueFetchId = (this.__queueFetchId || 0) + 1;
-    const id = this.__queueFetchId;
-    return Promise.resolve(this.$.list.fetch()).then(() => id === this.__queueFetchId);
+    return this._trackFetch(this.$.list.fetch());
+  },
+
+  _trackFetch(promise) {
+    // Fetches through the shared page provider abort one another, and an aborted request is still
+    // fulfilled, with the queue left empty. Resolve with whether nothing else is still in flight,
+    // so that only the fetch that settles last can spend the pending replay (WEBUI-2303).
+    this.__pendingFetches = (this.__pendingFetches || 0) + 1;
+    const release = () => {
+      this.__pendingFetches -= 1;
+      return this.__pendingFetches === 0;
+    };
+    return Promise.resolve(promise).then(release, (err) => {
+      release();
+      throw err;
+    });
   },
 
   _queueItemTapped(e) {
