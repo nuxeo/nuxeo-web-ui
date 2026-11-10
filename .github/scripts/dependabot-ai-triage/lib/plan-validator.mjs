@@ -329,7 +329,7 @@ function checkBlocker(ctx, group, owned, where) {
   if (blocker.type !== 'no-upstream-patch') {
     return;
   }
-  const patched = owned.filter((alert) => alert.firstPatched || alert.anyPatchPublished);
+  const patched = owned.filter((alert) => alert.firstPatched || alert.anyPatchPublished || alert.registryFix);
   if (patched.length) {
     ctx.fail('invalid-blocker', `${where} claims no upstream patch, but ${numbers(patched)} have patched versions.`);
   }

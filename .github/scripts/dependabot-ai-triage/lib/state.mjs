@@ -16,6 +16,11 @@ const RESOLVED = new Set(['done', 'failed', 'not-applied']);
 
 export class LockHeldError extends Error {}
 
+/** Property names of one generation of closure-history shards. */
+function shardNames(generation, count) {
+  return Array.from({ length: count }, (_, i) => `${CLEARED_PROPERTY}-${generation}-${i}`);
+}
+
 function splitId(id) {
   const index = id.lastIndexOf('#');
   return [id.slice(0, index), Number(id.slice(index + 1))];
@@ -148,7 +153,7 @@ export class ControlState {
   /** Closure history: an index property names how many shard properties hold the ranges. */
   async loadCleared() {
     const index = await this.jira.property(this.issueKey, CLEARED_PROPERTY);
-    const names = Array.from({ length: index?.shards ?? 0 }, (_, i) => `${CLEARED_PROPERTY}-${i}`);
+    const names = shardNames(index?.generation ?? 0, index?.shards ?? 0);
     const parts = await Promise.all(names.map((name) => this.jira.property(this.issueKey, name)));
     const record = { repositories: {} };
     for (const [repository, ranges] of parts.flatMap((part) => Object.entries(part?.repositories ?? {}))) {
@@ -157,12 +162,30 @@ export class ControlState {
     return record;
   }
 
-  /** Adds newly reported closures; shards are written before the index that makes them visible. */
+  /**
+   * Adds newly reported closures. A new generation of shards is written in full before the index switches to it,
+   * so an interrupted save leaves the previous generation intact and readable; the old one is removed afterwards.
+   */
   async saveCleared(ids) {
+    const index = await this.jira.property(this.issueKey, CLEARED_PROPERTY);
+    const previous = shardNames(index?.generation ?? 0, index?.shards ?? 0);
     const record = addCleared(await this.loadCleared(), ids);
     const shards = shardCleared(record);
-    await mapSequential(shards, (shard, i) => this.jira.setProperty(this.issueKey, `${CLEARED_PROPERTY}-${i}`, shard));
-    await this.jira.setProperty(this.issueKey, CLEARED_PROPERTY, { schemaVersion: 2, shards: shards.length });
+    const generation = (index?.generation ?? 0) + 1;
+    const names = shardNames(generation, shards.length);
+    await mapSequential(shards, (shard, i) => this.jira.setProperty(this.issueKey, names[i], shard));
+    await this.jira.setProperty(this.issueKey, CLEARED_PROPERTY, {
+      schemaVersion: 3,
+      generation,
+      shards: shards.length,
+    });
+    await mapSequential(previous, async (name) => {
+      try {
+        await this.jira.deleteProperty(this.issueKey, name);
+      } catch {
+        // A leftover old shard is never read again; removing it is housekeeping only.
+      }
+    });
     return record;
   }
 
