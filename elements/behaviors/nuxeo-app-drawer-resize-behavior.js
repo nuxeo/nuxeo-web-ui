@@ -115,7 +115,7 @@ export const NuxeoAppDrawerResizeBehavior = {
   /** Open drawer width (px): stored preference or natural default, clamped. */
   _computeOpenDrawerWidth() {
     const fallback = DRAWER_NATURAL_CONTENT_PX + this._sidebarPx();
-    const stored = this._drawerOpenWidth ?? this._loadStoredDrawerWidth();
+    const stored = this._drawerOpenWidth != null ? this._drawerOpenWidth : this._loadStoredDrawerWidth();
     if (stored == null) {
       return fallback;
     }
@@ -131,15 +131,16 @@ export const NuxeoAppDrawerResizeBehavior = {
   /** Read persisted drawer width from localStorage, or null if missing/invalid. */
   _loadStoredDrawerWidth() {
     try {
-      const raw = globalThis.localStorage?.getItem(DRAWER_STORAGE_KEY);
-      const n = Number.parseInt(raw ?? '', 10);
+      const raw = globalThis.localStorage != null ? globalThis.localStorage.getItem(DRAWER_STORAGE_KEY) : undefined;
+      const n = Number.parseInt(raw != null ? raw : '', 10);
       if (!Number.isFinite(n)) {
         return null;
       }
       return n;
-    } catch {
-      return null;
+    } catch (e) {
+      // Storage may be unavailable (private mode); there is no stored width then.
     }
+    return null;
   },
 
   /** Persist drawer width under `nuxeo.drawerWidth` (no-op when storage is unavailable). */
@@ -148,7 +149,7 @@ export const NuxeoAppDrawerResizeBehavior = {
       if (globalThis.localStorage) {
         globalThis.localStorage.setItem(DRAWER_STORAGE_KEY, String(px));
       }
-    } catch {
+    } catch (e) {
       // Storage may be unavailable (private mode, quota); width is not persisted.
     }
   },
@@ -229,7 +230,7 @@ export const NuxeoAppDrawerResizeBehavior = {
     if (!this.drawerOpened || this.isNarrow) {
       return;
     }
-    const rawAmount = e?.detail?.amount;
+    const rawAmount = e != null && e.detail != null ? e.detail.amount : undefined;
     const amount = Number.isFinite(rawAmount) ? Math.max(0, rawAmount) : 0;
     if (amount <= 0) {
       return;
@@ -271,7 +272,7 @@ export const NuxeoAppDrawerResizeBehavior = {
       if (globalThis.localStorage) {
         globalThis.localStorage.removeItem(DRAWER_STORAGE_KEY);
       }
-    } catch {
+    } catch (e) {
       // Storage may be unavailable (private mode, quota); width is not persisted.
     }
     if (this.drawerOpened) {
