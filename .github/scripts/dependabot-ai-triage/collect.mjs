@@ -201,6 +201,20 @@ function lowestFixInMajor(versions, major, floor, range) {
   );
 }
 
+/**
+ * The lowest published stable release above every vulnerable installed version that lies outside every vulnerable
+ * range. It proves a fix exists even when GitHub lists no patched version (e.g. range "< 2.0.0", 2.0.0 published).
+ */
+function fixAboveInstalled(versions, instances, alert, range) {
+  const installed = instances.filter((item) => item.vulnerable !== false).map((item) => item.version);
+  const floor = installed.sort(compareVersions).at(-1) ?? alert.firstPatched ?? '0.0.0';
+  return (
+    versions
+      .filter((version) => compareVersions(version, floor) > 0 && inAdvisoryRange(version, range) === false)
+      .sort(compareVersions)[0] ?? null
+  );
+}
+
 export function npmSummary(packument, alert, instances) {
   if (!packument?.versions) {
     return null;
@@ -217,6 +231,7 @@ export function npmSummary(packument, alert, instances) {
   return {
     latest: packument['dist-tags']?.latest,
     latestIsVulnerable: inAdvisoryRange(packument['dist-tags']?.latest, range),
+    fixAboveInstalled: fixAboveInstalled(versions, instances, alert, range),
     advisoryRanges: alert.advisoryRanges,
     firstPatchedPublished: alert.firstPatched ? versions.includes(alert.firstPatched) : false,
     // null for a major means no fixed release exists in that major: a major upgrade (not a blocker) is needed.
@@ -503,6 +518,10 @@ async function buildPlannerInput(ctx, { alerts, repositories, tickets, result })
   const npmInfo = await Promise.all(
     aiAlerts.map((alert, index) => npmEvidence(ctx.npm, alert, evidenceList[index], ctx.warnings)),
   );
+  // Registry-confirmed fix availability is kept on the alert so the validator can reject a false "no patch".
+  aiAlerts.forEach((alert, index) => {
+    alert.registryFix = npmInfo[index].package?.fixAboveInstalled ?? null;
+  });
   const candidates = selectCandidates(tickets, aiAlerts, currentOwner, ctx.config);
   const comments = await Promise.all(candidates.map((ticket) => ctx.jira.recentComments(ticket.key, 5)));
   const plannerAlerts = aiAlerts.map((alert, index) => {

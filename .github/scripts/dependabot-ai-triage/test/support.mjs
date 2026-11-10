@@ -94,6 +94,10 @@ export class FakeJira {
     });
   }
 
+  async allComments(key) {
+    return this.recentComments(key);
+  }
+
   async recentComments(key) {
     return this.issues.get(key).comments.map((body) => {
       return { body };

@@ -5,7 +5,7 @@ import { chmodSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from '
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { Executor, apply, postTeams, summarize } from '../apply.mjs';
-import { clearedAlerts, collect, plannerTicket, selectCandidates, ticketQueries } from '../collect.mjs';
+import { clearedAlerts, collect, npmSummary, plannerTicket, selectCandidates, ticketQueries } from '../collect.mjs';
 import { anonymouslyReadable, npmClient } from '../lib/clients.mjs';
 import { validatePlan } from '../lib/plan-validator.mjs';
 import { OWNED_LABEL, OWNERSHIP_PROPERTY, blockerRecheck, fingerprint, reconcile } from '../lib/reconcile.mjs';
@@ -1245,4 +1245,119 @@ test('closure ranges merge exactly and split across properties by size', () => {
   assert.ok(shards.length > 1);
   assert.ok(shards.every((shard) => JSON.stringify(shard).length <= 5000));
   assert.equal(shards.flatMap((shard) => shard.repositories[WEB] ?? []).length, 6000);
+});
+
+// Review round on c146376ac / 5cac15ad5.
+
+test('a published fix found on npm rejects "no upstream patch" even without a GitHub patched version', () => {
+  const packument = { 'dist-tags': { latest: '2.0.0' }, versions: { '1.4.0': {}, '1.9.9': {}, '2.0.0': {} } };
+  const alert = { firstPatched: null, advisoryRanges: [{ range: '< 2.0.0', firstPatched: null }] };
+  const summary = npmSummary(packument, alert, [{ version: '1.4.0', vulnerable: true }]);
+  assert.equal(summary.fixAboveInstalled, '2.0.0');
+  const none = npmSummary(
+    { 'dist-tags': { latest: '4.3.1' }, versions: { '4.2.0': {}, '4.3.1': {} } },
+    { firstPatched: null, advisoryRanges: [{ range: '>= 4.2.0, <= 4.3.1', firstPatched: null }] },
+    [{ version: '4.3.1', vulnerable: true }],
+  );
+  assert.equal(none.fixAboveInstalled, null);
+
+  const alerts = liveAlerts();
+  alerts.find((item) => item.repository === WEB && item.number === 9).registryFix = '5.0.0';
+  const result = validatePlan({
+    plan: bootstrapPlan(),
+    runId: RUN,
+    inventoryDigest: DIGEST,
+    repositories: [
+      { name: WEB, project: 'APP' },
+      { name: EL, project: 'LIB' },
+    ],
+    epicQuarter: '2026-Q4',
+    alerts,
+    aiInput: alerts.map((item) => `${item.repository}#${item.number}`),
+    currentOwner: new Map(),
+    tickets: registerTickets(),
+    now: new Date('2026-11-09T07:45:00Z'),
+  });
+  assert.ok(result.errors.some((error) => error.code === 'invalid-blocker'));
+});
+
+test('a link that recovery confirms missing is queued under its original id and blocks ownership', async () => {
+  const tickets = registerTickets();
+  const jira = new FakeJira(tickets);
+  jira.issues.set('LIB-700', { key: 'LIB-700', fields: { labels: [], issuelinks: [] }, properties: {}, comments: [] });
+  const control = new ControlState(jira, config.controlIssue);
+  await control.load();
+  const id = 'old:LIB-700:link:LIB-44';
+  await control.reserve({ id, kind: 'link', target: 'x', runId: 'old', recovery: { from: 'LIB-700', to: 'LIB-44' } });
+  await control.settle(id, 'uncertain', {});
+  const { exec, outcome } = await executor(jira, tickets);
+  await exec.recover();
+  assert.deepEqual(exec.pendingLinks, [{ id, from: 'LIB-700', to: 'LIB-44' }]);
+  exec.blockedLinks.add('LIB-700');
+  const done = await exec.finish(createGroup(), { key: 'LIB-700', onHold: false, ownership: null }, [], {});
+  assert.equal(done, false);
+  assert.match(outcome.failures.join(), /ownership waits until its pending issue links are created/);
+  assert.equal(jira.issues.get('LIB-700').properties[OWNERSHIP_PROPERTY], undefined);
+});
+
+test('an interrupted closure-history save keeps the previous generation readable', async () => {
+  const jira = new FakeJira();
+  const control = new ControlState(jira, config.controlIssue);
+  await control.load();
+  await control.saveCleared([`${WEB}#1`, `${WEB}#5`]);
+  const setProperty = jira.setProperty.bind(jira);
+  jira.setProperty = async (key, name, value) => {
+    if (name.startsWith('dependabot-ai-triage-cleared-2-')) {
+      throw new Error('HTTP 503');
+    }
+    return setProperty(key, name, value);
+  };
+  await assert.rejects(control.saveCleared([`${WEB}#3`]));
+  const record = await control.loadCleared();
+  assert.equal(isClearedReported(record, `${WEB}#1`), true);
+  assert.equal(isClearedReported(record, `${WEB}#5`), true);
+  jira.setProperty = setProperty;
+  await control.saveCleared([`${WEB}#3`]);
+  const next = await control.loadCleared();
+  assert.equal(isClearedReported(next, `${WEB}#3`), true);
+  const names = Object.keys(jira.issues.get(config.controlIssue).properties);
+  assert.ok(!names.includes('dependabot-ai-triage-cleared-1-0'));
+});
+
+test('the On Hold reason is its own step: if it fails, ownership is not recorded', async () => {
+  const tickets = registerTickets();
+  const jira = new FakeJira(tickets);
+  jira.failNext = { name: 'addComment', error: { status: 400 } };
+  const { exec, outcome } = await executor(jira, tickets);
+  const report = {};
+  const unpatched = group(`${EL}:pkg-merge`, EL, 'create', undefined, 'low', [106], {
+    ...blocked('no-upstream-patch', 'https://github.com/advisories/GHSA-0000-0000-0007'),
+  });
+  await exec.create(unpatched, report);
+  assert.equal(jira.issues.get(report.ticketKey).fields.status.name, 'On Hold');
+  assert.match(outcome.failures.join(), /hold-comment/);
+  assert.equal(jira.issues.get(report.ticketKey).properties[OWNERSHIP_PROPERTY], undefined);
+});
+
+test('the live candidate recheck also searches summaries for the affected package', async () => {
+  const tickets = registerTickets();
+  const jira = new FakeJira(tickets);
+  const { exec } = await executor(jira, tickets);
+  await exec.create(createGroup(), {});
+  assert.ok(jira.searches.some((jql) => /updated >= -\d+m/.test(jql) && /summary ~ "\\"pkg-match\\""/.test(jql)));
+});
+
+test('recovery reads the whole comment history, not only the latest page', async () => {
+  const tickets = registerTickets();
+  const jira = new FakeJira(tickets);
+  jira.recentComments = async () => [];
+  jira.allComments = async () => [{ body: { type: 'doc', content: [{ type: 'text', text: 'Run old.' }] } }];
+  const control = new ControlState(jira, config.controlIssue);
+  await control.load();
+  await control.reserve({ id: 'old:x', kind: 'extend', target: 'APP-31', runId: 'old', recovery: { key: 'APP-31' } });
+  const { exec } = await executor(jira, tickets);
+  await exec.recover();
+  const reloaded = new ControlState(jira, config.controlIssue);
+  await reloaded.load();
+  assert.equal(reloaded.find('old:x').status, 'done');
 });

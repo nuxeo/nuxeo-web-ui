@@ -112,6 +112,8 @@ export class Executor {
     this.now = new Date().toISOString();
     this.stopped = false;
     this.pendingLinks = [];
+    // Tickets with links still to be made: their ownership is not recorded until the links exist.
+    this.blockedLinks = new Set();
     // Tickets this run wrote to: their own updates are not "changes since collection".
     this.touched = new Set();
   }
@@ -305,7 +307,6 @@ export class Executor {
     }
     await this.jira.transition(key, transition.id);
     await this.verifyIssue(key, { status: this.config.holdStatus });
-    await this.jira.addComment(key, holdComment({ group, runId: this.inventory.runId }));
     return true;
   }
 
@@ -328,8 +329,23 @@ export class Executor {
       if (!held) {
         return false;
       }
+      // The reason, mitigation and recheck criteria are a separate step: ownership waits for both.
+      const reason = this.withRecovery(
+        async () => {
+          await this.jira.addComment(target.key, holdComment({ group, runId }));
+          return { key: target.key };
+        },
+        { key: target.key },
+      );
+      if (!(await this.act(`${runId}:${target.key}:hold-comment`, 'hold-comment', target.key, reason))) {
+        return false;
+      }
       report.onHold = true;
       report.blockerChanged = report.blockerChanged || report.heldVerified;
+    }
+    if (this.blockedLinks.has(target.key)) {
+      this.outcome.failures.push(`${target.key}: ownership waits until its pending issue links are created.`);
+      return false;
     }
     const ownership = ownershipRecord({
       group,
@@ -440,9 +456,15 @@ export class Executor {
   /** Tickets that match these alerts and are new, or changed since collection by someone other than this run. */
   async changedCandidates(group, alerts) {
     const project = this.config.repositoryConfig(group.repository).project;
-    const minutes = Math.ceil((Date.now() - Date.parse(this.inventory.startedAt)) / 60000) + 5;
+    // Everything changed since collection started; without a start time, a wide 24-hour window is used instead.
+    const elapsed = Math.ceil((Date.now() - Date.parse(this.inventory.startedAt)) / 60000) + 5;
+    const minutes = Number.isFinite(elapsed) ? elapsed : 1440;
     const ids = [...new Set(alerts.flatMap((alert) => [alert.ghsa, alert.cve, alert.url]).filter(Boolean))];
-    const terms = ids.map((id) => String.raw`text ~ "\"${id}\""`);
+    const packages = [...new Set(alerts.map((alert) => alert.package).filter(Boolean))];
+    const terms = [
+      ...ids.map((id) => String.raw`text ~ "\"${id}\""`),
+      ...packages.map((name) => String.raw`summary ~ "\"${name}\""`),
+    ];
     const jql = `project = ${project} AND updated >= -${minutes}m AND (${terms.join(' OR ')}) ORDER BY key`;
     const issues = await this.jira.search(jql, ['updated'], []);
     return issues.filter((issue) => {
@@ -632,7 +654,8 @@ export class Executor {
     }
     // Scope and severity steps: labels and severity are idempotent; the only non-idempotent write is a comment,
     // and every comment names its run, so a comment from that run means the write went through.
-    const comments = await this.jira.recentComments(recovery.key, 20);
+    // The whole history: a comment from that run may be older than the latest page.
+    const comments = await this.jira.allComments(recovery.key);
     const commented = comments.some((comment) => textOf(comment.body).includes(entry.runId));
     return { status: commented ? 'done' : 'not-applied' };
   }
@@ -646,6 +669,10 @@ export class Executor {
       return;
     }
     const { status, key } = await this.reconcileEntry(entry);
+    if (entry.kind === 'link' && status === 'not-applied') {
+      // Confirmed missing: retried under its original journal id before the plan, like any failed link.
+      this.pendingLinks.push({ id: entry.id, from: entry.recovery.from, to: entry.recovery.to });
+    }
     await this.control.settle(entry.id, status, { recovered: true, ...(key ? { key } : {}) });
     const message = `${entry.kind} on ${entry.target} from run ${entry.runId} was ${status === 'done' ? 'applied' : 'not applied'}; its alerts are re-planned.`;
     this.outcome.warnings.push({ code: 'recovered', message });
@@ -915,7 +942,13 @@ async function notify({ jira, control, config, inventory, outcome }) {
 
 /** Retries links that failed earlier, executes the plan, and keeps every link still to be made in the state. */
 async function runLinks(executor, control, outcome, plan) {
-  const remaining = await executor.replayLinks(control.state?.pendingLinks ?? []);
+  // Links queued by earlier runs and links that recovery just confirmed missing are retried first.
+  const queued = [...(control.state?.pendingLinks ?? []), ...executor.pendingLinks];
+  executor.pendingLinks = [];
+  const remaining = await executor.replayLinks(queued);
+  for (const link of remaining) {
+    executor.blockedLinks.add(link.from);
+  }
   if (plan && !outcome.failures.length) {
     await executor.execute(plan);
   }

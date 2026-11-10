@@ -128,6 +128,17 @@ export function jiraClient({ site, email, token }) {
     }
     return searchPages(query, issues, page + 1, data.nextPageToken);
   };
+  const commentPages = async (key, collected, startAt) => {
+    if (startAt >= MAX_PAGES * 100) {
+      throw new Error(`Comment history of ${key} exceeds ${MAX_PAGES * 100} comments`);
+    }
+    const data = await call('GET', `/issue/${key}/comment?startAt=${startAt}&maxResults=100`, undefined, 'comments');
+    const comments = [...collected, ...(data.comments ?? [])];
+    const total = data.total ?? comments.length;
+    return comments.length >= total || !(data.comments ?? []).length
+      ? comments
+      : commentPages(key, comments, comments.length);
+  };
   const metadataPages = async (project, issueTypeId, collected, startAt) => {
     const target = `/issue/createmeta/${project}/issuetypes/${issueTypeId}?startAt=${startAt}&maxResults=200`;
     const data = await call('GET', target, undefined, 'create metadata');
@@ -144,6 +155,10 @@ export function jiraClient({ site, email, token }) {
     issue(key, fields, properties = []) {
       const propertyQuery = properties.length ? `&properties=${properties.join(',')}` : '';
       return call('GET', `/issue/${key}?fields=${fields.join(',')}${propertyQuery}`, undefined, 'issue read');
+    },
+    /** Every comment of an issue; throws rather than returning a partial history. */
+    allComments(key) {
+      return commentPages(key, [], 0);
     },
     async recentComments(key, limit = 10) {
       const data = await call(
