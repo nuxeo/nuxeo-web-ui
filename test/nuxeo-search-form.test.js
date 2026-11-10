@@ -696,19 +696,28 @@ suite('nuxeo-search-form', () => {
       { uid: 'uid-1', path: '/default-domain/doc-1' },
       { uid: 'uid-2', path: '/default-domain/doc-2' },
     ];
-    // a fetch replaces the entries with new object instances, as the page provider does
+    // what the page provider display behaviour does once a response is in: it replaces the entries
+    // with new object instances and reports the load, whoever started the request
+    const loadQueue = (form, items = entries) => {
+      form.$.list.items = items.map((entry) => Object.assign({}, entry));
+      form.$.list.dispatchEvent(new CustomEvent('nuxeo-page-loaded', { bubbles: true, composed: true }));
+    };
     const stubFetch = (form) =>
-      sinon.stub(form.$.list, 'fetch').callsFake(() => {
-        form.$.list.items = entries.map((entry) => Object.assign({}, entry));
-        return Promise.resolve();
-      });
-    // the selection happens in the fetch promise's continuation
+      sandbox.stub(form.$.list, 'fetch').callsFake(() => Promise.resolve().then(() => loadQueue(form)));
+    // an aborted request is fulfilled too, but leaves the queue empty and reports no load
+    const abortedFetch = () => Promise.resolve();
+    // the load and the callers' continuations run a few microtasks after the fetch
     const settle = async () => {
+      await Promise.resolve();
       await Promise.resolve();
       await Promise.resolve();
     };
 
+    let sandbox;
+
     setup(() => {
+      // spies and stubs are restored in teardown, so a failing assertion cannot leak them
+      sandbox = sinon.createSandbox();
       // `visible` first, or `_visibleChanged` issues a real fetch before `fetch` is stubbed
       searchForm.visible = true;
       searchForm.queue = true;
@@ -717,13 +726,14 @@ suite('nuxeo-search-form', () => {
     });
 
     teardown(() => {
+      sandbox.restore();
       delete searchForm.navigateTo;
     });
 
     test('selects the displayed document once the queue is first populated', async () => {
       searchForm.currentDocument = entries[1];
-      const fetchStub = stubFetch(searchForm);
-      const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+      stubFetch(searchForm);
+      const selectSpy = sandbox.spy(searchForm.$.list, 'selectIndex');
 
       searchForm._visibleChanged();
       await settle();
@@ -731,51 +741,42 @@ suite('nuxeo-search-form', () => {
       expect(selectSpy).to.have.been.calledWith(1);
       // following the route must never navigate, or the two would loop
       expect(searchForm.navigateTo).to.not.have.been.called;
-
-      fetchStub.restore();
-      selectSpy.restore();
     });
 
     test('follows the route rather than the document known when the queue was armed', async () => {
       searchForm.currentDocument = entries[1];
       // the user navigated again before the queue came back
       searchForm.currentDocument = entries[0];
-      const fetchStub = stubFetch(searchForm);
-      const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+      stubFetch(searchForm);
+      const selectSpy = sandbox.spy(searchForm.$.list, 'selectIndex');
 
       searchForm._visibleChanged();
       await settle();
 
       expect(selectSpy).to.have.been.calledOnce;
       expect(selectSpy).to.have.been.calledWith(0);
-
-      fetchStub.restore();
-      selectSpy.restore();
     });
 
     test('a queue displayed without an explicit index also catches up', async () => {
       // _formChanged reaches displayQueue with no index once the search layout is loaded
       searchForm.currentDocument = entries[0];
-      const fetchStub = stubFetch(searchForm);
-      const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+      stubFetch(searchForm);
+      const selectSpy = sandbox.spy(searchForm.$.list, 'selectIndex');
 
       searchForm.displayQueue();
       await settle();
 
       expect(selectSpy).to.have.been.calledWith(0);
-
-      fetchStub.restore();
-      selectSpy.restore();
     });
 
     test('later fetches do not pull the selection back to the displayed document', async () => {
       // sort, column filter and a new search all clearSelection() and then fetch
       searchForm.currentDocument = entries[0];
-      const fetchStub = stubFetch(searchForm);
+      stubFetch(searchForm);
       searchForm._visibleChanged();
       await settle();
 
-      const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+      const selectSpy = sandbox.spy(searchForm.$.list, 'selectIndex');
       searchForm.$.list.clearSelection();
       searchForm._visibleChanged();
       await settle();
@@ -783,9 +784,6 @@ suite('nuxeo-search-form', () => {
       await settle();
 
       expect(selectSpy).to.not.have.been.called;
-
-      fetchStub.restore();
-      selectSpy.restore();
     });
 
     test('a populated queue is synchronised by the observer, leaving nothing pending', async () => {
@@ -794,25 +792,22 @@ suite('nuxeo-search-form', () => {
       searchForm.currentDocument = entries[1];
       expect(searchForm.__queueSelectionPending).to.not.be.true;
 
-      const fetchStub = stubFetch(searchForm);
+      stubFetch(searchForm);
       searchForm.$.list.clearSelection();
-      const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+      const selectSpy = sandbox.spy(searchForm.$.list, 'selectIndex');
 
       searchForm._visibleChanged();
       await settle();
 
       expect(selectSpy).to.not.have.been.called;
-
-      fetchStub.restore();
-      selectSpy.restore();
     });
 
     test('an explicit index wins over a pending replay (WEBUI-1881)', async () => {
       // the filters/queue toggle restores the document the user opened from the queue
       searchForm.currentDocument = entries[0];
       searchForm.selectedDocument = entries[1];
-      const fetchStub = stubFetch(searchForm);
-      const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+      stubFetch(searchForm);
+      const selectSpy = sandbox.spy(searchForm.$.list, 'selectIndex');
 
       searchForm.displayQueueAndNavigateToFirst();
       await settle();
@@ -820,33 +815,26 @@ suite('nuxeo-search-form', () => {
       expect(selectSpy).to.have.been.calledOnce;
       expect(selectSpy).to.have.been.calledWith(1);
       expect(searchForm.__queueSelectionPending).to.not.be.true;
-
-      fetchStub.restore();
-      selectSpy.restore();
     });
 
     test('does not select a displayed document that is outside the queue', async () => {
       searchForm.currentDocument = { uid: 'uid-child', path: '/default-domain/doc-1/child' };
-      const fetchStub = stubFetch(searchForm);
-      const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
-      const clearSpy = sinon.spy(searchForm.$.list, 'clearSelection');
+      stubFetch(searchForm);
+      const selectSpy = sandbox.spy(searchForm.$.list, 'selectIndex');
+      const clearSpy = sandbox.spy(searchForm.$.list, 'clearSelection');
 
       searchForm._visibleChanged();
       await settle();
 
       expect(selectSpy).to.not.have.been.called;
       expect(clearSpy).to.not.have.been.called;
-
-      fetchStub.restore();
-      selectSpy.restore();
-      clearSpy.restore();
     });
 
     test('refresh populating the queue spends a pending replay without a document change', async () => {
       searchForm.currentDocument = entries[0];
       expect(searchForm.__queueSelectionPending).to.be.true;
 
-      const fetchStub = stubFetch(searchForm);
+      stubFetch(searchForm);
       searchForm.refresh();
       await settle();
       expect(searchForm.__queueSelectionPending).to.not.be.true;
@@ -854,104 +842,107 @@ suite('nuxeo-search-form', () => {
       // a deliberate clear - sort, column filter - must survive the visibility fetch after it
       searchForm.$.list.clearSelection();
       searchForm.selectedDocument = null;
-      const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+      const selectSpy = sandbox.spy(searchForm.$.list, 'selectIndex');
 
       searchForm._visibleChanged();
       await settle();
 
       expect(selectSpy).to.not.have.been.called;
-
-      fetchStub.restore();
-      selectSpy.restore();
     });
 
-    test('a superseded fetch cannot spend the replay before the replacement populates the queue', async () => {
+    test('an aborted fetch cannot spend the replay before the replacement populates the queue', async () => {
       searchForm.currentDocument = entries[1];
       expect(searchForm.__queueSelectionPending).to.be.true;
 
-      // the first fetch is aborted by the second: it settles with the queue still empty
-      let settleFirst;
-      let settleSecond;
-      const fetchStub = sinon.stub(searchForm.$.list, 'fetch');
-      fetchStub.onFirstCall().returns(new Promise((resolve) => (settleFirst = resolve)));
-      fetchStub.onSecondCall().returns(new Promise((resolve) => (settleSecond = resolve)));
-      const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+      // the visibility fetch is aborted by the one displayQueue starts: it settles first, empty
+      let settleReplacement;
+      const fetchStub = sandbox.stub(searchForm.$.list, 'fetch');
+      fetchStub.onFirstCall().callsFake(abortedFetch);
+      fetchStub.onSecondCall().returns(new Promise((resolve) => (settleReplacement = resolve)));
+      const selectSpy = sandbox.spy(searchForm.$.list, 'selectIndex');
 
       searchForm._visibleChanged();
       searchForm.displayQueue();
-      // the aborted request settles first, with nothing in the queue
-      settleFirst();
       await settle();
+      expect(searchForm.__queueSelectionPending).to.be.true;
+
       // then the replacement brings the entries in
-      searchForm.$.list.items = entries.map((entry) => Object.assign({}, entry));
-      settleSecond();
+      loadQueue(searchForm);
+      settleReplacement();
       await settle();
 
       expect(selectSpy).to.have.been.calledOnce;
       expect(searchForm.selectedDocument.uid).to.equal('uid-2');
       expect(searchForm.__queueSelectionPending).to.not.be.true;
-
-      fetchStub.restore();
-      selectSpy.restore();
     });
 
-    test('refresh with results present waits for the shared provider before spending the replay', async () => {
-      searchForm.currentDocument = entries[1];
-      expect(searchForm.__queueSelectionPending).to.be.true;
+    suite('with a results view sharing the provider', () => {
+      let originalResults;
 
-      // the results request aborts the queue request, which settles first with the queue empty
-      let settleQueue;
-      let settleResults;
-      const fetchStub = sinon
-        .stub(searchForm.$.list, 'fetch')
-        .returns(new Promise((resolve) => (settleQueue = resolve)));
-      const resultsFetchStub = sinon
-        .stub(searchForm, '_fetch')
-        .returns(new Promise((resolve) => (settleResults = resolve)));
-      searchForm.results = { reset: sinon.spy() };
-      const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+      setup(() => {
+        originalResults = searchForm.results;
+        // `nuxeo-results.fetch` debounces, and a caller superseded within the debounce window is
+        // never settled, so the queue cannot wait on it
+        searchForm.results = { reset: sinon.spy(), fetch: () => new Promise(() => {}) };
+      });
 
-      searchForm.refresh();
-      settleQueue();
-      await settle();
-      expect(searchForm.__queueSelectionPending).to.be.true;
+      teardown(() => {
+        searchForm.results = originalResults;
+        searchForm.loading = false;
+      });
 
-      searchForm.$.list.items = entries.map((entry) => Object.assign({}, entry));
-      settleResults();
-      await settle();
+      test('the results response populating the queue spends the replay', async () => {
+        searchForm.currentDocument = entries[1];
+        // the results request aborts the queue request, which is fulfilled with the queue empty
+        sandbox.stub(searchForm.$.list, 'fetch').callsFake(abortedFetch);
+        const selectSpy = sandbox.spy(searchForm.$.list, 'selectIndex');
 
-      expect(selectSpy).to.have.been.calledOnce;
-      expect(searchForm.selectedDocument.uid).to.equal('uid-2');
-      expect(searchForm.__queueSelectionPending).to.not.be.true;
+        searchForm.refresh();
+        await settle();
+        expect(searchForm.__queueSelectionPending).to.be.true;
 
-      fetchStub.restore();
-      resultsFetchStub.restore();
-      selectSpy.restore();
-    });
+        // the provider's own response is synced into the queue, which reports the load
+        loadQueue(searchForm);
 
-    test('a rejected fetch releases the in-flight count', async () => {
-      const fetchStub = sinon.stub(searchForm.$.list, 'fetch').returns(Promise.reject(new Error('boom')));
-      let error;
-      try {
-        await searchForm._fetchQueue();
-      } catch (e) {
-        error = e;
-      }
-      expect(error.message).to.equal('boom');
-      expect(searchForm.__pendingFetches).to.equal(0);
-      fetchStub.restore();
+        expect(selectSpy).to.have.been.calledOnce;
+        expect(searchForm.selectedDocument.uid).to.equal('uid-2');
+        expect(searchForm.__queueSelectionPending).to.not.be.true;
+      });
+
+      test('rapid refreshes whose results fetches are coalesced do not block a later replay', async () => {
+        searchForm.currentDocument = entries[1];
+        sandbox.stub(searchForm.$.list, 'fetch').callsFake(abortedFetch);
+        const selectSpy = sandbox.spy(searchForm.$.list, 'selectIndex');
+
+        searchForm.refresh();
+        searchForm.refresh();
+        await settle();
+        loadQueue(searchForm);
+        expect(searchForm.selectedDocument.uid).to.equal('uid-2');
+
+        // a new search empties the queue again and the route moves on before it is back: the
+        // dropped results callers must not keep the next replay from running
+        searchForm.$.list.items = [];
+        searchForm.currentDocument = entries[0];
+        expect(searchForm.__queueSelectionPending).to.be.true;
+        loadQueue(searchForm);
+
+        expect(selectSpy).to.have.been.calledTwice;
+        expect(selectSpy.secondCall).to.have.been.calledWith(0);
+        expect(searchForm.__queueSelectionPending).to.not.be.true;
+      });
     });
 
     test('a successful empty result still spends the replay', async () => {
       searchForm.currentDocument = entries[1];
-      const fetchStub = sinon.stub(searchForm.$.list, 'fetch').resolves();
+      sandbox.stub(searchForm.$.list, 'fetch').callsFake(() => Promise.resolve().then(() => loadQueue(searchForm, [])));
+      const selectSpy = sandbox.spy(searchForm.$.list, 'selectIndex');
 
       searchForm._visibleChanged();
       await settle();
 
       expect(searchForm.__queueSelectionPending).to.not.be.true;
-
-      fetchStub.restore();
+      expect(selectSpy).to.not.have.been.called;
     });
 
     test('a lookup against a populated queue spends an earlier pending replay', async () => {
@@ -959,7 +950,7 @@ suite('nuxeo-search-form', () => {
       searchForm.currentDocument = entries[0];
       expect(searchForm.__queueSelectionPending).to.be.true;
 
-      const fetchStub = stubFetch(searchForm);
+      stubFetch(searchForm);
       searchForm._visibleChanged();
       await settle();
       searchForm.__queueSelectionPending = true;
@@ -972,28 +963,24 @@ suite('nuxeo-search-form', () => {
       // a deliberate clear - sort, column filter - must survive the fetch that follows it
       searchForm.$.list.clearSelection();
       searchForm.selectedDocument = null;
-      const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+      const selectSpy = sandbox.spy(searchForm.$.list, 'selectIndex');
 
       searchForm._visibleChanged();
       await settle();
 
       expect(selectSpy).to.not.have.been.called;
-
-      fetchStub.restore();
-      selectSpy.restore();
     });
 
-    test('does nothing when the filters view is showing by the time the queue arrives', () => {
+    test('keeps the replay armed while the filters view is showing', () => {
       searchForm.currentDocument = entries[0];
-      searchForm.$.list.items = entries.map((entry) => Object.assign({}, entry));
-      const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+      expect(searchForm.__queueSelectionPending).to.be.true;
+      const selectSpy = sandbox.spy(searchForm.$.list, 'selectIndex');
       searchForm.queue = false;
 
-      searchForm._selectPendingCurrentDocument();
+      loadQueue(searchForm);
 
       expect(selectSpy).to.not.have.been.called;
-
-      selectSpy.restore();
+      expect(searchForm.__queueSelectionPending).to.be.true;
     });
   });
 

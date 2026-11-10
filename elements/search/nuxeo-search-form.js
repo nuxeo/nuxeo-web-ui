@@ -393,6 +393,7 @@ Polymer({
           <nuxeo-data-list
             nx-provider="provider"
             id="list"
+            on-nuxeo-page-loaded="_queuePageLoaded"
             selected-item="{{selectedDocument}}"
             empty-label="[[i18n('searchForm.queue.noResults')]]"
             empty-label-when-filtered
@@ -745,7 +746,7 @@ Polymer({
         }
       }
       if (this.queue) {
-        this._fetchQueue().then((idle) => idle && this._selectPendingCurrentDocument());
+        this.$.list.fetch();
       } else if (this.auto) {
         this._fetch(this.$.provider);
       }
@@ -762,15 +763,11 @@ Polymer({
 
   refresh() {
     if (this.queue) {
-      // This fetch can be the one that first populates the queue, so it has to spend a pending
-      // replay too: left armed, a later visibility fetch would re-select the displayed document
-      // after a deliberate clear (WEBUI-2303).
-      void this._fetchQueue().then((idle) => idle && this._selectPendingCurrentDocument());
+      this.$.list.fetch();
     }
     if (this.results) {
       this.results.reset();
-      // Shares the provider with the queue, so it can abort the queue request above: track it too.
-      void this._trackFetch(this._fetch(this.results)).then((idle) => idle && this._selectPendingCurrentDocument());
+      this._fetch(this.results);
     }
   },
 
@@ -790,38 +787,19 @@ Polymer({
       if (restoreSelection) {
         selectedUid = this.selectedDocument != null ? this.selectedDocument.uid : undefined;
       }
-      this._fetchQueue().then((idle) => {
+      if (typeof index === 'number') {
+        // An explicit index is the caller's own selection and wins over a pending replay.
+        this.__queueSelectionPending = false;
+      }
+      this.$.list.fetch().then(() => {
         if (typeof index === 'number') {
-          // An explicit index is the caller's own selection and wins over a pending replay.
-          this.__queueSelectionPending = false;
           const targetIndex = this._queueIndexOf(selectedUid, index);
           this.$.list.scrollToIndex(targetIndex);
           this.$.list.selectIndex(targetIndex);
           this._navigateToQueueItem(targetIndex);
-        } else if (idle) {
-          this._selectPendingCurrentDocument();
         }
       });
     }
-  },
-
-  _fetchQueue() {
-    return this._trackFetch(this.$.list.fetch());
-  },
-
-  _trackFetch(promise) {
-    // Fetches through the shared page provider abort one another, and an aborted request is still
-    // fulfilled, with the queue left empty. Resolve with whether nothing else is still in flight,
-    // so that only the fetch that settles last can spend the pending replay (WEBUI-2303).
-    this.__pendingFetches = (this.__pendingFetches || 0) + 1;
-    const release = () => {
-      this.__pendingFetches -= 1;
-      return this.__pendingFetches === 0;
-    };
-    return Promise.resolve(promise).then(release, (err) => {
-      release();
-      throw err;
-    });
   },
 
   _queueItemTapped(e) {
@@ -876,7 +854,7 @@ Polymer({
     // The list is guarded because `currentDocument` is bound from the host and can be pushed in
     // before the template is stamped, and `queue` is set as an attribute on some search forms.
     // Such a form can be handed the document while still un-fetched, and an observer only runs
-    // on a change, so ask the queue fetch to replay the lookup instead (WEBUI-2303).
+    // on a change, so ask the next queue load to replay the lookup instead (WEBUI-2303).
     if (!(this.$ && this.$.list && this.$.list.items && this.$.list.items.length)) {
       this.__queueSelectionPending = true;
       return;
@@ -888,10 +866,19 @@ Polymer({
     this._selectCurrentDocumentInQueue();
   },
 
+  _queuePageLoaded() {
+    // The list reports `nuxeo-page-loaded` only for a response that actually filled it: its own
+    // fetch, or the shared page provider fetching for the results view. An aborted request is not
+    // reported, so the replay cannot be spent against a queue that is still empty, and nothing here
+    // waits on a caller's promise, which a superseded or debounced fetch may never settle.
+    this._selectPendingCurrentDocument();
+  },
+
   _selectPendingCurrentDocument() {
     // Replay once, never after every fetch: sort, column filter and a new search each clear the
-    // selection and then fetch, and re-selecting there would fight them (WEBUI-2303).
-    if (!this.__queueSelectionPending) {
+    // selection and then fetch, and re-selecting there would fight them (WEBUI-2303). Keep it armed
+    // while the filters view is showing, since nothing can be highlighted there.
+    if (!this.__queueSelectionPending || !this.queue) {
       return;
     }
     this.__queueSelectionPending = false;
