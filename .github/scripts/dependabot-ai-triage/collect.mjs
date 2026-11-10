@@ -5,7 +5,7 @@ import { anonymouslyReadable, githubClient, jiraClient, npmClient } from './lib/
 import { loadConfig } from './lib/config.mjs';
 import { analyzeLockfile, analyzeManifest, vulnerableParents } from './lib/lockfile.mjs';
 import { OWNED_LABEL, OWNERSHIP_PROPERTY, combinedRange, normalizeAlert, reconcile } from './lib/reconcile.mjs';
-import { ControlState, LockHeldError } from './lib/state.mjs';
+import { ControlState, LockHeldError, isClearedReported } from './lib/state.mjs';
 import {
   alertId,
   clip,
@@ -115,29 +115,57 @@ async function verifyJira(jira, config, probe) {
   }
 }
 
-function ticketQueries(config, alerts) {
+function batches(items, size = 10) {
+  const result = [];
+  for (let i = 0; i < items.length; i += size) {
+    result.push(items.slice(i, i + size));
+  }
+  return result;
+}
+
+/**
+ * Each query carries the identifiers or packages it searched for. `text ~` also matches comments, so a ticket
+ * found this way is kept as a planner candidate even when its summary and description do not mention the alert.
+ */
+export function ticketQueries(config, alerts) {
   const projects = config.repositories.map((repo) => repo.project).join(', ');
+  const recent = '(statusCategory != Done OR updated >= -365d)';
   const queries = [
-    `labels = "${OWNED_LABEL}" ORDER BY key`,
-    `project in (${projects}) AND labels = dependabot AND (statusCategory != Done OR updated >= -365d) ORDER BY key`,
+    { jql: `labels = "${OWNED_LABEL}" ORDER BY key`, matches: [] },
+    { jql: `project in (${projects}) AND labels = dependabot AND ${recent} ORDER BY key`, matches: [] },
   ];
   if (config.epic) {
-    queries.push(`parent = ${config.epic} ORDER BY key`);
+    queries.push({ jql: `parent = ${config.epic} ORDER BY key`, matches: [] });
   }
-  const identifiers = [...new Set(alerts.flatMap((alert) => [alert.ghsa, alert.cve]).filter(Boolean))];
-  for (let i = 0; i < identifiers.length; i += 10) {
-    const terms = identifiers.slice(i, i + 10).map((id) => String.raw`text ~ "\"${id}\""`);
-    queries.push(`project in (${projects}) AND (${terms.join(' OR ')}) ORDER BY key`);
+  const identifiers = [...new Set(alerts.flatMap((alert) => [alert.ghsa, alert.cve, alert.url]).filter(Boolean))];
+  for (const batch of batches(identifiers)) {
+    const terms = batch.map((id) => String.raw`text ~ "\"${id}\""`);
+    queries.push({ jql: `project in (${projects}) AND (${terms.join(' OR ')}) ORDER BY key`, matches: batch });
+  }
+  // Upgrade tickets outside the epic and without the dependabot label often name only the package.
+  const packages = [...new Set(alerts.map((alert) => alert.package).filter(Boolean))];
+  for (const batch of batches(packages)) {
+    const terms = batch.map((name) => String.raw`summary ~ "\"${name}\""`);
+    queries.push({
+      jql: `project in (${projects}) AND ${recent} AND (${terms.join(' OR ')}) ORDER BY key`,
+      matches: batch.map((name) => `package:${name}`),
+    });
   }
   return queries;
 }
 
 async function readTickets(jira, config, alerts, warnings) {
   const fields = [...TICKET_FIELDS, config.severityField];
-  const pages = await Promise.all(
-    ticketQueries(config, alerts).map((jql) => jira.search(jql, fields, [OWNERSHIP_PROPERTY])),
-  );
-  const byKey = new Map(pages.flat().map((issue) => [issue.key, issue]));
+  const queries = ticketQueries(config, alerts);
+  const pages = await Promise.all(queries.map(({ jql }) => jira.search(jql, fields, [OWNERSHIP_PROPERTY])));
+  const byKey = new Map();
+  const matchedBy = new Map();
+  pages.forEach((issues, index) => {
+    for (const issue of issues) {
+      byKey.set(issue.key, issue);
+      matchedBy.set(issue.key, [...(matchedBy.get(issue.key) ?? []), ...queries[index].matches]);
+    }
+  });
   // Upstream tickets that blocked owners wait for must be read too, so a status change triggers a recheck.
   const upstream = [...byKey.values()]
     .map((issue) => issue.properties?.[OWNERSHIP_PROPERTY]?.blocker?.upstreamRef)
@@ -151,7 +179,8 @@ async function readTickets(jira, config, alerts, warnings) {
   byKey.delete(config.controlIssue);
   return [...byKey.values()].map((issue) => {
     const ticket = toTicket(issue, config);
-    return { ...ticket, ownership: validOwnership(ticket, config, warnings) };
+    const matched = [...new Set(matchedBy.get(issue.key) ?? [])];
+    return { ...ticket, matchedBy: matched, ownership: validOwnership(ticket, config, warnings) };
   });
 }
 
@@ -313,8 +342,13 @@ export function selectCandidates(tickets, aiAlerts, currentOwner, config) {
       return true;
     }
     const openInEpic = ticket.statusCategory !== 'done' && ticket.parent === config.epic;
+    const matched = new Set(ticket.matchedBy ?? []);
+    // Identifier searches also match comments, so such a hit counts even if the description is silent.
+    const searchHit = (alert) =>
+      [alert.ghsa, alert.cve, alert.url, `package:${alert.package}`].some((id) => id && matched.has(id));
     return aiAlerts.some(
       (alert) =>
+        searchHit(alert) ||
         mentions(ticket, alert) ||
         currentOwner[alertId(alert.repository, alert.number)] === ticket.key ||
         (openInEpic && config.repositoryConfig(alert.repository).project === ticket.project),
@@ -423,9 +457,8 @@ async function clearedBatch(github, batch, warnings) {
 }
 
 /** Looks up owned alerts that are no longer open, in small batches; ones already reported are skipped. */
-export async function clearedAlerts(github, ownedNotOpen, warnings, alreadyReported = []) {
-  const reported = new Set(alreadyReported);
-  const pending = ownedNotOpen.filter((item) => !reported.has(item.id));
+export async function clearedAlerts(github, ownedNotOpen, warnings, isReported = () => false) {
+  const pending = ownedNotOpen.filter((item) => !isReported(item.id));
   const batches = [];
   for (let i = 0; i < pending.length; i += LOOKUP_BATCH) {
     batches.push(pending.slice(i, i + LOOKUP_BATCH));
@@ -542,8 +575,10 @@ async function reconcileAndPlan(ctx, inventory) {
   const previous = inventory.previousState?.lastSuccess ? inventory.previousState : null;
   const result = reconcile({ alerts, tickets, previousState: previous });
   inventory.reconciliation = result;
-  const reportedCleared = inventory.previousState?.reportedCleared ?? [];
-  inventory.cleared = await clearedAlerts(ctx.github, result.ownedNotOpen, ctx.warnings, reportedCleared);
+  const reported = await ctx.control.loadCleared();
+  inventory.cleared = await clearedAlerts(ctx.github, result.ownedNotOpen, ctx.warnings, (id) =>
+    isClearedReported(reported, id),
+  );
   const planner = await buildPlannerInput(ctx, { alerts, repositories, tickets, result });
   Object.assign(inventory, planner, { plannerNeeded: planner.aiInput.length > 0 });
 }

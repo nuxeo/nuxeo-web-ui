@@ -1,5 +1,9 @@
 export const STATE_PROPERTY = 'dependabot-ai-triage-state';
 export const JOURNAL_PROPERTY = 'dependabot-ai-triage-journal';
+// Alerts already reported as closed on GitHub, per repository: every number at or below `floor`, plus `ids`.
+export const CLEARED_PROPERTY = 'dependabot-ai-triage-cleared';
+// Jira issue properties are limited to 32 768 bytes.
+const PROPERTY_BUDGET = 28000;
 // One property per run (`<prefix>-<runId>`) so a later run never overwrites a card awaiting a retried delivery.
 export const CARD_PROPERTY = 'dependabot-ai-triage-teams-card';
 // GitHub allows re-running a workflow run for 30 days; delivery records must outlive that window.
@@ -9,6 +13,36 @@ const JOURNAL_BUDGET = 28000;
 const RESOLVED = new Set(['done', 'failed', 'not-applied']);
 
 export class LockHeldError extends Error {}
+
+export function isClearedReported(record, id) {
+  const [repository, number] = [id.slice(0, id.lastIndexOf('#')), Number(id.slice(id.lastIndexOf('#') + 1))];
+  const entry = record?.repositories?.[repository];
+  return Boolean(entry) && (number <= entry.floor || entry.ids.includes(number));
+}
+
+/**
+ * Alert numbers only grow, so the oldest reported closures are folded into a per-repository floor when the record
+ * nears the size limit. Nothing is forgotten: everything at or below the floor still counts as reported.
+ */
+export function addCleared(record, ids, budget = PROPERTY_BUDGET) {
+  const next = { schemaVersion: 1, repositories: structuredClone(record?.repositories ?? {}) };
+  for (const id of ids) {
+    const repository = id.slice(0, id.lastIndexOf('#'));
+    const number = Number(id.slice(id.lastIndexOf('#') + 1));
+    const entry = next.repositories[repository] ?? { floor: 0, ids: [] };
+    if (number > entry.floor && !entry.ids.includes(number)) {
+      entry.ids.push(number);
+    }
+    entry.ids.sort((a, b) => a - b);
+    next.repositories[repository] = entry;
+  }
+  while (JSON.stringify(next).length > budget) {
+    const [, largest] = Object.entries(next.repositories).sort((a, b) => b[1].ids.length - a[1].ids.length)[0];
+    const folded = largest.ids.splice(0, Math.max(1, Math.ceil(largest.ids.length / 10)));
+    largest.floor = Math.max(largest.floor, folded.at(-1));
+  }
+  return next;
+}
 
 /** Run state kept on the private control issue (Jira issue properties are not shown in the UI). */
 export class ControlState {
@@ -26,7 +60,11 @@ export class ControlState {
   }
 
   async saveState(changes) {
-    this.state = { schemaVersion: 1, ...this.state, ...changes };
+    const next = { schemaVersion: 1, ...this.state, ...changes };
+    if (JSON.stringify(next).length > PROPERTY_BUDGET) {
+      throw new Error('Run state would exceed the Jira property size limit; it was not saved.');
+    }
+    this.state = next;
     await this.jira.setProperty(this.issueKey, STATE_PROPERTY, this.state);
   }
 
@@ -75,8 +113,23 @@ export class ControlState {
     }
   }
 
+  /** Reserved writes, plus creates whose outcome was unknown: their run-scoped label can still settle them. */
   pending() {
-    return this.journal.entries.filter((entry) => entry.status === 'reserved');
+    return this.journal.entries.filter(
+      (entry) =>
+        entry.status === 'reserved' || (entry.status === 'uncertain' && entry.kind === 'create' && entry.recovery),
+    );
+  }
+
+  async loadCleared() {
+    return (await this.jira.property(this.issueKey, CLEARED_PROPERTY)) ?? { schemaVersion: 1, repositories: {} };
+  }
+
+  /** Adds newly reported closures and keeps the record within the property limit by raising per-repo floors. */
+  async saveCleared(record, ids) {
+    const next = addCleared(record, ids);
+    await this.jira.setProperty(this.issueKey, CLEARED_PROPERTY, next);
+    return next;
   }
 
   find(id) {

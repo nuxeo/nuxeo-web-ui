@@ -83,11 +83,12 @@ export class FakeJira {
   }
 
   async search(jql) {
+    this.searches = [...(this.searches ?? []), jql];
     const label = /labels = "([^"]+)"/.exec(jql)[1];
     return [...this.issues.values()]
       .filter((issue) => issue.fields.labels.includes(label))
-      .map(({ key }) => {
-        return { key };
+      .map(({ key, fields, properties }) => {
+        return { key, fields, properties: structuredClone(properties) };
       });
   }
 

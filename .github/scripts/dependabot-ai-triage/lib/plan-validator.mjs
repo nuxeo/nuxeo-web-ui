@@ -66,6 +66,9 @@ function unknownKeys(object, allowed) {
 }
 
 function isUpstreamRef(value) {
+  if (typeof value !== 'string') {
+    return false;
+  }
   return JIRA_KEY.test(value) || /^https:\/\/(github\.com|www\.npmjs\.com)\/[\w./#@%-]+$/.test(value);
 }
 
@@ -320,7 +323,7 @@ function checkBlocker(ctx, group, owned, where) {
     ctx.fail('invalid-blocker', `${where} blocker type "${blocker.type}" is not an external blocker.`);
   }
   const complete = ['reason', 'mitigation', 'recheck'].every((field) => isText(blocker[field]));
-  if (!complete || !isUpstreamRef(blocker.upstreamRef ?? '')) {
+  if (!complete || !isUpstreamRef(blocker.upstreamRef)) {
     ctx.fail('blocker-missing', `${where} needs reason, upstreamRef, mitigation and recheck criteria.`);
   }
   if (blocker.type !== 'no-upstream-patch') {
@@ -405,8 +408,14 @@ function checkReports(ctx) {
   for (const [index, item] of ctx.plan.closedTicketMismatches.entries()) {
     const where = `closedTicketMismatches[${index}]`;
     const ticket = isObject(item) && typeof item.ticket === 'string' ? ctx.tickets.get(item.ticket) : null;
-    if (!validReportTarget(ctx, item) || unknownKeys(item, MISMATCH_KEYS).length || ticket?.statusCategory !== 'done') {
-      ctx.fail('mismatch-schema', `${where} must reference a closed ticket from the fresh Jira read.`);
+    const valid = validReportTarget(ctx, item) && !unknownKeys(item, MISMATCH_KEYS).length;
+    // The closed ticket must belong to the alert's own Jira project, as for groups.
+    const sameProject = valid && item.ticket.startsWith(`${ctx.projectOf.get(item.repository)}-`);
+    if (!valid || !sameProject || ticket?.statusCategory !== 'done') {
+      ctx.fail(
+        'mismatch-schema',
+        `${where} must reference a closed ticket of the alert's project from the fresh Jira read.`,
+      );
       continue;
     }
     assign(ctx, item.repository, item.alert, where);

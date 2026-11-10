@@ -5,13 +5,21 @@ import { chmodSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from '
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { Executor, apply, postTeams, summarize } from '../apply.mjs';
-import { clearedAlerts, collect, plannerTicket, selectCandidates } from '../collect.mjs';
+import { clearedAlerts, collect, plannerTicket, selectCandidates, ticketQueries } from '../collect.mjs';
 import { anonymouslyReadable, npmClient } from '../lib/clients.mjs';
 import { validatePlan } from '../lib/plan-validator.mjs';
-import { OWNERSHIP_PROPERTY, blockerRecheck, fingerprint, reconcile } from '../lib/reconcile.mjs';
+import { OWNED_LABEL, OWNERSHIP_PROPERTY, blockerRecheck, fingerprint, reconcile } from '../lib/reconcile.mjs';
 import { runReport, teamsCard } from '../lib/render.mjs';
 import { request } from '../lib/util.mjs';
-import { CARD_PROPERTY, ControlState, JOURNAL_PROPERTY, STATE_PROPERTY } from '../lib/state.mjs';
+import {
+  CARD_PROPERTY,
+  ControlState,
+  JOURNAL_PROPERTY,
+  STATE_PROPERTY,
+  addCleared,
+  isClearedReported,
+} from '../lib/state.mjs';
+import { analyzeLockfile, parseDeclaration } from '../lib/lockfile.mjs';
 import { plan } from '../plan.mjs';
 import { DIGEST, EL, RUN, WEB, blocked, bootstrapPlan, group, liveAlerts, registerTickets } from './fixtures.mjs';
 import { FakeJira, config, createGroup, executor, newOutcome, severityId } from './support.mjs';
@@ -515,7 +523,7 @@ test('every closed owned alert is looked up in bounded batches, skipping ones al
   const owned = Array.from({ length: 130 }, (_, index) => {
     return { id: `${WEB}#${index + 1}`, tickets: ['APP-1'] };
   });
-  const cleared = await clearedAlerts(github, owned, [], [`${WEB}#1`]);
+  const cleared = await clearedAlerts(github, owned, [], (id) => id === `${WEB}#1`);
   assert.equal(cleared.length, 129);
   assert.ok(!looked.includes(1) && looked.includes(130));
   assert.ok(peak <= 10);
@@ -937,4 +945,185 @@ test('related tickets must come from the Jira read of this run and the configure
   assert.deepEqual(codes(withRelated(['APP-31', 'LIB-44'])), []);
   assert.ok(codes(withRelated(['LIB-9999'])).includes('unknown-related-ticket'));
   assert.ok(codes(withRelated(['OTHER-5'])).includes('unknown-related-ticket'));
+});
+
+// Review round on 72fcbf68f / e18a3b08b.
+
+test('a retry whose plan changed does not reuse completed actions for different inputs', async () => {
+  const tickets = registerTickets();
+  const jira = new FakeJira(tickets);
+  const first = await executor(jira, tickets);
+  await first.exec.create(createGroup(), {});
+  const changed = { ...createGroup(), alerts: [108, 107], severity: 'high' };
+  const retry = await executor(jira, tickets);
+  const report = {};
+  await retry.exec.create(changed, report);
+  assert.match(retry.outcome.failures.join(), /planned differently by an earlier attempt/);
+  assert.equal(report.ticketKey, undefined);
+  assert.equal(jira.calls.filter((call) => call.name === 'create').length, 1);
+});
+
+test('creation stops when ownership or a matching ticket appeared during planning', async () => {
+  const tickets = registerTickets();
+  const jira = new FakeJira(tickets);
+  jira.issues.get('LIB-44').fields.labels.push(OWNED_LABEL);
+  jira.issues.get('LIB-44').properties[OWNERSHIP_PROPERTY] = { repository: EL, alerts: { 108: {} } };
+  const { exec, outcome } = await executor(jira, tickets);
+  await exec.create(createGroup(), {});
+  assert.match(outcome.failures.join(), /LIB-44 recorded ownership of these alerts after collection/);
+  assert.equal(jira.calls.filter((call) => call.name === 'create').length, 0);
+
+  const fresh = new FakeJira(tickets);
+  fresh.issues.set('LIB-500', {
+    key: 'LIB-500',
+    fields: { labels: [OWNED_LABEL], status: { name: 'Open', statusCategory: { key: 'new' } } },
+    properties: {},
+    comments: [],
+  });
+  const second = await executor(fresh, tickets);
+  await second.exec.create(createGroup(), {});
+  assert.match(second.outcome.failures.join(), /LIB-500 appeared after collection/);
+});
+
+test('tickets found by identifier or package search stay candidates even when only a comment mentions them', () => {
+  const alert = liveAlerts().find((item) => item.repository === EL && item.number === 108);
+  const commentOnly = {
+    key: 'LIB-7',
+    project: 'LIB',
+    summary: 'Old upgrade',
+    description: '',
+    statusCategory: 'done',
+    matchedBy: [alert.ghsa],
+  };
+  const byPackage = { ...commentOnly, key: 'LIB-8', matchedBy: [`package:${alert.package}`] };
+  const unrelated = { ...commentOnly, key: 'LIB-9', matchedBy: [] };
+  const keys = selectCandidates([commentOnly, byPackage, unrelated], [alert], {}, config).map((ticket) => ticket.key);
+  assert.deepEqual(keys.sort(), ['LIB-7', 'LIB-8']);
+  const queries = ticketQueries({ ...config, epic: 'EPIC-1' }, [alert]);
+  assert.ok(queries.some((query) => /summary ~ "\\"pkg-match\\""/.test(query.jql)));
+  assert.ok(queries.some((query) => query.matches.includes(alert.ghsa)));
+});
+
+test('npm alias declarations are resolved for dependents and direct declarations', () => {
+  const lock = {
+    lockfileVersion: 3,
+    packages: {
+      '': { name: 'root', devDependencies: { 'width-cjs': 'npm:pkg-width@^4.2.0' } },
+      'node_modules/@acme/cli': { version: '8.0.2', dependencies: { 'width-cjs': 'npm:pkg-width@^4.2.0' } },
+      'node_modules/width-cjs': { name: 'pkg-width', version: '4.2.3' },
+    },
+  };
+  const analysis = analyzeLockfile({ lock, name: 'pkg-width', vulnerableRange: '< 5.0.0' });
+  assert.equal(analysis.instances.length, 1);
+  const dependents = analysis.instances[0].dependents.map((item) => `${item.name}:${item.range}:${item.alias}`);
+  assert.deepEqual(dependents.sort(), ['(root project):^4.2.0:width-cjs', '@acme/cli:^4.2.0:width-cjs']);
+  assert.deepEqual(analysis.directDeclaration, [
+    { field: 'devDependencies', spec: 'npm:pkg-width@^4.2.0', alias: 'width-cjs' },
+  ]);
+  assert.deepEqual(parseDeclaration('x', 'npm:@scope/name@^1.0.0'), {
+    name: '@scope/name',
+    range: '^1.0.0',
+    alias: 'x',
+  });
+});
+
+test('a failed link keeps ownership unrecorded and is retried by a later run', async () => {
+  const tickets = registerTickets();
+  const jira = new FakeJira(tickets);
+  jira.failNext = { name: 'link', error: { status: 400 } };
+  const { exec, outcome } = await executor(jira, tickets);
+  const report = {};
+  await exec.create({ ...createGroup(), relatedTickets: ['LIB-44'] }, report);
+  assert.match(outcome.failures.join(), /link/);
+  assert.equal(jira.issues.get(report.ticketKey).properties[OWNERSHIP_PROPERTY], undefined);
+  assert.deepEqual(exec.pendingLinks, [{ from: report.ticketKey, to: 'LIB-44' }]);
+  const later = await executor(jira, tickets, { runId: 'later-run' });
+  const remaining = await later.exec.replayLinks(exec.pendingLinks);
+  assert.deepEqual(remaining, []);
+  assert.equal(jira.calls.filter((call) => call.name === 'link').length, 2);
+});
+
+test('closure history stays under the property limit and old closures stay reported', () => {
+  const ids = Array.from({ length: 12000 }, (_, index) => `${WEB}#${index + 1}`);
+  const record = addCleared({ repositories: {} }, ids);
+  assert.ok(JSON.stringify(record).length <= 28000);
+  assert.ok(record.repositories[WEB].floor > 0);
+  assert.equal(isClearedReported(record, `${WEB}#1`), true);
+  assert.equal(isClearedReported(record, `${WEB}#12000`), true);
+  assert.equal(isClearedReported(record, `${WEB}#12001`), false);
+  assert.equal(isClearedReported(record, `${EL}#1`), false);
+});
+
+test('the run state refuses to exceed the Jira property limit', async () => {
+  const jira = new FakeJira();
+  const control = new ControlState(jira, config.controlIssue);
+  await control.load();
+  await assert.rejects(control.saveState({ big: 'x'.repeat(30000) }), /property size limit/);
+});
+
+test('a closed-ticket mismatch must name a ticket of the alert repository project', () => {
+  const alerts = liveAlerts();
+  const planned = bootstrapPlan();
+  planned.groups.pop();
+  planned.closedTicketMismatches.push({ repository: EL, alert: 108, ticket: 'APP-77' });
+  const result = validatePlan({
+    plan: planned,
+    runId: RUN,
+    inventoryDigest: DIGEST,
+    repositories: [
+      { name: WEB, project: 'APP' },
+      { name: EL, project: 'LIB' },
+    ],
+    epicQuarter: '2026-Q4',
+    alerts,
+    aiInput: alerts.map((alert) => `${alert.repository}#${alert.number}`),
+    currentOwner: new Map(),
+    tickets: [...registerTickets(), { key: 'APP-77', statusCategory: 'done' }],
+    now: new Date('2026-11-09T07:45:00Z'),
+  });
+  assert.ok(result.errors.some((error) => error.code === 'mismatch-schema'));
+});
+
+test('a non-string upstream reference is rejected', () => {
+  const alerts = liveAlerts();
+  const planned = bootstrapPlan();
+  const held = planned.groups.find((item) => item.ticket === 'APP-30');
+  held.blocker.upstreamRef = ['LIB-24'];
+  const result = validatePlan({
+    plan: planned,
+    runId: RUN,
+    inventoryDigest: DIGEST,
+    repositories: [
+      { name: WEB, project: 'APP' },
+      { name: EL, project: 'LIB' },
+    ],
+    epicQuarter: '2026-Q4',
+    alerts,
+    aiInput: alerts.map((alert) => `${alert.repository}#${alert.number}`),
+    currentOwner: new Map(),
+    tickets: registerTickets(),
+    now: new Date('2026-11-09T07:45:00Z'),
+  });
+  assert.ok(result.errors.some((error) => error.code === 'blocker-missing'));
+});
+
+test('a create with an unknown outcome is settled by later recovery through its label', async () => {
+  const jira = new FakeJira();
+  const control = new ControlState(jira, config.controlIssue);
+  await control.load();
+  await control.reserve({ id: 'old:create', kind: 'create', target: 'x', runId: 'old', recovery: { label: 'dat-u' } });
+  await control.settle('old:create', 'uncertain', {});
+  assert.equal(control.pending().length, 1);
+  jira.issues.set('LIB-600', {
+    key: 'LIB-600',
+    fields: { labels: ['dat-u'], status: { name: 'Open', statusCategory: { key: 'new' } } },
+    properties: {},
+    comments: [],
+  });
+  const { exec } = await executor(jira, []);
+  await exec.recover();
+  const reloaded = new ControlState(jira, config.controlIssue);
+  await reloaded.load();
+  assert.equal(reloaded.find('old:create').status, 'done');
+  assert.equal(reloaded.pending().length, 0);
 });

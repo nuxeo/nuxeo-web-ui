@@ -110,11 +110,19 @@ export class Executor {
     this.tickets = new Map((inventory.tickets ?? []).map((ticket) => [ticket.key, ticket]));
     this.now = new Date().toISOString();
     this.stopped = false;
+    this.pendingLinks = [];
   }
 
   /** Returns true when the action may run now; records why it may not otherwise. */
-  async prepare(id, kind, target, recovery) {
+  async prepare(id, kind, target, recovery, signature) {
     const previous = this.control.find(id);
+    // A retry of the same run re-plans from fresh data: a completed action is only reused for identical inputs.
+    if (previous?.signature && signature && previous.signature !== signature) {
+      this.outcome.failures.push(
+        `${kind} ${target} was planned differently by an earlier attempt of this run; not reused.`,
+      );
+      return false;
+    }
     if (previous?.status === 'done') {
       this.outcome.actions.push({ status: 'already-done', kind, target, detail: '' });
       return false;
@@ -129,19 +137,20 @@ export class Executor {
       previous.status = 'reserved';
       await this.control.persistJournal();
     } else {
-      await this.control.reserve({ id, kind, target, runId: this.inventory.runId, recovery });
+      await this.control.reserve({ id, kind, target, runId: this.inventory.runId, recovery, signature });
     }
     return true;
   }
 
   /** Reserve → act → settle. A completed action from an earlier attempt of this run is not repeated. */
-  async act(id, kind, target, fn) {
+  async act(id, kind, target, fn, signature) {
     if (this.stopped) {
       return null;
     }
-    if (!(await this.prepare(id, kind, target, fn.recovery))) {
+    if (!(await this.prepare(id, kind, target, fn.recovery, signature))) {
       const previous = this.control.find(id);
-      return previous?.status === 'done' ? previous.result : null;
+      const reusable = previous?.status === 'done' && (!signature || previous.signature === signature);
+      return reusable ? previous.result : null;
     }
     let result;
     try {
@@ -180,6 +189,18 @@ export class Executor {
       this.stopped = true;
       this.outcome.failures.push(`${kind} ${target}: journal entry not saved: ${journalError.message}`);
     }
+  }
+
+  /** Identifies what an action was asked to do, so a retry with different inputs never reuses its result. */
+  signature(group, extra = {}) {
+    return shortHash({
+      operation: group.operation,
+      kind: group.kind,
+      severity: group.severity,
+      alerts: [...group.alerts].sort((a, b) => a - b),
+      updateNote: group.updateNote ?? null,
+      ...extra,
+    });
   }
 
   groupAlerts(group) {
@@ -302,11 +323,19 @@ export class Executor {
       now: this.now,
       upstreamStatus: this.upstreamStatus(group),
     });
-    const recorded = await this.act(`${runId}:${target.key}:ownership`, 'ownership', target.key, async () => {
-      await this.jira.setProperty(target.key, OWNERSHIP_PROPERTY, ownership);
-      await this.verifyIssue(target.key, { property: ownership });
-      return { key: target.key };
-    });
+    const signature = this.signature(group);
+    const id = `${runId}:${target.key}:ownership:${signature}`;
+    const recorded = await this.act(
+      id,
+      'ownership',
+      target.key,
+      async () => {
+        await this.jira.setProperty(target.key, OWNERSHIP_PROPERTY, ownership);
+        await this.verifyIssue(target.key, { property: ownership });
+        return { key: target.key };
+      },
+      signature,
+    );
     return Boolean(recorded);
   }
 
@@ -349,23 +378,89 @@ export class Executor {
     const alerts = this.groupAlerts(group);
     const run = async () => {
       const existing = await this.jira.search(`labels = "${label}" ORDER BY created ASC`, ['summary']);
+      if (!existing.length) {
+        await this.checkLiveCoverage(group, alerts);
+      }
       const key = existing[0]?.key ?? (await this.jira.create(this.createFields(group, alerts, label))).key;
       await this.verifyIssue(key, { severity: group.severity, epic: this.config.epic });
       return { key, detail: existing.length ? '(reused the ticket from an interrupted attempt of this run)' : '' };
     };
     run.recovery = { label };
-    const result = await this.act(`${runId}:${group.remediationId}:create`, 'create', group.remediationId, run);
+    const signature = this.signature(group);
+    const id = `${runId}:${group.remediationId}:create`;
+    const result = await this.act(id, 'create', group.remediationId, run, signature);
     if (!result) {
       return;
     }
     Object.assign(report, { ticketKey: result.key, action: 'created', blockerChanged: group.kind === 'blocked' });
-    await mapSequential(group.relatedTickets ?? [], (related) =>
-      this.act(`${runId}:${result.key}:link:${related}`, 'link', `${result.key} → ${related}`, async () => {
-        await this.jira.link(this.config.linkType, result.key, related);
-        return { key: result.key };
-      }),
-    );
-    await this.finish(group, { key: result.key, onHold: false, category: 'new', ownership: null }, alerts, report);
+    const linked = await mapSequential(group.relatedTickets ?? [], (related) => this.link(result.key, related));
+    // Ownership waits for the links: until it is recorded the alerts are re-planned, and failed links are retried.
+    if (linked.every(Boolean)) {
+      await this.finish(group, { key: result.key, onHold: false, category: 'new', ownership: null }, alerts, report);
+    }
+  }
+
+  /**
+   * Coverage may appear while the planner runs (a ticket created or adopted by someone else). Re-read it right
+   * before creating, so a new ticket is never a duplicate of work recorded since collection.
+   */
+  async checkLiveCoverage(group, alerts) {
+    const project = this.config.repositoryConfig(group.repository).project;
+    const minutes = Math.ceil((Date.now() - Date.parse(this.inventory.startedAt)) / 60000) + 5;
+    const ids = alerts.flatMap((alert) => [alert.ghsa, alert.cve, alert.url]).filter(Boolean);
+    const terms = [...new Set(ids)].map((id) => String.raw`text ~ "\"${id}\""`);
+    const jql =
+      `project = ${project} AND (labels = "${OWNED_LABEL}" OR (updated >= -${minutes}m AND (${terms.join(' OR ')})))` +
+      ' ORDER BY key';
+    const issues = await this.jira.search(jql, ['summary', 'status'], [OWNERSHIP_PROPERTY]);
+    const numbers = new Set(alerts.map((alert) => alert.number));
+    const owner = issues.find((issue) => {
+      const ownership = issue.properties?.[OWNERSHIP_PROPERTY];
+      // A closed owner is a closed-ticket mismatch, which reconciliation reports; only open owners block a create.
+      return (
+        issue.fields?.status?.statusCategory?.key !== 'done' &&
+        ownership?.repository === group.repository &&
+        Object.keys(ownership.alerts ?? {}).some((number) => numbers.has(Number(number)))
+      );
+    });
+    if (owner) {
+      throw new Error(`${owner.key} recorded ownership of these alerts after collection; not creating a duplicate`);
+    }
+    const known = new Set(this.tickets.keys());
+    const fresh = issues.filter((issue) => !known.has(issue.key) && !issue.properties?.[OWNERSHIP_PROPERTY]);
+    if (fresh.length) {
+      const keys = fresh.map((issue) => issue.key).join(', ');
+      throw new Error(`${keys} appeared after collection and may cover these alerts; re-planned next run`);
+    }
+  }
+
+  /** Links a new ticket; a definite failure is kept and retried by later runs independently of the plan. */
+  async link(from, to) {
+    const id = `${this.inventory.runId}:${from}:link:${to}`;
+    const linked = await this.act(id, 'link', `${from} → ${to}`, async () => {
+      await this.jira.link(this.config.linkType, from, to);
+      return { key: from };
+    });
+    if (!linked) {
+      this.pendingLinks.push({ from, to });
+    }
+    return Boolean(linked);
+  }
+
+  /** Retries links that failed in earlier runs, before anything else is changed. */
+  async replayLinks(pending) {
+    const remaining = [];
+    await mapSequential(pending, async ({ from, to }) => {
+      const id = `${this.inventory.runId}:replay:${from}:link:${to}`;
+      const done = await this.act(id, 'link', `${from} → ${to}`, async () => {
+        await this.jira.link(this.config.linkType, from, to);
+        return { key: from };
+      });
+      if (!done) {
+        remaining.push({ from, to });
+      }
+    });
+    return remaining;
   }
 
   async applyScope(group, target, added) {
@@ -405,8 +500,15 @@ export class Executor {
     }
     const recorded = new Set(Object.keys(target.ownership?.alerts ?? {}).map(Number));
     const added = alerts.filter((alert) => !recorded.has(alert.number));
-    const id = `${runId}:${group.remediationId}:${group.operation}`;
-    const scope = await this.act(id, group.operation, group.ticket, () => this.applyScope(group, target, added));
+    const signature = this.signature(group, { ticket: group.ticket });
+    const id = `${runId}:${group.remediationId}:${group.operation}:${signature}`;
+    const scope = await this.act(
+      id,
+      group.operation,
+      group.ticket,
+      () => this.applyScope(group, target, added),
+      signature,
+    );
     if (!scope) {
       return;
     }
@@ -618,7 +720,6 @@ function describe(outcome, inventory, plan) {
   const summary = summarize(inventory, plan);
   const reconciliation = inventory.reconciliation ?? {};
   const reported = new Set(inventory.previousState?.reportedMismatches ?? []);
-  const reportedCleared = new Set(inventory.previousState?.reportedCleared ?? []);
   const groups = plan?.groups ?? [];
   const byOperation = (operation) => groups.filter((group) => group.operation === operation).length;
   const planMismatches = (plan?.closedTicketMismatches ?? []).map((item) => {
@@ -639,8 +740,9 @@ function describe(outcome, inventory, plan) {
     ],
     ambiguous: reconciliation.ambiguous ?? [],
     // Alerts closed on GitHub are reported once, not every week.
+    // The collector already skips closures reported by earlier runs.
     cleared: outcome.cleared.map((item) => {
-      return { ...item, isNew: !reportedCleared.has(item.id) };
+      return { ...item, isNew: true };
     }),
     needsReview: plan?.needsReview ?? [],
     groups: groups.map((group) => {
@@ -689,10 +791,14 @@ async function saveState(control, outcome, inventory) {
       lastSuccess: record,
       pendingUnowned: (outcome.untriaged ?? []).filter((id) => pending.has(id)),
       reportedMismatches: outcome.closedMismatches.map((item) => item.id),
-      reportedCleared: [
-        ...new Set([...(inventory.previousState?.reportedCleared ?? []), ...outcome.cleared.map((item) => item.id)]),
-      ].slice(-2000),
+      reportedCleared: undefined,
     });
+    if (outcome.cleared.length) {
+      await control.saveCleared(
+        await control.loadCleared(),
+        outcome.cleared.map((item) => item.id),
+      );
+    }
   } else {
     await control.saveState({ lastFailure: { ...record, failures: outcome.failures.slice(0, 20) } });
   }
@@ -725,6 +831,21 @@ async function notify({ jira, control, config, inventory, outcome }) {
   }
 }
 
+/** Retries links that failed earlier, executes the plan, and keeps every link still to be made in the state. */
+async function runLinks(executor, control, outcome, plan) {
+  const remaining = await executor.replayLinks(control.state?.pendingLinks ?? []);
+  if (plan && !outcome.failures.length) {
+    await executor.execute(plan);
+  }
+  const pendingLinks = [...remaining, ...executor.pendingLinks];
+  if (pendingLinks.length || control.state?.pendingLinks?.length) {
+    await control.saveState({ pendingLinks });
+  }
+  if (pendingLinks.length) {
+    outcome.failures.push(`${pendingLinks.length} issue link(s) could not be created; retried next run.`);
+  }
+}
+
 async function executeLocked({ jira, control, config, inventory, outcome, plan }) {
   await control.load();
   const executor = new Executor({ jira, control, config, inventory, outcome });
@@ -736,8 +857,8 @@ async function executeLocked({ jira, control, config, inventory, outcome, plan }
       const message = `${control.pending().length} interrupted write(s) await reconciliation by the next automatic run.`;
       outcome.warnings.push({ code: 'pending', message });
     }
-    if (outcome.mode === 'automatic' && plan && !outcome.failures.length) {
-      await executor.execute(plan);
+    if (outcome.mode === 'automatic') {
+      await runLinks(executor, control, outcome, plan);
     }
   } catch (error) {
     outcome.failures.push(`Executor: ${error.message}`);
