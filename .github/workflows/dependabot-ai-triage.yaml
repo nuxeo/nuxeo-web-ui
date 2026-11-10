@@ -1,13 +1,14 @@
 name: Dependabot AI triage
 
 # Weekly AI-assisted triage of open Dependabot alerts in nuxeo-web-ui and nuxeo-elements.
-# This repository is public: security data never goes to logs or artifacts. State, reports and the
-# action journal live in the private Jira control issue named in .github/dependabot-ai-triage.json.
-# See .github/scripts/dependabot-ai-triage/README.md.
+# The logic lives in nuxeo/ui-team-gh-actions (dependabot-ai-triage/README.md); this caller holds the schedule,
+# the secrets and the variables (SECURITY_EPIC, SECURITY_EPIC_QUARTER, DEPENDABOT_AI_TRIAGE_*), and pins the
+# reusable workflow to a reviewed commit. Keep this file identical on every dev branch: GitHub only schedules the
+# default branch's copy.
 on:
   schedule:
-    # Monday 07:30 UTC = 13:00 Asia/Kolkata. GitHub only schedules the default branch's copy.
-    - cron: '30 7 * * 1'
+    - cron: '0 13 * * 1'
+      timezone: 'Asia/Kolkata'
   workflow_dispatch:
     inputs:
       mode:
@@ -26,61 +27,13 @@ permissions:
 
 jobs:
   triage:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 60
-    env:
-      TRIAGE_RUN_ID: ${{ github.run_id }}
-      TRIAGE_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || vars.DEPENDABOT_AI_TRIAGE_MODE || 'preview' }}
-      ALLOW_AUTOMATIC: ${{ vars.DEPENDABOT_AI_TRIAGE_ALLOW_AUTOMATIC }}
-      APPROVED_REF: ${{ vars.DEPENDABOT_AI_TRIAGE_APPROVED_REF }}
-      DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-      SECURITY_EPIC: ${{ vars.SECURITY_EPIC }}
-      SECURITY_EPIC_QUARTER: ${{ vars.SECURITY_EPIC_QUARTER }}
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          persist-credentials: false
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-
-      - name: Prepare working directory
-        run: echo "TRIAGE_WORK_DIR=$RUNNER_TEMP/dependabot-ai-triage" >> "$GITHUB_ENV"
-
-      - name: Test triage invariants
-        run: npm test --prefix .github/scripts/dependabot-ai-triage
-
-      - name: Collect alerts, Jira ownership and dependency evidence (no AI)
-        id: collect
-        env:
-          GH_TOKEN: ${{ secrets.GIT_ADMIN_TOKEN }}
-          JIRA_EMAIL: ${{ secrets.DEPENDABOT_TRIAGE_JIRA_EMAIL }}
-          JIRA_API_TOKEN: ${{ secrets.DEPENDABOT_TRIAGE_TOKEN }}
-        run: node .github/scripts/dependabot-ai-triage/collect.mjs
-
-      - name: Install Copilot CLI
-        if: steps.collect.outputs.planner_needed == 'true'
-        run: |
-          npm install --global "@github/copilot@$(jq -r .copilot.cliVersion .github/dependabot-ai-triage.json)"
-          echo "COPILOT_BIN=$(npm prefix --global)/bin/copilot" >> "$GITHUB_ENV"
-
-      # The agent gets read-only file tools, no MCP servers and only the Copilot token.
-      - name: Plan with Copilot
-        if: steps.collect.outputs.planner_needed == 'true'
-        timeout-minutes: 45
-        env:
-          COPILOT_GITHUB_TOKEN: ${{ secrets.DEPENDABOT_TRIAGE_COPILOT_TOKEN }}
-        run: node .github/scripts/dependabot-ai-triage/plan.mjs
-
-      - name: Validate plan, apply, report and notify
-        if: always() && steps.collect.outcome != 'skipped'
-        env:
-          JIRA_EMAIL: ${{ secrets.DEPENDABOT_TRIAGE_JIRA_EMAIL }}
-          JIRA_API_TOKEN: ${{ secrets.DEPENDABOT_TRIAGE_TOKEN }}
-          DEPENDABOT_TEAMS_WEBHOOK_URL: ${{ secrets.DEPENDABOT_TEAMS_WEBHOOK_URL }}
-        run: node .github/scripts/dependabot-ai-triage/apply.mjs
-
-      - name: Remove working files
-        if: always()
-        run: rm -rf "$TRIAGE_WORK_DIR"
+    uses: nuxeo/ui-team-gh-actions/.github/workflows/dependabot-ai-triage.yaml@3bccc517bf13f8fc970eac5fda4760a2baea7be1
+    with:
+      mode: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || '' }}
+    # Passed by name, never `inherit`: the shared workflow receives only what it uses.
+    secrets:
+      DEPENDABOT_TRIAGE_GITHUB_TOKEN: ${{ secrets.GIT_ADMIN_TOKEN }}
+      DEPENDABOT_TRIAGE_JIRA_EMAIL: ${{ secrets.DEPENDABOT_TRIAGE_JIRA_EMAIL }}
+      DEPENDABOT_TRIAGE_TOKEN: ${{ secrets.DEPENDABOT_TRIAGE_TOKEN }}
+      DEPENDABOT_TEAMS_WEBHOOK_URL: ${{ secrets.DEPENDABOT_TEAMS_WEBHOOK_URL }}
+      DEPENDABOT_TRIAGE_COPILOT_TOKEN: ${{ secrets.DEPENDABOT_TRIAGE_COPILOT_TOKEN }}
