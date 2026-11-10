@@ -283,9 +283,12 @@ export async function branchEvidence(readJson, alert, sha) {
     if (!owner) {
       return declared;
     }
+    // A workspace root's overrides and engines apply to the whole lockfile; the workspace's own declarations are
+    // kept separately below.
+    const rootFile = path.posix.join(path.posix.dirname(owner.file), 'package.json');
     const analysis = analyzeLockfile({
       lock: owner.lock,
-      manifest,
+      manifest: rootFile === file ? manifest : await readJson(sha, rootFile),
       name: alert.package,
       vulnerableRange: combinedRange(alert),
     });
