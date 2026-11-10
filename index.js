@@ -3,6 +3,10 @@ import { importHTML, importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js'
 import { setFallbackNotificationTarget } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import { loadTheme } from './themes/loader.js';
 import { installGlobalFocusRing } from './themes/dark-theme-focus-ring.js';
+// Must precede the `./i18n/i18n.js` import below: that module issues its locale request at import
+// time, and the address bar has to be stripped of the spent `token` before it goes out, so the
+// credential is not in that request's `Referer` (WEBUI-2316).
+import './elements/entry-url-install.js';
 import { i18nReady } from './i18n/i18n.js';
 
 // Install the themeable keyboard-focus ring before any custom element attaches its shadow root,
@@ -16,7 +20,7 @@ const setupRTLSupport = () => {
   window.nuxeo.I18n = window.nuxeo.I18n || {};
   const userLanguage = navigator.language || navigator.userLanguage || 'en';
   const rtlLanguages = ['ar', 'he', 'fa', 'ur'];
-  const isRTL = rtlLanguages.some((lang) => userLanguage?.startsWith(lang));
+  const isRTL = rtlLanguages.some((lang) => (userLanguage != null ? userLanguage.startsWith(lang) : undefined));
   window.nuxeo.I18n.direction = isRTL ? 'rtl' : 'ltr';
   document.documentElement.dir = window.nuxeo.I18n.direction;
 };
@@ -64,6 +68,7 @@ const setupApp = async () =>
     }
   });
 const loadRouting = async () => {
+  // The entry URL is already normalized by the `entry-url-install.js` import, above (WEBUI-2316).
   if (config.get('router.htmlImport')) {
     // Wrap importHref in a promise so the startup chain awaits routing.html actually loading
     // and load errors reject (surface) instead of being swallowed, matching the import() branch.
