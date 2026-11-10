@@ -911,3 +911,30 @@ test('the anonymous probe treats 401/403/404 as private and a readable issue as 
     globalThis.fetch = original;
   }
 });
+
+test('related tickets must come from the Jira read of this run and the configured projects', () => {
+  const alerts = liveAlerts();
+  const withRelated = (keys) => {
+    const planned = bootstrapPlan();
+    planned.groups.at(-1).relatedTickets = keys;
+    return validatePlan({
+      plan: planned,
+      runId: RUN,
+      inventoryDigest: DIGEST,
+      repositories: [
+        { name: WEB, project: 'APP' },
+        { name: EL, project: 'LIB' },
+      ],
+      epicQuarter: '2026-Q4',
+      alerts,
+      aiInput: alerts.map((alert) => `${alert.repository}#${alert.number}`),
+      currentOwner: new Map(),
+      tickets: [...registerTickets(), { key: 'OTHER-5', project: 'OTHER', statusCategory: 'new' }],
+      now: new Date('2026-11-09T07:45:00Z'),
+    });
+  };
+  const codes = (result) => result.errors.map((error) => error.code);
+  assert.deepEqual(codes(withRelated(['APP-31', 'LIB-44'])), []);
+  assert.ok(codes(withRelated(['LIB-9999'])).includes('unknown-related-ticket'));
+  assert.ok(codes(withRelated(['OTHER-5'])).includes('unknown-related-ticket'));
+});

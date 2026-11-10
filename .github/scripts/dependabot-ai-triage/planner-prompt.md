@@ -49,7 +49,8 @@ remediation:
   same parent upgrade). Extending adds the alert to that ticket's scope.
 - A ticket that only mentions the package or advisory, or a QA/historical comment, is not coverage.
 - A ticket whose `statusCategory` is `indeterminate` (In Progress, In Review, In QA...) must not be extended. Create
-  a new ticket and put the existing key in `relatedTickets`.
+  a new ticket and put the existing key in `relatedTickets`. Only keys of tickets in the input files may be used
+  there; any other key makes the plan invalid.
 - A ticket that is On Hold may only be extended with alerts that share its blocker (`kind` = `blocked`).
 - If the only ticket that explicitly covers an open alert is closed (`statusCategory` = `done`), report it in
   `closedTicketMismatches`. Do not reopen, replace or extend closed tickets.

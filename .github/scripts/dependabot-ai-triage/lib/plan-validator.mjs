@@ -124,6 +124,12 @@ function checkFields(ctx, group, where) {
   const validRelated = (key) => typeof key === 'string' && JIRA_KEY.test(key);
   if (!Array.isArray(related) || related.length > 5 || !related.every(validRelated)) {
     fail('group-schema', `${where} relatedTickets must be at most 5 Jira keys.`);
+    return;
+  }
+  // Links are created in Jira, so only tickets this run read, in the configured projects, may be linked.
+  const projects = new Set(ctx.projectOf.values());
+  for (const key of related.filter((item) => !ctx.tickets.has(item) || !projects.has(item.split('-')[0]))) {
+    fail('unknown-related-ticket', `${where} relates to ${key}, which is not a ticket from this run's Jira read.`);
   }
 }
 
