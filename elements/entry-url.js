@@ -56,33 +56,80 @@ const EMBEDDED_CREDENTIAL = new RegExp(`[?&](?:${CREDENTIAL_PARAMS.join('|')})=`
 const DUPLICATED_CREDENTIAL_SEPARATOR = new RegExp(String.raw`\?(?=(?:${CREDENTIAL_PARAMS.join('|')})=)`, 'g');
 
 /**
+ * The document tab, the only query parameter this app reads or writes (`nuxeo-browser._updateUrl`,
+ * `routing.js`). Its values are tab names, which never contain a `?`.
+ */
+const TAB_PARAM = 'p';
+
+/** Matches a credential assignment anywhere in a raw (still percent-encoded) query string. */
+const CREDENTIAL_ASSIGNMENT = new RegExp(`(?:^|[?&])(?:${CREDENTIAL_PARAMS.join('|')})=`);
+
+/** Matches the raw `p=<tab>` assignment, up to the next parameter. */
+const TAB_ASSIGNMENT = new RegExp(`(^|&)${TAB_PARAM}=([^&]*)`);
+
+/**
+ * When the query carries a credential, a literal `?` inside the tab name is the separator page.js
+ * lost when it appended `location.search`, even if the copy's own parameters came first
+ * (`p=permissions?lang=fr&token=t`). Keep the tab name that precedes it and put what follows back
+ * as parameters of their own. Restricting this to the tab is deliberate: any other value may
+ * legitimately hold a `?`, and is left as data.
+ *
+ * This works on the raw query string, not on parsed values. A parsed value is already decoded, so
+ * splitting it again would turn an encoded `&`, `=` or `+` in a swallowed parameter into a
+ * separator or a space. A percent-encoded `%3F` is data and is never mistaken for the separator.
+ *
+ * @param {string} query the raw query string, without its leading `?`
+ * @return {string} `query`, with a tab name that swallowed a separator split back apart
+ */
+function recoverTab(query) {
+  if (!CREDENTIAL_ASSIGNMENT.test(query)) {
+    return query;
+  }
+  return query.replace(TAB_ASSIGNMENT, (match, lead, tab) => {
+    const separator = tab.indexOf('?');
+    if (separator < 0) {
+      return match;
+    }
+    // An empty name means nothing usable is left of the tab, so the route falls back to its default.
+    const name = tab.slice(0, separator);
+    return lead + [name && `${TAB_PARAM}=${name}`, tab.slice(separator + 1)].filter(Boolean).join('&');
+  });
+}
+
+/**
  * Parse a query string that a previous visit may already have corrupted. Users bookmark and
  * re-share the addresses this bug produced, so those shapes have to be repaired rather than carried
  * forward.
- */
-/**
+ *
  * Two limits are deliberate, because closing either costs more on the addresses that do occur than
- * it saves on the ones that do not. Every query parameter this app reads or writes is `p`, the
- * document tab (`nuxeo-browser._updateUrl`, `routing.js`), whose values are tab names.
+ * it saves on the ones that do not.
  *
  * - A `?<credential>=` inside a value that is genuinely data is treated as a lost separator. Only a
  *   parameter the app never writes could carry one; identifying residue by the credential's value
  *   instead stops a bookmark being repaired once the login redirect has cleared `location.search`.
  * - Repeated keys collapse to the first value. `URLSearchParams.get()` already returned that, and
  *   collapsing them is what folds the appended copies back into one clean address.
+ *
+ * @param {string} query the query string to parse, without its leading `?`
+ * @param {string} [appended] the `location.search` page.js may have appended to `query`, if known
+ * @return {URLSearchParams} the repaired parameters
  */
 function parseQuery(query, appended) {
   // page.js appended `location.search` verbatim, so while we still have that string the lost
   // separator is just the `?` that begins the literal copy - whatever order its parameters are in,
-  // and once per visit. Repair those first, then fall back to the credential heuristic below for a
-  // copy whose `location.search` the server's login redirect has since dropped.
+  // and once per visit. Remove every trailing copy outright: the caller merges the outer parameters
+  // back in once afterwards, so keeping them here would only duplicate them (and, by rewriting the
+  // copy's `?`, stop the next one from matching). Only a copy that carries a credential is residue of
+  // this bug; a value that merely ends with the same text (`q=https://x/?lang=fr`) is data.
   let repaired = query;
-  if (appended && appended.length > 1) {
+  if (appended && appended.length > 1 && EMBEDDED_CREDENTIAL.test(appended)) {
     while (repaired.endsWith(appended)) {
-      repaired = `${repaired.slice(0, -appended.length)}&${appended.slice(1)}`;
+      repaired = repaired.slice(0, -appended.length);
     }
   }
-  return new URLSearchParams(repaired.replace(DUPLICATED_CREDENTIAL_SEPARATOR, '&'));
+  // Otherwise fall back to the credential heuristic, for a copy whose `location.search` the server's
+  // login redirect has since dropped.
+  return new URLSearchParams(recoverTab(repaired.replace(DUPLICATED_CREDENTIAL_SEPARATOR, '&')));
 }
 
 /**

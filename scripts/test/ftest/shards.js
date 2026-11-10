@@ -44,7 +44,13 @@ const path = require('path');
 
 const REPO_ROOT = path.join(__dirname, '../../..');
 const FEATURES_DIR = path.join(REPO_ROOT, 'ftest/features');
-const WORKFLOW = path.join(REPO_ROOT, '.github/workflows/ftest.yaml');
+/*
+ * Every workflow that dispatches a shard matrix. Each one is cross-checked against the manifest,
+ * because a matrix the manifest does not match is the drift this script exists to catch and it is
+ * per-workflow: `ftest.yaml` agreeing with the manifest says nothing about whether `cross-repo.yaml`
+ * does. Add a workflow here in the same change that gives it a `shard:` matrix.
+ */
+const SHARDED_WORKFLOWS = ['.github/workflows/ftest.yaml', '.github/workflows/cross-repo.yaml'];
 
 /*
  * The filenames `--place` is willing to write, kept to an allowlist because two separate contracts
@@ -128,15 +134,21 @@ const SHARDS = [
  * running, with every job still green. Both YAML list styles are accepted so that reformatting the
  * workflow cannot fail the lint on its own.
  */
-function matrixShards() {
-  const lines = fs.readFileSync(WORKFLOW, 'utf8').split('\n');
-  const start = lines.findIndex((line) => /^\s*shard:/.test(line));
+function matrixShards(relativePath) {
+  const lines = fs.readFileSync(path.join(REPO_ROOT, relativePath), 'utf8').split('\n');
+  /*
+   * `shard:` is the matrix key itself, which ftest.yaml writes literally. cross-repo.yaml sizes its
+   * matrix at run time from a probe job, so the literal list lives in `FTEST_SHARDS` instead and
+   * the matrix reads an expression; the intended shards are still stated statically, which is all
+   * this check needs. A workflow declaring neither is reported rather than assumed correct.
+   */
+  const start = lines.findIndex((line) => /^\s*(shard|FTEST_SHARDS):/.test(line));
   if (start === -1) {
     return null;
   }
 
-  // `shard: [1, 2, 3, 4]`
-  const inline = /^\s*shard:\s*\[([^\]]*)\]/.exec(lines[start]);
+  // `shard: [1, 2, 3, 4]` or `FTEST_SHARDS: '[1, 2, 3, 4]'`
+  const inline = /^\s*(?:shard|FTEST_SHARDS):\s*'?\[([^\]]*)\]/.exec(lines[start]);
   let items;
   if (inline) {
     items = inline[1].split(',');
@@ -207,29 +219,32 @@ function check() {
       errors.push(`  ${feature} is assigned to a shard but does not exist in ftest/features/; remove it.`),
     );
 
-  const dispatched = matrixShards();
-  if (!dispatched) {
-    errors.push(
-      '  Could not read the `shard:` matrix list from .github/workflows/ftest.yaml, so the manifest\n' +
-        '    could not be checked against the shards CI actually runs. Check both by hand.',
-    );
-  } else {
-    const expected = SHARDS.map((_, index) => index + 1);
+  const expected = SHARDS.map((_, index) => index + 1);
+  SHARDED_WORKFLOWS.forEach((workflow) => {
+    const dispatched = matrixShards(workflow);
+    if (!dispatched) {
+      errors.push(
+        `  Could not read the \`shard:\` matrix list from ${workflow}, so the manifest could not be\n` +
+          '    checked against the shards that workflow actually runs. Check both by hand, and if the\n' +
+          `    matrix was removed on purpose, drop ${workflow} from SHARDED_WORKFLOWS in this file.`,
+      );
+      return;
+    }
     const missing = expected.filter((shard) => !dispatched.includes(shard));
     const extra = dispatched.filter((shard) => !expected.includes(shard));
     if (missing.length > 0) {
       errors.push(
         `  Shard(s) ${missing.join(', ')} exist in the manifest but are not in the \`shard:\` matrix in\n` +
-          '    .github/workflows/ftest.yaml, so their features would never run.',
+          `    ${workflow}, so their features would never run there.`,
       );
     }
     if (extra.length > 0) {
       errors.push(
-        `  The \`shard:\` matrix in .github/workflows/ftest.yaml dispatches shard(s) ${extra.join(', ')}, which\n` +
-          '    the manifest does not define; those jobs would fail to resolve a spec list.',
+        `  The \`shard:\` matrix in ${workflow} dispatches shard(s) ${extra.join(', ')}, which the manifest\n` +
+          '    does not define; those jobs would fail to resolve a spec list.',
       );
     }
-  }
+  });
 
   if (errors.length > 0) {
     console.error('The ftest shard manifest and ftest/features/ have drifted apart:\n');
