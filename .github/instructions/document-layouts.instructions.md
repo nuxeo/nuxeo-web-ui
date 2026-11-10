@@ -119,7 +119,7 @@ Notes:
 - Do not put `aria-label` or `aria-labelledby` on an element with no role — a bare `<div>` is generic and
   author-supplied names on it are ignored by browsers and flagged by axe. That is why the value element
   carries `role="definition"`.
-- `themes/base.js` styles both `label` and `.label` with `--nuxeo-label`, so the bare element selector
+- `themes/base.js` styles both `label` and `span.label` with `--nuxeo-label`, so the bare element selector
   still works for customer-authored layouts written against the older pattern.
 - Values carrying `class="multiline"` are styled `white-space: pre-line`. Keep the binding on the same
   source line as the tags (with a `<!-- prettier-ignore -->` above it if the line exceeds the print
