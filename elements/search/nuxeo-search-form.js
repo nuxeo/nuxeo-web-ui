@@ -762,7 +762,10 @@ Polymer({
 
   refresh() {
     if (this.queue) {
-      this.$.list.fetch();
+      // This fetch can be the one that first populates the queue, so it has to spend a pending
+      // replay too: left armed, a later visibility fetch would re-select the displayed document
+      // after a deliberate clear (WEBUI-2303).
+      Promise.resolve(this.$.list.fetch()).then(() => this._selectPendingCurrentDocument());
     }
     if (this.results) {
       this.results.reset();
@@ -859,9 +862,8 @@ Polymer({
       return;
     }
     // The entries are already in, so this lookup is the synchronisation a replay would have run.
-    // Spend a flag armed earlier against an empty queue: `refresh()`, which the quick filters
-    // fire, populates the entries without consuming it, and leaving it armed would let a later
-    // fetch re-select the displayed document after a deliberate clear.
+    // Spend a flag armed earlier against an empty queue, otherwise a later fetch could
+    // re-select the displayed document after a deliberate clear.
     this.__queueSelectionPending = false;
     this._selectCurrentDocumentInQueue();
   },
