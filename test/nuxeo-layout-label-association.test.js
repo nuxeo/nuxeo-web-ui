@@ -57,6 +57,13 @@ async function load(is, relativePath) {
  * control is a SonarCloud Web:S6853 finding and gives a screen-reader user no relationship
  * between the field name and the value or control beside it.
  */
+teardown(function reportFailedTest() {
+  if (this.currentTest && this.currentTest.state === 'failed') {
+    // eslint-disable-next-line no-console
+    console.error(`Failed test: ${this.currentTest.fullTitle()}`);
+  }
+});
+
 suite('layout label association (WEBUI-2230)', () => {
   const metadataLayouts = [
     ['nuxeo-file-metadata-layout', 'elements/document/file/nuxeo-file-metadata-layout.html'],
@@ -115,6 +122,111 @@ suite('layout label association (WEBUI-2230)', () => {
       expect(label.id).to.equal('obsolete-label');
       const toggle = element.shadowRoot.querySelector('paper-toggle-button');
       expect(toggle.getAttribute('aria-labelledby')).to.equal(label.id);
+    });
+  });
+});
+
+suite('l10nxvocabulary parent label (WEBUI-2230)', () => {
+  test('names the parent button with its field label and current selected value', async () => {
+    const element = await load(
+      'nuxeo-l10nxvocabulary-edit-layout',
+      'elements/directory/l10nxvocabulary/nuxeo-l10nxvocabulary-edit-layout.html',
+    );
+    const button = element.shadowRoot.querySelector('#selectParent');
+    const label = element.shadowRoot.querySelector('#parent-label');
+    expect(label.textContent.trim()).to.not.be.empty;
+    expect(button.getAttribute('aria-labelledby').split(/\s+/)).to.deep.equal(['parent-label', 'selectParent']);
+    element.set('entry', { properties: { id: 'child', parent: 'first-parent', obsolete: 0 } });
+    await flush();
+    expect(button.textContent.trim()).to.equal('first-parent');
+    element.set('entry', { properties: { id: 'child', parent: 'second-parent', obsolete: 0 } });
+    await flush();
+    expect(button.textContent.trim()).to.equal('second-parent');
+  });
+});
+
+// Validate the whole conversion, including markup nested in conditional templates.
+// DOMParser keeps scripts inert, so this check cannot register layouts or start requests.
+suite('all converted layout sources (WEBUI-2230)', () => {
+  const paths = [
+    'addons/easyshare/document/easysharefolder/nuxeo-easysharefolder-metadata-layout.html',
+    'addons/nuxeo-imap-connector/document/mailfolder/nuxeo-mailfolder-metadata-layout.html',
+    'addons/nuxeo-imap-connector/document/mailmessage/nuxeo-mailmessage-metadata-layout.html',
+    'addons/nuxeo-platform-3d/document/threed/nuxeo-threed-metadata-layout.html',
+    'addons/nuxeo-template-rendering/document/templatesource/nuxeo-templatesource-metadata-layout.html',
+    'addons/nuxeo-template-rendering/document/webtemplatesource/nuxeo-webtemplatesource-metadata-layout.html',
+    'elements/directory/l10nvocabulary/nuxeo-l10nvocabulary-edit-layout.html',
+    'elements/directory/l10nxvocabulary/nuxeo-l10nxvocabulary-edit-layout.html',
+    'elements/directory/vocabulary/nuxeo-vocabulary-edit-layout.html',
+    'elements/directory/xvocabulary/nuxeo-xvocabulary-edit-layout.html',
+    'elements/document/audio/nuxeo-audio-metadata-layout.html',
+    'elements/document/collection/nuxeo-collection-metadata-layout.html',
+    'elements/document/collections/nuxeo-collections-metadata-layout.html',
+    'elements/document/domain/nuxeo-domain-metadata-layout.html',
+    'elements/document/favorites/nuxeo-favorites-metadata-layout.html',
+    'elements/document/file/nuxeo-file-metadata-layout.html',
+    'elements/document/folder/nuxeo-folder-metadata-layout.html',
+    'elements/document/note/nuxeo-note-metadata-layout.html',
+    'elements/document/orderedfolder/nuxeo-orderedfolder-metadata-layout.html',
+    'elements/document/picture/nuxeo-picture-metadata-layout.html',
+    'elements/document/picturebook/nuxeo-picturebook-metadata-layout.html',
+    'elements/document/root/nuxeo-root-metadata-layout.html',
+    'elements/document/section/nuxeo-section-metadata-layout.html',
+    'elements/document/sectionroot/nuxeo-sectionroot-metadata-layout.html',
+    'elements/document/templateroot/nuxeo-templateroot-metadata-layout.html',
+    'elements/document/userworkspacesroot/nuxeo-userworkspacesroot-metadata-layout.html',
+    'elements/document/video/nuxeo-video-metadata-layout.html',
+    'elements/document/workspace/nuxeo-workspace-metadata-layout.html',
+    'elements/document/workspaceroot/nuxeo-workspaceroot-metadata-layout.html',
+    'elements/search/expired/nuxeo-expired-search-form.html',
+    'elements/search/trash/nuxeo-trash-search-form.html',
+    'elements/workflow/paralleldocumentreview/nuxeo-task2169-layout.html',
+    'elements/workflow/paralleldocumentreview/nuxeo-task328d-layout.html',
+    'elements/workflow/serialdocumentreview/nuxeo-task6d8-layout.html',
+  ];
+
+  function allElements(root) {
+    return [...root.querySelectorAll('*')].flatMap((element) =>
+      element.localName === 'template' ? [element, ...allElements(element.content)] : [element],
+    );
+  }
+
+  paths.forEach((path) => {
+    test(path, async () => {
+      const response = await fetch(new URL(`../${path}`, import.meta.url));
+      expect(response.ok, path).to.be.true;
+      const source = new DOMParser().parseFromString(await response.text(), 'text/html');
+      const elements = allElements(source);
+      expect(
+        elements.filter((element) => element.localName === 'label'),
+        path,
+      ).to.be.empty;
+      const labels = elements.filter((element) => element.classList.contains('label'));
+      expect(labels, path).to.not.be.empty;
+      labels.forEach((label) => {
+        expect(label.localName, path).to.equal('span');
+        expect(label.id, path).to.not.be.empty;
+        expect(
+          elements.filter((element) => element.id === label.id),
+          label.id,
+        ).to.have.lengthOf(1);
+        const values = elements.filter((element) =>
+          (element.getAttribute('aria-labelledby') || '').split(/\s+/).includes(label.id),
+        );
+        if (path.startsWith('elements/search/')) {
+          // Search hosts retain their existing aria-label binding; the inner input
+          // derives its accessible name from the dropdown placeholder.
+          expect(
+            elements.some((element) => element.hasAttribute('aria-label$')),
+            path,
+          ).to.be.true;
+        } else {
+          expect(values, `${path}: ${label.id}`).to.not.be.empty;
+          if (!path.startsWith('elements/directory/')) {
+            values.forEach((value) => expect(value.getAttribute('role'), label.id).to.equal('definition'));
+          }
+        }
+      });
     });
   });
 });
