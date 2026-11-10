@@ -101,7 +101,7 @@ the variables were not updated, the run still reconciles and reports, but refuse
   verified, so an interrupted run leaves those alerts unowned and they are simply planned again. A write whose
   outcome is unknown (timeout, 5xx) stops further writes and is never blindly repeated; the next automatic run
   reconciles it from Jira before writing anything (whether the link exists, the ticket is On Hold, the ownership
-  property or a comment naming that run is present). Preview only reports it. A Teams post whose delivery is unknown is not resent, and no Teams message is
+  property is written by that run, or every comment of that action, each carrying its own action marker, is present). Preview only reports it. A Teams post whose delivery is unknown is not resent, and no Teams message is
   sent when the private journal is unavailable. Re-running the same workflow run does not repeat completed writes.
 
 The checkpoint advances only after a complete automatic run. Collection, planning, validation or write failures make

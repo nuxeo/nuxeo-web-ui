@@ -207,7 +207,11 @@ function lowestFixInMajor(versions, major, floor, range) {
  */
 function fixAboveInstalled(versions, instances, alert, range) {
   const installed = instances.filter((item) => item.vulnerable !== false).map((item) => item.version);
-  const floor = installed.sort(compareVersions).at(-1) ?? alert.firstPatched ?? '0.0.0';
+  const floor = installed.sort(compareVersions).at(-1) ?? alert.firstPatched;
+  // Without a known installed version or patched release there is no floor to prove an upgrade from.
+  if (!floor) {
+    return null;
+  }
   return (
     versions
       .filter((version) => compareVersions(version, floor) > 0 && inAdvisoryRange(version, range) === false)
@@ -228,6 +232,10 @@ export function npmSummary(packument, alert, instances) {
       floors.set(major, instance.version);
     }
   }
+  const perMajor = Object.fromEntries(
+    [...floors].map(([major, floor]) => [major, lowestFixInMajor(versions, major, floor, range)]),
+  );
+  const majorFixes = Object.values(perMajor).filter(Boolean).sort(compareVersions);
   return {
     latest: packument['dist-tags']?.latest,
     latestIsVulnerable: inAdvisoryRange(packument['dist-tags']?.latest, range),
@@ -235,9 +243,9 @@ export function npmSummary(packument, alert, instances) {
     advisoryRanges: alert.advisoryRanges,
     firstPatchedPublished: alert.firstPatched ? versions.includes(alert.firstPatched) : false,
     // null for a major means no fixed release exists in that major: a major upgrade (not a blocker) is needed.
-    lowestFixPerVulnerableMajor: Object.fromEntries(
-      [...floors].map(([major, floor]) => [major, lowestFixInMajor(versions, major, floor, range)]),
-    ),
+    lowestFixPerVulnerableMajor: perMajor,
+    // A fixed release in at least one vulnerable major: an upstream patch exists even if another major has none.
+    fixInSomeVulnerableMajor: majorFixes[0] ?? null,
     firstPatchedEngines: packument.versions[alert.firstPatched]?.engines ?? null,
   };
 }
@@ -520,7 +528,8 @@ async function buildPlannerInput(ctx, { alerts, repositories, tickets, result })
   );
   // Registry-confirmed fix availability is kept on the alert so the validator can reject a false "no patch".
   aiAlerts.forEach((alert, index) => {
-    alert.registryFix = npmInfo[index].package?.fixAboveInstalled ?? null;
+    const npmPackage = npmInfo[index].package;
+    alert.registryFix = npmPackage?.fixAboveInstalled ?? npmPackage?.fixInSomeVulnerableMajor ?? null;
   });
   const candidates = selectCandidates(tickets, aiAlerts, currentOwner, ctx.config);
   const comments = await Promise.all(candidates.map((ticket) => ctx.jira.recentComments(ticket.key, 5)));

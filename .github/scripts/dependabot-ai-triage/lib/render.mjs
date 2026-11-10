@@ -102,29 +102,29 @@ export function ticketDescription({ group, alerts, evidence, config, runId }) {
   ]);
 }
 
-export function extendComment({ group, added, evidence, runId }) {
+export function extendComment({ group, added, evidence, runId, marker }) {
   const extended = added.length > 0;
   const severity = `Highest current GitHub severity of the findings this ticket owns: ${titleCase(group.severity)}.`;
   return adfDoc([
     adfHeading(extended ? 'Dependabot triage: scope extended' : 'Dependabot triage: finding update'),
     adfParagraph(adfText(group.updateNote ?? group.rationale)),
     extended ? adfBullets(findingsSection(added, evidence)) : null,
-    adfParagraph(adfText(`${severity} Run ${runId}.`)),
+    adfParagraph(adfText(`${severity} Run ${runId} (ref ${marker}).`)),
   ]);
 }
 
-export function severityComment({ raise, runId }) {
+export function severityComment({ raise, runId, marker }) {
   const from = raise.from ? titleCase(raise.from) : 'unset';
   const text =
     `GitHub now reports ${titleCase(raise.to)} for ${raise.alerts.join(', ')}. ` +
-    `Defect Severity raised from ${from} to ${titleCase(raise.to)}. Run ${runId}.`;
+    `Defect Severity raised from ${from} to ${titleCase(raise.to)}. Run ${runId} (ref ${marker}).`;
   return adfDoc([adfHeading('Dependabot triage: severity raised'), adfParagraph(adfText(text))]);
 }
 
-export function holdComment({ group, runId }) {
+export function holdComment({ group, runId, marker }) {
   const note =
     'Severity remains unchanged. No risk acceptance or alert dismissal is implied. ' +
-    `Set by Dependabot AI triage run ${runId}.`;
+    `Set by Dependabot AI triage run ${runId} (ref ${marker}).`;
   return adfDoc([
     adfHeading('Reason for On Hold'),
     adfBullets(blockerLines(group.blocker)),

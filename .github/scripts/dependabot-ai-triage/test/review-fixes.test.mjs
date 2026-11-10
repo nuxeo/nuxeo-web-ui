@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { chmodSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { Executor, apply, postTeams, summarize } from '../apply.mjs';
+import { Executor, actionMarker, apply, postTeams, summarize } from '../apply.mjs';
 import { clearedAlerts, collect, npmSummary, plannerTicket, selectCandidates, ticketQueries } from '../collect.mjs';
 import { anonymouslyReadable, npmClient } from '../lib/clients.mjs';
 import { validatePlan } from '../lib/plan-validator.mjs';
@@ -1171,10 +1171,12 @@ test('uncertain scope writes from earlier runs are reconciled from comments befo
     ['old:a', 'APP-31'],
     ['old:b', 'APP-28'],
   ]) {
-    await control.reserve({ id, kind: 'extend', target: key, runId: 'old', recovery: { key } });
+    const recovery = { key, markers: [actionMarker(id, 'scope')] };
+    await control.reserve({ id, kind: 'extend', target: key, runId: 'old', recovery });
     await control.settle(id, 'uncertain', {});
   }
-  jira.issues.get('APP-31').comments.push({ type: 'doc', content: [{ type: 'text', text: 'Run old.' }] });
+  const text = `Run old (ref ${actionMarker('old:a', 'scope')}).`;
+  jira.issues.get('APP-31').comments.push({ type: 'doc', content: [{ type: 'text', text }] });
   const { exec } = await executor(jira, tickets);
   await exec.recover();
   const reloaded = new ControlState(jira, config.controlIssue);
@@ -1351,13 +1353,90 @@ test('recovery reads the whole comment history, not only the latest page', async
   const tickets = registerTickets();
   const jira = new FakeJira(tickets);
   jira.recentComments = async () => [];
-  jira.allComments = async () => [{ body: { type: 'doc', content: [{ type: 'text', text: 'Run old.' }] } }];
+  const marker = actionMarker('old:x', 'scope');
+  jira.allComments = async () => [{ body: { type: 'doc', content: [{ type: 'text', text: `ref ${marker}` }] } }];
   const control = new ControlState(jira, config.controlIssue);
   await control.load();
-  await control.reserve({ id: 'old:x', kind: 'extend', target: 'APP-31', runId: 'old', recovery: { key: 'APP-31' } });
+  const recovery = { key: 'APP-31', markers: [marker] };
+  await control.reserve({ id: 'old:x', kind: 'extend', target: 'APP-31', runId: 'old', recovery });
   const { exec } = await executor(jira, tickets);
   await exec.recover();
   const reloaded = new ControlState(jira, config.controlIssue);
   await reloaded.load();
   assert.equal(reloaded.find('old:x').status, 'done');
+});
+
+// Review round on fe2048e0d / 1b6803e0a.
+
+test('scope recovery requires the comment of that exact action, not any comment from the same run', async () => {
+  const tickets = registerTickets();
+  const jira = new FakeJira(tickets);
+  const control = new ControlState(jira, config.controlIssue);
+  await control.load();
+  const earlier = 'run-1:APP-31:extend:aaa';
+  const later = 'run-1:APP-31:extend:bbb';
+  const text = `Run run-1 (ref ${actionMarker(earlier, 'scope')}).`;
+  jira.issues.get('APP-31').comments.push({ type: 'doc', content: [{ type: 'text', text }] });
+  const recovery = { key: 'APP-31', markers: [actionMarker(later, 'scope'), actionMarker(later, 'severity')] };
+  await control.reserve({ id: later, kind: 'extend', target: 'APP-31', runId: 'run-1', recovery });
+  await control.settle(later, 'uncertain', {});
+  const { exec } = await executor(jira, tickets);
+  await exec.recover();
+  const reloaded = new ControlState(jira, config.controlIssue);
+  await reloaded.load();
+  assert.equal(reloaded.find(later).status, 'not-applied');
+});
+
+test('an extension writes its marker in every comment it posts', async () => {
+  const tickets = registerTickets();
+  const jira = new FakeJira(tickets);
+  const { exec, control } = await executor(jira, tickets);
+  const extend = group(`${EL}:refresh`, EL, 'extend', 'LIB-44', 'critical', [104, 105, 107], { updateNote: 'x' });
+  await exec.update(extend, {});
+  const entry = control.journal.entries.find((item) => item.kind === 'extend');
+  assert.equal(entry.recovery.markers.length, 2);
+  const texts = jira.issues.get('LIB-44').comments.map((comment) => JSON.stringify(comment));
+  for (const marker of entry.recovery.markers) {
+    assert.ok(texts.some((text) => text.includes(marker)));
+  }
+});
+
+test('a hold whose reason comment failed is completed by the next attempt before ownership', async () => {
+  const tickets = registerTickets();
+  const jira = new FakeJira(tickets);
+  jira.failNext = { name: 'addComment', error: { status: 400 } };
+  const unpatched = group(`${EL}:pkg-merge`, EL, 'create', undefined, 'low', [106], {
+    ...blocked('no-upstream-patch', 'https://github.com/advisories/GHSA-0000-0000-0007'),
+  });
+  const first = await executor(jira, tickets);
+  const report = {};
+  await first.exec.create(unpatched, report);
+  const key = report.ticketKey;
+  assert.equal(jira.issues.get(key).fields.status.name, 'On Hold');
+  const retry = await executor(jira, tickets);
+  const done = await retry.exec.finish(unpatched, { key, onHold: true, ownership: null }, [], {});
+  assert.equal(done, true);
+  assert.ok(jira.issues.get(key).comments.some((comment) => JSON.stringify(comment).includes('Reason for On Hold')));
+  assert.ok(jira.issues.get(key).properties[OWNERSHIP_PROPERTY]);
+});
+
+test('a fix in one vulnerable major is kept when another installed major has none', () => {
+  const packument = { 'dist-tags': { latest: '3.0.0' }, versions: { '2.1.0': {}, '2.1.1': {}, '3.0.0': {} } };
+  const alert = {
+    firstPatched: null,
+    advisoryRanges: [{ range: '< 2.1.1', firstPatched: null }, { range: '>= 3.0.0' }],
+  };
+  const instances = [
+    { version: '2.1.0', vulnerable: true },
+    { version: '3.0.0', vulnerable: true },
+  ];
+  const summary = npmSummary(packument, alert, instances);
+  assert.equal(summary.fixAboveInstalled, null);
+  assert.equal(summary.fixInSomeVulnerableMajor, '2.1.1');
+});
+
+test('no upgrade is inferred when neither an installed version nor a patched release is known', () => {
+  const packument = { 'dist-tags': { latest: '2.0.0' }, versions: { '1.0.0': {}, '2.0.0': {} } };
+  const alert = { firstPatched: null, advisoryRanges: [{ range: '>= 2.0.0', firstPatched: null }] };
+  assert.equal(npmSummary(packument, alert, []).fixAboveInstalled, null);
 });
