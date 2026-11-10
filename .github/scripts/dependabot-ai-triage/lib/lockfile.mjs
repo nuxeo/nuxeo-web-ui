@@ -41,11 +41,40 @@ function overridesFor(overrides, name, trail = []) {
   });
 }
 
+/**
+ * Reads a dependency declaration, including npm aliases such as `"string-width-cjs": "npm:string-width@^4.2.0"`.
+ * Returns the real package name and its range, or null when the spec is not a string.
+ */
+export function parseDeclaration(key, spec) {
+  if (typeof spec !== 'string') {
+    return null;
+  }
+  if (!spec.startsWith('npm:')) {
+    return { name: key, range: spec, alias: null };
+  }
+  const target = spec.slice('npm:'.length);
+  const at = target.indexOf('@', 1);
+  return at < 0
+    ? { name: target, range: '*', alias: key }
+    : { name: target.slice(0, at), range: target.slice(at + 1), alias: key };
+}
+
+/** Declarations of `name` in one dependency map, matched by real package name (aliases included). */
+function declaredAs(map, name) {
+  return Object.entries(map ?? {})
+    .map(([key, spec]) => {
+      const parsed = parseDeclaration(key, spec);
+      return parsed?.name === name ? { key, ...parsed } : null;
+    })
+    .filter(Boolean);
+}
+
 function declarations(manifest, name) {
-  return DEPENDENCY_FIELDS.map((field) => {
-    const spec = manifest?.[field]?.[name];
-    return spec === undefined ? null : { field, spec };
-  }).filter(Boolean);
+  return DEPENDENCY_FIELDS.flatMap((field) =>
+    declaredAs(manifest?.[field], name).map((item) => {
+      return { field, spec: manifest[field][item.key], ...(item.alias ? { alias: item.alias } : {}) };
+    }),
+  );
 }
 
 function dependentsOf(packages, name, byPath) {
@@ -53,16 +82,20 @@ function dependentsOf(packages, name, byPath) {
     if (metadata.link) {
       continue;
     }
-    for (const field of DEPENDENCY_FIELDS.filter((item) => metadata[item]?.[name] !== undefined)) {
-      const target = byPath.get(resolveDependency(packages, key, name));
-      if (target && target.dependents.length < MAX_DEPENDENTS) {
-        target.dependents.push({
-          name: key ? packageNameAt(key, metadata) : '(root project)',
-          version: metadata.version ?? null,
-          path: key || '(root)',
-          range: metadata[field][name],
-          type: field,
-        });
+    for (const field of DEPENDENCY_FIELDS) {
+      for (const declared of declaredAs(metadata[field], name)) {
+        // node_modules paths use the declared key, which is the alias for an aliased dependency.
+        const target = byPath.get(resolveDependency(packages, key, declared.key));
+        if (target && target.dependents.length < MAX_DEPENDENTS) {
+          target.dependents.push({
+            name: key ? packageNameAt(key, metadata) : '(root project)',
+            version: metadata.version ?? null,
+            path: key || '(root)',
+            range: declared.range,
+            type: field,
+            ...(declared.alias ? { alias: declared.alias } : {}),
+          });
+        }
       }
     }
   }

@@ -50,7 +50,10 @@ only counts. Everything else is in Jira:
 
 - **Control issue** (`controlIssue` in the config, currently WEBUI-2435, security level _Internal_, label
   `dependabot-ai-triage-control`). Holds the run lock, checkpoint and action journal as hidden issue properties
-  (`dependabot-ai-triage-state`, `dependabot-ai-triage-journal`). A short private report comment is added only when
+  (`dependabot-ai-triage-state`, `dependabot-ai-triage-journal`, `dependabot-ai-triage-cleared` for alerts already
+  reported as closed, and one `dependabot-ai-triage-teams-card-<runId>` per run until its Teams delivery succeeds).
+  Each stays under Jira's 32 KB property limit; the closure history folds its oldest entries into a per-repository
+  floor instead of forgetting them. A short private report comment is added only when
   a run proposes or makes a change, needs review, or fails; a clean week adds no comment. Each comment lists the
   sources, the counts, one line per affected ticket (with the fix, reason and acceptance criteria only for new or
   extended tickets) and anything that needs attention. Before storing anything, every run checks that the issue has
@@ -92,7 +95,9 @@ the variables were not updated, the run still reconciles and reports, but refuse
 - **automatic**: requires `DEPENDABOT_AI_TRIAGE_ALLOW_AUTOMATIC=true` and the default branch (or the approved ref).
   Applies the plan, then posts the Teams card. Every Jira/Teams write is reserved in the journal before it is made.
   Each target is re-read just before it is changed; a ticket closed, started or re-owned since collection is left
-  alone and reported. The ownership property is written **last**, after the scope, severity and On Hold changes are
+  alone and reported. Before a new ticket is created, ownership and matching tickets are re-read, so work recorded
+  while the planner ran is never duplicated. Links to related tickets are made before ownership is recorded; a link
+  that fails is kept in the run state and retried by later runs. The ownership property is written **last**, after the scope, severity and On Hold changes are
   verified, so an interrupted run leaves those alerts unowned and they are simply planned again. A write whose
   outcome is unknown (timeout, 5xx) stops further writes and is never blindly repeated; the next automatic run settles
   it from Jira (preview only reports it). A Teams post whose delivery is unknown is not resent, and no Teams message is
