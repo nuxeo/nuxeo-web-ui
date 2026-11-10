@@ -265,7 +265,7 @@ async function parentSummary(npm, name, packageName, warnings) {
   }
 }
 
-async function branchEvidence(readJson, alert, sha) {
+export async function branchEvidence(readJson, alert, sha) {
   const { manifest: file } = alert;
   if (file.endsWith('package-lock.json')) {
     const [lock, manifest] = await Promise.all([
@@ -277,9 +277,42 @@ async function branchEvidence(readJson, alert, sha) {
       : { kind: 'lockfile', supported: false, reason: 'lockfile not present on this branch' };
   }
   if (file.endsWith('package.json')) {
-    return analyzeManifest({ manifest: await readJson(sha, file), name: alert.package });
+    const manifest = await readJson(sha, file);
+    const declared = analyzeManifest({ manifest, name: alert.package });
+    const owner = await owningLockfile(readJson, sha, file);
+    if (!owner) {
+      return declared;
+    }
+    const analysis = analyzeLockfile({
+      lock: owner.lock,
+      manifest,
+      name: alert.package,
+      vulnerableRange: combinedRange(alert),
+    });
+    return analysis.supported ? { ...analysis, lockfile: owner.file, declarations: declared.declarations } : declared;
   }
   return { kind: 'other', supported: false, reason: `unsupported manifest ${file}` };
+}
+
+/**
+ * The lockfile that resolves a package.json: its own, or the nearest ancestor's when the package is one of that
+ * project's npm workspaces (the ancestor lockfile then lists the workspace path in its "packages" map).
+ */
+async function owningLockfile(readJson, sha, file) {
+  const dir = path.posix.dirname(file);
+  const dirs = [dir];
+  while (dirs.at(-1) !== '.') {
+    dirs.push(path.posix.dirname(dirs.at(-1)));
+  }
+  const files = dirs.map((item) => path.posix.join(item, 'package-lock.json'));
+  const locks = await Promise.all(files.map((item) => readJson(sha, item)));
+  const index = locks.findIndex(Boolean);
+  if (index < 0) {
+    return null;
+  }
+  const relative = path.posix.relative(dirs[index], dir);
+  const owns = index === 0 || Boolean(locks[index].packages?.[relative]);
+  return owns ? { lock: locks[index], file: files[index] } : null;
 }
 
 async function alertEvidence(readJson, alert, branchShas) {

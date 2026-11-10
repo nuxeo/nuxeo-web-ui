@@ -9,11 +9,11 @@ Workflow: [`.github/workflows/dependabot-ai-triage.yaml`](../../workflows/depend
 
 ## How a run works
 
-| Step       | Script        | AI? | What it does                                                                                                                                                                                                                                                                                                    |
-| ---------- | ------------- | --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. Collect | `collect.mjs` | No  | Locks the run, reads **every** open alert (paginated, per-repository completion recorded), reads Jira tickets with their ownership property, reconciles alerts by exact lookup, and gathers lockfile/npm evidence only for alerts that are unowned or changed.                                                  |
-| 2. Plan    | `plan.mjs`    | Yes | Runs Copilot CLI with `planner-prompt.md`. The agent can only read the planner input files (`view`, `glob`, `grep`); no shell, network, MCP servers or credentials other than the Copilot token. Output: a JSON plan.                                                                                           |
-| 3. Apply   | `apply.mjs`   | No  | Validates the plan (`lib/plan-validator.mjs`). In automatic mode it creates/extends tickets, records ownership, raises severity, moves blocked tickets On Hold and posts the Teams card. Saves state on the control issue and adds a short private report there when something changed, needs review or failed. |
+| Step       | Script        | AI? | What it does                                                                                                                                                                                                                                                                                                                                        |
+| ---------- | ------------- | --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Collect | `collect.mjs` | No  | Locks the run, reads **every** open alert (paginated, per-repository completion recorded), reads Jira tickets with their ownership property, reconciles alerts by exact lookup, and gathers lockfile/npm evidence only for alerts that are unowned or changed (a `package.json` alert uses its own lockfile, or the root one for an npm workspace). |
+| 2. Plan    | `plan.mjs`    | Yes | Runs Copilot CLI with `planner-prompt.md`. The agent can only read the planner input files (`view`, `glob`, `grep`); no shell, network, MCP servers or credentials other than the Copilot token. Output: a JSON plan.                                                                                                                               |
+| 3. Apply   | `apply.mjs`   | No  | Validates the plan (`lib/plan-validator.mjs`). In automatic mode it creates/extends tickets, records ownership, raises severity, moves blocked tickets On Hold and posts the Teams card. Saves state on the control issue and adds a short private report there when something changed, needs review or failed.                                     |
 
 Ownership is never inferred from description text. When a ticket owns alerts, the executor writes the Jira issue
 property `dependabot-ai-triage-ownership` (alert numbers and fingerprints) and adds the `dependabot-ai-triage`
@@ -104,9 +104,11 @@ the variables were not updated, the run still reconciles and reports, but refuse
   interrupted run leaves those alerts unowned and they are simply planned again. A write whose outcome is unknown
   (timeout, 5xx) stops further writes and is never blindly repeated; the next automatic run reconciles it from Jira
   before writing anything (whether the link exists, the ticket is On Hold or has the raised severity, the ownership
-  property is written by that run, or the comment carrying that step's own marker is present). Preview only reports
-  it. A Teams post whose delivery is unknown is not resent, and no Teams message is
-  sent when the private journal is unavailable. Re-running the same workflow run does not repeat completed writes.
+  property carries that exact write's id, or the comment carrying that step's own marker is present). Comments and
+  links are also checked before they are written, so a retry never duplicates them even after their journal records
+  were pruned. Preview only reports it. A Teams post whose delivery is unknown is not resent, and no Teams message is
+  sent when the private journal is unavailable. The Teams card is trimmed to a fixed byte budget; omitted lines are in
+  the full report. Re-running the same workflow run does not repeat completed writes.
 
 The checkpoint advances only after a complete automatic run. Collection, planning, validation or write failures make
 the run incomplete: the report and (in automatic mode) the Teams card say "scan incomplete" and name the failure;

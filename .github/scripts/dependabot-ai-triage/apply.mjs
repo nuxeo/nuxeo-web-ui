@@ -242,7 +242,7 @@ export class Executor {
       ],
       ['epic', epic && issue.fields.parent?.key !== epic],
       ['status', status && issue.fields.status?.name !== status],
-      ['ownership property', property && issue.properties?.[OWNERSHIP_PROPERTY]?.updatedBy !== property.updatedBy],
+      ['ownership property', property && issue.properties?.[OWNERSHIP_PROPERTY]?.writeId !== property.writeId],
     ];
     const problems = checks.filter(([, failed]) => failed).map(([name]) => name);
     if (problems.length) {
@@ -342,7 +342,7 @@ export class Executor {
       const marker = actionMarker(id, 'reason');
       const reason = this.withRecovery(
         async () => {
-          await this.jira.addComment(target.key, holdComment({ group, runId, marker }));
+          await this.commentOnce(target.key, marker, holdComment({ group, runId, marker }));
           return { key: target.key };
         },
         { key: target.key, markers: [marker] },
@@ -370,16 +370,20 @@ export class Executor {
       this.outcome.failures.push(`${target.key}: ownership waits until its pending links and comments are written.`);
       return false;
     }
-    const ownership = ownershipRecord({
-      group,
-      alerts,
-      previous: target.ownership,
-      runId,
-      now: this.now,
-      upstreamStatus: this.upstreamStatus(group),
-    });
     const signature = this.signature(group);
     const id = `${runId}:${target.key}:ownership:${signature}`;
+    // `writeId` identifies this exact write: retries of one run may write different payloads to the same ticket.
+    const ownership = {
+      ...ownershipRecord({
+        group,
+        alerts,
+        previous: target.ownership,
+        runId,
+        now: this.now,
+        upstreamStatus: this.upstreamStatus(group),
+      }),
+      writeId: id,
+    };
     const recorded = await this.act(
       id,
       'ownership',
@@ -518,7 +522,10 @@ export class Executor {
   /** Links a new ticket; a definite failure is kept and retried by later runs independently of the plan. */
   linkAction(from, to) {
     const run = async () => {
-      await this.jira.link(this.config.linkType, from, to);
+      // Checked first, so a retry whose journal record was pruned never adds the link twice.
+      if (!(await this.linked(from, to))) {
+        await this.jira.link(this.config.linkType, from, to);
+      }
       return { key: from };
     };
     run.recovery = { from, to };
@@ -547,7 +554,8 @@ export class Executor {
       const done = comment
         ? await this.act(id, item.kind, item.key, this.severityCommentAction(id, item.key, item.raise))
         : await this.act(id, 'link', `${item.from} → ${item.to}`, this.linkAction(item.from, item.to));
-      if (!done && this.control.find(id)?.status === 'failed') {
+      // Kept until its journal entry is done: a write skipped because an earlier one stopped the run stays queued.
+      if (!done && this.control.find(id)?.status !== 'done') {
         remaining.push({ ...item, id });
       }
     });
@@ -559,7 +567,7 @@ export class Executor {
     const marker = actionMarker(id, 'severity');
     return this.withRecovery(
       async () => {
-        await this.jira.addComment(key, severityComment({ raise, runId: this.inventory.runId, marker }));
+        await this.commentOnce(key, marker, severityComment({ raise, runId: this.inventory.runId, marker }));
         return { key };
       },
       { key, raise, markers: [marker] },
@@ -598,15 +606,19 @@ export class Executor {
     return { key, raise: { from: target.severity ?? null, to: group.severity, alerts: drivers } };
   }
 
-  /** Writes the scope comment, then the severity comment, each once; false if either is still missing. */
+  /**
+   * Writes the severity explanation first (a failure is queued, so it is never lost), then the scope comment.
+   * Each is written once; false while either is still missing.
+   */
   async scopeComments(group, target, id, scope, added) {
     const { runId, evidence } = this.inventory;
+    const explained = !scope.raise || (await this.explainRaise(id, target.key, scope.raise));
     if (group.operation === 'extend' || group.updateNote) {
       const noteId = `${id}:scope-comment`;
       const marker = actionMarker(noteId, 'scope');
       const note = this.withRecovery(
         async () => {
-          await this.jira.addComment(target.key, extendComment({ group, added, evidence, runId, marker }));
+          await this.commentOnce(target.key, marker, extendComment({ group, added, evidence, runId, marker }));
           return { key: target.key };
         },
         { key: target.key, markers: [marker] },
@@ -615,7 +627,7 @@ export class Executor {
         return false;
       }
     }
-    return !scope.raise || this.explainRaise(id, target.key, scope.raise);
+    return explained;
   }
 
   async update(group, report) {
@@ -706,6 +718,27 @@ export class Executor {
     }
   }
 
+  async linked(from, to) {
+    const issue = await this.jira.issue(from, ['issuelinks']);
+    return (issue.fields?.issuelinks ?? []).some((link) => (link.outwardIssue ?? link.inwardIssue)?.key === to);
+  }
+
+  async hasComment(key, marker) {
+    // The whole history: a step's comment may be older than the latest page.
+    const comments = await this.jira.allComments(key);
+    return comments.some((comment) => textOf(comment.body).includes(marker));
+  }
+
+  /**
+   * Posts a step's comment unless one carrying its marker exists. Jira steps' journal records may be pruned when
+   * the journal fills, so the comment itself is what keeps a retry from posting it twice.
+   */
+  async commentOnce(key, marker, body) {
+    if (!(await this.hasComment(key, marker))) {
+      await this.jira.addComment(key, body);
+    }
+  }
+
   /** Decides from Jira whether an interrupted or uncertain write happened; never repeats it to find out. */
   async reconcileEntry(entry) {
     const { recovery } = entry;
@@ -714,11 +747,7 @@ export class Executor {
       return found.length ? { status: 'done', key: found[0].key } : { status: 'not-applied' };
     }
     if (entry.kind === 'link') {
-      const issue = await this.jira.issue(recovery.from, ['issuelinks']);
-      const linked = (issue.fields?.issuelinks ?? []).some(
-        (link) => (link.outwardIssue ?? link.inwardIssue)?.key === recovery.to,
-      );
-      return { status: linked ? 'done' : 'not-applied' };
+      return { status: (await this.linked(recovery.from, recovery.to)) ? 'done' : 'not-applied' };
     }
     if (entry.kind === 'hold') {
       const issue = await this.jira.issue(recovery.key, ['status']);
@@ -726,14 +755,13 @@ export class Executor {
     }
     if (entry.kind === 'ownership') {
       const issue = await this.jira.issue(recovery.key, ['status'], [OWNERSHIP_PROPERTY]);
-      const written = issue.properties?.[OWNERSHIP_PROPERTY]?.updatedBy === entry.runId;
+      const written = issue.properties?.[OWNERSHIP_PROPERTY]?.writeId === entry.id;
       return { status: written ? 'done' : 'not-applied' };
     }
     if (!recovery.markers) {
       return this.reconcileScope(entry);
     }
     // Comment steps: each comment carries the marker of its own step, so only that exact comment proves the write.
-    // The whole history: such a comment may be older than the latest page.
     const texts = (await this.jira.allComments(recovery.key)).map((comment) => textOf(comment.body));
     const commented = recovery.markers.every((marker) => texts.some((text) => text.includes(marker)));
     return { status: commented ? 'done' : 'not-applied' };
@@ -750,7 +778,7 @@ export class Executor {
       return { status: (issue.fields?.labels ?? []).includes(OWNED_LABEL) ? 'done' : 'not-applied' };
     }
     const severity = this.config.severityOf(issue.fields?.[this.config.severityField]?.id);
-    if (SEVERITY_RANK[severity] < SEVERITY_RANK[recovery.raiseTo]) {
+    if ((SEVERITY_RANK[severity] ?? 0) < SEVERITY_RANK[recovery.raiseTo]) {
       return { status: 'not-applied' };
     }
     const commentId = `${entry.id}:severity-comment`;
@@ -1046,26 +1074,35 @@ async function notify({ jira, control, config, inventory, outcome }) {
 }
 
 /** Retries writes that failed earlier, executes the plan, and keeps every write still to be made in the state. */
-async function runPending(executor, control, outcome, plan) {
+export async function runPending(executor, control, outcome, plan) {
   // Writes queued by earlier runs and writes that recovery just confirmed missing are retried first.
-  const queued = [...(control.state?.pendingWrites ?? []), ...executor.pendingWrites];
+  const queued = uniqueById([...(control.state?.pendingWrites ?? []), ...executor.pendingWrites]);
   executor.pendingWrites = [];
-  const remaining = await executor.replayPending(queued);
-  for (const item of remaining) {
-    executor.blockedTickets.add(item.from ?? item.key);
+  let remaining = queued;
+  try {
+    remaining = await executor.replayPending(queued);
+    for (const item of remaining) {
+      executor.blockedTickets.add(item.from ?? item.key);
+    }
+    if (plan && !outcome.failures.length) {
+      await executor.execute(plan);
+    }
+  } finally {
+    // Saved even when a later group throws, so writes queued earlier in this run are not lost.
+    const pendingWrites = uniqueById([...remaining, ...executor.pendingWrites]);
+    if (pendingWrites.length || control.state?.pendingWrites?.length) {
+      await control.saveState({ pendingWrites });
+    }
+    if (pendingWrites.length) {
+      outcome.failures.push(
+        `${pendingWrites.length} issue link(s) or comment(s) are not written yet; retried next run.`,
+      );
+    }
   }
-  if (plan && !outcome.failures.length) {
-    await executor.execute(plan);
-  }
-  const pendingWrites = [...remaining, ...executor.pendingWrites];
-  if (pendingWrites.length || control.state?.pendingWrites?.length) {
-    await control.saveState({ pendingWrites });
-  }
-  if (pendingWrites.length) {
-    outcome.failures.push(
-      `${pendingWrites.length} issue link(s) or comment(s) could not be written; retried next run.`,
-    );
-  }
+}
+
+function uniqueById(items) {
+  return [...new Map(items.map((item) => [item.id, item])).values()];
 }
 
 async function executeLocked({ jira, control, config, inventory, outcome, plan }) {
