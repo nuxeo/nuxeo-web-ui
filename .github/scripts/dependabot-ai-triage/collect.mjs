@@ -89,6 +89,12 @@ async function verifyProject(jira, config, repo) {
       problems.push(`${repo.project}: ${config.severityField} option ${id} is not "${name}"; update configuration.`);
     }
   }
+  const priorities = new Set((byId('priority')?.allowedValues ?? []).map((option) => option.name));
+  for (const priority of new Set(Object.values(config.priorityBySeverity ?? {}))) {
+    if (!priorities.has(priority)) {
+      problems.push(`${repo.project}: priority "${priority}" is not available; update configuration.`);
+    }
+  }
   const components = (byId('components')?.allowedValues ?? []).map((option) => option.name);
   if (repo.component && !components.includes(repo.component)) {
     problems.push(`${repo.project}: component "${repo.component}" is not available.`);

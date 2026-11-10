@@ -120,7 +120,9 @@ export function severityComment({ raise, runId, marker }) {
   const from = raise.from ? titleCase(raise.from) : 'unset';
   const text =
     `GitHub now reports ${titleCase(raise.to)} for ${raise.alerts.join(', ')}. ` +
-    `Defect Severity raised from ${from} to ${titleCase(raise.to)}. Run ${runId} (ref ${marker}).`;
+    `Defect Severity raised from ${from} to ${titleCase(raise.to)}.` +
+    (raise.priority ? ` Priority raised from ${raise.priority.from ?? 'unset'} to ${raise.priority.to}.` : '') +
+    ` Run ${runId} (ref ${marker}).`;
   return adfDoc([adfHeading('Dependabot triage: severity raised'), adfParagraph(adfText(text))]);
 }
 
