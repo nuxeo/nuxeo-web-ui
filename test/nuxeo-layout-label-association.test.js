@@ -44,8 +44,10 @@ function loadHtmlImport(href) {
 }
 
 async function load(is, relativePath) {
-  await loadHtmlImport(`${base}/../${relativePath}`);
-  await customElements.whenDefined(is);
+  if (!customElements.get(is)) {
+    await loadHtmlImport(`${base}/../${relativePath}?label-association-test`);
+    await customElements.whenDefined(is);
+  }
   const element = await fixture(html`<div></div>`);
   element.appendChild(document.createElement(is));
   await flush();
@@ -57,6 +59,14 @@ async function load(is, relativePath) {
  * control is a SonarCloud Web:S6853 finding and gives a screen-reader user no relationship
  * between the field name and the value or control beside it.
  */
+// Load File before request-mocking suites can leave an HTML-import cache entry pending.
+// The fixture helper below reuses the registered production element in each suite.
+suiteSetup(async function preloadFileMetadata() {
+  this.timeout(15000);
+  await loadHtmlImport(`${base}/../elements/document/file/nuxeo-file-metadata-layout.html?label-association-test`);
+  await customElements.whenDefined('nuxeo-file-metadata-layout');
+});
+
 suiteTeardown(function reportFailedHooks() {
   function report(suite) {
     const hooks = [...suite._beforeAll, ...suite._beforeEach, ...suite._afterEach, ...suite._afterAll];
@@ -82,10 +92,7 @@ suite('layout label association (WEBUI-2230)', () => {
     suite(is, () => {
       let element;
 
-      suiteSetup(async function loadMetadataLayout() {
-        // The first legacy HTML import also initializes shared styles and nested widgets.
-        // Allow CI's cold browser startup without relaxing any of the label assertions.
-        this.timeout(15000);
+      suiteSetup(async () => {
         element = await load(is, path);
       });
 
