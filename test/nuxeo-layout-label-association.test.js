@@ -82,7 +82,10 @@ suite('layout label association (WEBUI-2230)', () => {
     suite(is, () => {
       let element;
 
-      suiteSetup(async () => {
+      suiteSetup(async function loadMetadataLayout() {
+        // The first legacy HTML import also initializes shared styles and nested widgets.
+        // Allow CI's cold browser startup without relaxing any of the label assertions.
+        this.timeout(15000);
         element = await load(is, path);
       });
 
