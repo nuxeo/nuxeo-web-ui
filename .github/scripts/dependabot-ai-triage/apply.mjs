@@ -293,8 +293,12 @@ export class Executor {
   /** The configured priority for a severity when it is above `current`; a priority is never lowered. */
   priorityRaise(severity, current) {
     const target = this.config.priorityBySeverity?.[severity];
+    return target && this.belowPriority(current, target) ? target : null;
+  }
+
+  belowPriority(current, target) {
     const order = this.config.priorityOrder ?? [];
-    return target && order.indexOf(target) > order.indexOf(current) ? target : null;
+    return order.indexOf(current) < order.indexOf(target);
   }
 
   /** Raises Defect Severity and/or priority in one edit and verifies what changed; neither is ever lowered. */
@@ -681,7 +685,11 @@ export class Executor {
       id,
       group.operation,
       group.ticket,
-      this.withRecovery(() => this.applyScope(group, target), { key: group.ticket, raiseTo }),
+      this.withRecovery(() => this.applyScope(group, target), {
+        key: group.ticket,
+        raiseTo,
+        priorityTo: this.priorityRaise(group.severity, target.priority),
+      }),
       signature,
     );
     if (!scope) {
@@ -735,6 +743,7 @@ export class Executor {
         {
           key: raise.ticket,
           raiseTo: raise.to,
+          priorityTo: this.config.priorityBySeverity?.[raise.to] ?? null,
           raise: { from: raise.from ?? null, to: raise.to, alerts: raise.alerts },
         },
       ),
@@ -800,7 +809,11 @@ export class Executor {
    */
   async reconcileScope(entry) {
     const { recovery } = entry;
-    const issue = await this.jira.issue(recovery.key, ['labels', this.config.severityField]);
+    const issue = await this.jira.issue(recovery.key, ['labels', 'priority', this.config.severityField]);
+    // A requested priority is applied only when Jira shows at least that priority.
+    if (recovery.priorityTo && this.belowPriority(issue.fields?.priority?.name, recovery.priorityTo)) {
+      return { status: 'not-applied' };
+    }
     if (!recovery.raiseTo) {
       return { status: (issue.fields?.labels ?? []).includes(OWNED_LABEL) ? 'done' : 'not-applied' };
     }
