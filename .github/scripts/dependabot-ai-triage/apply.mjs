@@ -36,6 +36,11 @@ export function quarterLabel(quarter) {
   return quarter.replace('-', '_');
 }
 
+/** Identifies one comment of one journalled action, so recovery never mistakes another comment for it. */
+export function actionMarker(id, step) {
+  return `dat-${shortHash([id, step])}`;
+}
+
 export function ownershipRecord({ group, alerts, previous, runId, now, upstreamStatus = null }) {
   const records = { ...previous?.alerts };
   for (const alert of alerts) {
@@ -311,13 +316,14 @@ export class Executor {
   }
 
   /**
-   * Puts blocked work On Hold, then records ownership last. If any step is interrupted, the alerts stay
-   * unowned and are planned again next run (the planner then adopts the ticket), so no step is lost.
+   * Puts blocked work On Hold with its reason. The reason is its own step and is resumed whenever the ticket was put
+   * On Hold here, or no blocked ownership shows that an earlier run already gave it (a transition that succeeded
+   * before its comment failed leaves the ticket On Hold, so the On Hold status alone does not prove the reason).
    */
-  async finish(group, target, alerts, report) {
+  async holdWithReason(group, target, report) {
     const { runId } = this.inventory;
-    report.onHold = target.onHold;
-    if (group.kind === 'blocked' && !target.onHold) {
+    const holdNow = !target.onHold;
+    if (holdNow) {
       const hold = this.withRecovery(
         async () => {
           return { key: target.key, held: await this.hold(target.key, group) };
@@ -329,19 +335,35 @@ export class Executor {
       if (!held) {
         return false;
       }
-      // The reason, mitigation and recheck criteria are a separate step: ownership waits for both.
+    }
+    if (holdNow || target.ownership?.kind !== 'blocked') {
+      const id = `${runId}:${target.key}:hold-comment`;
+      const marker = actionMarker(id, 'reason');
       const reason = this.withRecovery(
         async () => {
-          await this.jira.addComment(target.key, holdComment({ group, runId }));
+          await this.jira.addComment(target.key, holdComment({ group, runId, marker }));
           return { key: target.key };
         },
-        { key: target.key },
+        { key: target.key, markers: [marker] },
       );
-      if (!(await this.act(`${runId}:${target.key}:hold-comment`, 'hold-comment', target.key, reason))) {
+      if (!(await this.act(id, 'hold-comment', target.key, reason))) {
         return false;
       }
-      report.onHold = true;
-      report.blockerChanged = report.blockerChanged || report.heldVerified;
+    }
+    report.onHold = true;
+    report.blockerChanged = report.blockerChanged || Boolean(report.heldVerified);
+    return true;
+  }
+
+  /**
+   * Puts blocked work On Hold, then records ownership last. If any step is interrupted, the alerts stay
+   * unowned and are planned again next run (the planner then adopts the ticket), so no step is lost.
+   */
+  async finish(group, target, alerts, report) {
+    const { runId } = this.inventory;
+    report.onHold = target.onHold;
+    if (group.kind === 'blocked' && !(await this.holdWithReason(group, target, report))) {
+      return false;
     }
     if (this.blockedLinks.has(target.key)) {
       this.outcome.failures.push(`${target.key}: ownership waits until its pending issue links are created.`);
@@ -528,24 +550,38 @@ export class Executor {
     return remaining;
   }
 
-  async applyScope(group, target, added) {
+  /** The comments a scope update writes, each with its own marker: recovery requires all of them. */
+  scopeComments(group, target, id) {
+    return {
+      note: group.operation === 'extend' || group.updateNote ? actionMarker(id, 'scope') : null,
+      raise:
+        SEVERITY_RANK[group.severity] > (SEVERITY_RANK[target.severity] ?? 0) ? actionMarker(id, 'severity') : null,
+    };
+  }
+
+  async applyScope(group, target, added, markers) {
     const { key } = target;
     const { runId } = this.inventory;
     if (!target.labels.includes(OWNED_LABEL)) {
       await this.jira.addLabel(key, OWNED_LABEL);
     }
-    const raise = SEVERITY_RANK[group.severity] > (SEVERITY_RANK[target.severity] ?? 0);
+    const raise = Boolean(markers.raise);
     if (raise) {
       await this.jira.edit(key, { [this.config.severityField]: { id: this.config.severityOptions[group.severity] } });
     }
-    if (group.operation === 'extend' || group.updateNote) {
-      await this.jira.addComment(key, extendComment({ group, added, evidence: this.inventory.evidence, runId }));
+    if (markers.note) {
+      const { evidence } = this.inventory;
+      await this.jira.addComment(key, extendComment({ group, added, evidence, runId, marker: markers.note }));
     }
     if (raise) {
       const drivers = this.groupAlerts(group)
         .filter((alert) => alert.severity === group.severity)
         .map((alert) => `#${alert.number}`);
-      const comment = severityComment({ raise: { from: target.severity, to: group.severity, alerts: drivers }, runId });
+      const comment = severityComment({
+        raise: { from: target.severity, to: group.severity, alerts: drivers },
+        runId,
+        marker: markers.raise,
+      });
       await this.jira.addComment(key, comment);
       // Only verify severity we changed: a ticket set higher by hand is never lowered.
       await this.verifyIssue(key, { severity: group.severity });
@@ -573,11 +609,15 @@ export class Executor {
     }
     const signature = this.signature(group, { ticket: group.ticket });
     const id = `${runId}:${group.remediationId}:${group.operation}:${signature}`;
+    const markers = this.scopeComments(group, target, id);
     const scope = await this.act(
       id,
       group.operation,
       group.ticket,
-      this.withRecovery(() => this.applyScope(group, target, added), { key: group.ticket }),
+      this.withRecovery(() => this.applyScope(group, target, added, markers), {
+        key: group.ticket,
+        markers: [markers.note, markers.raise].filter(Boolean),
+      }),
       signature,
     );
     if (!scope) {
@@ -600,6 +640,7 @@ export class Executor {
       return;
     }
     const id = `${this.inventory.runId}:${raise.ticket}:severity-${raise.to}`;
+    const marker = actionMarker(id, 'severity');
     const result = await this.act(
       id,
       'severity',
@@ -619,11 +660,11 @@ export class Executor {
           await this.jira.edit(raise.ticket, {
             [this.config.severityField]: { id: this.config.severityOptions[raise.to] },
           });
-          await this.jira.addComment(raise.ticket, severityComment({ raise, runId: this.inventory.runId }));
+          await this.jira.addComment(raise.ticket, severityComment({ raise, runId: this.inventory.runId, marker }));
           await this.verifyIssue(raise.ticket, { severity: raise.to });
           return { key: raise.ticket };
         },
-        { key: raise.ticket },
+        { key: raise.ticket, markers: [marker] },
       ),
     );
     raise.applied = Boolean(result) && !result.unchanged;
@@ -652,11 +693,15 @@ export class Executor {
       const written = issue.properties?.[OWNERSHIP_PROPERTY]?.updatedBy === entry.runId;
       return { status: written ? 'done' : 'not-applied' };
     }
-    // Scope and severity steps: labels and severity are idempotent; the only non-idempotent write is a comment,
-    // and every comment names its run, so a comment from that run means the write went through.
-    // The whole history: a comment from that run may be older than the latest page.
-    const comments = await this.jira.allComments(recovery.key);
-    const commented = comments.some((comment) => textOf(comment.body).includes(entry.runId));
+    // Scope, severity and hold-reason steps: labels and severity are idempotent; the non-idempotent writes are
+    // comments, each carrying the marker of its own action and step, so only those exact comments prove the write.
+    // The whole history: such a comment may be older than the latest page.
+    const markers = recovery.markers ?? [];
+    if (!markers.length) {
+      return { status: 'not-applied' };
+    }
+    const texts = (await this.jira.allComments(recovery.key)).map((comment) => textOf(comment.body));
+    const commented = markers.every((marker) => texts.some((text) => text.includes(marker)));
     return { status: commented ? 'done' : 'not-applied' };
   }
 
