@@ -57,11 +57,18 @@ async function load(is, relativePath) {
  * control is a SonarCloud Web:S6853 finding and gives a screen-reader user no relationship
  * between the field name and the value or control beside it.
  */
-teardown(function reportFailedTest() {
-  if (this.currentTest && this.currentTest.state === 'failed') {
-    // eslint-disable-next-line no-console
-    console.error(`Failed test: ${this.currentTest.fullTitle()}`);
+suiteTeardown(function reportFailedHooks() {
+  function report(suite) {
+    const hooks = [...suite._beforeAll, ...suite._beforeEach, ...suite._afterEach, ...suite._afterAll];
+    [...suite.tests, ...hooks].forEach((test) => {
+      if (test.err) {
+        // eslint-disable-next-line no-console
+        console.error(`Failed test or hook: ${test.fullTitle()}: ${test.err.message}`);
+      }
+    });
+    suite.suites.forEach(report);
   }
+  report(window.mocha.suite);
 });
 
 suite('layout label association (WEBUI-2230)', () => {
