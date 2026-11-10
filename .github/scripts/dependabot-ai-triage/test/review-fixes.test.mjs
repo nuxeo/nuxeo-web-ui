@@ -18,6 +18,7 @@ import {
   STATE_PROPERTY,
   addCleared,
   isClearedReported,
+  shardCleared,
 } from '../lib/state.mjs';
 import { analyzeLockfile, parseDeclaration } from '../lib/lockfile.mjs';
 import { plan } from '../plan.mjs';
@@ -664,12 +665,13 @@ test('a change whose journal entry cannot be saved stops further writes and is n
   assert.equal(exec.stopped, true);
   assert.match(outcome.failures.join(), /was applied but its journal entry was not saved/);
   const labelAdds = jira.calls.filter((call) => call.name === 'addLabel').length;
-  // A retry of the run settles the still-reserved entry as uncertain and does not repeat the change.
+  // A retry of the run reconciles the still-reserved entry from Jira first; nothing non-idempotent is repeated.
   const retry = await executor(jira, tickets);
   await retry.exec.recover();
+  assert.ok(retry.outcome.warnings.some((warning) => warning.code === 'recovered'));
   await retry.exec.update(bootstrapPlan().groups[0], {});
   assert.equal(jira.calls.filter((call) => call.name === 'addLabel').length, labelAdds);
-  assert.match(retry.outcome.failures.join(), /unknown outcome from an earlier attempt; not repeated/);
+  assert.equal(jira.issues.get('APP-31').comments.length, 0);
 });
 
 test('a covered severity raise is skipped when the ticket closed or changed owner after collection', async () => {
@@ -976,13 +978,15 @@ test('creation stops when ownership or a matching ticket appeared during plannin
   const fresh = new FakeJira(tickets);
   fresh.issues.set('LIB-500', {
     key: 'LIB-500',
-    fields: { labels: [OWNED_LABEL], status: { name: 'Open', statusCategory: { key: 'new' } } },
+    fields: { labels: [], status: { name: 'Open', statusCategory: { key: 'new' } }, updated: 'now' },
     properties: {},
     comments: [],
   });
+  fresh.recentlyUpdated = ['LIB-500'];
   const second = await executor(fresh, tickets);
   await second.exec.create(createGroup(), {});
-  assert.match(second.outcome.failures.join(), /LIB-500 appeared after collection/);
+  assert.match(second.outcome.failures.join(), /LIB-500 changed after collection/);
+  assert.equal(fresh.calls.filter((call) => call.name === 'create').length, 0);
 });
 
 test('tickets found by identifier or package search stay candidates even when only a comment mentions them', () => {
@@ -1036,22 +1040,13 @@ test('a failed link keeps ownership unrecorded and is retried by a later run', a
   await exec.create({ ...createGroup(), relatedTickets: ['LIB-44'] }, report);
   assert.match(outcome.failures.join(), /link/);
   assert.equal(jira.issues.get(report.ticketKey).properties[OWNERSHIP_PROPERTY], undefined);
-  assert.deepEqual(exec.pendingLinks, [{ from: report.ticketKey, to: 'LIB-44' }]);
+  assert.deepEqual(exec.pendingLinks, [
+    { id: `${RUN}:${report.ticketKey}:link:LIB-44`, from: report.ticketKey, to: 'LIB-44' },
+  ]);
   const later = await executor(jira, tickets, { runId: 'later-run' });
   const remaining = await later.exec.replayLinks(exec.pendingLinks);
   assert.deepEqual(remaining, []);
   assert.equal(jira.calls.filter((call) => call.name === 'link').length, 2);
-});
-
-test('closure history stays under the property limit and old closures stay reported', () => {
-  const ids = Array.from({ length: 12000 }, (_, index) => `${WEB}#${index + 1}`);
-  const record = addCleared({ repositories: {} }, ids);
-  assert.ok(JSON.stringify(record).length <= 28000);
-  assert.ok(record.repositories[WEB].floor > 0);
-  assert.equal(isClearedReported(record, `${WEB}#1`), true);
-  assert.equal(isClearedReported(record, `${WEB}#12000`), true);
-  assert.equal(isClearedReported(record, `${WEB}#12001`), false);
-  assert.equal(isClearedReported(record, `${EL}#1`), false);
 });
 
 test('the run state refuses to exceed the Jira property limit', async () => {
@@ -1126,4 +1121,128 @@ test('a create with an unknown outcome is settled by later recovery through its 
   await reloaded.load();
   assert.equal(reloaded.find('old:create').status, 'done');
   assert.equal(reloaded.pending().length, 0);
+});
+
+// Review round on 7ec1d7d97 / f69e6bf18.
+
+test('a link with an unknown outcome is not queued for replay; recovery reconciles it from the issue links', async () => {
+  const tickets = registerTickets();
+  const jira = new FakeJira(tickets);
+  const { exec, control } = await executor(jira, tickets);
+  const realLink = jira.link.bind(jira);
+  jira.link = async (...args) => {
+    await realLink(...args);
+    const error = new Error('timeout');
+    error.uncertain = true;
+    throw error;
+  };
+  const report = {};
+  await exec.create({ ...createGroup(), relatedTickets: ['LIB-44'] }, report);
+  assert.deepEqual(exec.pendingLinks, []);
+  const id = `${RUN}:${report.ticketKey}:link:LIB-44`;
+  assert.equal(control.find(id).status, 'uncertain');
+  jira.link = realLink;
+  jira.issues.get(report.ticketKey).fields.issuelinks = [{ outwardIssue: { key: 'LIB-44' } }];
+  const later = await executor(jira, tickets, { runId: 'later-run' });
+  await later.exec.recover();
+  const reloaded = new ControlState(jira, config.controlIssue);
+  await reloaded.load();
+  assert.equal(reloaded.find(id).status, 'done');
+  assert.equal(jira.calls.filter((call) => call.name === 'link').length, 1);
+});
+
+test('replayed links keep their original journal id', async () => {
+  const tickets = registerTickets();
+  const jira = new FakeJira(tickets);
+  const { exec, control } = await executor(jira, tickets);
+  const id = 'earlier:LIB-3000:link:LIB-44';
+  jira.issues.set('LIB-3000', { key: 'LIB-3000', fields: { labels: [] }, properties: {}, comments: [] });
+  const remaining = await exec.replayLinks([{ id, from: 'LIB-3000', to: 'LIB-44' }]);
+  assert.deepEqual(remaining, []);
+  assert.equal(control.find(id).status, 'done');
+});
+
+test('uncertain scope writes from earlier runs are reconciled from comments before new writes', async () => {
+  const tickets = registerTickets();
+  const jira = new FakeJira(tickets);
+  const control = new ControlState(jira, config.controlIssue);
+  await control.load();
+  for (const [id, key] of [
+    ['old:a', 'APP-31'],
+    ['old:b', 'APP-28'],
+  ]) {
+    await control.reserve({ id, kind: 'extend', target: key, runId: 'old', recovery: { key } });
+    await control.settle(id, 'uncertain', {});
+  }
+  jira.issues.get('APP-31').comments.push({ type: 'doc', content: [{ type: 'text', text: 'Run old.' }] });
+  const { exec } = await executor(jira, tickets);
+  await exec.recover();
+  const reloaded = new ControlState(jira, config.controlIssue);
+  await reloaded.load();
+  assert.equal(reloaded.find('old:a').status, 'done');
+  assert.equal(reloaded.find('old:b').status, 'not-applied');
+  assert.equal(reloaded.pending().length, 0);
+});
+
+test('closure history keeps exact membership: an older alert closing later is still reported', async () => {
+  const jira = new FakeJira();
+  const control = new ControlState(jira, config.controlIssue);
+  await control.load();
+  const ids = Array.from({ length: 20000 }, (_, index) => `${WEB}#${index * 2 + 3}`);
+  await control.saveCleared(ids);
+  const record = await control.loadCleared();
+  for (const value of Object.values(jira.issues.get(config.controlIssue).properties)) {
+    assert.ok(JSON.stringify(value).length <= 28000);
+  }
+  assert.equal(isClearedReported(record, `${WEB}#3`), true);
+  assert.equal(isClearedReported(record, `${WEB}#40001`), true);
+  assert.equal(isClearedReported(record, `${WEB}#2`), false);
+  assert.equal(isClearedReported(record, `${WEB}#4`), false);
+  await control.saveCleared([`${WEB}#4`]);
+  assert.equal(isClearedReported(await control.loadCleared(), `${WEB}#4`), true);
+});
+
+test('an update stops when another open ticket took one of the added alerts during planning', async () => {
+  const tickets = registerTickets();
+  const jira = new FakeJira(tickets);
+  jira.issues.get('LIB-24').fields.labels.push(OWNED_LABEL);
+  jira.issues.get('LIB-24').properties[OWNERSHIP_PROPERTY] = { repository: EL, alerts: { 108: {} } };
+  const { exec, outcome } = await executor(jira, tickets);
+  const extend = group(`${EL}:refresh`, EL, 'extend', 'LIB-44', 'high', [104, 105, 107, 108], { updateNote: 'x' });
+  await exec.update(extend, {});
+  assert.match(outcome.failures.join(), /LIB-24 now owns some of these alerts/);
+  assert.equal(jira.calls.filter((call) => call.args?.key === 'LIB-44').length, 0);
+});
+
+test('a collected candidate edited during planning defers creation, but edits by this run do not', async () => {
+  const tickets = registerTickets().map((ticket) => {
+    return { ...ticket, updated: 'before' };
+  });
+  const jira = new FakeJira(tickets);
+  jira.issues.get('LIB-44').fields.updated = 'during-planning';
+  jira.recentlyUpdated = ['LIB-44'];
+  const { exec, outcome } = await executor(jira, tickets);
+  await exec.create(createGroup(), {});
+  assert.match(outcome.failures.join(), /LIB-44 changed after collection/);
+
+  const own = new FakeJira(tickets);
+  own.issues.get('LIB-44').fields.updated = 'during-run';
+  own.recentlyUpdated = ['LIB-44'];
+  const run = await executor(own, tickets);
+  run.exec.touched.add('LIB-44');
+  await run.exec.create(createGroup(), {});
+  assert.deepEqual(run.outcome.failures, []);
+});
+
+test('closure ranges merge exactly and split across properties by size', () => {
+  const record = addCleared({ repositories: {} }, [`${WEB}#5`, `${WEB}#6`, `${WEB}#8`, `${WEB}#7`, `${EL}#1`]);
+  assert.deepEqual(record.repositories[WEB], [[5, 8]]);
+  const many = addCleared(
+    { repositories: {} },
+    Array.from({ length: 6000 }, (_, index) => `${WEB}#${index * 2}`),
+  );
+  const shards = shardCleared(many, 5000);
+  assert.ok(shards.length > 1);
+  assert.ok(shards.every((shard) => JSON.stringify(shard).length <= 5000));
+  assert.equal(shards.flatMap((shard) => shard.repositories[WEB] ?? []).length, 6000);
 });

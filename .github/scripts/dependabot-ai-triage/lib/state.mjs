@@ -1,6 +1,8 @@
+import { mapSequential } from './util.mjs';
+
 export const STATE_PROPERTY = 'dependabot-ai-triage-state';
 export const JOURNAL_PROPERTY = 'dependabot-ai-triage-journal';
-// Alerts already reported as closed on GitHub, per repository: every number at or below `floor`, plus `ids`.
+// Alerts already reported as closed on GitHub: an index property plus shards of exact per-repository ranges.
 export const CLEARED_PROPERTY = 'dependabot-ai-triage-cleared';
 // Jira issue properties are limited to 32 768 bytes.
 const PROPERTY_BUDGET = 28000;
@@ -14,34 +16,57 @@ const RESOLVED = new Set(['done', 'failed', 'not-applied']);
 
 export class LockHeldError extends Error {}
 
-export function isClearedReported(record, id) {
-  const [repository, number] = [id.slice(0, id.lastIndexOf('#')), Number(id.slice(id.lastIndexOf('#') + 1))];
-  const entry = record?.repositories?.[repository];
-  return Boolean(entry) && (number <= entry.floor || entry.ids.includes(number));
+function splitId(id) {
+  const index = id.lastIndexOf('#');
+  return [id.slice(0, index), Number(id.slice(index + 1))];
 }
 
-/**
- * Alert numbers only grow, so the oldest reported closures are folded into a per-repository floor when the record
- * nears the size limit. Nothing is forgotten: everything at or below the floor still counts as reported.
- */
-export function addCleared(record, ids, budget = PROPERTY_BUDGET) {
-  const next = { schemaVersion: 1, repositories: structuredClone(record?.repositories ?? {}) };
-  for (const id of ids) {
-    const repository = id.slice(0, id.lastIndexOf('#'));
-    const number = Number(id.slice(id.lastIndexOf('#') + 1));
-    const entry = next.repositories[repository] ?? { floor: 0, ids: [] };
-    if (number > entry.floor && !entry.ids.includes(number)) {
-      entry.ids.push(number);
+/** Exact membership: closures are kept as sorted, merged [start, end] ranges per repository. */
+export function isClearedReported(record, id) {
+  const [repository, number] = splitId(id);
+  return (record?.repositories?.[repository] ?? []).some(([start, end]) => number >= start && number <= end);
+}
+
+function mergeRanges(ranges) {
+  const merged = [];
+  for (const range of [...ranges].sort((a, b) => a[0] - b[0])) {
+    const last = merged.at(-1);
+    if (last && range[0] <= last[1] + 1) {
+      last[1] = Math.max(last[1], range[1]);
+    } else {
+      merged.push([...range]);
     }
-    entry.ids.sort((a, b) => a - b);
-    next.repositories[repository] = entry;
   }
-  while (JSON.stringify(next).length > budget) {
-    const [, largest] = Object.entries(next.repositories).sort((a, b) => b[1].ids.length - a[1].ids.length)[0];
-    const folded = largest.ids.splice(0, Math.max(1, Math.ceil(largest.ids.length / 10)));
-    largest.floor = Math.max(largest.floor, folded.at(-1));
+  return merged;
+}
+
+export function addCleared(record, ids) {
+  const next = { repositories: structuredClone(record?.repositories ?? {}) };
+  for (const id of ids) {
+    const [repository, number] = splitId(id);
+    next.repositories[repository] = mergeRanges([...(next.repositories[repository] ?? []), [number, number]]);
   }
   return next;
+}
+
+/** Splits a closure record into parts that each fit in one Jira issue property. */
+export function shardCleared(record, budget = PROPERTY_BUDGET) {
+  const shards = [];
+  let current = { repositories: {} };
+  for (const [repository, ranges] of Object.entries(record.repositories)) {
+    for (const range of ranges) {
+      const candidate = structuredClone(current);
+      candidate.repositories[repository] = [...(candidate.repositories[repository] ?? []), range];
+      if (JSON.stringify(candidate).length > budget && Object.keys(current.repositories).length) {
+        shards.push(current);
+        current = { repositories: { [repository]: [range] } };
+      } else {
+        current = candidate;
+      }
+    }
+  }
+  shards.push(current);
+  return shards;
 }
 
 /** Run state kept on the private control issue (Jira issue properties are not shown in the UI). */
@@ -113,23 +138,32 @@ export class ControlState {
     }
   }
 
-  /** Reserved writes, plus creates whose outcome was unknown: their run-scoped label can still settle them. */
+  /** Reserved writes, plus unknown outcomes that can be reconciled from Jira (every Jira write records how). */
   pending() {
     return this.journal.entries.filter(
-      (entry) =>
-        entry.status === 'reserved' || (entry.status === 'uncertain' && entry.kind === 'create' && entry.recovery),
+      (entry) => entry.status === 'reserved' || (entry.status === 'uncertain' && entry.recovery),
     );
   }
 
+  /** Closure history: an index property names how many shard properties hold the ranges. */
   async loadCleared() {
-    return (await this.jira.property(this.issueKey, CLEARED_PROPERTY)) ?? { schemaVersion: 1, repositories: {} };
+    const index = await this.jira.property(this.issueKey, CLEARED_PROPERTY);
+    const names = Array.from({ length: index?.shards ?? 0 }, (_, i) => `${CLEARED_PROPERTY}-${i}`);
+    const parts = await Promise.all(names.map((name) => this.jira.property(this.issueKey, name)));
+    const record = { repositories: {} };
+    for (const [repository, ranges] of parts.flatMap((part) => Object.entries(part?.repositories ?? {}))) {
+      record.repositories[repository] = mergeRanges([...(record.repositories[repository] ?? []), ...ranges]);
+    }
+    return record;
   }
 
-  /** Adds newly reported closures and keeps the record within the property limit by raising per-repo floors. */
-  async saveCleared(record, ids) {
-    const next = addCleared(record, ids);
-    await this.jira.setProperty(this.issueKey, CLEARED_PROPERTY, next);
-    return next;
+  /** Adds newly reported closures; shards are written before the index that makes them visible. */
+  async saveCleared(ids) {
+    const record = addCleared(await this.loadCleared(), ids);
+    const shards = shardCleared(record);
+    await mapSequential(shards, (shard, i) => this.jira.setProperty(this.issueKey, `${CLEARED_PROPERTY}-${i}`, shard));
+    await this.jira.setProperty(this.issueKey, CLEARED_PROPERTY, { schemaVersion: 2, shards: shards.length });
+    return record;
   }
 
   find(id) {

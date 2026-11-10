@@ -26,6 +26,7 @@ import {
   mapSequential,
   request,
   shortHash,
+  textOf,
 } from './lib/util.mjs';
 
 const readJson = (file) => JSON.parse(readFileSync(file, 'utf8'));
@@ -111,6 +112,8 @@ export class Executor {
     this.now = new Date().toISOString();
     this.stopped = false;
     this.pendingLinks = [];
+    // Tickets this run wrote to: their own updates are not "changes since collection".
+    this.touched = new Set();
   }
 
   /** Returns true when the action may run now; records why it may not otherwise. */
@@ -160,6 +163,9 @@ export class Executor {
       return null;
     }
     this.outcome.actions.push({ status: 'done', kind, target: result.key ?? target, detail: result.detail ?? '' });
+    if (result.key) {
+      this.touched.add(result.key);
+    }
     await this.acknowledge(id, kind, target, result);
     return result;
   }
@@ -189,6 +195,12 @@ export class Executor {
       this.stopped = true;
       this.outcome.failures.push(`${kind} ${target}: journal entry not saved: ${journalError.message}`);
     }
+  }
+
+  /** Attaches what recovery needs to reconcile an interrupted write from Jira. */
+  withRecovery(fn, recovery) {
+    fn.recovery = recovery;
+    return fn;
   }
 
   /** Identifies what an action was asked to do, so a retry with different inputs never reuses its result. */
@@ -305,9 +317,13 @@ export class Executor {
     const { runId } = this.inventory;
     report.onHold = target.onHold;
     if (group.kind === 'blocked' && !target.onHold) {
-      const held = await this.act(`${runId}:${target.key}:hold`, 'hold', target.key, async () => {
-        return { key: target.key, held: await this.hold(target.key, group) };
-      });
+      const hold = this.withRecovery(
+        async () => {
+          return { key: target.key, held: await this.hold(target.key, group) };
+        },
+        { key: target.key },
+      );
+      const held = await this.act(`${runId}:${target.key}:hold`, 'hold', target.key, hold);
       report.heldVerified = Boolean(held?.held);
       if (!held) {
         return false;
@@ -329,11 +345,14 @@ export class Executor {
       id,
       'ownership',
       target.key,
-      async () => {
-        await this.jira.setProperty(target.key, OWNERSHIP_PROPERTY, ownership);
-        await this.verifyIssue(target.key, { property: ownership });
-        return { key: target.key };
-      },
+      this.withRecovery(
+        async () => {
+          await this.jira.setProperty(target.key, OWNERSHIP_PROPERTY, ownership);
+          await this.verifyIssue(target.key, { property: ownership });
+          return { key: target.key };
+        },
+        { key: target.key },
+      ),
       signature,
     );
     return Boolean(recorded);
@@ -400,64 +419,88 @@ export class Executor {
     }
   }
 
-  /**
-   * Coverage may appear while the planner runs (a ticket created or adopted by someone else). Re-read it right
-   * before creating, so a new ticket is never a duplicate of work recorded since collection.
-   */
-  async checkLiveCoverage(group, alerts) {
+  /** Open tickets other than `exceptKey` whose recorded ownership now claims any of these alerts. */
+  async liveOwner(group, alerts, exceptKey = null) {
     const project = this.config.repositoryConfig(group.repository).project;
-    const minutes = Math.ceil((Date.now() - Date.parse(this.inventory.startedAt)) / 60000) + 5;
-    const ids = alerts.flatMap((alert) => [alert.ghsa, alert.cve, alert.url]).filter(Boolean);
-    const terms = [...new Set(ids)].map((id) => String.raw`text ~ "\"${id}\""`);
-    const jql =
-      `project = ${project} AND (labels = "${OWNED_LABEL}" OR (updated >= -${minutes}m AND (${terms.join(' OR ')})))` +
-      ' ORDER BY key';
-    const issues = await this.jira.search(jql, ['summary', 'status'], [OWNERSHIP_PROPERTY]);
+    const jql = `project = ${project} AND labels = "${OWNED_LABEL}" ORDER BY key`;
+    const issues = await this.jira.search(jql, ['status'], [OWNERSHIP_PROPERTY]);
     const numbers = new Set(alerts.map((alert) => alert.number));
-    const owner = issues.find((issue) => {
+    // A closed owner is a closed-ticket mismatch, which reconciliation reports; only open owners count.
+    return issues.find((issue) => {
       const ownership = issue.properties?.[OWNERSHIP_PROPERTY];
-      // A closed owner is a closed-ticket mismatch, which reconciliation reports; only open owners block a create.
       return (
+        issue.key !== exceptKey &&
         issue.fields?.status?.statusCategory?.key !== 'done' &&
         ownership?.repository === group.repository &&
         Object.keys(ownership.alerts ?? {}).some((number) => numbers.has(Number(number)))
       );
     });
+  }
+
+  /** Tickets that match these alerts and are new, or changed since collection by someone other than this run. */
+  async changedCandidates(group, alerts) {
+    const project = this.config.repositoryConfig(group.repository).project;
+    const minutes = Math.ceil((Date.now() - Date.parse(this.inventory.startedAt)) / 60000) + 5;
+    const ids = [...new Set(alerts.flatMap((alert) => [alert.ghsa, alert.cve, alert.url]).filter(Boolean))];
+    const terms = ids.map((id) => String.raw`text ~ "\"${id}\""`);
+    const jql = `project = ${project} AND updated >= -${minutes}m AND (${terms.join(' OR ')}) ORDER BY key`;
+    const issues = await this.jira.search(jql, ['updated'], []);
+    return issues.filter((issue) => {
+      if (this.touched.has(issue.key)) {
+        return false;
+      }
+      const collected = this.tickets.get(issue.key);
+      return !collected || collected.updated !== issue.fields?.updated;
+    });
+  }
+
+  /**
+   * Coverage may appear while the planner runs (a ticket created, adopted or edited by someone else). Re-read it
+   * right before creating, so a new ticket is never a duplicate of work recorded since collection.
+   */
+  async checkLiveCoverage(group, alerts) {
+    const owner = await this.liveOwner(group, alerts);
     if (owner) {
       throw new Error(`${owner.key} recorded ownership of these alerts after collection; not creating a duplicate`);
     }
-    const known = new Set(this.tickets.keys());
-    const fresh = issues.filter((issue) => !known.has(issue.key) && !issue.properties?.[OWNERSHIP_PROPERTY]);
-    if (fresh.length) {
-      const keys = fresh.map((issue) => issue.key).join(', ');
-      throw new Error(`${keys} appeared after collection and may cover these alerts; re-planned next run`);
+    const changed = await this.changedCandidates(group, alerts);
+    if (changed.length) {
+      const keys = changed.map((issue) => issue.key).join(', ');
+      throw new Error(`${keys} changed after collection and may cover these alerts; re-planned next run`);
     }
   }
 
   /** Links a new ticket; a definite failure is kept and retried by later runs independently of the plan. */
-  async link(from, to) {
-    const id = `${this.inventory.runId}:${from}:link:${to}`;
-    const linked = await this.act(id, 'link', `${from} → ${to}`, async () => {
+  linkAction(from, to) {
+    const run = async () => {
       await this.jira.link(this.config.linkType, from, to);
       return { key: from };
-    });
-    if (!linked) {
-      this.pendingLinks.push({ from, to });
+    };
+    run.recovery = { from, to };
+    return run;
+  }
+
+  /**
+   * Links a new ticket. Only a definite failure is kept for retry, under its original journal id; an unknown
+   * outcome is reconciled from the issue's links by the next run's recovery, never re-posted blindly.
+   */
+  async link(from, to) {
+    const id = `${this.inventory.runId}:${from}:link:${to}`;
+    const linked = await this.act(id, 'link', `${from} → ${to}`, this.linkAction(from, to));
+    if (!linked && this.control.find(id)?.status === 'failed') {
+      this.pendingLinks.push({ id, from, to });
     }
     return Boolean(linked);
   }
 
-  /** Retries links that failed in earlier runs, before anything else is changed. */
+  /** Retries links that definitely failed in earlier runs, under their original journal ids. */
   async replayLinks(pending) {
     const remaining = [];
-    await mapSequential(pending, async ({ from, to }) => {
-      const id = `${this.inventory.runId}:replay:${from}:link:${to}`;
-      const done = await this.act(id, 'link', `${from} → ${to}`, async () => {
-        await this.jira.link(this.config.linkType, from, to);
-        return { key: from };
-      });
-      if (!done) {
-        remaining.push({ from, to });
+    await mapSequential(pending, async ({ id, from, to }) => {
+      const linkId = id ?? `${this.inventory.runId}:${from}:link:${to}`;
+      const done = await this.act(linkId, 'link', `${from} → ${to}`, this.linkAction(from, to));
+      if (!done && this.control.find(linkId)?.status === 'failed') {
+        remaining.push({ id: linkId, from, to });
       }
     });
     return remaining;
@@ -500,13 +543,19 @@ export class Executor {
     }
     const recorded = new Set(Object.keys(target.ownership?.alerts ?? {}).map(Number));
     const added = alerts.filter((alert) => !recorded.has(alert.number));
+    // Another open ticket may have taken one of the added alerts while the planner ran.
+    const owner = added.length ? await this.liveOwner(group, added, group.ticket) : null;
+    if (owner) {
+      this.outcome.failures.push(`${group.operation} ${group.ticket}: ${owner.key} now owns some of these alerts.`);
+      return;
+    }
     const signature = this.signature(group, { ticket: group.ticket });
     const id = `${runId}:${group.remediationId}:${group.operation}:${signature}`;
     const scope = await this.act(
       id,
       group.operation,
       group.ticket,
-      () => this.applyScope(group, target, added),
+      this.withRecovery(() => this.applyScope(group, target, added), { key: group.ticket }),
       signature,
     );
     if (!scope) {
@@ -529,41 +578,77 @@ export class Executor {
       return;
     }
     const id = `${this.inventory.runId}:${raise.ticket}:severity-${raise.to}`;
-    const result = await this.act(id, 'severity', raise.ticket, async () => {
-      // Same fresh checks as planned updates (closed or re-owned tickets are left alone), and the decision uses
-      // the current Jira value: a severity raised by hand meanwhile is never lowered.
-      const { severity } = await this.refreshTarget({ ticket: raise.ticket, operation: 'raise', kind: 'actionable' });
-      if (SEVERITY_RANK[raise.to] <= (SEVERITY_RANK[severity] ?? 0)) {
-        return { key: raise.ticket, unchanged: true };
-      }
-      await this.jira.edit(raise.ticket, {
-        [this.config.severityField]: { id: this.config.severityOptions[raise.to] },
-      });
-      await this.jira.addComment(raise.ticket, severityComment({ raise, runId: this.inventory.runId }));
-      await this.verifyIssue(raise.ticket, { severity: raise.to });
-      return { key: raise.ticket };
-    });
+    const result = await this.act(
+      id,
+      'severity',
+      raise.ticket,
+      this.withRecovery(
+        async () => {
+          // Same fresh checks as planned updates (closed or re-owned tickets are left alone), and the decision uses
+          // the current Jira value: a severity raised by hand meanwhile is never lowered.
+          const { severity } = await this.refreshTarget({
+            ticket: raise.ticket,
+            operation: 'raise',
+            kind: 'actionable',
+          });
+          if (SEVERITY_RANK[raise.to] <= (SEVERITY_RANK[severity] ?? 0)) {
+            return { key: raise.ticket, unchanged: true };
+          }
+          await this.jira.edit(raise.ticket, {
+            [this.config.severityField]: { id: this.config.severityOptions[raise.to] },
+          });
+          await this.jira.addComment(raise.ticket, severityComment({ raise, runId: this.inventory.runId }));
+          await this.verifyIssue(raise.ticket, { severity: raise.to });
+          return { key: raise.ticket };
+        },
+        { key: raise.ticket },
+      ),
+    );
     raise.applied = Boolean(result) && !result.unchanged;
   }
 
-  /** Recovery only settles the journal; it never edits remediation tickets (their alerts are simply re-planned). */
+  /** Decides from Jira whether an interrupted or uncertain write happened; never repeats it to find out. */
+  async reconcileEntry(entry) {
+    const { recovery } = entry;
+    if (entry.kind === 'create') {
+      const found = await this.jira.search(`labels = "${recovery.label}" ORDER BY created ASC`, ['summary']);
+      return found.length ? { status: 'done', key: found[0].key } : { status: 'not-applied' };
+    }
+    if (entry.kind === 'link') {
+      const issue = await this.jira.issue(recovery.from, ['issuelinks']);
+      const linked = (issue.fields?.issuelinks ?? []).some(
+        (link) => (link.outwardIssue ?? link.inwardIssue)?.key === recovery.to,
+      );
+      return { status: linked ? 'done' : 'not-applied' };
+    }
+    if (entry.kind === 'hold') {
+      const issue = await this.jira.issue(recovery.key, ['status']);
+      return { status: issue.fields?.status?.name === this.config.holdStatus ? 'done' : 'not-applied' };
+    }
+    if (entry.kind === 'ownership') {
+      const issue = await this.jira.issue(recovery.key, ['status'], [OWNERSHIP_PROPERTY]);
+      const written = issue.properties?.[OWNERSHIP_PROPERTY]?.updatedBy === entry.runId;
+      return { status: written ? 'done' : 'not-applied' };
+    }
+    // Scope and severity steps: labels and severity are idempotent; the only non-idempotent write is a comment,
+    // and every comment names its run, so a comment from that run means the write went through.
+    const comments = await this.jira.recentComments(recovery.key, 20);
+    const commented = comments.some((comment) => textOf(comment.body).includes(entry.runId));
+    return { status: commented ? 'done' : 'not-applied' };
+  }
+
   async recoverEntry(entry) {
-    if (entry.kind !== 'create' || !entry.recovery) {
+    if (!entry.recovery) {
+      // Teams deliveries cannot be checked remotely: they stay unresolved and are never resent.
       await this.control.settle(entry.id, 'uncertain', {});
       const message = `${entry.kind} on ${entry.target} from run ${entry.runId} has an unknown outcome; not repeated.`;
       this.outcome.warnings.push({ code: 'uncertain', message });
       return;
     }
-    const found = await this.jira.search(`labels = "${entry.recovery.label}" ORDER BY created ASC`, ['summary']);
-    if (!found.length) {
-      await this.control.settle(entry.id, 'not-applied', {});
-      return;
-    }
-    await this.control.settle(entry.id, 'done', { key: found[0].key, recovered: true });
-    this.outcome.warnings.push({
-      code: 'recovered',
-      message: `${found[0].key} was created by interrupted run ${entry.runId}; its alerts are re-planned.`,
-    });
+    const { status, key } = await this.reconcileEntry(entry);
+    await this.control.settle(entry.id, status, { recovered: true, ...(key ? { key } : {}) });
+    const message = `${entry.kind} on ${entry.target} from run ${entry.runId} was ${status === 'done' ? 'applied' : 'not applied'}; its alerts are re-planned.`;
+    this.outcome.warnings.push({ code: 'recovered', message });
   }
 
   /** Reconciles reservations left by an interrupted run before anything new is written. */
@@ -794,10 +879,7 @@ async function saveState(control, outcome, inventory) {
       reportedCleared: undefined,
     });
     if (outcome.cleared.length) {
-      await control.saveCleared(
-        await control.loadCleared(),
-        outcome.cleared.map((item) => item.id),
-      );
+      await control.saveCleared(outcome.cleared.map((item) => item.id));
     }
   } else {
     await control.saveState({ lastFailure: { ...record, failures: outcome.failures.slice(0, 20) } });
