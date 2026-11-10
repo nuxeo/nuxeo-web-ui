@@ -104,8 +104,10 @@ nothing claims a clean scan.
 
 ## Enabling the weekly run
 
-1. Merge to `develop-2023` (the default branch; GitHub schedules only the default branch's workflows, so there is
-   exactly one weekly scheduler).
+1. Merge to both supported dev branches (`develop-2025` and `develop-2023`). GitHub runs scheduled workflows only
+   from the repository's default branch, so there is exactly one weekly scheduler (today `develop-2023`). Keeping the
+   workflow on every dev branch means the schedule continues unchanged when the default branch moves to a newer LTS
+   line. Keep the copies identical: a change lands on both branches.
 2. Add the `DEPENDABOT_TRIAGE_COPILOT_TOKEN` secret.
 3. Run **Run workflow** with `preview`, review the report on the control issue.
 4. Set `DEPENDABOT_AI_TRIAGE_ALLOW_AUTOMATIC=true` and `DEPENDABOT_AI_TRIAGE_MODE=automatic`.
