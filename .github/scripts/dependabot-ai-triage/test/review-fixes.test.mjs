@@ -15,6 +15,7 @@ import {
   ticketQueries,
 } from '../collect.mjs';
 import { anonymouslyReadable, npmClient } from '../lib/clients.mjs';
+import { loadConfig } from '../lib/config.mjs';
 import { validatePlan } from '../lib/plan-validator.mjs';
 import { OWNED_LABEL, OWNERSHIP_PROPERTY, blockerRecheck, fingerprint, reconcile } from '../lib/reconcile.mjs';
 import { runReport, teamsCard } from '../lib/render.mjs';
@@ -859,7 +860,7 @@ test('a ticket started after validation is not put On Hold, and its ownership is
   assert.equal(jira.issues.get('APP-31').properties[OWNERSHIP_PROPERTY], undefined);
 });
 
-async function collectWith({ level, publicReadable }) {
+async function collectWith({ level, publicReadable, priorities = ['Highest', 'High', 'Medium', 'Low', 'Lowest'] }) {
   const work = mkdtempSync(path.join(tmpdir(), 'dat-collect-'));
   const option = (value, id) => {
     return { value, id };
@@ -880,6 +881,12 @@ async function collectWith({ level, publicReadable }) {
           ],
         },
         { fieldId: 'components', allowedValues: [{ name: 'Web UI' }, { name: 'CI/CD' }] },
+        {
+          fieldId: 'priority',
+          allowedValues: priorities.map((name) => {
+            return { name };
+          }),
+        },
       ];
     },
     properties: new Map(),
@@ -1665,4 +1672,59 @@ test('a retry whose journal record was pruned does not post its comment twice', 
   pruned.exec.finish = async () => false;
   await pruned.exec.update(extend, {});
   assert.equal(jira.issues.get('LIB-44').comments.length, comments);
+});
+
+// Priority follows Defect Severity.
+
+const withPriority = {
+  ...config,
+  priorityBySeverity: { critical: 'High', high: 'High', medium: 'Medium', low: 'Low' },
+  priorityOrder: ['Lowest', 'Low', 'Medium', 'High', 'Highest'],
+};
+
+async function priorityExecutor(jira, tickets) {
+  const built = await executor(jira, tickets);
+  built.exec.config = withPriority;
+  return built;
+}
+
+test('a new ticket gets the priority mapped from its Defect Severity', async () => {
+  const tickets = registerTickets();
+  const jira = new FakeJira(tickets);
+  const { exec } = await priorityExecutor(jira, tickets);
+  const report = {};
+  await exec.create(group(`${EL}:critical`, EL, 'create', undefined, 'critical', [108]), report);
+  assert.deepEqual(jira.issues.get(report.ticketKey).fields.priority, { name: 'High' });
+});
+
+test('extending a ticket raises its priority with its severity but never lowers it', async () => {
+  const tickets = registerTickets();
+  const jira = new FakeJira(tickets);
+  jira.issues.get('LIB-44').fields.priority = { name: 'Low' };
+  const { exec } = await priorityExecutor(jira, tickets);
+  const extend = group(`${EL}:refresh`, EL, 'extend', 'LIB-44', 'critical', [104, 105, 107], { updateNote: 'x' });
+  await exec.update(extend, {});
+  assert.deepEqual(jira.issues.get('LIB-44').fields.priority, { name: 'High' });
+  assert.ok(
+    jira.issues.get('LIB-44').comments.some((comment) => JSON.stringify(comment).includes('Priority raised from Low')),
+  );
+
+  const kept = new FakeJira(tickets);
+  kept.issues.get('LIB-44').fields.priority = { name: 'Highest' };
+  const second = await priorityExecutor(kept, tickets);
+  await second.exec.update(extend, {});
+  assert.deepEqual(kept.issues.get('LIB-44').fields.priority, { name: 'Highest' });
+});
+
+test('a priority missing from a Jira project stops collection before anything is written', async () => {
+  const result = await collectWith({ level: '11176', publicReadable: false, priorities: ['Medium', 'Low'] });
+  assert.equal(result.lockAcquired, false);
+  assert.match(result.failures.join(), /priority "High" is not available/);
+});
+
+test('a priority mapping outside the configured order is rejected', () => {
+  const file = path.join(mkdtempSync(path.join(tmpdir(), 'dat-config-')), 'config.json');
+  const raw = JSON.parse(readFileSync(CONFIG_FILE, 'utf8'));
+  writeFileSync(file, JSON.stringify({ ...raw, priorityBySeverity: { ...raw.priorityBySeverity, low: 'Trivial' } }));
+  assert.throws(() => loadConfig(file, {}), /Priority "Trivial" for "low" must be listed in priorityOrder/);
 });

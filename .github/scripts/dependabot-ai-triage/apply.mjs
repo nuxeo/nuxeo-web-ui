@@ -232,14 +232,15 @@ export class Executor {
     return ref && JIRA_KEY.test(ref) ? (this.tickets.get(ref)?.status ?? null) : null;
   }
 
-  async verifyIssue(key, { severity, property, epic, status }) {
-    const fields = [this.config.severityField, 'parent', 'status', 'labels'];
+  async verifyIssue(key, { severity, priority, property, epic, status }) {
+    const fields = [this.config.severityField, 'priority', 'parent', 'status', 'labels'];
     const issue = await this.jira.issue(key, fields, property ? [OWNERSHIP_PROPERTY] : []);
     const checks = [
       [
         'Defect Severity',
         severity && issue.fields[this.config.severityField]?.id !== this.config.severityOptions[severity],
       ],
+      ['priority', priority && issue.fields.priority?.name !== priority],
       ['epic', epic && issue.fields.parent?.key !== epic],
       ['status', status && issue.fields.status?.name !== status],
       ['ownership property', property && issue.properties?.[OWNERSHIP_PROPERTY]?.writeId !== property.writeId],
@@ -256,7 +257,8 @@ export class Executor {
    */
   async refreshTarget(group) {
     const key = group.ticket;
-    const issue = await this.jira.issue(key, [this.config.severityField, 'status', 'labels'], [OWNERSHIP_PROPERTY]);
+    const fields = [this.config.severityField, 'priority', 'status', 'labels'];
+    const issue = await this.jira.issue(key, fields, [OWNERSHIP_PROPERTY]);
     const status = issue.fields.status ?? {};
     const category = status.statusCategory?.key;
     const ownership = issue.properties?.[OWNERSHIP_PROPERTY] ?? null;
@@ -281,10 +283,30 @@ export class Executor {
       key,
       labels: issue.fields.labels ?? [],
       severity: this.config.severityOf(issue.fields[this.config.severityField]?.id),
+      priority: issue.fields.priority?.name ?? null,
       onHold: status.name === this.config.holdStatus,
       category,
       ownership,
     };
+  }
+
+  /** The configured priority for a severity when it is above `current`; a priority is never lowered. */
+  priorityRaise(severity, current) {
+    const target = this.config.priorityBySeverity?.[severity];
+    const order = this.config.priorityOrder ?? [];
+    return target && order.indexOf(target) > order.indexOf(current) ? target : null;
+  }
+
+  /** Raises Defect Severity and/or priority in one edit and verifies what changed; neither is ever lowered. */
+  async raiseFields(key, severity, priority) {
+    const fields = {
+      ...(severity ? { [this.config.severityField]: { id: this.config.severityOptions[severity] } } : {}),
+      ...(priority ? { priority: { name: priority } } : {}),
+    };
+    if (Object.keys(fields).length) {
+      await this.jira.edit(key, fields);
+      await this.verifyIssue(key, { severity, priority });
+    }
   }
 
   recordRaise(ticket, from, to, alerts) {
@@ -594,16 +616,18 @@ export class Executor {
     if (!target.labels.includes(OWNED_LABEL)) {
       await this.jira.addLabel(key, OWNED_LABEL);
     }
-    if (SEVERITY_RANK[group.severity] <= (SEVERITY_RANK[target.severity] ?? 0)) {
+    const raised = SEVERITY_RANK[group.severity] > (SEVERITY_RANK[target.severity] ?? 0);
+    const priority = this.priorityRaise(group.severity, target.priority);
+    // Only what is raised is written and verified: a value set higher by hand is never lowered.
+    await this.raiseFields(key, raised ? group.severity : null, priority);
+    if (!raised) {
       return { key, raise: null };
     }
-    await this.jira.edit(key, { [this.config.severityField]: { id: this.config.severityOptions[group.severity] } });
-    // Only verify severity we changed: a ticket set higher by hand is never lowered.
-    await this.verifyIssue(key, { severity: group.severity });
     const drivers = this.groupAlerts(group)
       .filter((alert) => alert.severity === group.severity)
       .map((alert) => `#${alert.number}`);
-    return { key, raise: { from: target.severity ?? null, to: group.severity, alerts: drivers } };
+    const priorityChange = priority ? { priority: { from: target.priority, to: priority } } : {};
+    return { key, raise: { from: target.severity ?? null, to: group.severity, alerts: drivers, ...priorityChange } };
   }
 
   /**
@@ -691,19 +715,22 @@ export class Executor {
         async () => {
           // Same fresh checks as planned updates (closed or re-owned tickets are left alone), and the decision uses
           // the current Jira value: a severity raised by hand meanwhile is never lowered.
-          const { severity } = await this.refreshTarget({
+          const { severity, priority } = await this.refreshTarget({
             ticket: raise.ticket,
             operation: 'raise',
             kind: 'actionable',
           });
-          if (SEVERITY_RANK[raise.to] <= (SEVERITY_RANK[severity] ?? 0)) {
+          const raised = SEVERITY_RANK[raise.to] > (SEVERITY_RANK[severity] ?? 0);
+          const priorityTo = this.priorityRaise(raise.to, priority);
+          await this.raiseFields(raise.ticket, raised ? raise.to : null, priorityTo);
+          if (!raised) {
             return { key: raise.ticket, unchanged: true };
           }
-          await this.jira.edit(raise.ticket, {
-            [this.config.severityField]: { id: this.config.severityOptions[raise.to] },
-          });
-          await this.verifyIssue(raise.ticket, { severity: raise.to });
-          return { key: raise.ticket, raise: { from: severity ?? null, to: raise.to, alerts: raise.alerts } };
+          const priorityChange = priorityTo ? { priority: { from: priority, to: priorityTo } } : {};
+          return {
+            key: raise.ticket,
+            raise: { from: severity ?? null, to: raise.to, alerts: raise.alerts, ...priorityChange },
+          };
         },
         {
           key: raise.ticket,
