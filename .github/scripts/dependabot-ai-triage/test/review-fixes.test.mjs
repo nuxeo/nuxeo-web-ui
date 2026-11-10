@@ -1728,3 +1728,31 @@ test('a priority mapping outside the configured order is rejected', () => {
   writeFileSync(file, JSON.stringify({ ...raw, priorityBySeverity: { ...raw.priorityBySeverity, low: 'Trivial' } }));
   assert.throws(() => loadConfig(file, {}), /Priority "Trivial" for "low" must be listed in priorityOrder/);
 });
+
+test('recovery does not complete a scope step while its requested priority is missing', async () => {
+  const tickets = registerTickets();
+  const jira = new FakeJira(tickets);
+  jira.issues.get('LIB-44').fields.labels.push(OWNED_LABEL);
+  jira.issues.get('LIB-44').fields.priority = { name: 'Low' };
+  const control = new ControlState(jira, config.controlIssue);
+  await control.load();
+  const id = 'old:LIB-44:adopt:sig';
+  const recovery = { key: 'LIB-44', raiseTo: null, priorityTo: 'High' };
+  await control.reserve({ id, kind: 'adopt', target: 'LIB-44', runId: 'old', recovery });
+  await control.settle(id, 'uncertain', {});
+  const { exec } = await priorityExecutor(jira, tickets);
+  await exec.recover();
+  const reloaded = new ControlState(jira, config.controlIssue);
+  await reloaded.load();
+  assert.equal(reloaded.find(id).status, 'not-applied');
+
+  jira.issues.get('LIB-44').fields.priority = { name: 'High' };
+  const id2 = 'old:LIB-44:adopt:sig2';
+  await reloaded.reserve({ id: id2, kind: 'adopt', target: 'LIB-44', runId: 'old', recovery });
+  await reloaded.settle(id2, 'uncertain', {});
+  const again = await priorityExecutor(jira, tickets);
+  await again.exec.recover();
+  const final = new ControlState(jira, config.controlIssue);
+  await final.load();
+  assert.equal(final.find(id2).status, 'done');
+});
