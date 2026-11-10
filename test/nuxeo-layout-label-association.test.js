@@ -61,9 +61,9 @@ suiteTeardown(function reportFailedHooks() {
   function report(suite) {
     const hooks = [...suite._beforeAll, ...suite._beforeEach, ...suite._afterEach, ...suite._afterAll];
     [...suite.tests, ...hooks].forEach((test) => {
-      if (test.err) {
+      if (test.state === 'failed') {
         // eslint-disable-next-line no-console
-        console.error(`Failed test or hook: ${test.fullTitle()}: ${test.err.message}`);
+        console.error(`Failed test or hook: ${test.fullTitle()}: ${test.err ? test.err.message : 'hook failed'}`);
       }
     });
     suite.suites.forEach(report);
@@ -82,7 +82,10 @@ suite('layout label association (WEBUI-2230)', () => {
     suite(is, () => {
       let element;
 
-      suiteSetup(async () => {
+      suiteSetup(async function loadMetadataLayout() {
+        // The first legacy HTML import also initializes shared styles and nested widgets.
+        // Allow CI's cold browser startup without relaxing any of the label assertions.
+        this.timeout(15000);
         element = await load(is, path);
       });
 
