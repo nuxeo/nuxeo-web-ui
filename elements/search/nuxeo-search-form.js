@@ -745,7 +745,7 @@ Polymer({
         }
       }
       if (this.queue) {
-        this.$.list.fetch().then(() => this._selectPendingCurrentDocument());
+        this._fetchQueue().then((latest) => latest && this._selectPendingCurrentDocument());
       } else if (this.auto) {
         this._fetch(this.$.provider);
       }
@@ -765,7 +765,7 @@ Polymer({
       // This fetch can be the one that first populates the queue, so it has to spend a pending
       // replay too: left armed, a later visibility fetch would re-select the displayed document
       // after a deliberate clear (WEBUI-2303).
-      void Promise.resolve(this.$.list.fetch()).then(() => this._selectPendingCurrentDocument());
+      void this._fetchQueue().then((latest) => latest && this._selectPendingCurrentDocument());
     }
     if (this.results) {
       this.results.reset();
@@ -789,7 +789,7 @@ Polymer({
       if (restoreSelection) {
         selectedUid = this.selectedDocument != null ? this.selectedDocument.uid : undefined;
       }
-      this.$.list.fetch().then(() => {
+      this._fetchQueue().then((latest) => {
         if (typeof index === 'number') {
           // An explicit index is the caller's own selection and wins over a pending replay.
           this.__queueSelectionPending = false;
@@ -797,11 +797,20 @@ Polymer({
           this.$.list.scrollToIndex(targetIndex);
           this.$.list.selectIndex(targetIndex);
           this._navigateToQueueItem(targetIndex);
-        } else {
+        } else if (latest) {
           this._selectPendingCurrentDocument();
         }
       });
     }
+  },
+
+  _fetchQueue() {
+    // An overlapping fetch aborts the previous one, and the page provider still fulfils the aborted
+    // request with an empty queue. Resolve with whether this is the latest fetch, so that only
+    // the one that is not superseded can spend the pending replay (WEBUI-2303).
+    this.__queueFetchId = (this.__queueFetchId || 0) + 1;
+    const id = this.__queueFetchId;
+    return Promise.resolve(this.$.list.fetch()).then(() => id === this.__queueFetchId);
   },
 
   _queueItemTapped(e) {
