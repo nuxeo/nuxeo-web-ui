@@ -1,0 +1,39 @@
+name: Dependabot AI triage
+
+# Weekly AI-assisted triage of open Dependabot alerts in nuxeo-web-ui and nuxeo-elements.
+# The logic lives in nuxeo/ui-team-gh-actions (dependabot-ai-triage/README.md); this caller holds the schedule,
+# the secrets and the variables (SECURITY_EPIC, SECURITY_EPIC_QUARTER, DEPENDABOT_AI_TRIAGE_*), and pins the
+# reusable workflow to a reviewed commit. Keep this file identical on every dev branch: GitHub only schedules the
+# default branch's copy.
+on:
+  schedule:
+    - cron: '0 13 * * 1'
+      timezone: 'Asia/Kolkata'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'preview proposes only; automatic writes Jira and Teams (needs DEPENDABOT_AI_TRIAGE_ALLOW_AUTOMATIC=true)'
+        type: choice
+        options: [preview, automatic]
+        default: preview
+
+# One triage at a time; never cancel a run that may be writing to Jira.
+concurrency:
+  group: dependabot-ai-triage
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  triage:
+    uses: nuxeo/ui-team-gh-actions/.github/workflows/dependabot-ai-triage.yaml@3bccc517bf13f8fc970eac5fda4760a2baea7be1
+    with:
+      mode: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || '' }}
+    # Passed by name, never `inherit`: the shared workflow receives only what it uses.
+    secrets:
+      DEPENDABOT_TRIAGE_GITHUB_TOKEN: ${{ secrets.GIT_ADMIN_TOKEN }}
+      DEPENDABOT_TRIAGE_JIRA_EMAIL: ${{ secrets.DEPENDABOT_TRIAGE_JIRA_EMAIL }}
+      DEPENDABOT_TRIAGE_TOKEN: ${{ secrets.DEPENDABOT_TRIAGE_TOKEN }}
+      DEPENDABOT_TEAMS_WEBHOOK_URL: ${{ secrets.DEPENDABOT_TEAMS_WEBHOOK_URL }}
+      DEPENDABOT_TRIAGE_COPILOT_TOKEN: ${{ secrets.DEPENDABOT_TRIAGE_COPILOT_TOKEN }}
