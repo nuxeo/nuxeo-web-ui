@@ -865,6 +865,48 @@ suite('nuxeo-search-form', () => {
       selectSpy.restore();
     });
 
+    test('a superseded fetch cannot spend the replay before the replacement populates the queue', async () => {
+      searchForm.currentDocument = entries[1];
+      expect(searchForm.__queueSelectionPending).to.be.true;
+
+      // the first fetch is aborted by the second: it settles with the queue still empty
+      let settleFirst;
+      let settleSecond;
+      const fetchStub = sinon.stub(searchForm.$.list, 'fetch');
+      fetchStub.onFirstCall().returns(new Promise((resolve) => (settleFirst = resolve)));
+      fetchStub.onSecondCall().returns(new Promise((resolve) => (settleSecond = resolve)));
+      const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+
+      searchForm._visibleChanged();
+      searchForm.displayQueue();
+      // the aborted request settles first, with nothing in the queue
+      settleFirst();
+      await settle();
+      // then the replacement brings the entries in
+      searchForm.$.list.items = entries.map((entry) => Object.assign({}, entry));
+      settleSecond();
+      await settle();
+
+      expect(selectSpy).to.have.been.calledOnce;
+      expect(searchForm.selectedDocument.uid).to.equal('uid-2');
+      expect(searchForm.__queueSelectionPending).to.not.be.true;
+
+      fetchStub.restore();
+      selectSpy.restore();
+    });
+
+    test('a successful empty result still spends the replay', async () => {
+      searchForm.currentDocument = entries[1];
+      const fetchStub = sinon.stub(searchForm.$.list, 'fetch').resolves();
+
+      searchForm._visibleChanged();
+      await settle();
+
+      expect(searchForm.__queueSelectionPending).to.not.be.true;
+
+      fetchStub.restore();
+    });
+
     test('a lookup against a populated queue spends an earlier pending replay', async () => {
       // the entries are not in yet, so the observer can only arm the replay
       searchForm.currentDocument = entries[0];
