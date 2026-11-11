@@ -27,6 +27,7 @@ Always follow this sequence when making changes:
 npm install                  # Install dependencies (Node ≥ 22.13)
 npm run format               # Auto-fix formatting (Prettier → ESLint)
 npm run lint                 # ESLint + Prettier check — must pass
+npm run check:catalog        # Designer catalog analyzer check — must pass (see below)
 npm test                     # Web Test Runner unit tests — must pass
 ```
 
@@ -34,6 +35,10 @@ npm test                     # Web Test Runner unit tests — must pass
 - `npm run format` runs `prettier --write` first, then `eslint --fix`.
 - Always run `npm run format` before committing. Pre-commit hooks enforce this.
 - Do NOT commit `.only` in test files — the `no-only-tests` ESLint rule blocks it.
+- `npm run check:catalog` needs the catalog generator's own dependencies once:
+  `npm ci --ignore-scripts --prefix packages/nuxeo-designer-catalog`. It runs `polymer-analyzer` on the
+  catalog entry points (including the `@nuxeo` packages in `node_modules`) and fails when a file cannot be
+  parsed or an element that went missing in WEBUI-2418 is not found. The Lint CI job runs it.
 
 ## CLA-safe commits
 
@@ -176,7 +181,7 @@ Push to a dev branch (`develop-2025`, `develop-2023`) runs `develop.yaml`, which
 
 Push to a release branch runs `main.yaml` for that line: those four plus **sonar**, again in parallel, then **build**, which depends on all five and does the tag and publish.
 
-PRs run lint and test workflows automatically.
+PRs run lint and test workflows automatically. The Lint job also runs `npm run check:catalog`.
 
 `ftest.yaml` fans out into four shard jobs plus an aggregating `ftests` job. Branch protection
 requires the `ftests` context, so the shards deliberately run under a different job id — a matrix
