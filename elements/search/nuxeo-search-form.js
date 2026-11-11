@@ -118,7 +118,7 @@ Polymer({
       }
 
       nuxeo-data-list {
-        height: calc(100vh - 61px - var(--nuxeo-app-top));
+        height: calc(100vh - 61px - (var(--nuxeo-app-top, 0px) + var(--nuxeo-app-bottom, 0px)));
         display: block;
         position: relative;
       }
