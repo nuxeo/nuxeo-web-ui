@@ -19,12 +19,13 @@ run the same checks that gate the PR, and **only push if they pass**.
 | CI workflow | Command | Run locally? |
 |---|---|---|
 | **Lint** (`lint.yaml`) | `npm run lint` (eslint + `prettier --list-different`) | Yes — fast |
+| **Lint** (`lint.yaml`, 2nd step) | `npm run check:catalog` (polymer-analyzer on the Designer catalog entry points; needs `npm ci --prefix packages/nuxeo-designer-catalog` once, the script does it) | Yes — ~5 s |
 | **Test** (`test.yaml`) | `npm run test` (web-test-runner `--coverage`) | Yes — ~2 min |
 | A11y (`a11y.yaml`) | `mvn -B -ntp install` + `mvn -B -ntp -f plugin/a11y install` | Optional — needs Java + npm token + repo creds |
 | Ftest (`ftest`, cross-repo `web-ui`) | `npm run ftest` (WebdriverIO + a running Nuxeo server) | No — tens of minutes |
 | Sonar / full build | push-only (`main.yaml`) | No — not a PR gate |
 
-`npm run lint` and `npm run test` are the gate developers must reproduce locally.
+`npm run lint`, `npm run check:catalog` and `npm run test` are the gate developers must reproduce locally.
 A11y/build/sonar need Maven and secrets, so they're not part of the fast pre-push loop.
 
 **Don't wait on the functional tests.** `ftest` (and the cross-repo `web-ui` check) boots a Nuxeo
@@ -38,8 +39,8 @@ plausibly come from the change, re-run the job rather than investigating it.
 From the repo root:
 
 ```bash
-bash .cursor/skills/nuxeo-web-ui-pr-checks/scripts/pr-checks.sh         # lint + test (matches CI)
-bash .cursor/skills/nuxeo-web-ui-pr-checks/scripts/pr-checks.sh --fix   # npm run format first, then lint + test
+bash .cursor/skills/nuxeo-web-ui-pr-checks/scripts/pr-checks.sh         # lint + catalog check + test (matches CI)
+bash .cursor/skills/nuxeo-web-ui-pr-checks/scripts/pr-checks.sh --fix   # npm run format first, then lint + catalog check + test
 ```
 
 - Exit code `0` → safe to push.

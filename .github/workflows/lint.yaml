@@ -50,3 +50,13 @@ jobs:
 
       - name: Lint
         run: npm run lint
+
+      # The Designer catalog generator drops any file polymer-analyzer cannot parse, with the elements it
+      # defines (WEBUI-2418). Run the same analyzer on the same entry points, including the @nuxeo packages
+      # installed from the lockfile, which ESLint does not see.
+      - name: Install catalog generator
+        working-directory: packages/nuxeo-designer-catalog
+        run: npm ci --ignore-scripts
+
+      - name: Check the Designer catalog can read every source
+        run: npm run check:catalog

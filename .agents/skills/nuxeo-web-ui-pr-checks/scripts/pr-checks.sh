@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Run the same gating checks the nuxeo-web-ui PR CI runs (Lint + Unit tests),
 # locally, before pushing to a PR branch.
-# Mirrors .github/workflows/lint.yaml (npm run lint) and test.yaml (npm run test).
+# Mirrors .github/workflows/lint.yaml (npm run lint + npm run check:catalog) and test.yaml (npm run test).
 #
 # Usage:
-#   pr-checks.sh          # lint + test (exactly what CI gates on)
-#   pr-checks.sh --fix    # npm run format first (prettier --write + eslint --fix), then lint + test
+#   pr-checks.sh          # lint + catalog check + test (exactly what CI gates on)
+#   pr-checks.sh --fix    # npm run format first (prettier --write + eslint --fix), then lint + catalog check + test
 #
 # Exit codes: 0 = all green (safe to push); 1 = a check failed; 2 = usage/setup error.
 
@@ -36,7 +36,16 @@ fi
 step "npm run lint"
 npm run lint || fail "lint failed - run with --fix (or 'npm run format'), commit, then re-run"
 
-# 2. Unit tests (test.yaml): web-test-runner --coverage.
+# 2. Designer catalog analyzer check (second step of lint.yaml). Needs the catalog generator's own
+#    dependencies, which a root npm install does not add.
+step "npm run check:catalog"
+if [ ! -d packages/nuxeo-designer-catalog/node_modules/polymer-analyzer ]; then
+  npm ci --ignore-scripts --no-audit --no-fund --prefix packages/nuxeo-designer-catalog >/dev/null \
+    || fail "could not install packages/nuxeo-designer-catalog dependencies"
+fi
+npm run check:catalog || fail "the Designer catalog analyzer cannot read a file - see the list above (WEBUI-2418)"
+
+# 3. Unit tests (test.yaml): web-test-runner --coverage.
 step "npm test"
 if ! npm test; then
   # Most common local-only cause: npm install replaced the nuxeo-elements symlinks.
@@ -58,6 +67,6 @@ HINT
   fail "unit tests failed"
 fi
 
-printf '\n\xe2\x9c\x85 Lint + unit tests passed (matches the PR gating checks). Safe to push.\n'
+printf '\n\xe2\x9c\x85 Lint + catalog check + unit tests passed (matches the PR gating checks). Safe to push.\n'
 printf '   Note: CI also runs a11y/build/sonar (Maven + secrets); see SKILL.md if relevant.\n'
 exit 0
