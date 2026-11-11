@@ -15,8 +15,6 @@ on:
     secrets:
       NPM_PACKAGES_TOKEN:
         required: true
-      SAUCE_ACCESS_KEY:
-        required: false
 
 env:
   # Branch this PR targets. Used to pick the matching nuxeo-elements branch to build against.
