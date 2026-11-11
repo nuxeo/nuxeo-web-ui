@@ -216,7 +216,8 @@ Each LTS line has a permanent **dev branch** that collects work, and a **release
 - Hotfix work on an already-released version branches from the release branch directly. That path is unchanged.
 - Delete your branch once its PR is merged or closed. Cross-repo CI pairs a Web UI PR with a `nuxeo-elements` branch of the **same name**, so an abandoned branch can be silently picked up by a later, unrelated PR — the only clue is one line in a CI log.
 - PRs trigger lint and test workflows automatically
-- PRs tagged `preview` get ephemeral preview environments
+- PRs tagged `preview` publish a combined Nuxeo + Web UI image and comment its reference on the PR; deploying that
+  image to a preview environment is handled outside this repository
 
 ## CI/CD
 
