@@ -299,4 +299,147 @@ suite('nuxeo-document-publications', () => {
       document.dir = origDir;
     });
   });
+
+  // WEBUI-1701: the publication operations report failures through `this.notify()` from inside
+  // their `.catch()` handlers. A regression to `function () { ... }` handlers loses the `this`
+  // binding (modules are strict mode, so `this` is `undefined`) and the user is never told the
+  // operation failed. These suites pin that behaviour for all three operations.
+  //
+  // Stubs are intentionally not restored inline: test/setup.js restores leaked sinon fakes after
+  // every test, so an assertion failure here cannot leak a stubbed `window.confirm` into the rest
+  // of the run (same convention as nuxeo-vocabulary-management.test.js).
+  const rowEvent = (item) => {
+    return { target: { parentNode: { item } } };
+  };
+
+  // Assert on plain extracted values, never `expect(spy).to.have.been.calledWith(...)`:
+  // a FAILING sinon-chai spy assertion never reports under @web/test-runner, so a regression
+  // would stall the run until `testsFinishTimeout` (15 min in CI) instead of failing. Comparing
+  // plain strings/numbers keeps the regression signal fast and readable.
+  const notifiedMessages = (spy) => spy.args.map((args) => args[0] && args[0].message);
+
+  suite('_unpublish error handling', () => {
+    test('should notify user on unpublish error', async () => {
+      const notifySpy = sinon.spy(element, 'notify');
+      sinon.stub(window, 'confirm').returns(true);
+      sinon.stub(element.$.unpublishOp, 'execute').rejects(new Error('Unpublish failed'));
+
+      await element._unpublish(rowEvent({ uid: 'doc-1', path: '/default-domain/workspaces/ws/doc' }));
+
+      expect(notifiedMessages(notifySpy)).to.deep.equal(['publication.unpublish.error']);
+    });
+
+    test('should not proceed if user cancels confirmation', () => {
+      sinon.stub(window, 'confirm').returns(false);
+      const executeSpy = sinon.spy(element.$.unpublishOp, 'execute');
+
+      expect(element._unpublish(rowEvent({ uid: 'doc-1' }))).to.be.undefined;
+      expect(executeSpy.callCount).to.equal(0);
+    });
+
+    test('should do nothing when the event has no target', () => {
+      const executeSpy = sinon.spy(element.$.unpublishOp, 'execute');
+
+      expect(element._unpublish(undefined)).to.be.undefined;
+      expect(element._unpublish({})).to.be.undefined;
+      expect(executeSpy.callCount).to.equal(0);
+    });
+
+    test('should notify success and refresh on unpublish success', async () => {
+      const notifySpy = sinon.spy(element, 'notify');
+      sinon.stub(window, 'confirm').returns(true);
+      const fetchSpy = sinon.spy(element, '_fetchPublications');
+      sinon.stub(element.$.unpublishOp, 'execute').resolves();
+
+      await element._unpublish(rowEvent({ uid: 'doc-1', path: '/default-domain/workspaces/ws/doc' }));
+
+      expect(notifiedMessages(notifySpy)).to.deep.equal(['publication.unpublish.success']);
+      expect(fetchSpy.callCount).to.equal(1);
+    });
+  });
+
+  suite('_republish error handling', () => {
+    test('should notify user on republish error and rethrow', async () => {
+      const notifySpy = sinon.spy(element, 'notify');
+      sinon.stub(window, 'confirm').returns(true);
+      sinon.stub(element.$.publishOp, 'execute').rejects(new Error('Republish failed'));
+      element._src = { uid: 'doc-src' };
+
+      let rejection;
+      await element
+        ._republish(rowEvent({ uid: 'doc-1', parentRef: 'section-1', properties: { 'rend:renditionName': 'pdf' } }))
+        .catch((err) => {
+          rejection = err;
+        });
+
+      expect(notifiedMessages(notifySpy)).to.deep.equal(['publication.internal.publish.error']);
+      // The handler rethrows so callers can react; assert it so the rejection is not left unhandled.
+      expect(rejection).to.be.an('error');
+      expect(rejection.message).to.equal('Republish failed');
+    });
+
+    test('should notify success and fire events on republish success', async () => {
+      const notifySpy = sinon.spy(element, 'notify');
+      sinon.stub(window, 'confirm').returns(true);
+      sinon.stub(element.$.publishOp, 'execute').resolves();
+      element._src = { uid: 'doc-src' };
+      const fired = [];
+      element.addEventListener('document-updated', () => fired.push('document-updated'));
+      element.addEventListener('nx-publish-success', () => fired.push('nx-publish-success'));
+
+      await element._republish(rowEvent({ uid: 'doc-1', parentRef: 'section-1', properties: {} }));
+
+      expect(notifiedMessages(notifySpy)).to.deep.equal(['publication.internal.publish.success']);
+      expect(fired).to.deep.equal(['document-updated', 'nx-publish-success']);
+    });
+
+    test('should do nothing when the event has no target', () => {
+      const executeSpy = sinon.spy(element.$.publishOp, 'execute');
+
+      expect(element._republish(undefined)).to.be.undefined;
+      expect(element._republish({})).to.be.undefined;
+      expect(executeSpy.callCount).to.equal(0);
+    });
+
+    test('should not proceed if user cancels republish confirmation', () => {
+      sinon.stub(window, 'confirm').returns(false);
+      const executeSpy = sinon.spy(element.$.publishOp, 'execute');
+      element._src = { uid: 'doc-src' };
+
+      expect(element._republish(rowEvent({ uid: 'doc-1', parentRef: 'section-1', properties: {} }))).to.be.undefined;
+      expect(executeSpy.callCount).to.equal(0);
+    });
+  });
+
+  suite('_unpublishAll error handling', () => {
+    test('should notify user on unpublish all error', async () => {
+      const notifySpy = sinon.spy(element, 'notify');
+      sinon.stub(window, 'confirm').returns(true);
+      sinon.stub(element.$.unpublishAllOp, 'execute').rejects(new Error('Unpublish all failed'));
+
+      await element._unpublishAll();
+
+      expect(notifiedMessages(notifySpy)).to.deep.equal(['publication.unpublish.all.error']);
+    });
+
+    test('should not proceed if user cancels unpublish all confirmation', () => {
+      sinon.stub(window, 'confirm').returns(false);
+      const executeSpy = sinon.spy(element.$.unpublishAllOp, 'execute');
+
+      expect(element._unpublishAll()).to.be.undefined;
+      expect(executeSpy.callCount).to.equal(0);
+    });
+
+    test('should notify success and refresh on unpublish all success', async () => {
+      const notifySpy = sinon.spy(element, 'notify');
+      sinon.stub(window, 'confirm').returns(true);
+      const fetchSpy = sinon.spy(element, '_fetchPublications');
+      sinon.stub(element.$.unpublishAllOp, 'execute').resolves();
+
+      await element._unpublishAll();
+
+      expect(notifiedMessages(notifySpy)).to.deep.equal(['publication.unpublish.all.success']);
+      expect(fetchSpy.callCount).to.equal(1);
+    });
+  });
 });
