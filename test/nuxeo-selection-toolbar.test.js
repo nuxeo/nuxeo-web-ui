@@ -129,32 +129,33 @@ suite('nuxeo-selection-toolbar', () => {
   // WEBUI-2411: a detached toolbar must not leave listeners on `document`, otherwise it (and the whole
   // view it belongs to, through `__dataHost`) is retained in memory.
   suite('document listeners lifecycle', () => {
-    let added;
-    let removed;
+    let operations;
 
+    // Replays add/remove calls in the order they happened, so a removal can only cancel an earlier
+    // registration and never hides one made after it.
     const netListeners = () => {
-      const counts = {};
-      added.forEach(([type, handler]) => {
-        counts[type] = counts[type] || new Set();
-        counts[type].add(handler);
+      const active = {};
+      operations.forEach(([operation, type, handler]) => {
+        active[type] = active[type] || new Set();
+        if (operation === 'add') {
+          active[type].add(handler);
+        } else {
+          active[type].delete(handler);
+        }
       });
-      removed.forEach(([type, handler]) => {
-        if (counts[type]) counts[type].delete(handler);
-      });
-      return Object.keys(counts)
-        .filter((type) => counts[type].size > 0)
+      return Object.keys(active)
+        .filter((type) => active[type].size > 0)
         .sort();
     };
 
     setup(() => {
-      added = [];
-      removed = [];
+      operations = [];
       sinon.stub(document, 'addEventListener').callsFake(function (type, handler, ...rest) {
-        added.push([type, handler]);
+        operations.push(['add', type, handler]);
         return EventTarget.prototype.addEventListener.call(this, type, handler, ...rest);
       });
       sinon.stub(document, 'removeEventListener').callsFake(function (type, handler, ...rest) {
-        removed.push([type, handler]);
+        operations.push(['remove', type, handler]);
         return EventTarget.prototype.removeEventListener.call(this, type, handler, ...rest);
       });
     });
@@ -178,9 +179,10 @@ suite('nuxeo-selection-toolbar', () => {
       const toolbar = document.createElement('nuxeo-selection-toolbar');
       for (let i = 0; i < 3; i++) {
         document.body.appendChild(toolbar);
+        expect(netListeners(), `cycle ${i} attached`).to.include.members(['keydown', 'mousedown', 'touchstart']);
         toolbar.remove();
+        expect(netListeners(), `cycle ${i} detached`).to.deep.equal([]);
       }
-      expect(netListeners()).to.deep.equal([]);
     });
 
     test('should not react to the Ctrl/Cmd + . shortcut once detached', () => {
