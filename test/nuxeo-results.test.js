@@ -1555,6 +1555,27 @@ suite('nuxeo-results', () => {
       expect(() => results._applyPrefsToView(null, { any: true })).to.not.throw();
     });
 
+    test('_applyPrefsToView reset turns off query persistence inherited by a reused table (ELEMENTS-2112)', () => {
+      const view = {
+        columns: [{ hiddenBack: false, hidden: false, order: 0 }],
+        sortOrder: [],
+        persistQuerySettings: true,
+        set: sinon.spy(),
+      };
+
+      results._applyPrefsToView(view, {});
+
+      expect(view.persistQuerySettings).to.be.false;
+    });
+
+    test('_applyPrefsToView reset leaves views without query persistence untouched (ELEMENTS-2112)', () => {
+      const view = { columns: [{ hiddenBack: false, hidden: false, order: 0 }], sortOrder: [], set: sinon.spy() };
+
+      results._applyPrefsToView(view, {});
+
+      expect(view).to.not.have.property('persistQuerySettings');
+    });
+
     test('_applyPrefsToView reset preserves layout-declared width attribute (WEBUI-2079)', () => {
       // Column elements that expose hasAttribute/getAttribute (mimics a real DOM custom element).
       // Title-like column has an explicit width="300px" attribute; the other has none.

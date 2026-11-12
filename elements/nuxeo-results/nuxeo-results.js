@@ -1353,6 +1353,11 @@ Polymer({
         if (view.sortOrder && view.sortOrder.length > 0) {
           view.sortOrder = [];
         }
+
+        // A table reused from a folder that opted in must not keep saving filters/sort here (ELEMENTS-2112)
+        if (view.persistQuerySettings) {
+          view.persistQuerySettings = false;
+        }
       } else {
         // Apply settings via the setter
         view.settings = newSettings;
