@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { fixture, html, login } from '@nuxeo/testing-helpers';
+import { fixture, flush, html, isElementVisible, login } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-publication/nuxeo-document-publications.js';
 
 suite('nuxeo-document-publications', () => {
@@ -28,6 +28,7 @@ suite('nuxeo-document-publications', () => {
     sinon.stub(element, 'i18n').callsFake((key) => key);
     sinon.stub(element, 'hasFacet').returns(false);
     sinon.stub(element, 'hasPermission').returns(false);
+    sinon.stub(element, 'urlFor').returns('#');
   });
 
   teardown(() => {
@@ -54,6 +55,168 @@ suite('nuxeo-document-publications', () => {
     test('should return false when doc lacks WriteVersion permission', () => {
       const doc = { uid: '1' };
       expect(element._canUnpublish(doc)).to.be.false;
+    });
+  });
+
+  suite('_checkUnpublishAll', () => {
+    const publications = (count) =>
+      Array.from({ length: count }, (_, i) => {
+        return { uid: `${i + 1}` };
+      });
+
+    // serves the publications page by page, like the server does for the provider's offset
+    const servePublications = (docs, pageSize = 40) =>
+      sinon.stub(element.$.unpublishAllProvider, 'fetch').callsFake(() => {
+        const { offset } = element.$.unpublishAllProvider;
+        return Promise.resolve({
+          entries: docs.slice(offset, offset + pageSize),
+          isNextPageAvailable: offset + pageSize < docs.length,
+        });
+      });
+
+    test('should allow unpublishing all when every publication has WriteVersion permission', async () => {
+      element.hasPermission.withArgs(sinon.match.any, 'WriteVersion').returns(true);
+      servePublications(publications(2));
+      await element._checkUnpublishAll();
+      expect(element.canUnpublishAll).to.be.true;
+    });
+
+    test('should check the publications beyond the first page', async () => {
+      element.hasPermission.withArgs(sinon.match.any, 'WriteVersion').returns(true);
+      const fetch = servePublications(publications(41));
+      await element._checkUnpublishAll();
+      expect(fetch).to.have.been.calledTwice;
+      expect(element.canUnpublishAll).to.be.true;
+    });
+
+    test('should not allow unpublishing all when a publication beyond the first page is denied', async () => {
+      element.hasPermission.callsFake((doc, permission) => permission === 'WriteVersion' && doc.uid !== '41');
+      const fetch = servePublications(publications(41));
+      await element._checkUnpublishAll();
+      expect(fetch).to.have.been.calledTwice;
+      expect(element.canUnpublishAll).to.be.false;
+    });
+
+    test('should not allow unpublishing all when the user can only read the publications', async () => {
+      element.canUnpublishAll = true;
+      const fetch = servePublications(publications(41));
+      await element._checkUnpublishAll();
+      expect(fetch).to.have.been.calledOnce;
+      expect(element.canUnpublishAll).to.be.false;
+    });
+
+    test('should allow unpublishing all when there are no publications', async () => {
+      servePublications([]);
+      await element._checkUnpublishAll();
+      expect(element.canUnpublishAll).to.be.true;
+    });
+
+    test('should not allow unpublishing all while the check is pending', () => {
+      element.canUnpublishAll = true;
+      sinon.stub(element.$.unpublishAllProvider, 'fetch').returns(new Promise(() => {}));
+      element._checkUnpublishAll();
+      expect(element.canUnpublishAll).to.be.false;
+    });
+
+    test('should not allow unpublishing all when the check fails', async () => {
+      element.hasPermission.withArgs(sinon.match.any, 'WriteVersion').returns(true);
+      sinon.stub(element.$.unpublishAllProvider, 'fetch').rejects(new Error('fail'));
+      await element._checkUnpublishAll();
+      expect(element.canUnpublishAll).to.be.false;
+    });
+
+    test('should ignore the result of an outdated check', async () => {
+      const allowed = { uid: '1' };
+      element.hasPermission.withArgs(allowed, 'WriteVersion').returns(true);
+      let resolveOutdated;
+      const fetch = sinon.stub(element.$.unpublishAllProvider, 'fetch');
+      fetch.onFirstCall().returns(
+        new Promise((resolve) => {
+          resolveOutdated = resolve;
+        }),
+      );
+      fetch.onSecondCall().resolves({ entries: [{ uid: '2' }], isNextPageAvailable: false });
+      const outdated = element._checkUnpublishAll();
+      await element._checkUnpublishAll();
+      resolveOutdated({ entries: [allowed], isNextPageAvailable: true });
+      await outdated;
+      expect(fetch).to.have.been.calledTwice;
+      expect(element.canUnpublishAll).to.be.false;
+    });
+  });
+
+  suite('pending Unpublish all check', () => {
+    const allowed = { entries: [{ uid: '1' }], isNextPageAvailable: false };
+    let resolveCheck;
+
+    setup(() => {
+      element.hasPermission.withArgs(sinon.match.any, 'WriteVersion').returns(true);
+      sinon.stub(element.$.table, 'fetch');
+      sinon.stub(element.$.unpublishAllProvider, 'fetch').returns(
+        new Promise((resolve) => {
+          resolveCheck = resolve;
+        }),
+      );
+      element.visible = true;
+      element.document = { uid: 'doc-1', isVersion: false };
+    });
+
+    test('should allow unpublishing all once the check completes for the current document', async () => {
+      resolveCheck(allowed);
+      await flush();
+      expect(element.canUnpublishAll).to.be.true;
+    });
+
+    test('should be ignored once the tab is hidden', async () => {
+      element.visible = false;
+      resolveCheck(allowed);
+      await flush();
+      expect(element.canUnpublishAll).to.be.false;
+    });
+
+    test('should be ignored while the source document of a version is resolved', async () => {
+      sinon.stub(element.$.srcDocOp, 'execute').returns(new Promise(() => {}));
+      element.document = { uid: 'ver-2', isVersion: true };
+      resolveCheck(allowed);
+      await flush();
+      expect(element.canUnpublishAll).to.be.false;
+    });
+  });
+
+  suite('Unpublish all button', () => {
+    const getButton = () => element.shadowRoot.querySelector('paper-button.unpublish-all');
+
+    test('should not be displayed when the user cannot unpublish every publication', async () => {
+      element.publishedDocs = [{ uid: '1' }];
+      element.canUnpublishAll = false;
+      await flush();
+      expect(isElementVisible(getButton())).to.be.false;
+    });
+
+    test('should be displayed and enabled when the user can unpublish every publication', async () => {
+      element.publishedDocs = [{ uid: '1' }];
+      element.canUnpublishAll = true;
+      await flush();
+      expect(isElementVisible(getButton())).to.be.true;
+      expect(getButton().hasAttribute('disabled')).to.be.false;
+    });
+
+    test('should be hidden again when a new check starts', async () => {
+      element.publishedDocs = [{ uid: '1' }];
+      element.canUnpublishAll = true;
+      await flush();
+      sinon.stub(element.$.unpublishAllProvider, 'fetch').returns(new Promise(() => {}));
+      element._checkUnpublishAll();
+      await flush();
+      expect(isElementVisible(getButton())).to.be.false;
+    });
+
+    test('should be disabled when there are no publications', async () => {
+      element.publishedDocs = [];
+      element.canUnpublishAll = true;
+      await flush();
+      expect(isElementVisible(getButton())).to.be.true;
+      expect(getButton().hasAttribute('disabled')).to.be.true;
     });
   });
 
@@ -250,8 +413,10 @@ suite('nuxeo-document-publications', () => {
       element.visible = true;
       element._src = { uid: 'doc-1' };
       const fetchSpy = sinon.spy(element.$.table, 'fetch');
+      const checkStub = sinon.stub(element, '_checkUnpublishAll');
       element._fetchPublications();
       expect(fetchSpy).to.have.been.calledOnce;
+      expect(checkStub).to.have.been.calledOnce;
       fetchSpy.restore();
     });
 
@@ -259,8 +424,10 @@ suite('nuxeo-document-publications', () => {
       element.visible = false;
       element._src = { uid: 'doc-1' };
       const fetchSpy = sinon.spy(element.$.table, 'fetch');
+      const checkStub = sinon.stub(element, '_checkUnpublishAll');
       element._fetchPublications();
       expect(fetchSpy).to.not.have.been.called;
+      expect(checkStub).to.not.have.been.called;
       fetchSpy.restore();
     });
 
@@ -268,8 +435,10 @@ suite('nuxeo-document-publications', () => {
       element.visible = true;
       element._src = null;
       const fetchSpy = sinon.spy(element.$.table, 'fetch');
+      const checkStub = sinon.stub(element, '_checkUnpublishAll');
       element._fetchPublications();
       expect(fetchSpy).to.not.have.been.called;
+      expect(checkStub).to.not.have.been.called;
       fetchSpy.restore();
     });
   });
