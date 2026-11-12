@@ -82,7 +82,10 @@ const template = html`
         }
 
         /* label */
-        label {
+        /* the bare element selector is kept for customer-authored layouts that still
+           hand-roll a <label>; new layouts use span.label for field names */
+        label,
+        span.label {
           @apply --nuxeo-label;
         }
 
