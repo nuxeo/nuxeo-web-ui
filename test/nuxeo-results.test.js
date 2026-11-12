@@ -38,6 +38,11 @@ const createMockView = (props = {}) => {
   return mockView;
 };
 
+// Records the columns shown in a document before a change, as applying its preferences does (WEBUI-1380)
+const markShown = (results, path, settings) => {
+  results.__shownVisibility = { path, value: JSON.stringify(results._visibilityOnly(settings)) };
+};
+
 // Mock page provider
 const createMockProvider = (resultsCount = 0, loading = false) => {
   const provider = document.createElement('nuxeo-page-provider');
@@ -589,6 +594,177 @@ suite('nuxeo-results', () => {
       setSpy.restore();
       saveSpy.restore();
       results.document = null;
+    });
+
+    test('_saveViewSettings saves layout prefs by default and doc prefs when document scope is requested', async () => {
+      results._isRestoring = false;
+      results.displayMode = 'table';
+      results._settings = {};
+      sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+      results.document = { path: '/default-domain/a', type: 'Folder' };
+      results.view = createMockView();
+      const settings = { columns: { 'dc:title': { hidden: false, width: '200px' } }, sortOrder: [] };
+      results.view.settings = settings;
+      markShown(results, '/default-domain/a', { columns: { 'dc:title': { hidden: true } } });
+      sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+      const saveLayoutStub = sinon.stub(results, 'saveLayoutPrefs').resolves();
+      const saveDocStub = sinon.stub(results, 'saveDocPrefs').resolves();
+
+      results._saveViewSettings();
+      await Promise.resolve();
+      // the columns shown are shared; the rest is saved with the document
+      expect(saveLayoutStub).to.have.been.calledOnceWith('layoutPrefs.Folder', {
+        columns: { 'dc:title': { hidden: false } },
+      });
+      expect(saveDocStub).to.have.been.calledOnceWith('/default-domain/a', sinon.match.string, settings);
+
+      results.prefsScope = 'document';
+      results._saveViewSettings();
+      await Promise.resolve();
+      expect(saveDocStub).to.have.been.calledTwice;
+      expect(saveLayoutStub).to.have.been.calledOnce;
+
+      results.prefsScope = 'layout';
+      results.document = null;
+    });
+
+    test('_saveViewSettings saves the settings and context captured before the debounce', async () => {
+      results._isRestoring = false;
+      results.displayMode = 'table';
+      results._settings = {};
+      sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+      results.document = { path: '/default-domain/a', type: 'Folder' };
+      results.view = createMockView();
+      const settings = { columns: { 'dc:title': { hidden: true } } };
+      results.view.settings = settings;
+      markShown(results, '/default-domain/a', { columns: { 'dc:title': { hidden: false } } });
+      let pending;
+      sinon.stub(results, '_debounceSave').callsFake((_, fn) => {
+        pending = fn;
+      });
+      const saveLayoutStub = sinon.stub(results, 'saveLayoutPrefs').resolves();
+      const saveDocStub = sinon.stub(results, 'saveDocPrefs').resolves();
+
+      results._saveViewSettings();
+      // another document's prefs are restored before the debounce fires
+      results.document = { path: '/default-domain/ws', type: 'Workspace' };
+      results.view.settings = { columns: { 'dc:title': { hidden: false } } };
+      pending();
+      await Promise.resolve();
+
+      expect(saveLayoutStub).to.have.been.calledOnceWith('layoutPrefs.Folder', settings);
+      expect(saveDocStub).to.have.been.calledOnceWith('/default-domain/a', sinon.match.string, settings);
+      results.document = null;
+    });
+
+    [
+      ['succeeds', (stub) => stub.resolves()],
+      ['fails', (stub) => stub.rejects({ status: 500 })],
+    ].forEach(([outcome, configure]) => {
+      test(`_saveViewSettings keeps local settings per document when a save ${outcome} after navigating`, async () => {
+        const originKey = 'webui-1380-test-nuxeo-results-folder-a';
+        const destinationKey = 'webui-1380-test-nuxeo-results-workspace-b';
+        const destinationSettings = { displayMode: 'table', table: { order: ['dc:created'] } };
+        const settle = async () => {
+          await flush();
+          await new Promise((resolve) => setTimeout(resolve));
+        };
+        window.localStorage.setItem(originKey, JSON.stringify({ displayMode: 'table' }));
+        window.localStorage.setItem(destinationKey, JSON.stringify(destinationSettings));
+        try {
+          results._isRestoring = false;
+          results.displayMode = 'table';
+          sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+          sinon.stub(console, 'warn');
+          sinon.stub(results, 'notify');
+          results.document = { path: '/default-domain/a', type: 'Folder' };
+          results._localStorageName = originKey;
+          await settle();
+          results.view = createMockView();
+          results.view.settings = { order: ['dc:title'] };
+          let pending;
+          sinon.stub(results, '_debounceSave').callsFake((_, fn) => {
+            pending = fn;
+          });
+          configure(sinon.stub(results, 'saveLayoutPrefs'));
+          configure(sinon.stub(results, 'saveDocPrefs'));
+
+          results._saveViewSettings();
+          // navigate to another document, whose local settings get loaded, before the save finishes
+          results.document = { path: '/default-domain/b', type: 'Workspace' };
+          results._localStorageName = destinationKey;
+          await settle();
+          expect(results._settings).to.deep.equal(destinationSettings);
+          pending();
+          await settle();
+
+          expect(results._settings).to.deep.equal(destinationSettings);
+          expect(JSON.parse(window.localStorage.getItem(destinationKey))).to.deep.equal(destinationSettings);
+          expect(JSON.parse(window.localStorage.getItem(originKey))).to.deep.equal({
+            displayMode: 'table',
+            table: { order: ['dc:title'] },
+          });
+        } finally {
+          window.localStorage.removeItem(originKey);
+          window.localStorage.removeItem(destinationKey);
+          results.document = null;
+        }
+      });
+    });
+
+    test('_saveViewSettings notifies once per failure streak when column settings cannot be saved', async () => {
+      const settle = () => new Promise((resolve) => setTimeout(resolve));
+      results._isRestoring = false;
+      results.displayMode = 'table';
+      results._settings = {};
+      sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+      sinon.stub(console, 'warn');
+      results.document = { path: '/default-domain/a', type: 'Folder' };
+      results.view = createMockView();
+      results.view.settings = { columns: { 'dc:title': { hidden: false } } };
+      sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+      sinon.stub(results, 'saveLayoutPrefs').resolves();
+      const saveDocStub = sinon.stub(results, 'saveDocPrefs').rejects({ status: 404 });
+      const notifyStub = sinon.stub(results, 'notify');
+
+      results._saveViewSettings();
+      await settle();
+      results._saveViewSettings();
+      await settle();
+      expect(notifyStub).to.have.been.calledOnceWith({ message: results.i18n('results.columnSettings.saveFailed') });
+
+      // a successful save ends the streak, so the next failure is reported again
+      saveDocStub.resolves();
+      results._saveViewSettings();
+      await settle();
+      saveDocStub.rejects({ status: 500 });
+      results._saveViewSettings();
+      await settle();
+      expect(notifyStub).to.have.been.calledTwice;
+      results.document = null;
+    });
+
+    test("_saveViewSettings doesn't notify when search column settings cannot be saved, as before", async () => {
+      results._isRestoring = false;
+      results.displayMode = 'table';
+      results._settings = {};
+      sinon.stub(console, 'warn');
+      results.document = null;
+      const provider = createMockProvider();
+      provider.provider = 'default_search';
+      results.nxProvider = provider;
+      expect(results._shouldUseGlobalPrefs).to.be.true;
+      results.view = createMockView();
+      results.view.settings = { order: ['dc:title'] };
+      sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+      sinon.stub(results, 'saveGlobalResultsPrefs').rejects({ status: 500 });
+      const notifyStub = sinon.stub(results, 'notify');
+
+      results._saveViewSettings();
+      await new Promise((resolve) => setTimeout(resolve));
+      expect(notifyStub.called).to.equal(false);
+      // the browser copy is still kept
+      expect(results._settings.table).to.deep.equal({ order: ['dc:title'] });
     });
   });
 
@@ -1723,6 +1899,39 @@ suite('nuxeo-results', () => {
       stub.restore();
     });
 
+    test('_getAllGlobalPreferencesOnce retries after the preferences request failed', async () => {
+      // Module-level __allGlobalPrefsPromise is shared across all nuxeo-results tests; clear caches first.
+      results._connectedUserChanged('prefs-test-user-d', 'prefs-test-user-c');
+      sinon.stub(console, 'error');
+      const getStub = sinon.stub(results.$.preferences, 'get');
+      getStub.onFirstCall().rejects({ status: 500 });
+      getStub.onSecondCall().resolves({ preferences: { default_search: '{}' } });
+
+      const failed = await results._getAllGlobalPreferencesOnce();
+      expect(failed).to.deep.equal({});
+      expect(results._isUnavailablePrefsMap(failed)).to.be.true;
+
+      const prefs = await results._getAllGlobalPreferencesOnce();
+      expect(getStub).to.have.been.calledTwice;
+      expect(prefs).to.deep.equal({ default_search: '{}' });
+      expect(results._isUnavailablePrefsMap(prefs)).to.be.false;
+    });
+
+    test('_loadGlobalPrefs does not cache the defaults used while the preferences request fails', async () => {
+      results._connectedUserChanged('prefs-test-user-f', 'prefs-test-user-e');
+      sinon.stub(console, 'error');
+      const getStub = sinon.stub(results.$.preferences, 'get');
+      getStub.onFirstCall().rejects({ status: 500 });
+      getStub.onSecondCall().resolves({ preferences: { default_search: '{"order":["dc:title"]}' } });
+      results.document = null;
+
+      await results._loadGlobalPrefs(true, { provider: 'default_search' }, 'retry-user');
+      expect(results.globalPrefs).to.deep.equal({});
+
+      await results._loadGlobalPrefs(true, { provider: 'default_search' }, 'retry-user');
+      expect(results.globalPrefs).to.deep.equal({ order: ['dc:title'] });
+    });
+
     test('_putGlobalPreference writes plain text payload', async () => {
       const putStub = sinon.stub(results.$.preferences, 'put').resolves();
       await results._putGlobalPreference('default_search', { order: ['dc:title'] });
@@ -1895,6 +2104,42 @@ suite('nuxeo-results', () => {
       putStub.restore();
     });
 
+    test('preference requests run one at a time, each on its own path (WEBUI-1380)', async () => {
+      // the shared resource cancels a pending request when the next one starts: a request must wait for the previous one
+      const sent = [];
+      let finishFirst;
+      const putStub = sinon.stub(results.$.preferences, 'put').callsFake(() => {
+        sent.push(`PUT ${results.$.preferences.path}`);
+        return sent.length === 1
+          ? new Promise((resolve) => {
+              finishFirst = resolve;
+            })
+          : Promise.resolve();
+      });
+      const putDoc = results._putDocPreference('/default-domain/F2', 'documentPrefs.k', {});
+      const putGlobal = results._putGlobalPreference('layoutPrefs.Folder', { columns: {} });
+      await flush();
+      expect(sent).to.deep.equal(['PUT /path/default-domain/F2/@preferences']);
+      finishFirst();
+      await Promise.all([putDoc, putGlobal]);
+      expect(sent).to.deep.equal([
+        'PUT /path/default-domain/F2/@preferences',
+        'PUT /me/preferences/layoutPrefs.Folder',
+      ]);
+      putStub.restore();
+    });
+
+    test('a failed preference request does not block the next one (WEBUI-1380)', async () => {
+      const putStub = sinon.stub(results.$.preferences, 'put');
+      putStub.onFirstCall().rejects(new Error('offline'));
+      putStub.onSecondCall().resolves();
+      const putError = results._putDocPreference('/default-domain/F2', 'documentPrefs.k', {}).catch((err) => err);
+      await results._putGlobalPreference('layoutPrefs.Folder', { columns: {} });
+      expect((await putError).message).to.equal('offline');
+      expect(putStub).to.have.been.calledTwice;
+      putStub.restore();
+    });
+
     test('saveDocPrefs validates inputs and updates docPrefs', async () => {
       await results
         .saveDocPrefs('', 'k', {})
@@ -1951,6 +2196,1357 @@ suite('nuxeo-results', () => {
       results._loadDocPrefs(true, doc, 'user-2');
       results._loadDocPrefs(true, doc, 'user-2');
       expect(results.docPrefs).to.deep.equal({});
+    });
+
+    suite('Layout-scoped prefs (WEBUI-1380)', () => {
+      test('_computeLayoutPrefsKey keys prefs by document type and table unless overridden', () => {
+        const folder = { type: 'Folder' };
+        expect(results._computeLayoutPrefsKey('layout', undefined, folder, 'nuxeo-document-content.results')).to.equal(
+          'layoutPrefs.Folder.nuxeo-document-content.results',
+        );
+        expect(results._computeLayoutPrefsKey('layout', undefined, folder, '')).to.equal('layoutPrefs.Folder');
+        expect(results._computeLayoutPrefsKey('layout', 'case-notes', { type: 'Case' }, 'x-case.notes')).to.equal(
+          'layoutPrefs.case-notes',
+        );
+        expect(
+          results._computeLayoutPrefsKey('layout', undefined, { path: '/default-domain' }, 'x-case.notes'),
+        ).to.equal('');
+        expect(results._computeLayoutPrefsKey('document', 'case-notes', { type: 'Case' }, '')).to.equal('');
+        // not resolved until attached
+        expect(results._computeLayoutPrefsKey('layout', undefined, folder, undefined)).to.be.undefined;
+      });
+
+      test('keys prefs per document type and per table of the hosting layout', () => {
+        if (!customElements.get('x-webui-1380-layout')) {
+          customElements.define('x-webui-1380-layout', class extends HTMLElement {});
+        }
+        const host = document.createElement('x-webui-1380-layout');
+        const root = host.attachShadow({ mode: 'open' });
+        const notes = document.createElement('nuxeo-results');
+        notes.id = 'notes';
+        const files = document.createElement('nuxeo-results');
+        files.id = 'files';
+        root.append(notes, files);
+        document.body.appendChild(host);
+        try {
+          notes.document = { path: '/default-domain/case-1', type: 'Case' };
+          files.document = { path: '/default-domain/case-1', type: 'Case' };
+          expect(notes._layoutPrefsKey).to.equal('layoutPrefs.Case.x-webui-1380-layout.notes');
+          expect(files._layoutPrefsKey).to.equal('layoutPrefs.Case.x-webui-1380-layout.files');
+          // another document of the same type shares the key; another type does not
+          notes.document = { path: '/default-domain/case-2', type: 'Case' };
+          expect(notes._layoutPrefsKey).to.equal('layoutPrefs.Case.x-webui-1380-layout.notes');
+          notes.document = { path: '/default-domain/folder-1', type: 'Folder' };
+          expect(notes._layoutPrefsKey).to.equal('layoutPrefs.Folder.x-webui-1380-layout.notes');
+          // the hosting element's own id is part of the key, so two hosts of the same kind keep their own settings
+          host.id = 'second';
+          notes.attached();
+          expect(notes._layoutPrefsKey).to.equal('layoutPrefs.Folder.x-webui-1380-layout.second.notes');
+        } finally {
+          host.remove();
+        }
+      });
+
+      test('_loadDocPrefs waits for the layout to be resolved', () => {
+        const enricherStub = sinon.stub(results, '_getDocPrefsFromEnricher');
+        results._prefsHost = undefined;
+        results._loadDocPrefs(true, { path: '/default-domain/a' }, 'layout-user-0', undefined);
+        expect(enricherStub).to.not.have.been.called;
+        results._prefsHost = '';
+      });
+
+      test('defaults to layout scope keyed by the document type', () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results.document = { path: '/default-domain/workspaces/a', type: 'Folder' };
+        expect(results.prefsScope).to.equal('layout');
+        expect(results._layoutPrefsKey).to.equal('layoutPrefs.Folder');
+        results.prefsScope = 'document';
+        expect(results._layoutPrefsKey).to.equal('');
+        results.prefsScope = 'layout';
+        results.document = null;
+      });
+
+      test("_loadDocPrefs shows the columns shared by the layout with each document's own width and sort", async () => {
+        const allPrefsStub = sinon
+          .stub(results, '_getAllGlobalPreferencesOnce')
+          .resolves({ 'layoutPrefs.Folder': '{"columns":{"dc:title":{"hidden":true}}}' });
+        const own = {
+          columns: { 'dc:title': { hidden: false, order: 1, width: '200px', resized: true } },
+          sortOrder: [{ path: 'dc:created', direction: 'desc' }],
+        };
+        const docA = {
+          path: '/default-domain/a',
+          contextParameters: {
+            userPreferences: { preferences: { 'documentPrefs.table': JSON.stringify(own) } },
+          },
+        };
+        results.name = 'table';
+
+        await results._loadDocPrefs(true, docA, 'layout-user-1', 'layoutPrefs.Folder');
+        expect(results.docPrefs).to.deep.equal({
+          columns: { 'dc:title': { hidden: true, order: 1, width: '200px', resized: true } },
+          sortOrder: [{ path: 'dc:created', direction: 'desc' }],
+        });
+        expect(results.__hasBackendDocPrefs).to.be.true;
+
+        // a second document of the same layout, with nothing of its own, reuses the cached layout prefs synchronously
+        results._loadDocPrefs(true, { path: '/default-domain/b' }, 'layout-user-1', 'layoutPrefs.Folder');
+        expect(results.docPrefs).to.deep.equal({ columns: { 'dc:title': { hidden: true } } });
+        expect(allPrefsStub).to.have.been.calledOnce;
+      });
+
+      test('only the columns shown are taken from the layout, even from layout prefs holding more', () => {
+        results._useLayoutPrefs(
+          { columns: { 'dc:title': { hidden: true, width: '90px', order: 3 } }, sortOrder: [{ path: 'dc:title' }] },
+          { path: '/default-domain/c', type: 'Folder' },
+          'layout-user-8',
+        );
+        expect(results.docPrefs).to.deep.equal({ columns: { 'dc:title': { hidden: true } } });
+      });
+
+      test('_loadDocPrefs falls back to the document prefs when the layout has none yet', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results.name = 'table';
+        const doc = {
+          path: '/default-domain/legacy',
+          contextParameters: {
+            userPreferences: { preferences: { 'documentPrefs.table': '{"order":["dc:created"]}' } },
+          },
+        };
+
+        await results._loadDocPrefs(true, doc, 'layout-user-2', 'layoutPrefs.Folder');
+        expect(results.docPrefs).to.deep.equal({ order: ['dc:created'] });
+        expect(results.__hasBackendDocPrefs).to.be.true;
+      });
+
+      test('_loadDocPrefs falls back to the document prefs when the layout prefs cannot be loaded', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').rejects(new Error('boom'));
+        const warnStub = sinon.stub(console, 'warn');
+        results.name = 'table';
+        const doc = {
+          path: '/default-domain/legacy',
+          contextParameters: {
+            userPreferences: { preferences: { 'documentPrefs.table': '{"order":["dc:created"]}' } },
+          },
+        };
+
+        await results._loadDocPrefs(true, doc, 'layout-user-3', 'layoutPrefs.Folder');
+        expect(results.docPrefs).to.deep.equal({ order: ['dc:created'] });
+        expect(warnStub).to.have.been.called;
+      });
+
+      test('_loadDocPrefs retries the layout prefs after the preferences request failed', async () => {
+        // Module-level preference caches are shared across all nuxeo-results tests; clear them first.
+        results._connectedUserChanged('layout-retry-user-b', 'layout-retry-user-a');
+        sinon.stub(console, 'error');
+        const getStub = sinon.stub(results.$.preferences, 'get');
+        getStub.onFirstCall().rejects({ status: 500 });
+        getStub
+          .onSecondCall()
+          .resolves({ preferences: { 'layoutPrefs.Folder': '{"columns":{"dc:title":{"hidden":true}}}' } });
+        const doc = { path: '/default-domain/a', type: 'Folder' };
+
+        await results._loadDocPrefs(true, doc, 'layout-retry-user', 'layoutPrefs.Folder');
+        expect(results.docPrefs).to.deep.equal({});
+
+        await results._loadDocPrefs(true, doc, 'layout-retry-user', 'layoutPrefs.Folder');
+        expect(getStub).to.have.been.calledTwice;
+        expect(results.docPrefs).to.deep.equal({ columns: { 'dc:title': { hidden: true } } });
+      });
+
+      test('_loadDocPrefs ignores a layout prefs load superseded by a newer context', async () => {
+        let resolveFirst;
+        const allPrefsStub = sinon.stub(results, '_getAllGlobalPreferencesOnce');
+        allPrefsStub.onFirstCall().returns(
+          new Promise((resolve) => {
+            resolveFirst = resolve;
+          }),
+        );
+        const first = results._loadDocPrefs(true, { path: '/default-domain/a' }, 'layout-user-4', 'layoutPrefs.A');
+        results._loadDocPrefs(true, { path: '/default-domain/b' }, 'layout-user-4', '');
+        resolveFirst({ 'layoutPrefs.A': '{"order":["dc:title"]}' });
+        await first;
+        expect(results.docPrefs).to.deep.equal({});
+      });
+
+      test('saveLayoutPrefs validates inputs and persists only the columns shown', async () => {
+        await results
+          .saveLayoutPrefs('', {})
+          .then(() => assert.fail('should fail when key missing'))
+          .catch((err) => expect(err.message).to.contain('missing key'));
+
+        results._connectedUserId = null;
+        await results
+          .saveLayoutPrefs('layoutPrefs.Folder', {})
+          .then(() => assert.fail('should fail when user id is missing'))
+          .catch((err) => expect(err.message).to.contain('missing user id'));
+
+        const putStub = sinon.stub(results, '_putGlobalPreference').resolves();
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results._connectedUserId = 'layout-user-5';
+        results.document = { path: '/default-domain/a', type: 'Folder' };
+        await Promise.resolve();
+        await results.saveLayoutPrefs('layoutPrefs.Folder', {
+          columns: { 'dc:title': { hidden: true, width: '200px', order: 2, filterValue: 'invoice' } },
+          sortOrder: [{ path: 'dc:title', direction: 'asc' }],
+        });
+        expect(putStub).to.have.been.calledWith('layoutPrefs.Folder', { columns: { 'dc:title': { hidden: true } } });
+
+        // another document of the same layout picks the saved prefs from the session cache
+        results._loadDocPrefs(true, { path: '/default-domain/other' }, 'layout-user-5', 'layoutPrefs.Folder');
+        expect(results.docPrefs).to.deep.equal({ columns: { 'dc:title': { hidden: true } } });
+        results.document = null;
+      });
+
+      test('saveLayoutPrefs completing after a layout switch does not override the new layout prefs', async () => {
+        let resolvePut;
+        sinon.stub(results, '_putGlobalPreference').returns(
+          new Promise((resolve) => {
+            resolvePut = resolve;
+          }),
+        );
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results._connectedUserId = 'layout-user-6';
+        results.document = { path: '/default-domain/a', type: 'Folder' };
+        const shared = { columns: { 'dc:title': { hidden: true } } };
+        const save = results.saveLayoutPrefs('layoutPrefs.Folder', shared);
+
+        // switch to a document of another layout while the PUT is pending
+        results.document = { path: '/default-domain/ws', type: 'Workspace' };
+        results.docPrefs = { order: ['dc:created'] };
+        resolvePut();
+        await save;
+
+        expect(results.docPrefs).to.deep.equal({ order: ['dc:created'] });
+        // the saved layout still has its prefs cached for the next document of that layout
+        results._loadDocPrefs(true, { path: '/default-domain/b' }, 'layout-user-6', 'layoutPrefs.Folder');
+        expect(results.docPrefs).to.deep.equal(shared);
+        results.document = null;
+      });
+
+      test('a pending initial load does not overwrite layout prefs saved meanwhile', async () => {
+        let resolveGet;
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').returns(
+          new Promise((resolve) => {
+            resolveGet = resolve;
+          }),
+        );
+        sinon.stub(results, '_putGlobalPreference').resolves();
+        results._connectedUserId = 'layout-user-7';
+        const load = results._loadDocPrefs(true, { path: '/default-domain/a' }, 'layout-user-7', 'layoutPrefs.Folder');
+
+        const saved = { columns: { 'dc:title': { hidden: true } } };
+        await results.saveLayoutPrefs('layoutPrefs.Folder', saved);
+        resolveGet({ 'layoutPrefs.Folder': '{"columns":{"dc:title":{"hidden":false}}}' });
+        await load;
+
+        expect(results.docPrefs).to.deep.equal(saved);
+        results._loadDocPrefs(true, { path: '/default-domain/b' }, 'layout-user-7', 'layoutPrefs.Folder');
+        expect(results.docPrefs).to.deep.equal(saved);
+      });
+    });
+
+    suite('Choice of where column changes apply (WEBUI-1380)', () => {
+      const ownPrefs = (prefs) => {
+        return {
+          contextParameters: {
+            userPreferences: { preferences: { 'documentPrefs.table': JSON.stringify(prefs) } },
+          },
+        };
+      };
+
+      setup(() => {
+        results.name = 'table';
+        results._connectedUserId = 'scope-user';
+      });
+
+      teardown(() => {
+        results.document = null;
+      });
+
+      test('the choice is offered only when column settings are shared by the layout', () => {
+        const table = createMockView({ settingsScopeEnabled: false, settingsScope: 'all' });
+        results._updateViewSettingsScope(table, 'layoutPrefs.Folder', 'all');
+        expect(table.settingsScopeEnabled).to.be.true;
+        results._updateViewSettingsScope(table, '', 'all');
+        expect(table.settingsScopeEnabled).to.be.false;
+        results._updateViewSettingsScope(table, undefined, 'all');
+        expect(table.settingsScopeEnabled).to.be.false;
+      });
+
+      test('passes the choice to a table that supports it, and leaves other views alone', () => {
+        const table = createMockView({ settingsScopeEnabled: false, settingsScope: 'all' });
+        results._updateViewSettingsScope(table, 'layoutPrefs.Folder', 'document');
+        expect(table.settingsScopeEnabled).to.be.true;
+        expect(table.settingsScope).to.equal('document');
+
+        const grid = createMockView();
+        results._updateViewSettingsScope(grid, 'layoutPrefs.Folder', 'document');
+        expect(grid.settingsScopeEnabled).to.be.undefined;
+      });
+
+      test('"This document only" columns win over the columns shared by the layout', async () => {
+        const allPrefsStub = sinon
+          .stub(results, '_getAllGlobalPreferencesOnce')
+          .resolves({ 'layoutPrefs.Folder': '{"order":["dc:title"]}' });
+        const doc = { path: '/default-domain/scope-a', ...ownPrefs({ order: ['dc:created'], scope: 'document' }) };
+
+        await results._loadDocPrefs(true, doc, 'scope-user-1', 'layoutPrefs.Folder');
+
+        expect(results.docPrefs).to.deep.equal({ order: ['dc:created'], scope: 'document' });
+        expect(results._settingsScope).to.equal('document');
+        expect(allPrefsStub).to.not.have.been.called;
+      });
+
+      test('a document saved before this change takes the shared columns shown, and keeps its width, order and sort', async () => {
+        sinon
+          .stub(results, '_getAllGlobalPreferencesOnce')
+          .resolves({ 'layoutPrefs.Folder': '{"columns":{"dc:title":{"hidden":true},"dc:creator":{"hidden":false}}}' });
+        const own = {
+          columns: {
+            'dc:title': { hidden: false, order: 1, width: '300px', resized: true, filterValue: 'report' },
+            'dc:creator': { hidden: true, order: 0, width: null, resized: false },
+          },
+          sortOrder: [{ path: 'dc:modified', direction: 'asc' }],
+        };
+        const doc = { path: '/default-domain/scope-b', ...ownPrefs(own) };
+
+        await results._loadDocPrefs(true, doc, 'scope-user-2', 'layoutPrefs.Folder');
+
+        expect(results.docPrefs).to.deep.equal({
+          columns: {
+            'dc:title': { hidden: true, order: 1, width: '300px', resized: true, filterValue: 'report' },
+            'dc:creator': { hidden: false, order: 0, width: null, resized: false },
+          },
+          sortOrder: [{ path: 'dc:modified', direction: 'asc' }],
+        });
+        expect(results._settingsScope).to.equal('all');
+      });
+
+      test('column changes are saved for the document only while "This document only" is chosen', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        results.document = { path: '/default-domain/scope-c', type: 'Folder' };
+        results._settingsScope = 'document';
+        results.view = createMockView();
+        results.view.settings = { order: ['dc:title'] };
+        sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+        const saveDocStub = sinon.stub(results, 'saveDocPrefs').resolves();
+        const saveLayoutStub = sinon.stub(results, 'saveLayoutPrefs').resolves();
+
+        results._saveViewSettings();
+        await Promise.resolve();
+
+        expect(saveDocStub).to.have.been.calledOnceWith('/default-domain/scope-c', 'documentPrefs.table', {
+          order: ['dc:title'],
+          scope: 'document',
+        });
+        expect(saveLayoutStub).to.not.have.been.called;
+      });
+
+      test('choosing "This document only" keeps the current columns for this document', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results.document = { path: '/default-domain/scope-d', type: 'Folder' };
+        results.view = createMockView();
+        results.view.settings = { order: ['dc:title'] };
+        const saveDocStub = sinon.stub(results, 'saveDocPrefs').resolves();
+
+        results._onSettingsScopeSelected({ detail: { scope: 'document' } });
+        await Promise.resolve();
+
+        expect(results._settingsScope).to.equal('document');
+        expect(saveDocStub).to.have.been.calledOnceWith('/default-domain/scope-d', 'documentPrefs.table', {
+          order: ['dc:title'],
+          scope: 'document',
+        });
+      });
+
+      test('choosing "All documents of this type" keeps this document\'s settings, without the mark, and shows the shared columns', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results.document = { path: '/default-domain/scope-e', type: 'Folder' };
+        results.view = createMockView();
+        const settings = {
+          columns: { 'dc:title': { hidden: true, width: '250px', filterValue: 'invoice' } },
+          sortOrder: [{ path: 'dc:title', direction: 'asc' }],
+        };
+        results.view.settings = settings;
+        results._settings = { table: { order: ['dc:created'] } };
+        results._settingsScope = 'document';
+        const putStub = sinon.stub(results, '_putDocPreference').resolves();
+        const loadStub = sinon.stub(results, '_loadDocPrefs');
+
+        results._onSettingsScopeSelected({ detail: { scope: 'all' } });
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(results._settingsScope).to.equal('all');
+        expect(results._settings.table).to.be.null;
+        expect(putStub).to.have.been.calledOnceWith('/default-domain/scope-e', 'documentPrefs.table', settings);
+        expect(loadStub).to.have.been.calledOnce;
+      });
+
+      test('tells the user when the choice cannot be saved', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        sinon.stub(console, 'warn');
+        results.document = { path: '/default-domain/scope-f', type: 'Folder' };
+        results.view = createMockView();
+        sinon.stub(results, 'saveDocPrefs').rejects({ status: 500 });
+        const notifyStub = sinon.stub(results, 'notify');
+
+        results._onSettingsScopeSelected({ detail: { scope: 'document' } });
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(notifyStub).to.have.been.calledOnce;
+        // nothing was saved: the choice goes back, so the dialog matches what is stored
+        expect(results._settingsScope).to.equal('all');
+      });
+
+      test('ignores the choice when column settings are not shared by the layout', () => {
+        results.prefsScope = 'document';
+        results.document = { path: '/default-domain/scope-g', type: 'Folder' };
+        results.view = createMockView();
+        const saveDocStub = sinon.stub(results, 'saveDocPrefs').resolves();
+
+        results._onSettingsScopeSelected({ detail: { scope: 'document' } });
+
+        expect(saveDocStub).to.not.have.been.called;
+        results.prefsScope = 'layout';
+      });
+
+      test('a document save that finishes after moving to another document does not change its columns', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        let finishPut;
+        sinon.stub(results, '_putDocPreference').returns(
+          new Promise((resolve) => {
+            finishPut = resolve;
+          }),
+        );
+        results.document = { path: '/default-domain/scope-h', type: 'Folder' };
+        const save = results.saveDocPrefs('/default-domain/scope-h', 'documentPrefs.table', { order: ['dc:title'] });
+        results.document = { path: '/default-domain/scope-i', type: 'Folder' };
+        results.docPrefs = { order: ['dc:created'] };
+        finishPut();
+        await save;
+
+        expect(results.docPrefs).to.deep.equal({ order: ['dc:created'] });
+      });
+
+      test('a late shared save does not replace the columns of a document using its own', async () => {
+        let finishPut;
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        sinon.stub(results, '_putGlobalPreference').returns(
+          new Promise((resolve) => {
+            finishPut = resolve;
+          }),
+        );
+        results.document = { path: '/default-domain/scope-j', type: 'Folder' };
+        const save = results.saveLayoutPrefs('layoutPrefs.Folder', { order: ['dc:title'] });
+        // move to a folder of the same type that uses its own columns, before the save finishes
+        results.document = {
+          path: '/default-domain/scope-k',
+          type: 'Folder',
+          ...ownPrefs({ order: ['dc:created'], scope: 'document' }),
+        };
+        expect(results._settingsScope).to.equal('document');
+        finishPut();
+        await save;
+
+        expect(results.docPrefs).to.deep.equal({ order: ['dc:created'], scope: 'document' });
+      });
+
+      test('a late shared load does not replace the columns just kept for this document', async () => {
+        let resolveGet;
+        results._connectedUserId = 'scope-user-late-load';
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').returns(
+          new Promise((resolve) => {
+            resolveGet = resolve;
+          }),
+        );
+        sinon.stub(results, '_putDocPreference').resolves();
+        results.view = createMockView();
+        results.view.settings = { order: ['dc:title'] };
+        // the shared columns are still loading when the user picks "This document only"
+        results.document = { path: '/default-domain/scope-m', type: 'Folder' };
+        results._onSettingsScopeSelected({ detail: { scope: 'document' } });
+        await new Promise((resolve) => setTimeout(resolve));
+        resolveGet({ 'layoutPrefs.Folder': '{"order":["dc:modified"]}' });
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(results._settingsScope).to.equal('document');
+        expect(results.docPrefs).to.deep.equal({ order: ['dc:title'], scope: 'document' });
+      });
+
+      test('a queued change does not bring back "This document only" after choosing all documents', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        const putStub = sinon.stub(results, '_putDocPreference').resolves();
+        results.view = createMockView();
+        results.view.settings = { order: ['dc:title'] };
+        results.document = { path: '/default-domain/scope-n', type: 'Folder' };
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        results._settingsScope = 'document';
+        let pending;
+        sinon.stub(results, '_debounceSave').callsFake((_, fn) => {
+          pending = fn;
+        });
+
+        // a column change under "This document only", then "All documents of this type" before it is saved
+        results._saveViewSettings();
+        results._onSettingsScopeSelected({ detail: { scope: 'all' } });
+        pending();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        // the queued "This document only" save was dropped: only the switch wrote the entry, without the mark
+        expect(putStub).to.have.been.calledOnceWith('/default-domain/scope-n', 'documentPrefs.table', {
+          order: ['dc:title'],
+        });
+      });
+
+      test('a queued change under all documents does not undo a newer "This document only"', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        const putDoc = sinon.stub(results, '_putDocPreference').resolves();
+        const putGlobal = sinon.stub(results, '_putGlobalPreference').resolves();
+        results.view = createMockView();
+        results.view.settings = { columns: { 'dc:title': { hidden: false, width: '120px' } } };
+        results.document = { path: '/default-domain/scope-n2', type: 'Folder' };
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        results._settingsScope = 'all';
+        let pending;
+        sinon.stub(results, '_debounceSave').callsFake((_, fn) => {
+          pending = fn;
+        });
+
+        // a column resized under "All documents of this type", then "This document only" before it is saved
+        results._saveViewSettings();
+        results._onSettingsScopeSelected({ detail: { scope: 'document' } });
+        pending();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(putDoc).to.have.been.calledOnceWith('/default-domain/scope-n2', 'documentPrefs.table', {
+          columns: { 'dc:title': { hidden: false, width: '120px' } },
+          scope: 'document',
+        });
+        expect(putGlobal).to.not.have.been.called;
+      });
+
+      test('saves for the same document run in order, so an older one never lands last', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        const written = [];
+        let finishFirst;
+        sinon.stub(results, '_putDocPreference').callsFake((path, key, value) => {
+          written.push(value);
+          return written.length === 1
+            ? new Promise((resolve) => {
+                finishFirst = resolve;
+              })
+            : Promise.resolve();
+        });
+        results.document = { path: '/default-domain/scope-o', type: 'Folder' };
+
+        const first = results.saveDocPrefs('/default-domain/scope-o', 'documentPrefs.table', { scope: 'document' });
+        const second = results.saveDocPrefs('/default-domain/scope-o', 'documentPrefs.table', {});
+        await new Promise((resolve) => setTimeout(resolve));
+        // the second save waits for the first one to finish
+        expect(written).to.have.length(1);
+
+        finishFirst();
+        await Promise.all([first, second]);
+        expect(written).to.deep.equal([{ scope: 'document' }, {}]);
+        expect(results.docPrefs).to.deep.equal({});
+      });
+
+      test('under all documents only the columns shown are shared; width, order, sort and filters stay with the document', async () => {
+        results._connectedUserChanged('filters-user-b', 'filters-user-a');
+        results._connectedUserId = 'filters-user';
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        results.document = { path: '/default-domain/filters-a', type: 'Folder' };
+        results._settingsScope = 'all';
+        results.view = createMockView();
+        const settings = {
+          columns: { 'dc:title': { hidden: false, order: 1, width: '250px', resized: true, filterValue: 'invoice' } },
+          sortOrder: [{ path: 'dc:title', direction: 'asc' }],
+        };
+        results.view.settings = settings;
+        // the user shows the Title column
+        markShown(results, '/default-domain/filters-a', { columns: { 'dc:title': { hidden: true } } });
+        sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+        const putGlobal = sinon.stub(results, '_putGlobalPreference').resolves();
+        const putDoc = sinon.stub(results, '_putDocPreference').resolves();
+
+        results._saveViewSettings();
+        await new Promise((resolve) => setTimeout(resolve));
+        expect(putGlobal).to.have.been.calledOnceWith('layoutPrefs.Folder', {
+          columns: { 'dc:title': { hidden: false } },
+        });
+        expect(putDoc).to.have.been.calledOnceWith('/default-domain/filters-a', 'documentPrefs.table', settings);
+
+        // a resize or sort only: the columns shown are unchanged, so the shared columns are not written again
+        results.view.settings = { ...settings, sortOrder: [{ path: 'dc:title', direction: 'desc' }] };
+        results._saveViewSettings();
+        await new Promise((resolve) => setTimeout(resolve));
+        expect(putGlobal).to.have.been.calledOnce;
+        expect(putDoc).to.have.been.calledTwice;
+      });
+
+      test("shared columns are shown with this document's own settings, never another document's", () => {
+        const withOwn = {
+          path: '/default-domain/filters-b',
+          type: 'Folder',
+          ...ownPrefs({ columns: { 'dc:title': { hidden: true, width: '80px', filterValue: 'report' } } }),
+        };
+        results._useLayoutPrefs({ columns: { 'dc:title': { hidden: false } } }, withOwn, 'filters-user-2');
+        expect(results.docPrefs).to.deep.equal({
+          columns: { 'dc:title': { hidden: false, width: '80px', filterValue: 'report' } },
+        });
+
+        // width, sort or filters that found their way into the shared columns are not applied to other documents
+        const shared = {
+          columns: { 'dc:title': { hidden: false, width: '500px', filterValue: 'invoice' } },
+          sortOrder: [{ path: 'dc:title', direction: 'asc' }],
+        };
+        results._useLayoutPrefs(shared, { path: '/default-domain/filters-c', type: 'Folder' }, 'filters-user-2');
+        expect(results.docPrefs).to.deep.equal({ columns: { 'dc:title': { hidden: false } } });
+      });
+
+      test('picture books and collections share the columns shown by type, like other documents', async () => {
+        const layouts = {
+          '/elements/document/picturebook/nuxeo-picturebook-view-layout.html': 'nuxeo-results',
+          '/elements/document/collection/nuxeo-collection-view-layout.html': 'nuxeo-default-results',
+        };
+        for (const [url, tag] of Object.entries(layouts)) {
+          const response = await fetch(url);
+          const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
+          const table = doc.querySelector('dom-module template').content.querySelector(`${tag}#results`);
+          expect(table.hasAttribute('prefs-scope'), url).to.equal(false);
+        }
+        // each type keeps its own shared columns
+        const keys = ['Collection', 'PictureBook'].map((type) =>
+          results._computeLayoutPrefsKey('layout', undefined, { type }, 'host.results'),
+        );
+        expect(keys).to.deep.equal(['layoutPrefs.Collection.host.results', 'layoutPrefs.PictureBook.host.results']);
+      });
+
+      test("a document's own columns keep the filters shown, as before; the shared columns alone clear them", () => {
+        results.__docPrefsPending = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        const view = createMockView({ columns: [{ field: 'dc:title', filterValue: 'invoice' }], set: sinon.spy() });
+        results._applyDocPrefsImpl(true, { columns: { 'dc:title': { hidden: false, width: '80px' } } }, view);
+        expect(view.set.called).to.equal(false);
+
+        // nothing of its own: the defaults with the shared columns, which reset the filters as the defaults always did
+        results._applyDocPrefsImpl(true, { columns: { 'dc:title': { hidden: false } } }, view);
+        expect(view.set.calledOnceWith('columns.0.filterValue', '')).to.equal(true);
+      });
+
+      test('a missing or forbidden preferences endpoint is asked once per session; other failures are retried', async () => {
+        sinon.stub(console, 'error');
+        for (const status of [404, 403]) {
+          results._connectedUserChanged(`missing-${status}-b`, `missing-${status}-a`);
+          const getStub = sinon.stub(results.$.preferences, 'get').rejects({ status });
+          await results._getAllGlobalPreferencesOnce();
+          await results._getAllGlobalPreferencesOnce();
+          expect(getStub, `status ${status}`).to.have.been.calledOnce;
+          getStub.restore();
+        }
+        results._connectedUserChanged('down-b', 'down-a');
+        const getStub = sinon.stub(results.$.preferences, 'get').rejects({ status: 503 });
+        await results._getAllGlobalPreferencesOnce();
+        await results._getAllGlobalPreferencesOnce();
+        expect(getStub).to.have.been.calledTwice;
+      });
+
+      test('switching back to all documents restores the previous choice when the change cannot be saved', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        sinon.stub(console, 'warn');
+        sinon.stub(results, 'notify');
+        results.document = { path: '/default-domain/scope-p', type: 'Folder' };
+        results.view = createMockView();
+        results._settings = { table: { order: ['dc:created'] } };
+        results._settingsScope = 'document';
+        sinon.stub(results, '_putDocPreference').rejects({ status: 500 });
+
+        results._onSettingsScopeSelected({ detail: { scope: 'all' } });
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(results._settingsScope).to.equal('document');
+        expect(results._settings.table).to.deep.equal({ order: ['dc:created'] });
+        expect(results.notify).to.have.been.calledOnce;
+      });
+
+      test('applies nothing until the shared columns are loaded, so other columns never show first', async () => {
+        let resolveGet;
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').returns(
+          new Promise((resolve) => {
+            resolveGet = resolve;
+          }),
+        );
+        sinon.stub(results, '_filterSettingsByCapabilities').callsFake((view, settings) => settings);
+        const applyStub = sinon.stub(results, '_applyPrefsToView');
+        results.view = createMockView();
+
+        results._loadDocPrefs(
+          true,
+          { path: '/default-domain/pending-a', type: 'Folder' },
+          'pending-user',
+          'layoutPrefs.Folder',
+        );
+        results._applyDocPrefsImpl(true, results.docPrefs, results.view);
+        expect(applyStub).to.not.have.been.called;
+
+        resolveGet({ 'layoutPrefs.Folder': '{"columns":{"dc:title":{"hidden":false}}}' });
+        await new Promise((resolve) => setTimeout(resolve, 80));
+        expect(applyStub).to.have.been.called;
+        expect(applyStub.lastCall.args[1]).to.deep.equal({ columns: { 'dc:title': { hidden: false } } });
+      });
+
+      test('choosing a scope while the shared columns are loading does not leave the table waiting', () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').returns(new Promise(() => {}));
+        sinon.stub(results, '_putDocPreference').resolves();
+        results.document = { path: '/default-domain/pending-b', type: 'Folder' };
+        results.view = createMockView();
+        results._loadDocPrefs(true, results.document, 'pending-user-2', 'layoutPrefs.Folder');
+        expect(results.__docPrefsPending).to.be.true;
+
+        results._onSettingsScopeSelected({ detail: { scope: 'document' } });
+        expect(results.__docPrefsPending).to.be.false;
+      });
+
+      test('switching to all documents with column changes pending keeps them, to be saved for all on close', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results.document = { path: '/default-domain/scope-q', type: 'Folder' };
+        results.view = createMockView();
+        results._settings = {};
+        results._settingsScope = 'document';
+        sinon.stub(results, '_putDocPreference').resolves();
+        const loadStub = sinon.stub(results, '_loadDocPrefs');
+
+        results._onSettingsScopeSelected({ detail: { scope: 'all', pendingChanges: true } });
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(results._settingsScope).to.equal('all');
+        // the shared columns are not reloaded over the user's pending changes
+        expect(loadStub).to.not.have.been.called;
+      });
+
+      test('switching to all documents with column changes pending shares the columns shown on close, even if undone', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results.document = { path: '/default-domain/scope-undo', type: 'Folder' };
+        results.view = createMockView();
+        results._settings = {};
+        results._settingsScope = 'document';
+        // the document's own columns, different from the shared ones
+        const own = { columns: { 'dc:title': { hidden: true } } };
+        results.view.settings = own;
+        markShown(results, '/default-domain/scope-undo', own);
+        sinon.stub(results, '_putDocPreference').resolves();
+        sinon.stub(results, '_loadDocPrefs');
+        sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+        const saveLayoutStub = sinon.stub(results, 'saveLayoutPrefs').resolves();
+
+        // a column was toggled, then all documents picked, then the toggle undone before Done
+        results._onSettingsScopeSelected({ detail: { scope: 'all', pendingChanges: true } });
+        await new Promise((resolve) => setTimeout(resolve));
+        results._saveViewSettings();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(saveLayoutStub.calledOnce).to.equal(true);
+        expect(saveLayoutStub.firstCall.args[1]).to.deep.equal(own);
+      });
+
+      test('an older switch to all documents finishing late does not undo a newer "This document only"', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results.document = { path: '/default-domain/scope-r', type: 'Folder' };
+        results.view = createMockView();
+        results._settings = {};
+        results._settingsScope = 'document';
+        let finishFirst;
+        const putDoc = sinon.stub(results, '_putDocPreference').resolves();
+        putDoc.onFirstCall().returns(
+          new Promise((resolve) => {
+            finishFirst = resolve;
+          }),
+        );
+        const loadStub = sinon.stub(results, '_loadDocPrefs');
+
+        results._onSettingsScopeSelected({ detail: { scope: 'all' } });
+        results._onSettingsScopeSelected({ detail: { scope: 'document' } });
+        finishFirst();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(results._settingsScope).to.equal('document');
+        expect(loadStub).to.not.have.been.called;
+      });
+
+      test('a column changed while switching to all documents is not replaced by the shared columns', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results.document = { path: '/default-domain/scope-u', type: 'Folder' };
+        results.view = createMockView();
+        results._settings = {};
+        results._settingsScope = 'document';
+        let finishPut;
+        sinon.stub(results, '_putDocPreference').returns(
+          new Promise((resolve) => {
+            finishPut = resolve;
+          }),
+        );
+        const loadStub = sinon.stub(results, '_loadDocPrefs');
+        const dialog = { pendingChanges: false };
+
+        results._onSettingsScopeSelected({
+          detail: { scope: 'all', pendingChanges: false },
+          composedPath: () => [dialog],
+        });
+        dialog.pendingChanges = true;
+        finishPut();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(loadStub).to.not.have.been.called;
+      });
+
+      test('a filters-only change is kept when the table is shown again, e.g. after the grid view', async () => {
+        results._connectedUserChanged('filters-only-b', 'filters-only-a');
+        results._connectedUserId = 'filters-only';
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        results.document = { path: '/default-domain/filters-h', type: 'Folder' };
+        results._settingsScope = 'all';
+        results.view = createMockView();
+        results.view.settings = { columns: { 'dc:title': { hidden: false } } };
+        markShown(results, '/default-domain/filters-h', { columns: { 'dc:title': { hidden: true } } });
+        sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+        const putGlobal = sinon.stub(results, '_putGlobalPreference').resolves();
+        sinon.stub(results, '_putDocPreference').resolves();
+        results._saveViewSettings();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        results.view.settings = { columns: { 'dc:title': { hidden: false, filterValue: 'report' } } };
+        results._saveViewSettings();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(putGlobal).to.have.been.calledOnce;
+        expect(results.docPrefs).to.deep.equal({ columns: { 'dc:title': { hidden: false, filterValue: 'report' } } });
+      });
+
+      test('a "This document only" save finishing after a newer column change does not undo it', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results.document = { path: '/default-domain/scope-t', type: 'Folder' };
+        results.view = createMockView();
+        results.view.settings = { columns: { 'dc:title': { hidden: false } } };
+        results._settingsScope = 'all';
+        let finishPut;
+        sinon.stub(results, '_putDocPreference').returns(
+          new Promise((resolve) => {
+            finishPut = resolve;
+          }),
+        );
+        const before = results.docPrefs;
+
+        results._onSettingsScopeSelected({ detail: { scope: 'document' } });
+        results.view.settings = { columns: { 'dc:title': { hidden: false }, 'dc:creator': { hidden: false } } };
+        finishPut();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(results.docPrefs).to.equal(before);
+      });
+
+      test('a column changed and saved while switching to all documents is not replaced by the shared columns', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results.document = { path: '/default-domain/scope-x', type: 'Folder' };
+        results.view = createMockView();
+        results.view.settings = { columns: { 'dc:title': { hidden: false } } };
+        results._settingsScope = 'document';
+        let finishPut;
+        sinon.stub(results, '_putDocPreference').returns(
+          new Promise((resolve) => {
+            finishPut = resolve;
+          }),
+        );
+        const load = sinon.spy(results, '_loadDocPrefs');
+
+        // nothing pending when picked; the column is changed and the dialog closed before the save ends
+        results._onSettingsScopeSelected({ detail: { scope: 'all', pendingChanges: false } });
+        results.view.settings = { columns: { 'dc:title': { hidden: true } } };
+        finishPut();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(load).to.not.have.been.calledWith(true);
+      });
+
+      test('a shared save finishing after a newer column change does not undo it', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        results.document = { path: '/default-domain/scope-w', type: 'Folder' };
+        results._settingsScope = 'all';
+        results.view = createMockView();
+        results.view.settings = { columns: { 'dc:title': { hidden: true } } };
+        sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+        let finishPut;
+        sinon.stub(results, '_putGlobalPreference').returns(
+          new Promise((resolve) => {
+            finishPut = resolve;
+          }),
+        );
+        sinon.stub(results, '_putDocPreference').resolves();
+        const before = results.docPrefs;
+
+        results._saveViewSettings();
+        // the dialog is opened again and another column changed before the save ends
+        results.view.settings = { columns: { 'dc:title': { hidden: true }, 'dc:creator': { hidden: true } } };
+        finishPut();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(results.docPrefs).to.equal(before);
+      });
+
+      test("a document's own save finishing after a newer column change does not undo it", async () => {
+        results._connectedUserChanged('filters-only-d', 'filters-only-c');
+        results._connectedUserId = 'filters-only-late';
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        results.document = { path: '/default-domain/filters-late', type: 'Folder' };
+        results._settingsScope = 'all';
+        results.view = createMockView();
+        results.view.settings = { columns: { 'dc:title': { hidden: false } } };
+        sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+        sinon.stub(results, '_putGlobalPreference').resolves();
+        const putDoc = sinon.stub(results, '_putDocPreference').resolves();
+        results._saveViewSettings();
+        await new Promise((resolve) => setTimeout(resolve));
+        let finishPut;
+        putDoc.returns(
+          new Promise((resolve) => {
+            finishPut = resolve;
+          }),
+        );
+        const before = results.docPrefs;
+
+        results.view.settings = { columns: { 'dc:title': { hidden: false, filterValue: 'report' } } };
+        results._saveViewSettings();
+        results.view.settings = { columns: { 'dc:title': { hidden: true, filterValue: 'report' } } };
+        finishPut();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(results.docPrefs).to.equal(before);
+      });
+
+      test('a document with nothing of its own gets the default width, order and sort with the shared columns', () => {
+        results._settings = {};
+        results.__docPrefsPending = false;
+        const view = createMockView({
+          columns: [
+            { field: 'dc:title', hiddenBack: false, _declaredWidth: '200px', width: '400px', order: 1 },
+            { field: 'dc:creator', hiddenBack: true, width: null, order: 0 },
+          ],
+          sortOrder: [{ path: 'dc:title', direction: 'asc' }],
+        });
+        sinon.stub(results, '_filterSettingsByCapabilities').returnsArg(1);
+        const applyStub = sinon.stub(results, '_applyPrefsToView');
+
+        // the width, order and sort of the document shown before don't carry over
+        results._applyDocPrefsImpl(
+          true,
+          { columns: { 'dc:title': { hidden: true }, 'dc:creator': { hidden: false } } },
+          view,
+        );
+
+        expect(applyStub).to.have.been.calledOnce;
+        expect(applyStub.lastCall.args[1]).to.deep.equal({
+          columns: {
+            'dc:title': { hidden: true, order: 0, width: '200px', resized: false },
+            'dc:creator': { hidden: false, order: 1, width: null, resized: false },
+          },
+        });
+        // applied as the defaults, which clear the table's sort and filters
+        expect(applyStub.lastCall.args[2]).to.deep.equal({ fromDefaults: true });
+      });
+
+      test('a resize or sort in one folder is not applied to another folder of the same type', async () => {
+        results._connectedUserChanged('per-folder-b', 'per-folder-a');
+        results._connectedUserId = 'per-folder';
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        results.document = { path: '/default-domain/per-folder-a', type: 'Folder' };
+        results._settingsScope = 'all';
+        results.view = createMockView();
+        results.view.settings = { columns: { 'dc:title': { hidden: false } } };
+        // the user shows the Title column, which is shared
+        markShown(results, '/default-domain/per-folder-a', { columns: { 'dc:title': { hidden: true } } });
+        sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+        const putGlobal = sinon.stub(results, '_putGlobalPreference').resolves();
+        sinon.stub(results, '_putDocPreference').resolves();
+        results._saveViewSettings();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        // then resizes and sorts it
+        results.view.settings = {
+          columns: { 'dc:title': { hidden: false, order: 0, width: '420px', resized: true } },
+          sortOrder: [{ path: 'dc:title', direction: 'desc' }],
+        };
+        results._saveViewSettings();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(putGlobal).to.have.been.calledOnceWith('layoutPrefs.Folder', {
+          columns: { 'dc:title': { hidden: false } },
+        });
+        results._loadDocPrefs(true, { path: '/default-domain/per-folder-b' }, 'per-folder', 'layoutPrefs.Folder');
+        expect(results.docPrefs).to.deep.equal({ columns: { 'dc:title': { hidden: false } } });
+      });
+
+      test("before any columns are shared, a resize or sort doesn't share the document's own columns", async () => {
+        results._connectedUserChanged('legacy-b', 'legacy-a');
+        results._connectedUserId = 'legacy';
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        results.document = { path: '/default-domain/legacy-a', type: 'Folder' };
+        results._settingsScope = 'all';
+        results.view = createMockView();
+        // columns this folder kept from before the upgrade
+        const own = { columns: { 'dc:title': { hidden: true }, 'dc:creator': { hidden: false } } };
+        results.view.settings = own;
+        markShown(results, '/default-domain/legacy-a', own);
+        sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+        const putGlobal = sinon.stub(results, '_putGlobalPreference').resolves();
+        const putDoc = sinon.stub(results, '_putDocPreference').resolves();
+
+        results.view.settings = { ...own, sortOrder: [{ path: 'dc:creator', direction: 'asc' }] };
+        results._saveViewSettings();
+        await new Promise((resolve) => setTimeout(resolve));
+        expect(putGlobal).to.not.have.been.called;
+        expect(putDoc).to.have.been.calledOnce;
+
+        // showing a column is shared
+        results.view.settings = {
+          columns: { 'dc:title': { hidden: false }, 'dc:creator': { hidden: false } },
+          sortOrder: [{ path: 'dc:creator', direction: 'asc' }],
+        };
+        results._saveViewSettings();
+        await new Promise((resolve) => setTimeout(resolve));
+        expect(putGlobal).to.have.been.calledOnceWith('layoutPrefs.Folder', {
+          columns: { 'dc:title': { hidden: false }, 'dc:creator': { hidden: false } },
+        });
+      });
+
+      test("a change is not shared when the columns shown before it aren't known for this document", async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        results.document = { path: '/default-domain/unknown-a', type: 'Folder' };
+        results._settingsScope = 'all';
+        results.view = createMockView();
+        results.view.settings = { columns: { 'dc:title': { hidden: true } } };
+        // what was shown is only known for another document, e.g. the shared columns of this one are still loading
+        markShown(results, '/default-domain/other', { columns: { 'dc:title': { hidden: false } } });
+        sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+        const saveLayoutStub = sinon.stub(results, 'saveLayoutPrefs').resolves();
+        sinon.stub(results, 'saveDocPrefs').resolves();
+
+        results._saveViewSettings();
+        await Promise.resolve();
+
+        expect(saveLayoutStub).to.not.have.been.called;
+      });
+
+      test('a resize after switching from the grid to an unchanged table is not shared', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results._isRestoring = false;
+        results._settings = {};
+        results._settingsScope = 'all';
+        results.document = { path: '/default-domain/grid-table', type: 'Folder' };
+        results.__docPrefsPending = false;
+        const shown = { columns: { 'dc:title': { hidden: false } } };
+        // the table keeps the columns it shows, so applying the prefs changes nothing
+        sinon.stub(results, '_applyPrefsToView');
+        results.displayMode = 'grid';
+        results._applyDocPrefsImpl(true, {}, createMockView());
+        results.displayMode = 'table';
+        results.view = createMockView({ columns: [{ field: 'dc:title' }], settings: shown });
+        results._applyDocPrefsImpl(true, {}, results.view);
+        sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+        const saveLayoutStub = sinon.stub(results, 'saveLayoutPrefs').resolves();
+        sinon.stub(results, 'saveDocPrefs').resolves();
+
+        results.view.settings = { columns: { 'dc:title': { hidden: false, width: '300px' } } };
+        results._saveViewSettings();
+        await Promise.resolve();
+
+        expect(saveLayoutStub.called).to.equal(false);
+      });
+
+      test("a column change in one document isn't taken for a change of the next one, if their saves are queued together", async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        results._settingsScope = 'all';
+        results.view = createMockView();
+        const saved = [];
+        // the debounced save waits, so the second one replaces the first, as when moving to another document at once
+        sinon.stub(results, '_debounceSave').callsFake((_, fn) => saved.splice(0, 1, fn));
+        const saveLayoutStub = sinon.stub(results, 'saveLayoutPrefs').resolves();
+        sinon.stub(results, 'saveDocPrefs').resolves();
+
+        results.document = { path: '/default-domain/queued-a', type: 'Folder' };
+        markShown(results, '/default-domain/queued-a', { columns: { 'dc:title': { hidden: false } } });
+        results.view.settings = { columns: { 'dc:title': { hidden: true } } };
+        results._saveViewSettings();
+
+        results.document = { path: '/default-domain/queued-b', type: 'Folder' };
+        const shownInB = { columns: { 'dc:title': { hidden: false, width: '80px' } } };
+        markShown(results, '/default-domain/queued-b', shownInB);
+        results.view.settings = { columns: { 'dc:title': { hidden: false, width: '300px' } } };
+        results._saveViewSettings();
+        saved[0]();
+        await Promise.resolve();
+
+        expect(saveLayoutStub.called).to.equal(false);
+      });
+
+      test('restoring an older browser copy, e.g. back from the grid, is saved for the document but not shared', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settingsScope = 'all';
+        results.document = { path: '/default-domain/stale-a', type: 'Folder' };
+        const shown = { columns: { 'dc:title': { hidden: false } } };
+        // the browser copy still has the column hidden, from before it was shown again in another folder
+        results._settings = { table: { columns: { 'dc:title': { hidden: true } } } };
+        let current = shown;
+        const view = createMockView({ columns: [{ field: 'dc:title' }] });
+        // like the table, setting the settings changes the columns shown, which fires settings-changed at once
+        Object.defineProperty(view, 'settings', {
+          get: () => current,
+          set: (value) => {
+            current = value;
+            results._saveViewSettings();
+          },
+        });
+        results.view = view;
+        markShown(results, '/default-domain/stale-a', shown);
+        sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+        const saveLayoutStub = sinon.stub(results, 'saveLayoutPrefs').resolves();
+        const saveDocStub = sinon.stub(results, 'saveDocPrefs').resolves();
+
+        results._restoreViewSettings(view);
+        await Promise.resolve();
+
+        expect(saveLayoutStub.called).to.equal(false);
+        expect(saveDocStub.calledOnce).to.equal(true);
+
+        // nor when it replaces a column change still to be saved
+        results.__visibilityChanged = '/default-domain/stale-a';
+        results._restoreViewSettings(view);
+        await Promise.resolve();
+        expect(saveLayoutStub.called).to.equal(false);
+      });
+
+      test("a document with nothing of its own clears the table's sort only, so an Orderable folder keeps its order", () => {
+        results.__docPrefsPending = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        const view = createMockView({
+          columns: [{ field: 'dc:title', hiddenBack: false }],
+          sortOrder: [{ path: 'dc:title', direction: 'asc' }],
+        });
+        results._applyDocPrefsImpl(true, { columns: { 'dc:title': { hidden: true } } }, view);
+        // no sort in the settings, so the table leaves the page provider's sort (e.g. ecm:pos) alone
+        expect(Object.hasOwn(view.settings, 'sortOrder')).to.equal(false);
+        expect(view.settings.columns['dc:title'].hidden).to.equal(true);
+        expect(view.sortOrder).to.deep.equal([]);
+      });
+
+      test('a document with only a browser copy keeps its width and sort under the shared columns', () => {
+        const local = {
+          columns: { 'dc:title': { hidden: false, width: '300px' } },
+          sortOrder: [{ path: 'dc:title', direction: 'asc' }],
+        };
+        results.displayMode = 'table';
+        results._settings = { table: local };
+        results.__docPrefsPending = false;
+        const view = createMockView({ columns: [{ field: 'dc:title' }] });
+        sinon.stub(results, '_filterSettingsByCapabilities').returnsArg(1);
+        const applyStub = sinon.stub(results, '_applyPrefsToView');
+
+        results._applyDocPrefsImpl(true, { columns: { 'dc:title': { hidden: true } } }, view);
+
+        expect(applyStub.lastCall.args[1]).to.deep.equal({
+          columns: { 'dc:title': { hidden: true, width: '300px' } },
+          sortOrder: [{ path: 'dc:title', direction: 'asc' }],
+        });
+      });
+
+      test('changing the columns shown back while the first change is being saved still saves it', async () => {
+        results._connectedUserChanged('reverse-b', 'reverse-a');
+        results._connectedUserId = 'reverse';
+        const key = 'layoutPrefs.Folder';
+        const shown = { columns: { 'dc:title': { hidden: false } } };
+        const hidden = { columns: { 'dc:title': { hidden: true } } };
+        const put = sinon.stub(results, '_putGlobalPreference').resolves();
+        await results.saveLayoutPrefs(key, shown);
+        let finish;
+        put.returns(
+          new Promise((resolve) => {
+            finish = resolve;
+          }),
+        );
+
+        const first = results.saveLayoutPrefs(key, hidden);
+        // the stored columns are being replaced: going back to them must be written again
+        expect(results._sharedPrefsChanged(key, shown)).to.be.true;
+        expect(results._sharedPrefsChanged(key, hidden)).to.be.false;
+        finish();
+        await first;
+        expect(results._sharedPrefsChanged(key, hidden)).to.be.false;
+        expect(results._sharedPrefsChanged(key, shown)).to.be.true;
+      });
+
+      test('columns changed while the shared columns load after choosing all documents are kept', async () => {
+        let resolveGet;
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').returns(
+          new Promise((resolve) => {
+            resolveGet = resolve;
+          }),
+        );
+        const useLayout = sinon.spy(results, '_useLayoutPrefs');
+        const keepShown = () => true;
+
+        const load = results._loadDocPrefs(
+          true,
+          { path: '/default-domain/keep-a', type: 'Folder' },
+          'keep-user',
+          'layoutPrefs.Folder',
+          keepShown,
+        );
+        resolveGet({ 'layoutPrefs.Folder': '{"columns":{"dc:title":{"hidden":true}}}' });
+        await load;
+
+        expect(useLayout).to.not.have.been.called;
+        expect(results.__docPrefsPending).to.be.false;
+        // the shared columns are still cached for the next document
+        results._loadDocPrefs(true, { path: '/default-domain/keep-b' }, 'keep-user', 'layoutPrefs.Folder');
+        expect(results.docPrefs).to.deep.equal({ columns: { 'dc:title': { hidden: true } } });
+      });
+
+      test('a failed "This document only" is kept when the columns were changed since, as their save stores it', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        sinon.stub(console, 'warn');
+        sinon.stub(results, 'notify');
+        results.document = { path: '/default-domain/rollback-a', type: 'Folder' };
+        results.view = createMockView();
+        results.view.settings = { columns: { 'dc:title': { hidden: false } } };
+        let fail;
+        sinon.stub(results, '_putDocPreference').returns(
+          new Promise((resolve, reject) => {
+            fail = reject;
+          }),
+        );
+
+        results._onSettingsScopeSelected({ detail: { scope: 'document' } });
+        results.view.settings = { columns: { 'dc:title': { hidden: true } } };
+        fail({ status: 500 });
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(results._settingsScope).to.equal('document');
+        expect(results.notify).to.have.been.calledOnce;
+      });
+
+      test('a failed "This document only" goes back to all documents, drops saves made with it and shows the shared columns', async () => {
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        sinon.stub(console, 'warn');
+        sinon.stub(results, 'notify');
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        results.document = { path: '/default-domain/rollback-b', type: 'Folder' };
+        results.view = createMockView();
+        results.view.settings = { columns: { 'dc:title': { hidden: false } } };
+        const put = sinon.stub(results, '_putDocPreference').rejects({ status: 500 });
+        let pending;
+        sinon.stub(results, '_debounceSave').callsFake((_, fn) => {
+          pending = fn;
+        });
+        const load = sinon.spy(results, '_loadDocPrefs');
+
+        results._onSettingsScopeSelected({ detail: { scope: 'document' } });
+        // a save made with the choice, still waiting
+        results._saveViewSettings();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(results._settingsScope).to.equal('all');
+        expect(load).to.have.been.calledWith(true, results.document);
+        put.resetHistory();
+        pending();
+        await new Promise((resolve) => setTimeout(resolve));
+        expect(put).to.not.have.been.called;
+      });
+
+      test('a column changed under "This document only" and kept when choosing all documents is shared on Done, after the choice is saved', async () => {
+        results._connectedUserChanged('pending-share-b', 'pending-share-a');
+        sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        sinon.stub(results, 'restoreSettings');
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        const path = '/default-domain/pending-share';
+        results.document = { path, type: 'Folder' };
+        results.view = createMockView();
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        // set after the connection has settled, which may reset it
+        results._connectedUserId = 'pending-share';
+        results._settingsScope = 'document';
+        markShown(results, path, { columns: { 'dc:title': { hidden: false } } });
+        const putGlobal = sinon.stub(results, '_putGlobalPreference').resolves();
+        sinon.stub(results, '_putDocPreference').resolves();
+        sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+
+        // in the open dialog: hide Title, then pick "All documents of this type"
+        results.view.settings = { columns: { 'dc:title': { hidden: true } } };
+        results._onSettingsScopeSelected({ detail: { scope: 'all', pendingChanges: true } });
+        // the choice is saved and the shown columns applied again before Done
+        await new Promise((resolve) => setTimeout(resolve, 80));
+        results._saveViewSettings();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(putGlobal).to.have.been.calledOnceWith('layoutPrefs.Folder', {
+          columns: { 'dc:title': { hidden: true } },
+        });
+      });
+
+      test('a save finishing while the grid is shown is applied when the table shows again', async () => {
+        // only the save is under test: no prefs load, nor display mode restored from the browser, meanwhile
+        sinon.stub(results, '_loadDocPrefs');
+        sinon.stub(results, 'restoreSettings');
+        results.document = { path: '/default-domain/grid-a', type: 'Folder' };
+        results.view = createMockView();
+        results.view.settings = { columns: { 'dc:title': { hidden: false } } };
+        results.displayMode = 'grid';
+        sinon.stub(results, '_putDocPreference').resolves();
+        const saved = { columns: { 'dc:title': { hidden: true, width: '250px' } } };
+
+        await results.saveDocPrefs('/default-domain/grid-a', 'documentPrefs.table', saved);
+
+        expect(results.docPrefs).to.deep.equal(saved);
+      });
     });
 
     test('_applyDocPrefsImpl falls back from backend to local settings', () => {
