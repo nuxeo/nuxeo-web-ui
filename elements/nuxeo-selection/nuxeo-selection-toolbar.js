@@ -281,10 +281,6 @@ Polymer({
       this.lastInputKeyboard = false;
     };
 
-    document.addEventListener('keydown', this._onKeydown);
-    document.addEventListener('mousedown', this._onMousedown);
-    document.addEventListener('touchstart', this._onTouchstart);
-
     // Detect if user is on Mac (once)
     const isMac =
       (navigator.userAgentData &&
@@ -293,7 +289,7 @@ Polymer({
       /mac/i.test(navigator.userAgent);
 
     // Command/Ctrl + . toggle: table -> toolbar
-    document.addEventListener('keydown', (e) => {
+    this._onShortcutKeydown = (e) => {
       // On Mac, use Command (metaKey); otherwise use Ctrl
       const modifierPressed = isMac ? e.metaKey : e.ctrlKey;
       if (!modifierPressed) return;
@@ -314,17 +310,25 @@ Polymer({
           focusableElements[0].focus();
         }
       }
-    });
+    };
   },
 
-  disconnectedCallback() {
-    if (super.disconnectedCallback) {
-      super.disconnectedCallback();
-    }
+  // The document-level listeners are added on attach and removed on detach (not in `ready()`): they
+  // reference this element, so leaving them behind would retain the whole detached view (WEBUI-2411).
+  // Use the legacy `attached`/`detached` hooks: a `disconnectedCallback` declared in the `Polymer({})`
+  // object overrides the class method and its `super` is `Object.prototype`, so it would stop Polymer
+  // (and the behaviors' `detached`, e.g. I18nBehavior) from running.
+  attached() {
+    document.addEventListener('keydown', this._onKeydown);
+    document.addEventListener('mousedown', this._onMousedown);
+    document.addEventListener('touchstart', this._onTouchstart);
+    document.addEventListener('keydown', this._onShortcutKeydown);
+  },
 
-    // remove listeners to avoid memory leaks
+  detached() {
     document.removeEventListener('keydown', this._onKeydown);
     document.removeEventListener('mousedown', this._onMousedown);
     document.removeEventListener('touchstart', this._onTouchstart);
+    document.removeEventListener('keydown', this._onShortcutKeydown);
   },
 });

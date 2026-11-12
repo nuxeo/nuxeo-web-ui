@@ -125,4 +125,81 @@ suite('nuxeo-selection-toolbar', () => {
       expect(element.lastInputKeyboard).to.be.false;
     });
   });
+
+  // WEBUI-2411: a detached toolbar must not leave listeners on `document`, otherwise it (and the whole
+  // view it belongs to, through `__dataHost`) is retained in memory.
+  suite('document listeners lifecycle', () => {
+    let operations;
+
+    // Replays add/remove calls in the order they happened, so a removal can only cancel an earlier
+    // registration and never hides one made after it.
+    const netListeners = () => {
+      const active = {};
+      operations.forEach(([operation, type, handler]) => {
+        active[type] = active[type] || new Set();
+        if (operation === 'add') {
+          active[type].add(handler);
+        } else {
+          active[type].delete(handler);
+        }
+      });
+      return Object.keys(active)
+        .filter((type) => active[type].size > 0)
+        .sort();
+    };
+
+    setup(() => {
+      operations = [];
+      sinon.stub(document, 'addEventListener').callsFake(function (type, handler, ...rest) {
+        operations.push(['add', type, handler]);
+        return EventTarget.prototype.addEventListener.call(this, type, handler, ...rest);
+      });
+      sinon.stub(document, 'removeEventListener').callsFake(function (type, handler, ...rest) {
+        operations.push(['remove', type, handler]);
+        return EventTarget.prototype.removeEventListener.call(this, type, handler, ...rest);
+      });
+    });
+
+    teardown(() => {
+      document.addEventListener.restore();
+      document.removeEventListener.restore();
+    });
+
+    test('should remove every listener it added on document when detached', () => {
+      const toolbar = document.createElement('nuxeo-selection-toolbar');
+      document.body.appendChild(toolbar);
+      expect(netListeners()).to.include.members(['keydown', 'mousedown', 'touchstart', 'i18n-locale-loaded']);
+
+      toolbar.remove();
+
+      expect(netListeners()).to.deep.equal([]);
+    });
+
+    test('should not accumulate listeners across repeated attach/detach cycles', () => {
+      const toolbar = document.createElement('nuxeo-selection-toolbar');
+      for (let i = 0; i < 3; i++) {
+        document.body.appendChild(toolbar);
+        expect(netListeners(), `cycle ${i} attached`).to.include.members(['keydown', 'mousedown', 'touchstart']);
+        toolbar.remove();
+        expect(netListeners(), `cycle ${i} detached`).to.deep.equal([]);
+      }
+    });
+
+    test('should not react to the Ctrl/Cmd + . shortcut once detached', () => {
+      // the suite-level fixture is still attached and would handle the shortcut itself
+      element.remove();
+      const toolbar = document.createElement('nuxeo-selection-toolbar');
+      document.body.appendChild(toolbar);
+      toolbar.remove();
+      const evt = new KeyboardEvent('keydown', {
+        key: '.',
+        code: 'Period',
+        ctrlKey: true,
+        metaKey: true,
+        cancelable: true,
+      });
+      document.dispatchEvent(evt);
+      expect(evt.defaultPrevented).to.be.false;
+    });
+  });
 });
