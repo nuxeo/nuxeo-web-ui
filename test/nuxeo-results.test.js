@@ -751,6 +751,23 @@ suite('nuxeo-results', () => {
       // Selection should be cleared
       expect(results.selectedItems).to.deep.equal([]);
       expect(results.selectAllActive).to.equal(false);
+      expect(mockView1.clearSelection).to.have.been.called;
+    });
+
+    test('clears select-all state on the torn-down view when switching display modes', async () => {
+      const mockView1 = createMockView({ name: 'table', selectAllActive: true });
+      const mockView2 = createMockView({ name: 'queue' });
+
+      results.view = mockView1;
+      results.selectAllActive = true;
+      await flush();
+
+      mockView1.clearSelection.resetHistory();
+      results.view = mockView2;
+      await flush();
+
+      expect(mockView1.clearSelection).to.have.been.calledOnce;
+      expect(results.selectAllActive).to.equal(false);
     });
 
     test('maintains action context during provider loading state changes', async () => {
@@ -1013,6 +1030,17 @@ suite('nuxeo-results', () => {
   });
 
   suite('Select All and Exclusions', () => {
+    test('select all checkbox is bound to the host state, not the view path', () => {
+      // `view` is assigned imperatively, so Polymer never re-evaluates a `view.selectAllActive`
+      // binding when the view notifies a change: the checkbox would keep a stale checked state
+      // once the results are refetched (WEBUI-2338). The host's own `selectAllActive` is kept in
+      // sync by `_selectAllActiveChanged` and reset by `_teardownView`.
+      const template = results.constructor.template.innerHTML;
+
+      expect(template).to.contain('_isChecked(selectAllActive, _excludedDocs)');
+      expect(template).to.not.contain('_isChecked(view.selectAllActive');
+    });
+
     test('_toggleSelectAll calls clearSelection when all selected', () => {
       const mockView = createMockView({ selectAllActive: true });
       results.view = mockView;
