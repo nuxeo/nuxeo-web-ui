@@ -186,6 +186,31 @@ When('I switch to filter view', async function () {
   await driver.pause(1000);
 });
 
+When('I switch to queue view', async function () {
+  await driver.pause(1000);
+  const queueView = await this.ui.queueView;
+  await queueView.click();
+  await driver.pause(1000);
+});
+
+Then(/^I can see the (queue|search criteria) view on (.+)$/, async function (view, searchName) {
+  const form = await this.ui.searchForm(searchName).el;
+  const tabId = view === 'queue' ? 'toogleQueue' : 'toogleFilter';
+  const panelId = view === 'queue' ? 'queue' : 'filters';
+  await driver.waitUntil(
+    async () => {
+      try {
+        const tab = await form.$(`#${tabId}`);
+        const panel = await form.$(`#${panelId}`);
+        return (await tab.getAttribute('aria-selected')) === 'true' && (await panel.isDisplayed());
+      } catch (e) {
+        return false;
+      }
+    },
+    { timeout: 10000, interval: 500, timeoutMsg: `The ${view} view is not displayed on ${searchName}` },
+  );
+});
+
 Then(/^I can see (\d+) search results$/, async function (numberOfResults) {
   await driver.pause(1000);
   const uiResult = await this.ui.results;
