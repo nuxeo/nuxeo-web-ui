@@ -91,3 +91,44 @@ export function blurSelectionCheckOnPointerDeselect(host, e) {
     focused.blur();
   }
 }
+
+const pad = (value, length = 2) => String(value).padStart(length, '0');
+
+/**
+ * Returns the calendar day (`YYYY-MM-DD`) of a date in the given timezone, for server queries keyed by day
+ * (analytics and audit date ranges). The Web UI displays dates in `org.nuxeo.web.ui.timezone`, so these days must
+ * match what the user sees.
+ *
+ * - A date-only string is already a calendar day and is returned unchanged.
+ * - `undefined` means now; an invalid date gives an empty string, so no bound is sent.
+ * - An empty or unknown timezone uses the browser's local day (the historical behavior).
+ *
+ * @param {string|number|Date} [date] the date
+ * @param {string} [timezone] an IANA timezone id, e.g. `America/New_York`
+ * @return {string} the calendar day, with ASCII digits whatever the UI language
+ */
+export function calendarDayInTimezone(date, timezone) {
+  if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return date;
+  }
+  const instant = date === undefined ? new Date() : new Date(date);
+  if (date === null || Number.isNaN(instant.getTime())) {
+    return '';
+  }
+  const zone = typeof timezone === 'string' ? timezone.trim() : '';
+  if (zone) {
+    try {
+      const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: zone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).formatToParts(instant);
+      const part = (type) => parts.find((p) => p.type === type).value;
+      return `${pad(part('year'), 4)}-${part('month')}-${part('day')}`;
+    } catch (_e) {
+      // Unknown timezone: use the browser's local day, as the date formatters do.
+    }
+  }
+  return `${pad(instant.getFullYear(), 4)}-${pad(instant.getMonth() + 1)}-${pad(instant.getDate())}`;
+}
