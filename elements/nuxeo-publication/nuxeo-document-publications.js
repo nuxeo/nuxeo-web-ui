@@ -102,11 +102,24 @@ Polymer({
     >
     </nuxeo-page-provider>
 
+    <nuxeo-page-provider
+      id="unpublishAllProvider"
+      page-size="100"
+      provider="nxql_search"
+      params="[[_computeParams(_src)]]"
+      sort='{"ecm:uuid": "asc"}'
+      enrichers="permissions"
+      schemas="uid"
+    >
+    </nuxeo-page-provider>
+
     <nuxeo-card heading="[[i18n('publication.details')]]">
       <div class="resultActions">
-        <paper-button class="uppercase" on-tap="_unpublishAll" disabled$="[[!hasPublications]]"
-          >[[i18n('publication.unpublishAll')]]</paper-button
-        >
+        <template is="dom-if" if="[[canUnpublishAll]]">
+          <paper-button class="uppercase unpublish-all" on-tap="_unpublishAll" disabled$="[[!hasPublications]]"
+            >[[i18n('publication.unpublishAll')]]</paper-button
+          >
+        </template>
       </div>
       <nuxeo-data-table
         id="table"
@@ -176,6 +189,10 @@ Polymer({
       type: Boolean,
       computed: '_hasPublications(publishedDocs)',
     },
+    canUnpublishAll: {
+      type: Boolean,
+      value: false,
+    },
   },
 
   observers: ['_fetchPublications(_src, visible)', '_observeDocument(document, visible)'],
@@ -190,6 +207,7 @@ Polymer({
       if (!this.document.isVersion) {
         this._src = this.document;
       } else {
+        this._resetUnpublishAll();
         this.$.srcDocOp.execute().then((src) => {
           this._src = src;
         });
@@ -211,6 +229,9 @@ Polymer({
   _fetchPublications() {
     if (this.visible && this._src) {
       this.$.table.fetch();
+      this._checkUnpublishAll();
+    } else {
+      this._resetUnpublishAll();
     }
   },
 
@@ -285,6 +306,39 @@ Polymer({
 
   _hasPublications(docs) {
     return docs && docs.length > 0;
+  },
+
+  _resetUnpublishAll() {
+    this._unpublishAllCheck = null;
+    this.canUnpublishAll = false;
+  },
+
+  _checkUnpublishAll() {
+    // the table loads rows lazily, so every publication is fetched here before the bulk action is offered
+    this._resetUnpublishAll();
+    const check = {};
+    this._unpublishAllCheck = check;
+    return this._canUnpublishAllFrom(0, check)
+      .catch(() => false)
+      .then((allowed) => {
+        if (this._unpublishAllCheck === check) {
+          this.canUnpublishAll = allowed;
+        }
+      });
+  },
+
+  _canUnpublishAllFrom(offset, check) {
+    const provider = this.$.unpublishAllProvider;
+    provider.offset = offset;
+    return provider.fetch().then(({ entries, isNextPageAvailable }) => {
+      if (!entries.every((doc) => this._canUnpublish(doc))) {
+        return false;
+      }
+      if (isNextPageAvailable && entries.length > 0 && this._unpublishAllCheck === check) {
+        return this._canUnpublishAllFrom(offset + entries.length, check);
+      }
+      return true;
+    });
   },
 
   _unpublishAll() {
