@@ -21,9 +21,10 @@ import '@polymer/iron-flex-layout/iron-flex-layout.js';
 import '@polymer/iron-flex-layout/iron-flex-layout-classes.js';
 import { IronResizableBehavior } from '@polymer/iron-resizable-behavior';
 import '@polymer/paper-button/paper-button.js';
-import '@polymer/paper-icon-button/paper-icon-button.js';
+import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/paper-input/paper-input.js';
 import '@polymer/paper-spinner/paper-spinner-lite.js';
+import '@polymer/paper-tabs/paper-tabs.js';
 import '@polymer/paper-toggle-button/paper-toggle-button.js';
 import '@nuxeo/nuxeo-elements/nuxeo-page-provider.js';
 import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
@@ -129,20 +130,51 @@ Polymer({
         overflow: auto;
       }
 
-      .switch {
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 60px;
+      .view-tabs {
         height: 53px;
-        padding: 16px;
-        z-index: 101;
-        border-left: 1px solid var(--divider-color);
+        padding: 0 8px;
+        box-sizing: border-box;
+        box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
       }
 
-      .switch:hover {
-        background-color: var(--nuxeo-button-primary);
-        color: var(--nuxeo-button-primary-text);
+      .view-tabs paper-tabs {
+        height: 53px;
+        border-bottom: none;
+        font-family: var(--nuxeo-app-font);
+        --paper-tabs-selection-bar-color: var(--nuxeo-primary-color);
+      }
+
+      .view-tabs paper-tab {
+        flex: 1 1 0;
+        min-width: 0;
+        padding: 0 8px;
+        box-sizing: border-box;
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: var(--nuxeo-drawer-text);
+      }
+
+      .view-tabs paper-tab + paper-tab {
+        border-inline-start: 1px solid var(--divider-color);
+      }
+
+      /* The labels keep the drawer text color, which has enough contrast in every theme, so the selected tab is
+         told apart by its weight and the selection bar rather than by color alone. */
+      .view-tabs paper-tab.iron-selected {
+        font-weight: 700;
+      }
+
+      /* Dark themes define a bright focus outline; elsewhere fall back to the drawer text color. */
+      .view-tabs paper-tab:focus-visible {
+        outline: var(--nuxeo-focus-outline, 2px solid var(--nuxeo-drawer-text));
+        outline-offset: -2px;
+      }
+
+      .view-tabs iron-icon {
+        flex-shrink: 0;
+        --iron-icon-width: 18px;
+        --iron-icon-height: 18px;
+        margin-inline-end: 8px;
       }
 
       nuxeo-select {
@@ -190,6 +222,29 @@ Polymer({
         box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
         @apply --layout-horizontal;
         @apply --layout-center;
+      }
+
+      /* With the view tabs, the header holds the 53px tabs and a 60px saved search row. */
+      .with-view-tabs .header {
+        height: 60px;
+        padding: 6px 16px 8px;
+        box-sizing: border-box;
+      }
+
+      .with-view-tabs #actionsDropdown {
+        width: 100%;
+      }
+
+      .with-view-tabs .content {
+        height: calc(100% - 68px - 113px);
+      }
+
+      .with-view-tabs .display-auto-control {
+        height: calc(100% - 101px - 113px);
+      }
+
+      .with-view-tabs nuxeo-data-list {
+        height: calc(100vh - 121px - var(--nuxeo-app-top));
       }
 
       .header h1 {
@@ -323,7 +378,30 @@ Polymer({
     <nuxeo-search id="saved-search"></nuxeo-search>
     <nuxeo-resource id="directoryEntry"></nuxeo-resource>
 
-    <div id="search-container">
+    <div id="search-container" class$="[[_computeContainerClass(onlyQueue)]]">
+      <template is="dom-if" if="[[!onlyQueue]]">
+        <!-- The tabs only switch the view: the selected tab follows "queue", and choosing a tab calls the
+             same methods the former icon toggle did, so routing and the queue selection are unchanged. The
+             toogleFilter / toogleQueue ids are kept for the tests and scripts that select them. -->
+        <div class="view-tabs">
+          <paper-tabs
+            id="viewTabs"
+            noink
+            attr-for-selected="name"
+            selected="[[_computeSelectedView(queue)]]"
+            on-iron-activate="_viewTabActivated"
+          >
+            <paper-tab id="toogleFilter" name="filters" aria-controls="filters">
+              <iron-icon icon="nuxeo:filter"></iron-icon>
+              <span class="ellipsis">[[i18n('searchForm.searchCriteria')]]</span>
+            </paper-tab>
+            <paper-tab id="toogleQueue" name="queue" aria-controls="queue">
+              <iron-icon icon="nuxeo:view-list"></iron-icon>
+              <span class="ellipsis">[[i18n('searchForm.queue')]]</span>
+            </paper-tab>
+          </paper-tabs>
+        </div>
+      </template>
       <div class="header ellipsis search-header">
         <nuxeo-search
           id="saved-searches"
@@ -340,32 +418,6 @@ Polymer({
             value="{{selectedSearch}}"
             min-chars="0"
           ></nuxeo-selectivity>
-          <template is="dom-if" if="[[queue]]">
-            <paper-icon-button
-              class="switch"
-              icon="nuxeo:filter"
-              id="toogleFilter"
-              on-tap="_displayFiltersTapped"
-              aria-labelledby="toogleFilterTooltip"
-            >
-            </paper-icon-button>
-            <nuxeo-tooltip for="toogleFilter" id="toogleFilterTooltip"
-              >[[i18n('searchForm.displayFilterView')]]</nuxeo-tooltip
-            >
-          </template>
-          <template is="dom-if" if="[[!queue]]">
-            <paper-icon-button
-              class="switch"
-              icon="nuxeo:view-list"
-              id="toogleQueue"
-              on-tap="displayQueueAndNavigateToFirst"
-              aria-labelledby="toogleQueueTooltip"
-            >
-            </paper-icon-button>
-            <nuxeo-tooltip for="toogleQueue" id="toogleQueueTooltip"
-              >[[i18n('searchForm.displayQueueView')]]</nuxeo-tooltip
-            >
-          </template>
         </template>
         <template is="dom-if" if="[[onlyQueue]]">
           <h1>[[i18n(label)]]</h1>
@@ -373,7 +425,13 @@ Polymer({
       </div>
 
       <div class$="content [[_computeDisplayAutoControl(displayAutoControl)]]">
-        <div id="filters" class="filters loadable" hidden$="{{queue}}">
+        <div
+          id="filters"
+          class="filters loadable"
+          hidden$="{{queue}}"
+          role$="[[_computePanelRole(onlyQueue)]]"
+          aria-labelledby$="[[_computePanelLabel(onlyQueue, 'toogleFilter')]]"
+        >
           <nuxeo-search-form-layout
             id="layout"
             provider="[[provider]]"
@@ -385,7 +443,14 @@ Polymer({
           <paper-spinner-lite active$="[[loading]]" hidden$="[[!loading]]"></paper-spinner-lite>
         </div>
 
-        <div id="queue" hidden$="{{!queue}}" role="list">
+        <!-- Each view is the panel of its tab. Queue only forms render no tabs, so their views stay plain
+             containers. The list role sits on the data list, so the queue keeps its list semantics. -->
+        <div
+          id="queue"
+          hidden$="{{!queue}}"
+          role$="[[_computePanelRole(onlyQueue)]]"
+          aria-labelledby$="[[_computePanelLabel(onlyQueue, 'toogleQueue')]]"
+        >
           <template is="dom-if" if="[[_displayQuickFilters(_quickFilters)]]">
             <nuxeo-quick-filters quick-filters="{{_quickFilters}}" on-quick-filters-changed="refresh">
             </nuxeo-quick-filters>
@@ -393,6 +458,7 @@ Polymer({
           <nuxeo-data-list
             nx-provider="provider"
             id="list"
+            role="list"
             selected-item="{{selectedDocument}}"
             empty-label="[[i18n('searchForm.queue.noResults')]]"
             empty-label-when-filtered
@@ -608,7 +674,8 @@ Polymer({
     },
     /**
      * @ignore
-     * If `true`, only the queue title will be displayed in the header, without the actions dropdown.
+     * If `true`, only the queue title will be displayed in the header, without the search criteria / queue
+     * tabs and the saved search dropdown.
      * */
     onlyQueue: {
       type: Boolean,
@@ -908,6 +975,37 @@ Polymer({
 
   _navigateToResults() {
     this.fire('search-results');
+  },
+
+  _viewTabActivated(e) {
+    // The selected tab is bound to `queue`, so keep paper-tabs from selecting on its own and let the
+    // same methods the former icon toggle called switch the view. Choosing the tab that is already
+    // selected does nothing, as there was no toggle for the view already displayed.
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.detail.selected === 'queue') {
+      if (!this.queue) {
+        this.displayQueueAndNavigateToFirst();
+      }
+    } else if (this.queue) {
+      this._displayFiltersTapped();
+    }
+  },
+
+  _computeSelectedView(queue) {
+    return queue ? 'queue' : 'filters';
+  },
+
+  _computeContainerClass(onlyQueue) {
+    return onlyQueue ? '' : 'with-view-tabs';
+  },
+
+  _computePanelRole(onlyQueue) {
+    return onlyQueue ? null : 'tabpanel';
+  },
+
+  _computePanelLabel(onlyQueue, tabId) {
+    return onlyQueue ? null : tabId;
   },
 
   _computedClass(isSelected) {
