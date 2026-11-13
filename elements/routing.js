@@ -280,6 +280,10 @@ app.router = {
     return `/${name}`;
   },
 
+  // The route being shown. page.js sets it synchronously whenever a route is dispatched (documents, tasks, home...),
+  // before whatever that route loads has arrived, unlike the app's displayed page and document.
+  currentPath: () => page.current,
+
   // `options.replace` swaps the current history entry instead of adding one, for when the current URL
   // is about to stop resolving and browser Back must not return to it.
   navigate: (path, options) => {

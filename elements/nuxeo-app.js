@@ -1732,6 +1732,21 @@ Polymer({
     return this._restoredPaths && path ? this._restoredPaths[path] : undefined;
   },
 
+  // Whether the route being shown is still the browse route of `doc`. Unlike the displayed page and document, which
+  // only change once a newly requested route has loaded, the router's current path changes as soon as the user
+  // navigates, so a restore that completes late never replaces the history entry of another route.
+  _isRoutedTo(doc) {
+    const current = this.router && this.router.currentPath ? this.router.currentPath() : undefined;
+    if (!current || !doc || !doc.path) {
+      return false;
+    }
+    try {
+      return decodeURIComponent(current.split('?')[0]) === `/browse${doc.path}`;
+    } catch (err) {
+      return false;
+    }
+  },
+
   _documentUntrashed(e) {
     this._toast(this.i18n(`app.document.untrashed.${e.detail.error ? 'error' : 'success'}`));
     if (e.detail.doc && !e.detail.error) {
@@ -1743,7 +1758,7 @@ Polymer({
         }
         this._restoredPaths[trashed.path] = e.detail.doc.path;
       }
-      if (fromTrashedView && this.page === 'browse' && this.docPath === trashed.path) {
+      if (fromTrashedView && this._isRoutedTo(trashed)) {
         // the trashed URL we are on no longer resolves: replace its history entry rather than pushing a new one
         this.router.navigate(this._routeEntity(e.detail.doc), { replace: true });
       } else {
