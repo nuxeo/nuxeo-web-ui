@@ -1739,17 +1739,38 @@ suite('nuxeo-app', () => {
       app._refreshSearch.restore();
     });
 
-    test('_documentUntrashed navigates to restored document', () => {
-      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
-      sinon.stub(app, '_toast');
-      sinon.stub(app, 'hasFacet').returns(false);
-      sinon.stub(app, '_refreshSearch');
-      const doc = { uid: '1' };
-      app._documentUntrashed({ detail: { doc, error: false } });
-      expect(app.navigateTo).to.have.been.called;
-      app._toast.restore();
-      app.hasFacet.restore();
-      app._refreshSearch.restore();
+    suite('_documentUntrashed', () => {
+      let savedRouter;
+      let navigate;
+
+      setup(() => {
+        // Install a fake router and restore the global one afterwards, so the shared single-graph test run is
+        // left exactly as it was found.
+        savedRouter = RoutingBehavior.__router;
+        navigate = sinon.stub();
+        app.router = { navigate, browse: (path) => `/browse${path}` };
+        sinon.stub(app, '_toast');
+        sinon.stub(app, 'hasFacet').returns(false);
+        sinon.stub(app, '_refreshSearch');
+      });
+
+      teardown(() => {
+        RoutingBehavior.__router = savedRouter;
+      });
+
+      test('replaces the trashed document history entry with the restored document', () => {
+        const doc = { 'entity-type': 'document', uid: '1', path: '/ws/myfile' };
+        app._documentUntrashed({ detail: { doc } });
+        expect(navigate).to.have.been.calledOnce;
+        expect(navigate.firstCall.args).to.deep.equal(['/browse/ws/myfile', { replace: true }]);
+        expect(app._refreshSearch).to.have.been.calledOnce;
+      });
+
+      test('does not navigate when the restore failed', () => {
+        app._documentUntrashed({ detail: { error: new Error('forbidden') } });
+        expect(navigate).to.not.have.been.called;
+        expect(app._toast).to.have.been.calledWith('app.document.untrashed.error');
+      });
     });
   });
 
@@ -2460,20 +2481,6 @@ suite('nuxeo-app', () => {
       app._fetchTaskCount.restore();
       app._resetTaskSelection.restore();
       app.$$.restore();
-    });
-
-    test('_documentUntrashed navigates to restored document', () => {
-      sinon.stub(app, '_navigate');
-      sinon.stub(app, '_toast');
-      sinon.stub(app, 'hasFacet').returns(false);
-      sinon.stub(app, '_refreshSearch');
-      const doc = { uid: '1' };
-      app._documentUntrashed({ detail: { doc, error: false } });
-      expect(app._navigate).to.have.been.calledWith({ detail: { doc } });
-      app._navigate.restore();
-      app._toast.restore();
-      app.hasFacet.restore();
-      app._refreshSearch.restore();
     });
 
     test('_documentsDeleted bulk path refreshes search and collections', () => {

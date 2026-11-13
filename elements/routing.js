@@ -273,26 +273,34 @@ app.router = {
     return `/${name}`;
   },
 
-  navigate: (path) => {
+  // `options.replace` swaps the current history entry instead of adding one, for when the current URL
+  // is about to stop resolving and browser Back must not return to it.
+  navigate: (path, options) => {
     if (path == null) {
       return;
     }
+    const replace = !!(options && options.replace);
+    const show = (route) => (replace ? page.replace(route) : page(route));
     const isFullpath = /^http(s)?:\/\//.test(path);
     if (isFullpath) {
       const clientPath = sameRepositoryClientPath(path);
       if (clientPath != null) {
-        page(clientPath);
+        show(clientPath);
         return;
       }
       const isValidUrl = isTrustedDomain(path);
       if (isValidUrl) {
         const encodepath = encodeQueryParams(path);
+        if (replace) {
+          globalThis.location.replace(encodepath);
+          return;
+        }
         const link = document.createElement('a');
         link.setAttribute('href', encodepath);
         link.click();
       }
     } else {
-      page(path);
+      show(path);
     }
   },
 };
