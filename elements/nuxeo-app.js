@@ -1725,10 +1725,45 @@ Polymer({
     }
   },
 
+  // Restoring a document renames it back (the `._<ts>_.trashed` suffix is dropped), so URLs holding its trashed path
+  // stop resolving. The browse route sends such a URL, reached again through browser history (e.g. a tab of the
+  // trashed document or the search queue), to the restored document (WEBUI-2345).
+  restoredPathFor(path) {
+    return this._restoredPaths && path ? this._restoredPaths[path] : undefined;
+  },
+
+  // Whether the route being shown is still the browse route of `doc`. Unlike the displayed page and document, which
+  // only change once a newly requested route has loaded, the router's current path changes as soon as the user
+  // navigates, so a restore that completes late never replaces the history entry of another route.
+  _isRoutedTo(doc) {
+    const current = this.router && this.router.currentPath ? this.router.currentPath() : undefined;
+    if (!current || !doc || !doc.path) {
+      return false;
+    }
+    try {
+      return decodeURIComponent(current.split('?')[0]) === `/browse${doc.path}`;
+    } catch (err) {
+      return false;
+    }
+  },
+
   _documentUntrashed(e) {
     this._toast(this.i18n(`app.document.untrashed.${e.detail.error ? 'error' : 'success'}`));
     if (e.detail.doc && !e.detail.error) {
-      this._navigate({ detail: { doc: e.detail.doc } });
+      const trashed = this.currentDocument;
+      const fromTrashedView = !!trashed && trashed.uid === e.detail.doc.uid;
+      if (fromTrashedView) {
+        if (!this._restoredPaths) {
+          this._restoredPaths = {};
+        }
+        this._restoredPaths[trashed.path] = e.detail.doc.path;
+      }
+      if (fromTrashedView && this._isRoutedTo(trashed)) {
+        // the trashed URL we are on no longer resolves: replace its history entry rather than pushing a new one
+        this.router.navigate(this._routeEntity(e.detail.doc), { replace: true });
+      } else {
+        this._navigate({ detail: { doc: e.detail.doc } });
+      }
       if (this.hasFacet(e.detail.doc, 'Collection')) {
         this._refreshCollections();
       }
