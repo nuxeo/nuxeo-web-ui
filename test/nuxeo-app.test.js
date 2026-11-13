@@ -1813,6 +1813,25 @@ suite('nuxeo-app', () => {
         expect(app.showError).to.not.have.been.called;
       });
 
+      test('every stale tab entry of the trashed document opens the restored document on that tab', async () => {
+        app.currentDocument = { 'entity-type': 'document', uid: 'u1', path: trashedPath, isTrashed: true };
+        app._documentUntrashed({ detail: { doc: { 'entity-type': 'document', uid: 'u1', path: '/ws/my file' } } });
+        navigate.resetHistory();
+        sinon.stub(app, '_loadDocument').callsFake(notFound);
+
+        // View > History > View on the trashed document pushes one `.trashed` entry per tab, all reached by Back
+        app.load('browse', '', '/ws/my%20file._1794549808671_.trashed', 'view');
+        await flush();
+        app.load('browse', '', '/ws/my%20file._1794549808671_.trashed', 'history');
+        await flush();
+
+        expect(navigate.args).to.deep.equal([
+          ['/doc/u1?p=view', { replace: true }],
+          ['/doc/u1?p=history', { replace: true }],
+        ]);
+        expect(app.showError).to.not.have.been.called;
+      });
+
       test('trashed URLs of bulk-restored documents open the restored documents', async () => {
         app._documentsUntrashed({ detail: { documents: [{ uid: 'u2', path: trashedPath, isTrashed: true }] } });
         sinon.stub(app, '_loadDocument').callsFake(notFound);
