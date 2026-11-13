@@ -1235,7 +1235,7 @@ Polymer({
   },
 
   load(page, uid, path, action) {
-    const route = this.router && this.router.currentPath;
+    const navigation = this._currentNavigation();
     this._loadDocument({ uid, path, page })
       .then((doc) => {
         if (doc) {
@@ -1255,20 +1255,36 @@ Polymer({
         }
         const restoredUid = err && err.status === 404 && !uid ? this._restoredDocumentUid(path) : undefined;
         if (restoredUid) {
-          this._openRestoredDocument(restoredUid, action, route, err);
+          this._openRestoredDocument(restoredUid, action, path, navigation, err);
           return;
         }
         this.showError(err.status, this.i18n('browse.error'), err.message);
       });
   },
 
+  // Identifies the navigation being dispatched: the page.js route plus the browser URL, which nuxeo-browser also
+  // changes on tab switches without going through page.js. page.js pushes the URL right after dispatching, so the
+  // URL is read once the dispatch is over.
+  _currentNavigation() {
+    const navigation = { route: this.router && this.router.currentPath };
+    queueMicrotask(() => {
+      navigation.href = globalThis.location.href;
+    });
+    return navigation;
+  },
+
+  _isCurrentNavigation(navigation) {
+    const sameRoute = !this.router || this.router.currentPath === navigation.route;
+    return sameRoute && (navigation.href === undefined || globalThis.location.href === navigation.href);
+  },
+
   // Opens a restored document reached through one of its stale trashed URLs. It is resolved to its browse path, so
   // it is browsed like any document (a saved search loaded by UID would open the search instead), and the default
-  // View tab gets no `p` parameter that nuxeo-browser would strip with an extra history entry. Nothing happens if the
-  // user has navigated elsewhere in the meantime, so that the redirect never replaces an unrelated history entry.
-  _openRestoredDocument(uid, action, route, err) {
-    const isCurrent = () => !this.router || this.router.currentPath === route;
-    if (!isCurrent()) {
+  // View tab gets no `p` parameter that nuxeo-browser would strip with an extra history entry. Nothing is applied once
+  // the user has navigated elsewhere, so that the redirect never replaces an unrelated history entry.
+  _openRestoredDocument(uid, action, path, navigation, err) {
+    if (!this._isCurrentNavigation(navigation)) {
+      this._abandonDocumentLoad(path);
       return;
     }
     const restoredDoc = this.$.restoredDoc;
@@ -1276,15 +1292,40 @@ Polymer({
     restoredDoc
       .get()
       .then((doc) => {
-        if (isCurrent()) {
-          this.router.navigate(this._routeEntity(doc, action === 'view' ? undefined : action), { replace: true });
+        if (!this._isCurrentNavigation(navigation)) {
+          this._abandonDocumentLoad(path);
+          return;
         }
+        this.router.navigate(this._routeEntity(doc, action === 'view' ? undefined : action), { replace: true });
       })
-      .catch(() => {
-        if (isCurrent()) {
-          this.showError(err.status, this.i18n('browse.error'), err.message);
-        }
-      });
+      .catch((restoreErr) => this._restoredDocumentFailed(uid, path, navigation, err, restoreErr));
+  },
+
+  _restoredDocumentFailed(uid, path, navigation, err, restoreErr) {
+    if (restoreErr && restoreErr.name === 'AbortError') {
+      return;
+    }
+    if (!this._isCurrentNavigation(navigation)) {
+      this._abandonDocumentLoad(path);
+      return;
+    }
+    if (this._isAnonymousForbidden(restoreErr)) {
+      // after login, return to the restored document rather than to the trashed path that no longer resolves
+      globalThis.history.replaceState(globalThis.history.state, '', `#!${this.router.document(uid)}`);
+      this._redirectAnonymousToLogin();
+      return;
+    }
+    // the restored document being gone too is reported as the stale path not being found; anything else as is
+    const shown = restoreErr && restoreErr.status !== 404 ? restoreErr : err;
+    this.showError(shown.status, this.i18n('browse.error'), shown.message);
+  },
+
+  // A document load given up because the user has moved on must not leave the progress indicator on, unless a newer
+  // document load has taken it over.
+  _abandonDocumentLoad(path) {
+    if (this.docPath === path && !this.docId) {
+      this.loading = false;
+    }
   },
 
   showError(code, msg, url) {

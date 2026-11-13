@@ -1787,6 +1787,7 @@ suite('nuxeo-app', () => {
           navigate,
           currentPath: '/browse/ws/stale',
           browse: (path, subPage) => `/browse${path}${subPage ? `?p=${subPage}` : ''}`,
+          document: (id) => `/doc/${id}`,
         };
         restored = {
           u1: { 'entity-type': 'document', uid: 'u1', path: '/ws/my file' },
@@ -1853,17 +1854,65 @@ suite('nuxeo-app', () => {
         expect(app._redirectSavedSearch).to.not.have.been.called;
       });
 
-      test('the redirect is dropped once the user has navigated elsewhere', async () => {
+      test('the redirect is dropped once the user has navigated elsewhere, without leaving loading on', async () => {
         restoreFromDocumentView();
         let reject;
         app.$.doc.get.returns(new Promise((resolve, rej) => (reject = rej)));
 
         app.load('browse', '', trashedPath, 'view');
+        expect(app.loading).to.be.true;
         app.router.currentPath = '/home';
         reject(Object.assign(new Error('Not Found'), { status: 404 }));
         await settle();
 
         expect(navigate).to.not.have.been.called;
+        expect(app.showError).to.not.have.been.called;
+        expect(app.loading).to.be.false;
+      });
+
+      test('the redirect is dropped when the user switches tabs during the lookup', async () => {
+        restoreFromDocumentView();
+        let resolveLookup;
+        app.$.restoredDoc.get.callsFake(() => new Promise((resolve) => (resolveLookup = resolve)));
+        const { href } = globalThis.location;
+        try {
+          app.load('browse', '', trashedPath, 'view');
+          await settle();
+          // nuxeo-browser changes the URL of a tab switch with pushState, without going through page.js
+          globalThis.history.replaceState(globalThis.history.state, '', '#tab-switched');
+          resolveLookup(restored.u1);
+          await settle();
+        } finally {
+          globalThis.history.replaceState(globalThis.history.state, '', href);
+        }
+
+        expect(navigate).to.not.have.been.called;
+        expect(app.loading).to.be.false;
+      });
+
+      test('a failure of the restored document lookup is reported as is', async () => {
+        app.$.restoredDoc.get.rejects(Object.assign(new Error('Internal Server Error'), { status: 500 }));
+        restoreFromDocumentView();
+
+        app.load('browse', '', trashedPath, 'view');
+        await settle();
+
+        expect(navigate).to.not.have.been.called;
+        expect(app.showError).to.have.been.calledWith(500, sinon.match.any, 'Internal Server Error');
+      });
+
+      test('an anonymous user denied the restored document logs in back to it', async () => {
+        app.$.restoredDoc.get.rejects(Object.assign(new Error('Forbidden'), { status: 403 }));
+        sinon.stub(app, '_isAnonymousForbidden').callsFake((e) => !!e && e.status === 403);
+        sinon.stub(app, '_redirectAnonymousToLogin');
+        const replaceState = sinon.stub(globalThis.history, 'replaceState');
+        restoreFromDocumentView();
+
+        app.load('browse', '', trashedPath, 'view');
+        await settle();
+
+        expect(replaceState).to.have.been.calledWith(sinon.match.any, '', '#!/doc/u1');
+        expect(app._redirectAnonymousToLogin).to.have.been.calledOnce;
         expect(app.showError).to.not.have.been.called;
       });
 
