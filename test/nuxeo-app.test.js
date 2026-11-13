@@ -1870,6 +1870,25 @@ suite('nuxeo-app', () => {
         expect(app.loading).to.be.false;
       });
 
+      test('a dropped redirect leaves loading to a newer load of another tab of the same document', async () => {
+        restoreFromDocumentView();
+        let resolveLookup;
+        app.$.restoredDoc.get.callsFake(() => new Promise((resolve) => (resolveLookup = resolve)));
+        app.$.doc.get.onSecondCall().returns(new Promise(() => {}));
+
+        // Back to the stale View entry: its 404 starts the restored document lookup
+        app.load('browse', '', trashedPath, 'view');
+        await settle();
+        // Back again, to the stale History entry of the same document, while that lookup is pending
+        app.router.currentPath = '/browse/ws/stale?p=history';
+        app.load('browse', '', trashedPath, 'history');
+        resolveLookup(restored.u1);
+        await settle();
+
+        expect(navigate).to.not.have.been.called;
+        expect(app.loading).to.be.true;
+      });
+
       test('the redirect is dropped when the user switches tabs during the lookup', async () => {
         restoreFromDocumentView();
         let resolveLookup;
