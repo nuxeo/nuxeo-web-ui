@@ -1201,6 +1201,8 @@ Polymer({
    */
   _loadDocument(docParam, { applyState = true } = {}) {
     this.loading = true;
+    // identifies the load that owns `loading`, see _abandonDocumentLoad
+    this._activeDocumentLoad = docParam;
     this.docId = docParam.uid;
     this.docPath = docParam.path;
     this.$.doc.headers = this._computeHeaders();
@@ -1236,7 +1238,8 @@ Polymer({
 
   load(page, uid, path, action) {
     const navigation = this._currentNavigation();
-    this._loadDocument({ uid, path, page })
+    const docParam = { uid, path, page };
+    this._loadDocument(docParam)
       .then((doc) => {
         if (doc) {
           this.docAction = action;
@@ -1255,7 +1258,7 @@ Polymer({
         }
         const restoredUid = err && err.status === 404 && !uid ? this._restoredDocumentUid(path) : undefined;
         if (restoredUid) {
-          this._openRestoredDocument(restoredUid, action, path, navigation, err);
+          this._openRestoredDocument(restoredUid, action, docParam, navigation, err);
           return;
         }
         this.showError(err.status, this.i18n('browse.error'), err.message);
@@ -1282,9 +1285,9 @@ Polymer({
   // it is browsed like any document (a saved search loaded by UID would open the search instead), and the default
   // View tab gets no `p` parameter that nuxeo-browser would strip with an extra history entry. Nothing is applied once
   // the user has navigated elsewhere, so that the redirect never replaces an unrelated history entry.
-  _openRestoredDocument(uid, action, path, navigation, err) {
+  _openRestoredDocument(uid, action, docParam, navigation, err) {
     if (!this._isCurrentNavigation(navigation)) {
-      this._abandonDocumentLoad(path);
+      this._abandonDocumentLoad(docParam);
       return;
     }
     const restoredDoc = this.$.restoredDoc;
@@ -1293,20 +1296,20 @@ Polymer({
       .get()
       .then((doc) => {
         if (!this._isCurrentNavigation(navigation)) {
-          this._abandonDocumentLoad(path);
+          this._abandonDocumentLoad(docParam);
           return;
         }
         this.router.navigate(this._routeEntity(doc, action === 'view' ? undefined : action), { replace: true });
       })
-      .catch((restoreErr) => this._restoredDocumentFailed(uid, path, navigation, err, restoreErr));
+      .catch((restoreErr) => this._restoredDocumentFailed(uid, docParam, navigation, err, restoreErr));
   },
 
-  _restoredDocumentFailed(uid, path, navigation, err, restoreErr) {
+  _restoredDocumentFailed(uid, docParam, navigation, err, restoreErr) {
     if (restoreErr && restoreErr.name === 'AbortError') {
       return;
     }
     if (!this._isCurrentNavigation(navigation)) {
-      this._abandonDocumentLoad(path);
+      this._abandonDocumentLoad(docParam);
       return;
     }
     if (this._isAnonymousForbidden(restoreErr)) {
@@ -1321,9 +1324,9 @@ Polymer({
   },
 
   // A document load given up because the user has moved on must not leave the progress indicator on, unless a newer
-  // document load has taken it over.
-  _abandonDocumentLoad(path) {
-    if (this.docPath === path && !this.docId) {
+  // document load has taken it over, even one for the same document.
+  _abandonDocumentLoad(docParam) {
+    if (this._activeDocumentLoad === docParam) {
       this.loading = false;
     }
   },
