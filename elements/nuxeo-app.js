@@ -473,7 +473,6 @@ Polymer({
     <nuxeo-resource id="keepAlive" path="me"></nuxeo-resource>
 
     <nuxeo-document id="doc" doc-id="[[docId]]" doc-path="[[docPath]]"></nuxeo-document>
-    <nuxeo-document id="restoredDoc"></nuxeo-document>
 
     <nuxeo-sardine hidden></nuxeo-sardine>
 
@@ -1201,8 +1200,6 @@ Polymer({
    */
   _loadDocument(docParam, { applyState = true } = {}) {
     this.loading = true;
-    // identifies the load that owns `loading`, see _abandonDocumentLoad
-    this._activeDocumentLoad = docParam;
     this.docId = docParam.uid;
     this.docPath = docParam.path;
     this.$.doc.headers = this._computeHeaders();
@@ -1237,9 +1234,7 @@ Polymer({
   },
 
   load(page, uid, path, action) {
-    const navigation = this._currentNavigation();
-    const docParam = { uid, path, page };
-    this._loadDocument(docParam)
+    this._loadDocument({ uid, path, page })
       .then((doc) => {
         if (doc) {
           this.docAction = action;
@@ -1256,79 +1251,8 @@ Polymer({
           this._redirectAnonymousToLogin();
           return;
         }
-        const restoredUid = err && err.status === 404 && !uid ? this._restoredDocumentUid(path) : undefined;
-        if (restoredUid) {
-          this._openRestoredDocument(restoredUid, action, docParam, navigation, err);
-          return;
-        }
         this.showError(err.status, this.i18n('browse.error'), err.message);
       });
-  },
-
-  // Identifies the navigation being dispatched: the page.js route plus the browser URL, which nuxeo-browser also
-  // changes on tab switches without going through page.js. page.js pushes the URL right after dispatching, so the
-  // URL is read once the dispatch is over.
-  _currentNavigation() {
-    const navigation = { route: this.router && this.router.currentPath };
-    queueMicrotask(() => {
-      navigation.href = globalThis.location.href;
-    });
-    return navigation;
-  },
-
-  _isCurrentNavigation(navigation) {
-    const sameRoute = !this.router || this.router.currentPath === navigation.route;
-    return sameRoute && (navigation.href === undefined || globalThis.location.href === navigation.href);
-  },
-
-  // Opens a restored document reached through one of its stale trashed URLs. It is resolved to its browse path, so
-  // it is browsed like any document (a saved search loaded by UID would open the search instead), and the default
-  // View tab gets no `p` parameter that nuxeo-browser would strip with an extra history entry. Nothing is applied once
-  // the user has navigated elsewhere, so that the redirect never replaces an unrelated history entry.
-  _openRestoredDocument(uid, action, docParam, navigation, err) {
-    if (!this._isCurrentNavigation(navigation)) {
-      this._abandonDocumentLoad(docParam);
-      return;
-    }
-    const restoredDoc = this.$.restoredDoc;
-    restoredDoc.docId = uid;
-    restoredDoc
-      .get()
-      .then((doc) => {
-        if (!this._isCurrentNavigation(navigation)) {
-          this._abandonDocumentLoad(docParam);
-          return;
-        }
-        this.router.navigate(this._routeEntity(doc, action === 'view' ? undefined : action), { replace: true });
-      })
-      .catch((restoreErr) => this._restoredDocumentFailed(uid, docParam, navigation, err, restoreErr));
-  },
-
-  _restoredDocumentFailed(uid, docParam, navigation, err, restoreErr) {
-    if (restoreErr && restoreErr.name === 'AbortError') {
-      return;
-    }
-    if (!this._isCurrentNavigation(navigation)) {
-      this._abandonDocumentLoad(docParam);
-      return;
-    }
-    if (this._isAnonymousForbidden(restoreErr)) {
-      // after login, return to the restored document rather than to the trashed path that no longer resolves
-      globalThis.history.replaceState(globalThis.history.state, '', `#!${this.router.document(uid)}`);
-      this._redirectAnonymousToLogin();
-      return;
-    }
-    // the restored document being gone too is reported as the stale path not being found; anything else as is
-    const shown = restoreErr && restoreErr.status !== 404 ? restoreErr : err;
-    this.showError(shown.status, this.i18n('browse.error'), shown.message);
-  },
-
-  // A document load given up because the user has moved on must not leave the progress indicator on, unless a newer
-  // document load has taken it over, even one for the same document.
-  _abandonDocumentLoad(docParam) {
-    if (this._activeDocumentLoad === docParam) {
-      this.loading = false;
-    }
   },
 
   showError(code, msg, url) {
@@ -1801,43 +1725,30 @@ Polymer({
     }
   },
 
-  // Restoring a document renames it back (the `._<ts>_.trashed` suffix is dropped), so any URL holding its trashed
-  // path stops resolving. Remember those paths so that one reached again through browser history (the document
-  // view, the search queue, the results list) opens the restored document instead of a 404 (WEBUI-2345).
-  _rememberRestoredDocuments(docs) {
-    this._restoredDocuments = this._restoredDocuments || {};
-    docs.forEach((doc) => {
-      if (doc && doc.uid && doc.path && this.isTrashed(doc)) {
-        this._restoredDocuments[doc.path] = doc.uid;
-      }
-    });
-  },
-
-  // Route paths keep their URL encoding (page.js runs with `decodeURLComponents: false`) while document paths do
-  // not, so look the route path up both as is and decoded.
-  _restoredDocumentUid(path) {
-    if (!path || !this._restoredDocuments) {
-      return undefined;
-    }
-    let decoded = path;
-    try {
-      decoded = decodeURIComponent(path);
-    } catch (e) {
-      // a `%` that is not an escape sequence: the path is not encoded
-    }
-    return this._restoredDocuments[decoded] || this._restoredDocuments[path];
+  // Restoring a document renames it back (the `._<ts>_.trashed` suffix is dropped), so URLs holding its trashed path
+  // stop resolving. The browse route sends such a URL, reached again through browser history (e.g. a tab of the
+  // trashed document or the search queue), to the restored document (WEBUI-2345).
+  restoredPathFor(path) {
+    return this._restoredPaths && path ? this._restoredPaths[path] : undefined;
   },
 
   _documentUntrashed(e) {
     this._toast(this.i18n(`app.document.untrashed.${e.detail.error ? 'error' : 'success'}`));
     if (e.detail.doc && !e.detail.error) {
       const trashed = this.currentDocument;
-      if (trashed && trashed.uid === e.detail.doc.uid) {
-        this._rememberRestoredDocuments([trashed]);
+      const fromTrashedView = !!trashed && trashed.uid === e.detail.doc.uid;
+      if (fromTrashedView) {
+        if (!this._restoredPaths) {
+          this._restoredPaths = {};
+        }
+        this._restoredPaths[trashed.path] = e.detail.doc.path;
       }
-      // Restoring renames the document back, so the trashed URL we are on no longer resolves. Replace its
-      // history entry rather than pushing a new one, or browser Back lands on the error page (WEBUI-2345).
-      this.router.navigate(this._routeEntity(e.detail.doc), { replace: true });
+      if (fromTrashedView && this.page === 'browse') {
+        // the trashed URL we are on no longer resolves: replace its history entry rather than pushing a new one
+        this.router.navigate(this._routeEntity(e.detail.doc), { replace: true });
+      } else {
+        this._navigate({ detail: { doc: e.detail.doc } });
+      }
       if (this.hasFacet(e.detail.doc, 'Collection')) {
         this._refreshCollections();
       }
@@ -1880,9 +1791,6 @@ Polymer({
       this._refreshSearch();
     } else {
       this._toast(this.i18n(`app.documents.untrashed.${e.detail.error ? 'error' : 'success'}`));
-      if (!e.detail.error && Array.isArray(e.detail.documents)) {
-        this._rememberRestoredDocuments(e.detail.documents);
-      }
       if (e.detail.documents && e.detail.documents.some((doc) => this.hasFacet(doc, 'Collection'))) {
         this._refreshCollections();
       }

@@ -140,6 +140,13 @@ page('/browse', () => {
 // other regex route below. Unanchored, a path such as `/admin/browse/x` matched here and
 // was loaded as a browse path, because page() tries routes in registration order.
 page(/^\/browse\/([\s\S]*)/, (data) => {
+  const restoredPath = app.restoredPathFor(`/${data.params[0]}`);
+  if (restoredPath) {
+    // a URL of a trashed document that has since been restored, left in the browser history (WEBUI-2345)
+    const query = data.querystring ? `?${data.querystring}` : '';
+    page.redirect(app.router.browse(restoredPath) + query);
+    return;
+  }
   if (!data.state.contentView) {
     app.currentContentView = null;
   }
@@ -215,11 +222,6 @@ app.router = {
   baseUrl: app.baseUrl,
 
   useHashbang: true,
-
-  // The route being dispatched or displayed, set by page.js before any route handler runs.
-  get currentPath() {
-    return page.current;
-  },
 
   browse(path, subPage) {
     const encodedPath = path
