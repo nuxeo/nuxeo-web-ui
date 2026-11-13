@@ -1742,13 +1742,17 @@ suite('nuxeo-app', () => {
     suite('_documentUntrashed', () => {
       let savedRouter;
       let navigate;
+      let currentPath;
+      const trashedDoc = { 'entity-type': 'document', uid: '1', path: '/ws/myfile._1_.trashed', isTrashed: true };
+      const restoredDoc = { 'entity-type': 'document', uid: '1', path: '/ws/myfile' };
 
       setup(() => {
         // Install a fake router and restore the global one afterwards, so the shared single-graph test run is
         // left exactly as it was found.
         savedRouter = RoutingBehavior.__router;
         navigate = sinon.stub();
-        app.router = { navigate, browse: (path) => `/browse${path}` };
+        currentPath = '/browse/ws/myfile._1_.trashed';
+        app.router = { navigate, browse: (path) => `/browse${path}`, currentPath: () => currentPath };
         sinon.stub(app, '_toast');
         sinon.stub(app, 'hasFacet').returns(false);
         sinon.stub(app, '_refreshSearch');
@@ -1759,35 +1763,57 @@ suite('nuxeo-app', () => {
       });
 
       test('replaces the trashed document history entry with the restored document', () => {
-        app.currentDocument = { 'entity-type': 'document', uid: '1', path: '/ws/myfile._1_.trashed', isTrashed: true };
-        app.page = 'browse';
-        app.docPath = '/ws/myfile._1_.trashed';
-        const doc = { 'entity-type': 'document', uid: '1', path: '/ws/myfile' };
-        app._documentUntrashed({ detail: { doc } });
+        app.currentDocument = trashedDoc;
+        app._documentUntrashed({ detail: { doc: restoredDoc } });
         expect(navigate).to.have.been.calledOnce;
         expect(navigate.firstCall.args).to.deep.equal(['/browse/ws/myfile', { replace: true }]);
         expect(app._refreshSearch).to.have.been.calledOnce;
       });
 
-      test('pushes the restored document when the user has moved on before the restore completed', () => {
-        app.currentDocument = { 'entity-type': 'document', uid: '1', path: '/ws/myfile._1_.trashed', isTrashed: true };
-        app.page = 'home';
-        const doc = { 'entity-type': 'document', uid: '1', path: '/ws/myfile' };
-        app._documentUntrashed({ detail: { doc } });
+      test('replaces the entry of another tab of the trashed document', () => {
+        app.currentDocument = trashedDoc;
+        currentPath = '/browse/ws/myfile._1_.trashed?p=history';
+        app._documentUntrashed({ detail: { doc: restoredDoc } });
+        expect(navigate.firstCall.args).to.deep.equal(['/browse/ws/myfile', { replace: true }]);
+      });
+
+      test('matches a trashed document whose name needs URL encoding', () => {
+        app.currentDocument = { ...trashedDoc, path: '/ws/50%off é._1_.trashed' };
+        currentPath = '/browse/ws/50%25off%20%C3%A9._1_.trashed';
+        app._documentUntrashed({ detail: { doc: { ...restoredDoc, path: '/ws/50%off é' } } });
+        expect(navigate.firstCall.args[1]).to.deep.equal({ replace: true });
+      });
+
+      test('pushes the restored document when the user has moved on to Home before the restore completed', () => {
+        app.currentDocument = trashedDoc;
+        currentPath = '/home';
+        app._documentUntrashed({ detail: { doc: restoredDoc } });
         expect(navigate).to.have.been.calledOnce;
         expect(navigate.firstCall.args).to.deep.equal(['/browse/ws/myfile']);
       });
 
       test('does not replace the entry of another document still loading when the restore completes', () => {
-        app.currentDocument = { 'entity-type': 'document', uid: '1', path: '/ws/myfile._1_.trashed', isTrashed: true };
-        app.page = 'browse';
-        app.docPath = '/ws/myfile._1_.trashed';
-        // the user opens document B; until it loads, the trashed document stays displayed
-        sinon.stub(app.$.doc, 'get').returns(new Promise(() => {}));
-        app.load('browse', '', '/ws/other', 'view');
-        const doc = { 'entity-type': 'document', uid: '1', path: '/ws/myfile' };
-        app._documentUntrashed({ detail: { doc } });
+        // the displayed document stays the trashed one until the other document has loaded, but the router has
+        // already moved to its route
+        app.currentDocument = trashedDoc;
+        currentPath = '/browse/ws/other';
+        app._documentUntrashed({ detail: { doc: restoredDoc } });
         expect(navigate).to.have.been.calledOnce;
+        expect(navigate.firstCall.args).to.deep.equal(['/browse/ws/myfile']);
+      });
+
+      test('does not replace the entry of a task that is still loading when the restore completes', () => {
+        app.currentDocument = trashedDoc;
+        currentPath = '/tasks/abc';
+        app._documentUntrashed({ detail: { doc: restoredDoc } });
+        expect(navigate).to.have.been.calledOnce;
+        expect(navigate.firstCall.args).to.deep.equal(['/browse/ws/myfile']);
+      });
+
+      test('pushes instead of throwing when the current route has a malformed escape', () => {
+        app.currentDocument = trashedDoc;
+        currentPath = '/browse/ws/%E0%A4%A';
+        app._documentUntrashed({ detail: { doc: restoredDoc } });
         expect(navigate.firstCall.args).to.deep.equal(['/browse/ws/myfile']);
       });
 
