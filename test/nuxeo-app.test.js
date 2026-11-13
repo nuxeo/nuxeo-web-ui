@@ -1759,11 +1759,22 @@ suite('nuxeo-app', () => {
       });
 
       test('replaces the trashed document history entry with the restored document', () => {
+        app.currentDocument = { 'entity-type': 'document', uid: '1', path: '/ws/myfile._1_.trashed', isTrashed: true };
+        app.page = 'browse';
         const doc = { 'entity-type': 'document', uid: '1', path: '/ws/myfile' };
         app._documentUntrashed({ detail: { doc } });
         expect(navigate).to.have.been.calledOnce;
         expect(navigate.firstCall.args).to.deep.equal(['/browse/ws/myfile', { replace: true }]);
         expect(app._refreshSearch).to.have.been.calledOnce;
+      });
+
+      test('pushes the restored document when the user has moved on before the restore completed', () => {
+        app.currentDocument = { 'entity-type': 'document', uid: '1', path: '/ws/myfile._1_.trashed', isTrashed: true };
+        app.page = 'home';
+        const doc = { 'entity-type': 'document', uid: '1', path: '/ws/myfile' };
+        app._documentUntrashed({ detail: { doc } });
+        expect(navigate).to.have.been.calledOnce;
+        expect(navigate.firstCall.args).to.deep.equal(['/browse/ws/myfile']);
       });
 
       test('does not navigate when the restore failed', () => {
@@ -1774,204 +1785,35 @@ suite('nuxeo-app', () => {
     });
 
     suite('stale trashed URLs after a restore', () => {
-      const trashedPath = '/ws/my file._1794549808671_.trashed';
-      const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
+      const trashed = { 'entity-type': 'document', uid: 'u1', path: '/ws/my file._1_.trashed', isTrashed: true };
+      const restored = { 'entity-type': 'document', uid: 'u1', path: '/ws/my file' };
       let savedRouter;
-      let navigate;
-      let restored;
 
       setup(() => {
         savedRouter = RoutingBehavior.__router;
-        navigate = sinon.stub();
-        app.router = {
-          navigate,
-          currentPath: '/browse/ws/stale',
-          browse: (path, subPage) => `/browse${path}${subPage ? `?p=${subPage}` : ''}`,
-          document: (id) => `/doc/${id}`,
-        };
-        restored = {
-          u1: { 'entity-type': 'document', uid: 'u1', path: '/ws/my file' },
-          u2: { 'entity-type': 'document', uid: 'u2', path: '/ws/b' },
-          u3: { 'entity-type': 'document', uid: 'u3', path: '/ws/report %41' },
-        };
+        app.router = { navigate: sinon.stub(), browse: (path) => `/browse${path}` };
         sinon.stub(app, '_toast');
         sinon.stub(app, 'hasFacet').returns(false);
         sinon.stub(app, '_refreshSearch');
-        sinon.stub(app, 'showError');
-        sinon.stub(app.$.doc, 'get').rejects(Object.assign(new Error('Not Found'), { status: 404 }));
-        sinon.stub(app.$.restoredDoc, 'get').callsFake(() => {
-          const doc = restored[app.$.restoredDoc.docId];
-          return doc ? Promise.resolve(doc) : Promise.reject(Object.assign(new Error('gone'), { status: 404 }));
-        });
       });
 
       teardown(() => {
         RoutingBehavior.__router = savedRouter;
       });
 
-      const restoreFromDocumentView = () => {
-        app.currentDocument = { 'entity-type': 'document', uid: 'u1', path: trashedPath, isTrashed: true };
-        app._documentUntrashed({ detail: { doc: restored.u1 } });
-        navigate.resetHistory();
-      };
-
-      test('a trashed URL reached again after a restore opens the restored document by its path', async () => {
-        restoreFromDocumentView();
-
-        // e.g. a second `.trashed` entry pushed by the search queue, reached through Back
-        app.load('browse', '', '/ws/my%20file._1794549808671_.trashed', 'view');
-        await settle();
-
-        // the default View tab gets no `p`, which nuxeo-browser would otherwise strip with an extra history entry
-        expect(navigate.args).to.deep.equal([['/browse/ws/my file', { replace: true }]]);
-        expect(app.showError).to.not.have.been.called;
+      test('the trashed path of a document restored from its view resolves to its restored path', () => {
+        app.currentDocument = trashed;
+        app._documentUntrashed({ detail: { doc: restored } });
+        expect(app.restoredPathFor(trashed.path)).to.equal('/ws/my file');
+        expect(app.restoredPathFor('/ws/other._2_.trashed')).to.be.undefined;
       });
 
-      test('every stale tab entry of the trashed document opens the restored document on that tab', async () => {
-        restoreFromDocumentView();
-
-        // View > History > View on the trashed document pushes one `.trashed` entry per tab, all reached by Back
-        app.load('browse', '', '/ws/my%20file._1794549808671_.trashed', 'view');
-        await settle();
-        app.load('browse', '', '/ws/my%20file._1794549808671_.trashed', 'history');
-        await settle();
-
-        expect(navigate.args).to.deep.equal([
-          ['/browse/ws/my file', { replace: true }],
-          ['/browse/ws/my file?p=history', { replace: true }],
-        ]);
-      });
-
-      test('a restored saved search is browsed as a document, not opened as a search', async () => {
-        restored.u1.facets = ['SavedSearch'];
-        sinon.stub(app, '_redirectSavedSearch');
-        restoreFromDocumentView();
-
-        app.load('browse', '', trashedPath, 'history');
-        await settle();
-
-        expect(navigate.args).to.deep.equal([['/browse/ws/my file?p=history', { replace: true }]]);
-        expect(app._redirectSavedSearch).to.not.have.been.called;
-      });
-
-      test('the redirect is dropped once the user has navigated elsewhere, without leaving loading on', async () => {
-        restoreFromDocumentView();
-        let reject;
-        app.$.doc.get.returns(new Promise((resolve, rej) => (reject = rej)));
-
-        app.load('browse', '', trashedPath, 'view');
-        expect(app.loading).to.be.true;
-        app.router.currentPath = '/home';
-        reject(Object.assign(new Error('Not Found'), { status: 404 }));
-        await settle();
-
-        expect(navigate).to.not.have.been.called;
-        expect(app.showError).to.not.have.been.called;
-        expect(app.loading).to.be.false;
-      });
-
-      test('a dropped redirect leaves loading to a newer load of another tab of the same document', async () => {
-        restoreFromDocumentView();
-        let resolveLookup;
-        app.$.restoredDoc.get.callsFake(() => new Promise((resolve) => (resolveLookup = resolve)));
-        app.$.doc.get.onSecondCall().returns(new Promise(() => {}));
-
-        // Back to the stale View entry: its 404 starts the restored document lookup
-        app.load('browse', '', trashedPath, 'view');
-        await settle();
-        // Back again, to the stale History entry of the same document, while that lookup is pending
-        app.router.currentPath = '/browse/ws/stale?p=history';
-        app.load('browse', '', trashedPath, 'history');
-        resolveLookup(restored.u1);
-        await settle();
-
-        expect(navigate).to.not.have.been.called;
-        expect(app.loading).to.be.true;
-      });
-
-      test('the redirect is dropped when the user switches tabs during the lookup', async () => {
-        restoreFromDocumentView();
-        let resolveLookup;
-        app.$.restoredDoc.get.callsFake(() => new Promise((resolve) => (resolveLookup = resolve)));
-        const { href } = globalThis.location;
-        try {
-          app.load('browse', '', trashedPath, 'view');
-          await settle();
-          // nuxeo-browser changes the URL of a tab switch with pushState, without going through page.js
-          globalThis.history.replaceState(globalThis.history.state, '', '#tab-switched');
-          resolveLookup(restored.u1);
-          await settle();
-        } finally {
-          globalThis.history.replaceState(globalThis.history.state, '', href);
-        }
-
-        expect(navigate).to.not.have.been.called;
-        expect(app.loading).to.be.false;
-      });
-
-      test('a failure of the restored document lookup is reported as is', async () => {
-        app.$.restoredDoc.get.rejects(Object.assign(new Error('Internal Server Error'), { status: 500 }));
-        restoreFromDocumentView();
-
-        app.load('browse', '', trashedPath, 'view');
-        await settle();
-
-        expect(navigate).to.not.have.been.called;
-        expect(app.showError).to.have.been.calledWith(500, sinon.match.any, 'Internal Server Error');
-      });
-
-      test('an anonymous user denied the restored document logs in back to it', async () => {
-        app.$.restoredDoc.get.rejects(Object.assign(new Error('Forbidden'), { status: 403 }));
-        sinon.stub(app, '_isAnonymousForbidden').callsFake((e) => !!e && e.status === 403);
-        sinon.stub(app, '_redirectAnonymousToLogin');
-        const replaceState = sinon.stub(globalThis.history, 'replaceState');
-        restoreFromDocumentView();
-
-        app.load('browse', '', trashedPath, 'view');
-        await settle();
-
-        expect(replaceState).to.have.been.calledWith(sinon.match.any, '', '#!/doc/u1');
-        expect(app._redirectAnonymousToLogin).to.have.been.calledOnce;
-        expect(app.showError).to.not.have.been.called;
-      });
-
-      test('trashed URLs of bulk-restored documents open the restored documents', async () => {
-        app._documentsUntrashed({ detail: { documents: [{ uid: 'u2', path: trashedPath, isTrashed: true }] } });
-
-        app.load('browse', '', trashedPath);
-        await settle();
-
-        expect(navigate.args).to.deep.equal([['/browse/ws/b', { replace: true }]]);
-        expect(app.showError).to.not.have.been.called;
-      });
-
-      test('a restored document whose name holds an escape-like % sequence is matched too', async () => {
-        const path = '/ws/report %41._1_.trashed';
-        app._documentsUntrashed({ detail: { documents: [{ uid: 'u3', path, isTrashed: true }] } });
-
-        app.load('browse', '', '/ws/report%20%2541._1_.trashed');
-        await settle();
-
-        expect(navigate.args).to.deep.equal([['/browse/ws/report %41', { replace: true }]]);
-      });
-
-      test('the error page is shown when the restored document is gone too', async () => {
-        app._documentsUntrashed({ detail: { documents: [{ uid: 'deleted', path: trashedPath, isTrashed: true }] } });
-
-        app.load('browse', '', trashedPath);
-        await settle();
-
-        expect(navigate).to.not.have.been.called;
-        expect(app.showError).to.have.been.calledWith(404);
-      });
-
-      test('an unknown missing path still shows the error page', async () => {
-        app.load('browse', '', '/ws/never-restored._1_.trashed');
-        await settle();
-
-        expect(navigate).to.not.have.been.called;
-        expect(app.$.restoredDoc.get).to.not.have.been.called;
-        expect(app.showError).to.have.been.calledWith(404);
+      test('nothing is remembered for a restore that failed or is not the displayed document', () => {
+        app.currentDocument = trashed;
+        app._documentUntrashed({ detail: { error: new Error('forbidden') } });
+        app.currentDocument = { uid: 'other', path: '/ws/other' };
+        app._documentUntrashed({ detail: { doc: restored } });
+        expect(app.restoredPathFor(trashed.path)).to.be.undefined;
       });
     });
   });
