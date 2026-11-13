@@ -473,6 +473,7 @@ Polymer({
     <nuxeo-resource id="keepAlive" path="me"></nuxeo-resource>
 
     <nuxeo-document id="doc" doc-id="[[docId]]" doc-path="[[docPath]]"></nuxeo-document>
+    <nuxeo-document id="restoredDoc"></nuxeo-document>
 
     <nuxeo-sardine hidden></nuxeo-sardine>
 
@@ -1234,6 +1235,7 @@ Polymer({
   },
 
   load(page, uid, path, action) {
+    const route = this.router && this.router.currentPath;
     this._loadDocument({ uid, path, page })
       .then((doc) => {
         if (doc) {
@@ -1253,10 +1255,35 @@ Polymer({
         }
         const restoredUid = err && err.status === 404 && !uid ? this._restoredDocumentUid(path) : undefined;
         if (restoredUid) {
-          this.router.navigate(this.router.document(restoredUid, action), { replace: true });
+          this._openRestoredDocument(restoredUid, action, route, err);
           return;
         }
         this.showError(err.status, this.i18n('browse.error'), err.message);
+      });
+  },
+
+  // Opens a restored document reached through one of its stale trashed URLs. It is resolved to its browse path, so
+  // it is browsed like any document (a saved search loaded by UID would open the search instead), and the default
+  // View tab gets no `p` parameter that nuxeo-browser would strip with an extra history entry. Nothing happens if the
+  // user has navigated elsewhere in the meantime, so that the redirect never replaces an unrelated history entry.
+  _openRestoredDocument(uid, action, route, err) {
+    const isCurrent = () => !this.router || this.router.currentPath === route;
+    if (!isCurrent()) {
+      return;
+    }
+    const restoredDoc = this.$.restoredDoc;
+    restoredDoc.docId = uid;
+    restoredDoc
+      .get()
+      .then((doc) => {
+        if (isCurrent()) {
+          this.router.navigate(this._routeEntity(doc, action === 'view' ? undefined : action), { replace: true });
+        }
+      })
+      .catch(() => {
+        if (isCurrent()) {
+          this.showError(err.status, this.i18n('browse.error'), err.message);
+        }
       });
   },
 

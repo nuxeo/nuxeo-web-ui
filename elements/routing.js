@@ -216,6 +216,11 @@ app.router = {
 
   useHashbang: true,
 
+  // The route being dispatched or displayed, set by page.js before any route handler runs.
+  get currentPath() {
+    return page.current;
+  },
+
   browse(path, subPage) {
     const encodedPath = path
       ? path
