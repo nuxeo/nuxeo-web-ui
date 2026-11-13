@@ -280,7 +280,16 @@ app.router = {
       return;
     }
     const replace = !!(options && options.replace);
-    const show = (route) => (replace ? page.replace(route) : page(route));
+    const show = (route) => {
+      if (!replace) {
+        page(route);
+        return;
+      }
+      // page.js only counts pushed entries, and the search route reads `page.len === 0` as "opened directly".
+      // A replace is still an in-app navigation, so count it to keep that check unchanged.
+      page.len += 1;
+      page.replace(route);
+    };
     const isFullpath = /^http(s)?:\/\//.test(path);
     if (isFullpath) {
       const clientPath = sameRepositoryClientPath(path);

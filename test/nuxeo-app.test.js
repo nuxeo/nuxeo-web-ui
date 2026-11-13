@@ -1772,6 +1772,79 @@ suite('nuxeo-app', () => {
         expect(app._toast).to.have.been.calledWith('app.document.untrashed.error');
       });
     });
+
+    suite('stale trashed URLs after a restore', () => {
+      const trashedPath = '/ws/my file._1794549808671_.trashed';
+      let savedRouter;
+      let navigate;
+
+      setup(() => {
+        savedRouter = RoutingBehavior.__router;
+        navigate = sinon.stub();
+        app.router = {
+          navigate,
+          browse: (path) => `/browse${path}`,
+          document: (id, subPage) => `/doc/${id}${subPage ? `?p=${subPage}` : ''}`,
+        };
+        sinon.stub(app, '_toast');
+        sinon.stub(app, 'hasFacet').returns(false);
+        sinon.stub(app, '_refreshSearch');
+        sinon.stub(app, 'showError');
+      });
+
+      teardown(() => {
+        RoutingBehavior.__router = savedRouter;
+      });
+
+      const notFound = () => Promise.reject(Object.assign(new Error('Not Found'), { status: 404 }));
+
+      test('a trashed URL reached again after a restore opens the restored document', async () => {
+        app.currentDocument = { 'entity-type': 'document', uid: 'u1', path: trashedPath, isTrashed: true };
+        app._documentUntrashed({ detail: { doc: { 'entity-type': 'document', uid: 'u1', path: '/ws/my file' } } });
+        navigate.resetHistory();
+        sinon.stub(app, '_loadDocument').callsFake(notFound);
+
+        // the route keeps the URL encoding, e.g. when the queue pushed the trashed URL more than once
+        app.load('browse', '', '/ws/my%20file._1794549808671_.trashed', 'view');
+        await flush();
+
+        expect(navigate).to.have.been.calledOnce;
+        expect(navigate.firstCall.args).to.deep.equal(['/doc/u1?p=view', { replace: true }]);
+        expect(app.showError).to.not.have.been.called;
+      });
+
+      test('trashed URLs of bulk-restored documents open the restored documents', async () => {
+        app._documentsUntrashed({ detail: { documents: [{ uid: 'u2', path: trashedPath, isTrashed: true }] } });
+        sinon.stub(app, '_loadDocument').callsFake(notFound);
+
+        app.load('browse', '', trashedPath);
+        await flush();
+
+        expect(navigate.firstCall.args).to.deep.equal(['/doc/u2', { replace: true }]);
+        expect(app.showError).to.not.have.been.called;
+      });
+
+      test('a restored document whose name holds an escape-like % sequence is matched too', async () => {
+        const path = '/ws/report %41._1_.trashed';
+        app._documentsUntrashed({ detail: { documents: [{ uid: 'u3', path, isTrashed: true }] } });
+        sinon.stub(app, '_loadDocument').callsFake(notFound);
+
+        app.load('browse', '', '/ws/report%20%2541._1_.trashed');
+        await flush();
+
+        expect(navigate.firstCall.args).to.deep.equal(['/doc/u3', { replace: true }]);
+      });
+
+      test('an unknown missing path still shows the error page', async () => {
+        sinon.stub(app, '_loadDocument').callsFake(notFound);
+
+        app.load('browse', '', '/ws/never-restored._1_.trashed');
+        await flush();
+
+        expect(navigate).to.not.have.been.called;
+        expect(app.showError).to.have.been.calledWith(404);
+      });
+    });
   });
 
   suite('ready accessibility hooks', () => {

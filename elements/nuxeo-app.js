@@ -1251,6 +1251,11 @@ Polymer({
           this._redirectAnonymousToLogin();
           return;
         }
+        const restoredUid = err && err.status === 404 && !uid ? this._restoredDocumentUid(path) : undefined;
+        if (restoredUid) {
+          this.router.navigate(this.router.document(restoredUid, action), { replace: true });
+          return;
+        }
         this.showError(err.status, this.i18n('browse.error'), err.message);
       });
   },
@@ -1725,9 +1730,40 @@ Polymer({
     }
   },
 
+  // Restoring a document renames it back (the `._<ts>_.trashed` suffix is dropped), so any URL holding its trashed
+  // path stops resolving. Remember those paths so that one reached again through browser history (the document
+  // view, the search queue, the results list) opens the restored document instead of a 404 (WEBUI-2345).
+  _rememberRestoredDocuments(docs) {
+    this._restoredDocuments = this._restoredDocuments || {};
+    docs.forEach((doc) => {
+      if (doc && doc.uid && doc.path && this.isTrashed(doc)) {
+        this._restoredDocuments[doc.path] = doc.uid;
+      }
+    });
+  },
+
+  // Route paths keep their URL encoding (page.js runs with `decodeURLComponents: false`) while document paths do
+  // not, so look the route path up both as is and decoded.
+  _restoredDocumentUid(path) {
+    if (!path || !this._restoredDocuments) {
+      return undefined;
+    }
+    let decoded = path;
+    try {
+      decoded = decodeURIComponent(path);
+    } catch (e) {
+      // a `%` that is not an escape sequence: the path is not encoded
+    }
+    return this._restoredDocuments[decoded] || this._restoredDocuments[path];
+  },
+
   _documentUntrashed(e) {
     this._toast(this.i18n(`app.document.untrashed.${e.detail.error ? 'error' : 'success'}`));
     if (e.detail.doc && !e.detail.error) {
+      const trashed = this.currentDocument;
+      if (trashed && trashed.uid === e.detail.doc.uid) {
+        this._rememberRestoredDocuments([trashed]);
+      }
       // Restoring renames the document back, so the trashed URL we are on no longer resolves. Replace its
       // history entry rather than pushing a new one, or browser Back lands on the error page (WEBUI-2345).
       this.router.navigate(this._routeEntity(e.detail.doc), { replace: true });
@@ -1773,6 +1809,9 @@ Polymer({
       this._refreshSearch();
     } else {
       this._toast(this.i18n(`app.documents.untrashed.${e.detail.error ? 'error' : 'success'}`));
+      if (!e.detail.error && Array.isArray(e.detail.documents)) {
+        this._rememberRestoredDocuments(e.detail.documents);
+      }
       if (e.detail.documents && e.detail.documents.some((doc) => this.hasFacet(doc, 'Collection'))) {
         this._refreshCollections();
       }
