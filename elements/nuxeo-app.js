@@ -1728,7 +1728,9 @@ Polymer({
   _documentUntrashed(e) {
     this._toast(this.i18n(`app.document.untrashed.${e.detail.error ? 'error' : 'success'}`));
     if (e.detail.doc && !e.detail.error) {
-      this._navigate({ detail: { doc: e.detail.doc } });
+      // Restoring renames the document back, so the trashed URL we are on no longer resolves. Replace its
+      // history entry rather than pushing a new one, or browser Back lands on the error page (WEBUI-2345).
+      this.router.navigate(this._routeEntity(e.detail.doc), { replace: true });
       if (this.hasFacet(e.detail.doc, 'Collection')) {
         this._refreshCollections();
       }
