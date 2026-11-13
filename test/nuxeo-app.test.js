@@ -1761,6 +1761,7 @@ suite('nuxeo-app', () => {
       test('replaces the trashed document history entry with the restored document', () => {
         app.currentDocument = { 'entity-type': 'document', uid: '1', path: '/ws/myfile._1_.trashed', isTrashed: true };
         app.page = 'browse';
+        app.docPath = '/ws/myfile._1_.trashed';
         const doc = { 'entity-type': 'document', uid: '1', path: '/ws/myfile' };
         app._documentUntrashed({ detail: { doc } });
         expect(navigate).to.have.been.calledOnce;
@@ -1771,6 +1772,19 @@ suite('nuxeo-app', () => {
       test('pushes the restored document when the user has moved on before the restore completed', () => {
         app.currentDocument = { 'entity-type': 'document', uid: '1', path: '/ws/myfile._1_.trashed', isTrashed: true };
         app.page = 'home';
+        const doc = { 'entity-type': 'document', uid: '1', path: '/ws/myfile' };
+        app._documentUntrashed({ detail: { doc } });
+        expect(navigate).to.have.been.calledOnce;
+        expect(navigate.firstCall.args).to.deep.equal(['/browse/ws/myfile']);
+      });
+
+      test('does not replace the entry of another document still loading when the restore completes', () => {
+        app.currentDocument = { 'entity-type': 'document', uid: '1', path: '/ws/myfile._1_.trashed', isTrashed: true };
+        app.page = 'browse';
+        app.docPath = '/ws/myfile._1_.trashed';
+        // the user opens document B; until it loads, the trashed document stays displayed
+        sinon.stub(app.$.doc, 'get').returns(new Promise(() => {}));
+        app.load('browse', '', '/ws/other', 'view');
         const doc = { 'entity-type': 'document', uid: '1', path: '/ws/myfile' };
         app._documentUntrashed({ detail: { doc } });
         expect(navigate).to.have.been.calledOnce;

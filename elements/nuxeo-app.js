@@ -1743,7 +1743,7 @@ Polymer({
         }
         this._restoredPaths[trashed.path] = e.detail.doc.path;
       }
-      if (fromTrashedView && this.page === 'browse') {
+      if (fromTrashedView && this.page === 'browse' && this.docPath === trashed.path) {
         // the trashed URL we are on no longer resolves: replace its history entry rather than pushing a new one
         this.router.navigate(this._routeEntity(e.detail.doc), { replace: true });
       } else {
