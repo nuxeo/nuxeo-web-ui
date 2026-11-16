@@ -66,6 +66,19 @@ Polymer({
         scroll-padding-bottom: var(--nuxeo-page-content-safe-area-bottom, 0px);
       }
 
+      /*
+       * WEBUI-2314: on a region that already shows all of its content, the reserved strip is the
+       * only thing there is to scroll to, so the tab gets a scrollbar that reveals nothing but the
+       * empty strip - the large blank space at the bottom of View, History and Trash. The
+       * content-fits attribute hands that room back; see _updateContentFit for when it is set.
+       * scroll-padding-bottom stays either way because it costs no space. It only does anything
+       * where the region scrolls, and there it keeps what is scrolled into view - keyboard focus
+       * in particular - clear of the button.
+       */
+      :host([content-fits]) #content {
+        padding-bottom: 0;
+      }
+
       .toolbar {
         flex: 0 0 auto;
         @apply --layout-horizontal;
@@ -149,6 +162,62 @@ Polymer({
     if (!this.hasAttribute('dir')) {
       const direction = document.documentElement.getAttribute('dir');
       this.setAttribute('dir', direction);
+    }
+  },
+
+  attached() {
+    this._slotted = [];
+    this._contentObserver = new ResizeObserver(() => this._scheduleContentFit());
+    this._contentObserver.observe(this.$.content);
+    // The content region fills the page, so only what is slotted into it changes how much there is
+    // to scroll. Rebind on slotchange because tabs swap their layout in and out.
+    this._contentSlot = this.$.content.querySelector('slot');
+    this._onSlotChange = () => this._observeSlotted();
+    this._contentSlot.addEventListener('slotchange', this._onSlotChange);
+    this._observeSlotted();
+  },
+
+  detached() {
+    if (this._contentSlot) {
+      this._contentSlot.removeEventListener('slotchange', this._onSlotChange);
+    }
+    if (this._contentObserver) {
+      this._contentObserver.disconnect();
+    }
+    cancelAnimationFrame(this._contentFitFrame);
+  },
+
+  _observeSlotted() {
+    this._slotted.forEach((element) => this._contentObserver.unobserve(element));
+    this._slotted = this._contentSlot.assignedElements({ flatten: true });
+    this._slotted.forEach((element) => this._contentObserver.observe(element));
+    this._scheduleContentFit();
+  },
+
+  _scheduleContentFit() {
+    cancelAnimationFrame(this._contentFitFrame);
+    this._contentFitFrame = requestAnimationFrame(() => this._updateContentFit());
+  },
+
+  /**
+   * Reserve the create button strip only where it is reachable.
+   *
+   * Any overflow leaves the last rows under the button, and only the reserve creates the range to
+   * scroll them clear - scroll-padding-bottom steers scrolling but never extends it (WEBUI-1320).
+   * With no overflow there is nothing below the fold, so the strip would be a scrollbar with an
+   * empty range: the blank space WEBUI-2314 reports.
+   *
+   * The padding in force is subtracted, so the answer never depends on the attribute it sets.
+   */
+  _updateContentFit() {
+    const content = this.$.content;
+    const style = getComputedStyle(content);
+    const applied = Number.parseFloat(style.paddingBottom) || 0;
+    const overflow = content.scrollHeight - applied - content.clientHeight;
+    if (overflow > 0) {
+      this.removeAttribute('content-fits');
+    } else {
+      this.setAttribute('content-fits', '');
     }
   },
 });

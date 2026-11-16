@@ -30,7 +30,7 @@ limitations under the License.
     </style>
     <div class="inputclass">
       <nuxeo-input
-        role="widget"
+        data-widget
         label="[[i18n('title')]]"
         name="title"
         value="{{document.properties.dc:title}}"
@@ -44,7 +44,7 @@ limitations under the License.
       </nuxeo-input>
     </div>
     <nuxeo-textarea
-      role="widget"
+      data-widget
       label="[[i18n('label.description')]]"
       name="description"
       value="{{document.properties.dc:description}}"
@@ -52,7 +52,7 @@ limitations under the License.
     </nuxeo-textarea>
 
     <nuxeo-directory-suggestion
-      role="widget"
+      data-widget
       label="[[i18n('label.dublincore.nature')]]"
       name="nature"
       directory-name="nature"
@@ -63,7 +63,7 @@ limitations under the License.
     </nuxeo-directory-suggestion>
 
     <nuxeo-directory-suggestion
-      role="widget"
+      data-widget
       label="[[i18n('label.dublincore.subjects')]]"
       directory-name="l10nsubjects"
       name="subjects"
@@ -76,7 +76,7 @@ limitations under the License.
     </nuxeo-directory-suggestion>
 
     <nuxeo-directory-suggestion
-      role="widget"
+      data-widget
       label="[[i18n('label.dublincore.coverage')]]"
       directory-name="l10ncoverage"
       name="coverage"
@@ -88,7 +88,7 @@ limitations under the License.
     </nuxeo-directory-suggestion>
 
     <nuxeo-date-picker
-      role="widget"
+      data-widget
       label="[[i18n('label.dublincore.expire')]]"
       name="expired"
       value="{{document.properties.dc:expired}}"

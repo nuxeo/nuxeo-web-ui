@@ -64,7 +64,10 @@ export function isBrandingEnabled() {
   try {
     return config.get('branding.rebrand', false);
   } catch (e) {
-    console.warn('Failed to read branding flag; defaulting to legacy themes:', e?.message ?? String(e));
+    console.warn(
+      'Failed to read branding flag; defaulting to legacy themes:',
+      e != null && e.message != null ? e.message : String(e),
+    );
     return false;
   }
 }

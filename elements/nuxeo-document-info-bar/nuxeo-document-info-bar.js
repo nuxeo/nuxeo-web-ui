@@ -232,7 +232,7 @@ Polymer({
   },
 
   _fetchInitiators(workflows) {
-    if (!workflows?.length) {
+    if (!(workflows && workflows.length)) {
       // Bump the request id so any in-flight resolve is invalidated and cannot
       // repopulate the entities map after this reset.
       this._initiatorsRequestId += 1;
@@ -289,7 +289,7 @@ Polymer({
 
   _resolvedInitiator(initiator, entities, loading) {
     if (loading) return null;
-    return entities?.[initiator] || initiator;
+    return (entities && entities[initiator]) || initiator;
   },
 
   _computeRetentionUntiLabel(doc) {

@@ -24,11 +24,11 @@ class Widget {
       return;
     }
 
-    // TODO(nfgs): Handle multiple fields
+    // Only the first field of a multi-field widget is bound; see WEBUI-2285.
     this.field = this.widget.fields[0].fieldName;
 
     // Rename data['schema']['property'] to data.schema.property
-    this.field = this.field.replace(/\['/g, '.').replace(/']/g, '');
+    this.field = this.field.replaceAll("['", '.').replaceAll("']", '');
 
     // In a listing, the layout is not usually rendered on the document, but on a PageSelection element,
     // wrapping the  DocumentModel to handle selection information.

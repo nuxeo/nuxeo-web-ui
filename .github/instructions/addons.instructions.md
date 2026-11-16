@@ -42,3 +42,4 @@ Addons can include:
 - Follow the same Polymer legacy patterns as `elements/`
 - Addon elements use `nuxeo-` prefix
 - Each addon should be self-contained and not depend on other addons
+- Do not use `?.`, `??`, `catch { }` or other post-ES2019 syntax (ESLint enforces this): the Designer catalog generator (`polymer-analyzer` 3.2.4) cannot parse it and would drop the file and the elements it defines from the catalog. Use `a && a.b` (truthiness only), `a != null ? a.b : undefined` (value used), an explicit `!= null` check instead of `??`, or `catch (e)`.

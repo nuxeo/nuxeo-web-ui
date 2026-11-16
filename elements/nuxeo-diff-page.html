@@ -27,14 +27,55 @@ limitations under the License.
       a {
         color: var(--nuxeo-link-hover_-_color);
       }
+
+      /*
+       * WEBUI-1491: nuxeo-page reserves the strips the app bar paints its fixed buttons over, but
+       * its ::slotted() rule is in another tree, so nuxeo-styles' .header wins and drops the
+       * padding to 16px. Restore it, or the titles run under the Search button and the drawer
+       * toggle. Logical properties keep RTL mirrored.
+       */
+      .header {
+        padding-inline-start: 16px;
+        padding-inline-end: 64px;
+      }
+
+      @media (max-width: 720px) {
+        .header {
+          padding-inline-start: 48px;
+        }
+      }
+
+      .title {
+        display: flex;
+        align-items: center;
+        width: 100%;
+      }
+
+      .title > a {
+        /*
+         * WEBUI-1491: keep each title on one line and ellipsize it rather than letting the header
+         * wrap out of the toolbar. The titles split whatever the labels leave, evenly when both
+         * need it, and max-content stops either claiming more than its own text - so a short
+         * title keeps its width and hands the rest to the other one. A fixed share instead
+         * ellipsized both while space next to them went unused.
+         */
+        flex: 1 1 0;
+        max-width: max-content;
+        min-width: 0;
+        box-sizing: border-box;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        padding: 0 10px;
+      }
     </style>
     <nuxeo-page>
       <div class="header" slot="header">
-        <span>
+        <span class="title">
           [[i18n('app.title.diff')]]
-          <a href$="[[_buildPermalink(_left)]]">[[_left.title]]</a>
+          <a href$="[[_buildPermalink(_left)]]" title$="[[_left.title]]">[[_left.title]]</a>
           [[i18n('diffPage.versus')]]
-          <a href$="[[_buildPermalink(_right)]]">[[_right.title]]</a>
+          <a href$="[[_buildPermalink(_right)]]" title$="[[_right.title]]">[[_right.title]]</a>
         </span>
       </div>
       <div class="content">

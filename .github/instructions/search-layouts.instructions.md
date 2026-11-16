@@ -33,9 +33,9 @@ elements/search/<name>/
     <style include="nuxeo-styles"></style>
 
     <!-- Widgets bound to params and aggregations -->
-    <nuxeo-input role="widget" value="{{searchTerm}}" label="[[i18n('...')]]"></nuxeo-input>
+    <nuxeo-input data-widget value="{{searchTerm}}" label="[[i18n('...')]]"></nuxeo-input>
 
-    <div role="widget">
+    <div data-widget>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.dc_modified_agg]]"
         value="{{params.dc_modified_agg}}"
@@ -81,10 +81,37 @@ elements/search/<name>/
 </dom-module>
 ```
 
+## Labelling filter widgets
+
+Widgets that accept a `label` attribute (`nuxeo-input`, `nuxeo-textarea`, `nuxeo-select`,
+`nuxeo-path-suggestion`, `nuxeo-checkbox-aggregation`) associate the label with their internal control
+themselves — pass the label in and add no markup label.
+
+Where a filter needs a visible label in markup, use a `<span class="label">` rather than a `<label>`:
+a `<label>` with no `for` and no nested control is reported as SonarCloud `Web:S6853` and gives a
+screen-reader user no relationship to the control beside it.
+
+```html
+<div data-widget>
+  <span class="label" id="authors-label">[[i18n('defaultSearch.authors')]]</span>
+  <nuxeo-dropdown-aggregation
+    placeholder="[[i18n('defaultSearch.authors.placeholder')]]"
+    data="[[aggregations.dc_creator_agg]]"
+    value="{{params.dc_creator_agg}}"
+    multiple="true"
+    aria-label$="[[i18n('defaultSearch.authors')]]"
+  >
+  </nuxeo-dropdown-aggregation>
+</div>
+```
+
+`nuxeo-dropdown-aggregation` does not forward a `label`, so the control keeps its own `aria-label$`
+to give the inner input an accessible name.
+
 ## Key Patterns
 
 - **Aggregation widgets**: Bind `data` to `[[aggregations.<agg_name>]]` and `value` to `{{params.<agg_name>}}`
-- **Widget role**: Use `role="widget"` on form elements for layout discovery
+- **Widget marker**: Use `data-widget` on form elements for layout discovery. The older `role="widget"` marker is still supported but is not a valid ARIA role, so new layouts must use `data-widget` (see WEBUI-2229)
 - **i18n keys**: Search-specific keys follow `<searchName>Search.<field>` pattern (e.g., `defaultSearch.fullText`)
 - **Page provider**: Results use `<nuxeo-results>` bound to `nxProvider` with `<nuxeo-data-grid>` and `<nuxeo-data-table>` display modes
 - **Sort options**: Pass `sort-options` to `<nuxeo-results>` for sortable columns
@@ -100,7 +127,7 @@ elements/search/<name>/
 
 - Follow naming: `nuxeo-<name>-search-form.html` and `nuxeo-<name>-search-results.html`
 - Always include `Nuxeo.LayoutBehavior`
-- Use `role="widget"` on all search form fields
+- Use `data-widget` on all search form fields
 - Use two-way binding (`{{...}}`) for `params` and `searchTerm` in forms
 - Use one-way binding (`[[...]]`) for `aggregations` data
 - Results must provide both grid and list display modes via `<nuxeo-data-grid>` and `<nuxeo-data-table>`

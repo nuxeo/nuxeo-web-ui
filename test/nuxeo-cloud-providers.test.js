@@ -56,6 +56,35 @@ suite('nuxeo-cloud-providers', () => {
       expect(element._selectedEntry.scopes).to.equal('email,profile');
       expect(element._selectedServiceName).to.equal('google');
     });
+
+    test('should clone the row deeply without altering its field types', () => {
+      const item = {
+        serviceName: 'google',
+        description: 'Google OAuth2',
+        clientSecret: null,
+        isEnabled: true,
+        scopes: ['email', 'profile'],
+        userAuthorizationURL: 'https://accounts.google.com/o/oauth2/auth',
+        metadata: { registeredAt: '2024-01-31T10:15:00.000Z' },
+        'entity-type': 'nuxeoOAuth2ServiceProvider',
+      };
+
+      element._editEntry({ target: { parentNode: { item } } });
+      const entry = element._selectedEntry;
+
+      expect(entry).to.not.equal(item);
+      expect(entry.serviceName).to.be.a('string');
+      expect(entry.clientSecret).to.be.null;
+      expect(entry.isEnabled).to.equal(true);
+      // ISO timestamps stay strings — the entry is REST JSON, never a Date instance
+      expect(entry.metadata.registeredAt).to.be.a('string');
+      expect(entry.metadata).to.not.equal(item.metadata);
+
+      // _editEntry flattens scopes onto the copy; the row backing the table keeps its array
+      entry.metadata.registeredAt = 'changed';
+      expect(item.scopes).to.deep.equal(['email', 'profile']);
+      expect(item.metadata.registeredAt).to.equal('2024-01-31T10:15:00.000Z');
+    });
   });
 
   suite('_computeDialogHeading', () => {

@@ -31,7 +31,6 @@ jobs:
       contents: read
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-      SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
 
   a11y:
     uses: ./.github/workflows/a11y.yaml

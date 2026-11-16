@@ -164,7 +164,7 @@ class S3Provider {
   }
 
   _refreshBatchInfo() {
-    if (!this._currentCredentials || !this._currentCredentials.expiration) {
+    if (!(this._currentCredentials && this._currentCredentials.expiration)) {
       return Promise.resolve();
     }
     if (new Date() < this._currentCredentials.expiration) {
@@ -198,7 +198,7 @@ class S3Provider {
   upload(files, callback) {
     this._ensureBatch().then(() => {
       callback({ type: 'batchStart', batchId: this.batchId });
-      if (new Date().getTime() >= this.extraInfo.expiration) {
+      if (Date.now() >= this.extraInfo.expiration) {
         this._refreshBatchInfo();
       }
 

@@ -55,7 +55,13 @@ export const NuxeoRecycledThumbnailBehavior = {
   },
 
   _thumbnail(doc) {
-    if (doc?.uid && doc.contextParameters?.thumbnail?.url) {
+    if (
+      doc &&
+      doc.uid &&
+      doc.contextParameters &&
+      doc.contextParameters.thumbnail &&
+      doc.contextParameters.thumbnail.url
+    ) {
       const { url } = doc.contextParameters.thumbnail;
       // Derive the decorated URL instead of writing it back onto the document. A recycled host
       // meets the same document again whenever the user scrolls back over it, and mutating the
@@ -69,7 +75,10 @@ export const NuxeoRecycledThumbnailBehavior = {
   },
 
   isFollowRedirectEnabled() {
-    const followRedirect = Nuxeo?.UI?.config?.url?.followRedirect;
+    const followRedirect =
+      Nuxeo != null && Nuxeo.UI != null && Nuxeo.UI.config != null && Nuxeo.UI.config.url != null
+        ? Nuxeo.UI.config.url.followRedirect
+        : undefined;
     return followRedirect ? String(followRedirect).toLowerCase() === 'true' : false;
   },
 

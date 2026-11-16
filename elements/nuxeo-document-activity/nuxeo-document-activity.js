@@ -101,7 +101,7 @@ Polymer({
   observers: ['_fetchPrincipals(activities)'],
 
   _fetchPrincipals(activities) {
-    if (!activities?.length) {
+    if (!(activities && activities.length)) {
       // Bump the request id so any in-flight resolve is invalidated and cannot
       // repopulate the entities map after this reset.
       this._principalsRequestId += 1;
@@ -158,7 +158,7 @@ Polymer({
 
   _resolvedPrincipal(principalName, entities, loading) {
     if (loading) return null;
-    return entities?.[principalName] || principalName;
+    return (entities && entities[principalName]) || principalName;
   },
 
   _activity(event) {

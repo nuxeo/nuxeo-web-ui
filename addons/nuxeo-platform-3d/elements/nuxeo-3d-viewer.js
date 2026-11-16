@@ -320,16 +320,14 @@ Polymer({
     const object = data.scene;
 
     if (data.cameras && data.cameras.length) {
-      for (let i = 0; i < data.cameras.length; i++) {
-        const dataCamera = data.cameras[i];
+      for (const dataCamera of data.cameras) {
         const cameraName = dataCamera.parent.name;
         this.cameras[cameraName] = dataCamera;
       }
     }
 
     if (data.animations && data.animations.length) {
-      for (let i = 0; i < data.animations.length; i++) {
-        const animation = data.animations[i];
+      for (const animation of data.animations) {
         animation.loop = true;
         animation.play();
         this.animations.push(animation);

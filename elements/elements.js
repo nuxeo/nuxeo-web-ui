@@ -190,6 +190,7 @@ import './nuxeo-admin/nuxeo-search-analytics.js';
 import './nuxeo-admin/nuxeo-workflow-analytics.js';
 import './nuxeo-admin/nuxeo-user-group-management-page.js';
 import './nuxeo-admin/nuxeo-audit.js';
+import './nuxeo-admin/nuxeo-announcement-management.js';
 import './nuxeo-cloud-services/nuxeo-cloud-consumers.js';
 import './nuxeo-cloud-services/nuxeo-cloud-services.js';
 import './nuxeo-cloud-services/nuxeo-cloud-providers.js';
