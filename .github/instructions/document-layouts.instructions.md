@@ -42,7 +42,7 @@ These use `<dom-module>` with inline `<script>`. The `Polymer` and `Nuxeo` globa
         @apply --paper-card;
       }
     </style>
-    <nuxeo-document-viewer role="widget" document="[[document]]"></nuxeo-document-viewer>
+    <nuxeo-document-viewer data-widget document="[[document]]"></nuxeo-document-viewer>
   </template>
 
   <script>
@@ -86,11 +86,55 @@ Polymer({
 
 **Note**: Per-doctype layout files (`nuxeo-<doctype>-<mode>-layout.html`) always use the HTML format. The JS format is only used for shared infrastructure components in `elements/document/`.
 
+## Read-only name/value pairs (metadata and view layouts)
+
+Metadata layouts render a field name next to a read-only value. There is no form control involved, so
+**do not use `<label>`** — `for` may only reference a labelable form element, and a `<div>` is not one.
+A `<label>` with no association is reported by SonarCloud as `Web:S6853` and is announced by a screen
+reader as loose text with no relationship to the value beside it.
+
+Use a `<span class="label">` with an `id`, and give the value element `role="definition"` and
+`aria-labelledby` pointing at that `id`:
+
+```html
+<div data-widget>
+  <span class="label" id="title-label">[[i18n('label.dublincore.title')]]</span>
+  <div role="definition" aria-labelledby="title-label" name="title">[[document.properties.dc:title]]</div>
+</div>
+```
+
+The same applies when the value is a custom element rather than a `<div>`:
+
+```html
+<div data-widget hidden$="[[!document.properties.dc:expired]]">
+  <span class="label" id="expire-label">[[i18n('label.dublincore.expire')]]</span>
+  <nuxeo-date role="definition" aria-labelledby="expire-label" name="expired" datetime="[[document.properties.dc:expired]]"></nuxeo-date>
+</div>
+```
+
+Notes:
+
+- `id` values are scoped to the layout's shadow root, so `<field>-label` is enough; never use a bare
+  `id="label"`.
+- Do not put `aria-label` or `aria-labelledby` on an element with no role — a bare `<div>` is generic and
+  author-supplied names on it are ignored by browsers and flagged by axe. That is why the value element
+  carries `role="definition"`.
+- `themes/base.js` styles both `label` and `span.label` with `--nuxeo-label`, so the bare element selector
+  still works for customer-authored layouts written against the older pattern.
+- Values carrying `class="multiline"` are styled `white-space: pre-line`. Keep the binding on the same
+  source line as the tags (with a `<!-- prettier-ignore -->` above it if the line exceeds the print
+  width) — otherwise the source indentation renders as a blank line.
+
+For **genuinely interactive** controls that need a visible label in markup (a `paper-toggle-button`,
+a `paper-button`), keep the `<span class="label" id="…">` and point the control's `aria-labelledby`
+at it. Prefer passing `label="…"` into `nuxeo-input`, `nuxeo-textarea` and friends, which handle the
+association internally and need no markup label at all.
+
 ## Key Patterns
 
 - **Behavior**: Always use `Nuxeo.LayoutBehavior` — it provides `document`, `i18n`, and layout lifecycle methods
 - **Document binding**: Properties are bound to `document.properties['schema:field']` via `[[document.properties.dc:title]]` or `{{document.properties.dc:title}}`
-- **Widgets**: Use `role="widget"` attribute on form fields so the layout system can discover them
+- **Widgets**: Use the `data-widget` attribute on form fields so the layout system can discover them. The older `role="widget"` marker is still supported and existing layouts keep working, but it is not a valid ARIA role, so new layouts must use `data-widget` (see WEBUI-2229)
 - **Two-way binding**: Edit and create layouts use `{{...}}` for form fields; view and metadata layouts use `[[...]]`
 - **Nuxeo elements**: Use `<nuxeo-input>`, `<nuxeo-textarea>`, `<nuxeo-date-picker>`, `<nuxeo-select>`, `<nuxeo-directory-suggestion>`, `<nuxeo-user-suggestion>`, `<nuxeo-tag-suggestion>` for form fields
 - **JSDoc `@doctype`**: The `@doctype` annotation in the `document` property declaration associates the layout with a document type
@@ -119,3 +163,5 @@ Several `.js` files in `elements/document/` provide shared layout infrastructure
 - Edit and create layouts should use two-way binding (`{{...}}`) for form fields
 - Include `<style include="nuxeo-styles">` for consistent styling
 - Keep layouts simple — delegate complex logic to dedicated elements
+- Never hand-roll a `<label>` in a layout; use `<span class="label">` plus `role="definition"` /
+  `aria-labelledby` on the value, or a widget that takes a `label` attribute

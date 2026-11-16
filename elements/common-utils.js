@@ -83,10 +83,10 @@ export function blurSelectionCheckOnPointerDeselect(host, e) {
     !!evt &&
     ((typeof KeyboardEvent !== 'undefined' && evt instanceof KeyboardEvent) ||
       String(evt.type || '').startsWith('key'));
-  if (isKeyboardEvent(e) || isKeyboardEvent(e?.detail?.sourceEvent)) {
+  if (isKeyboardEvent(e) || isKeyboardEvent(e != null && e.detail != null ? e.detail.sourceEvent : undefined)) {
     return;
   }
-  const focused = host.shadowRoot?.activeElement;
+  const focused = host.shadowRoot != null ? host.shadowRoot.activeElement : undefined;
   if (focused && typeof focused.blur === 'function') {
     focused.blur();
   }

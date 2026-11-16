@@ -26,7 +26,7 @@ limitations under the License.
     <style include="nuxeo-styles"></style>
 
     <nuxeo-input
-      role="widget"
+      data-widget
       id="searchInput"
       label="[[i18n('defaultSearch.fullText')]]"
       value="{{searchTerm}}"
@@ -37,8 +37,8 @@ limitations under the License.
     >
     </nuxeo-input>
 
-    <div role="widget">
-      <label>[[i18n('defaultSearch.authors')]]</label>
+    <div data-widget>
+      <span class="label" id="authors-label">[[i18n('defaultSearch.authors')]]</span>
       <nuxeo-dropdown-aggregation
         placeholder="[[i18n('defaultSearch.authors.placeholder')]]"
         data="[[aggregations.dc_creator_agg]]"

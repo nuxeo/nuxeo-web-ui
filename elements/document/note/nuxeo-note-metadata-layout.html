@@ -25,23 +25,26 @@ limitations under the License.
   <template>
     <style include="nuxeo-styles"></style>
 
-    <div role="widget">
-      <label>[[i18n('label.dublincore.title')]]</label>
-      <div name="title">[[document.properties.dc:title]]</div>
+    <div data-widget>
+      <span class="label" id="title-label">[[i18n('label.dublincore.title')]]</span>
+      <div role="definition" aria-labelledby="title-label" name="title">[[document.properties.dc:title]]</div>
     </div>
 
-    <div role="widget" hidden$="[[!document.properties.dc:description]]">
-      <label>[[i18n('label.dublincore.description')]]</label>
-      <div name="description" class="multiline">[[document.properties.dc:description]]</div>
+    <div data-widget hidden$="[[!document.properties.dc:description]]">
+      <span class="label" id="description-label">[[i18n('label.dublincore.description')]]</span>
+      <!-- prettier-ignore -->
+      <div role="definition" aria-labelledby="description-label" name="description" class="multiline">[[document.properties.dc:description]]</div>
     </div>
 
-    <div role="widget" hidden$="[[!document.properties.dc:nature]]">
-      <label>[[i18n('label.dublincore.nature')]]</label>
-      <div name="nature">[[formatDirectory(document.properties.dc:nature)]]</div>
+    <div data-widget hidden$="[[!document.properties.dc:nature]]">
+      <span class="label" id="nature-label">[[i18n('label.dublincore.nature')]]</span>
+      <div role="definition" aria-labelledby="nature-label" name="nature">
+        [[formatDirectory(document.properties.dc:nature)]]
+      </div>
     </div>
 
     <nuxeo-directory-suggestion
-      role="widget"
+      data-widget
       label="[[i18n('label.dublincore.subjects')]]"
       directory-name="l10nsubjects"
       name="subjects"
@@ -53,26 +56,29 @@ limitations under the License.
     >
     </nuxeo-directory-suggestion>
 
-    <div role="widget" hidden$="[[!document.properties.dc:coverage]]">
-      <label>[[i18n('label.dublincore.coverage')]]</label>
-      <div name="coverage">[[formatDirectory(document.properties.dc:coverage)]]</div>
+    <div data-widget hidden$="[[!document.properties.dc:coverage]]">
+      <span class="label" id="coverage-label">[[i18n('label.dublincore.coverage')]]</span>
+      <div role="definition" aria-labelledby="coverage-label" name="coverage">
+        [[formatDirectory(document.properties.dc:coverage)]]
+      </div>
     </div>
 
-    <div role="widget" hidden$="[[!document.properties.dc:expired]]">
-      <label>[[i18n('label.dublincore.expire')]]</label>
+    <div data-widget hidden$="[[!document.properties.dc:expired]]">
+      <span class="label" id="expire-label">[[i18n('label.dublincore.expire')]]</span>
       <nuxeo-date
+        role="definition"
+        aria-labelledby="expire-label"
         name="expired"
-        aria-label$="[[i18n('label.dublincore.expire')]]"
         datetime="[[document.properties.dc:expired]]"
       ></nuxeo-date>
     </div>
 
-    <div role="widget">
-      <label>[[i18n('noteMetadataLayout.format')]]</label>
-      <div>[[formatMimeType(document.properties.note:mime_type)]]</div>
+    <div data-widget>
+      <span class="label" id="format-label">[[i18n('noteMetadataLayout.format')]]</span>
+      <div role="definition" aria-labelledby="format-label">[[formatMimeType(document.properties.note:mime_type)]]</div>
     </div>
 
-    <nuxeo-document-attachments role="widget" document="[[document]]"></nuxeo-document-attachments>
+    <nuxeo-document-attachments data-widget document="[[document]]"></nuxeo-document-attachments>
   </template>
 
   <script>

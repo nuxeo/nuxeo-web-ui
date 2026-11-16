@@ -68,7 +68,7 @@ export const TokenBehavior = [
     },
 
     _editEntry(e) {
-      this._set_selectedEntry(JSON.parse(JSON.stringify(e.target.parentNode.item)));
+      this._set_selectedEntry(structuredClone(e.target.parentNode.item));
       this.$.dialog.toggle();
     },
 

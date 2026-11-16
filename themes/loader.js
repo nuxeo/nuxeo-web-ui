@@ -26,7 +26,7 @@ export function safeSetTheme(value) {
     localStorage.setItem('theme', value);
   } catch (e) {
     // Storage may be unavailable in private browsing mode.
-    console.warn('Failed to persist theme preference:', e?.message ?? String(e));
+    console.warn('Failed to persist theme preference:', e != null && e.message != null ? e.message : String(e));
   }
 }
 
@@ -36,10 +36,10 @@ export function getValidTheme() {
     raw = localStorage.getItem('theme');
   } catch (e) {
     // Storage unavailable; return deployment default.
-    console.warn('Failed to read theme preference:', e?.message ?? String(e));
+    console.warn('Failed to read theme preference:', e != null && e.message != null ? e.message : String(e));
     return getDefaultTheme();
   }
-  const theme = raw?.trim();
+  const theme = raw != null ? raw.trim() : undefined;
   if (theme && SAFE_THEME_PATTERN.test(theme)) {
     // Map themes to handle branding mode changes while preserving user preference.
     const resolved = resolveTheme(theme);

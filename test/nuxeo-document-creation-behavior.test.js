@@ -109,6 +109,71 @@ suite('DocumentCreationBehavior', () => {
     });
   });
 
+  suite('_parentChanged', () => {
+    function parentWith(permissions, subtypes) {
+      return {
+        path: '/default-domain/workspaces',
+        contextParameters: { permissions, subtypes },
+        isTrashed: false,
+      };
+    }
+
+    function subtypesSetTo() {
+      return ctx.set.getCalls().find((call) => call.args[0] === 'subtypes');
+    }
+
+    test('should drop subtypes flagged HiddenInCreation and keep the rest sorted by id', () => {
+      ctx.parent = parentWith(
+        ['AddChildren'],
+        [
+          { type: 'Picture', facets: ['Commentable'] },
+          { type: 'Note', facets: ['HiddenInCreation'] },
+          { type: 'File', facets: [] },
+        ],
+      );
+
+      ctx._parentChanged();
+
+      expect(subtypesSetTo().args[1].map((type) => type.type)).to.deep.equal(['File', 'Picture']);
+    });
+
+    test('should keep every subtype when none is hidden in creation', () => {
+      ctx.parent = parentWith(
+        ['AddChildren'],
+        [
+          { type: 'File', facets: [] },
+          { type: 'Picture', facets: ['Commentable'] },
+        ],
+      );
+
+      ctx._parentChanged();
+
+      expect(subtypesSetTo().args[1].map((type) => type.type)).to.deep.equal(['File', 'Picture']);
+    });
+
+    test('should set no subtypes when the parent cannot be created in', () => {
+      ctx.parent = parentWith(['Read'], [{ type: 'File', facets: [] }]);
+
+      ctx._parentChanged();
+
+      expect(subtypesSetTo().args[1]).to.deep.equal([]);
+    });
+
+    test('should set the creatable subtypes sorted by id', () => {
+      ctx.parent.contextParameters.subtypes = [
+        { type: 'Picture', facets: [] },
+        { type: 'File', facets: [] },
+        { type: 'Folder', facets: [] },
+        { type: 'Internal', facets: ['HiddenInCreation'] },
+      ];
+
+      ctx._parentChanged();
+
+      const call = ctx.set.getCalls().find((c) => c.args[0] === 'subtypes');
+      expect(call.args[1].map((type) => type.id)).to.deep.equal(['file', 'folder', 'picture']);
+    });
+  });
+
   suite('_getTypeLabel', () => {
     test('should return formatted doc type when type is valid', () => {
       const type = { _id: '1', type: 'File', id: 'file', icon: 'file-icon' };
@@ -205,6 +270,55 @@ suite('DocumentCreationBehavior', () => {
   suite('_getDocumentProperties', () => {
     test('should return null by default (extension point)', () => {
       expect(ctx._getDocumentProperties()).to.be.null;
+    });
+  });
+
+  // The trailing slash is stripped off `targetPath` before it is compared to the parent path.
+  // Stripping every trailing slash would turn the repository root "/" into "", so the root
+  // would never match its parent and creation there would be reported as an invalid location.
+  suite('target path resolution', () => {
+    test('should accept a target path without a trailing slash', () => {
+      ctx.targetPath = '/default-domain/workspaces';
+      ctx._suggesterChildrenChanged();
+      expect(ctx.set).to.have.been.calledWith('isValidTargetPath', true);
+    });
+
+    test('should accept a target path with a trailing slash', () => {
+      ctx.targetPath = '/default-domain/workspaces/';
+      ctx._suggesterChildrenChanged();
+      expect(ctx.set).to.have.been.calledWith('isValidTargetPath', true);
+    });
+
+    test('should accept the repository root as a target path', () => {
+      ctx.parent.path = '/';
+      ctx.targetPath = '/';
+      ctx._suggesterChildrenChanged();
+      expect(ctx.set).to.have.been.calledWith('isValidTargetPath', true);
+    });
+
+    test('should reject a target path that is not the parent', () => {
+      ctx.targetPath = '/default-domain/somewhere-else';
+      ctx._suggesterChildrenChanged();
+      expect(ctx.set).to.have.been.calledWith('isValidTargetPath', false);
+    });
+
+    test('should keep targetPath when it differs from the parent only by a trailing slash', () => {
+      ctx.targetPath = '/default-domain/workspaces/';
+      ctx._parentChanged();
+      expect(ctx.set).to.not.have.been.calledWith('targetPath', '/default-domain/workspaces');
+    });
+
+    test('should keep targetPath at the repository root', () => {
+      ctx.parent.path = '/';
+      ctx.targetPath = '/';
+      ctx._parentChanged();
+      expect(ctx.set).to.not.have.been.calledWith('targetPath', '/');
+    });
+
+    test('should reset targetPath when it points somewhere other than the parent', () => {
+      ctx.targetPath = '/default-domain/somewhere-else';
+      ctx._parentChanged();
+      expect(ctx.set).to.have.been.calledWith('targetPath', '/default-domain/workspaces');
     });
   });
 });

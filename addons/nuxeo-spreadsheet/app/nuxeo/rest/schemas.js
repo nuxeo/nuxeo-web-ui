@@ -30,7 +30,7 @@ class Schemas extends Request {
     return this.execute().then((entries) => {
       for (const entry of entries) {
         const key = entry['@prefix'] || entry.name;
-        if (schemas.indexOf(key) !== -1) {
+        if (schemas.includes(key)) {
           data[key] = { name: entry.name };
         }
       }

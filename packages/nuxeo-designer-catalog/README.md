@@ -14,7 +14,7 @@ The catalog contains data about elements properties, methods and behaviors:
 npm install
 ```
 
-Note: This version of the catalog generator requires node version >=14.0.0.
+Note: This version of the catalog generator requires node version >=22.13.0.
 
 #### Catalog generation
 
@@ -33,6 +33,17 @@ gulp hints --tp <target-platform-version>
 ```sh
 ./scripts/maven-deploy.sh data/applications/nuxeo/<target-platform-version> <catalog-version>
 ```
+
+#### Check that the analyzer can read every source
+
+```sh
+node src/check-sources.js [web-ui-root]
+```
+
+Run from the Web UI root as `npm run check:catalog` (needs `npm ci` in both the root and this package).
+It analyzes the catalog entry points of `data/applications/nuxeo/2023.0/catalog-packages.json` with this
+package's `polymer-analyzer` and fails when a Web UI or `@nuxeo` file cannot be parsed or loaded, or when an
+element or behavior that went missing in WEBUI-1922 / WEBUI-2418 is not found. The Lint CI workflow runs it.
 
 #### Clean up generated catalog data
 

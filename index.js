@@ -3,6 +3,11 @@ import { importHTML, importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js'
 import { setFallbackNotificationTarget } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import { loadTheme } from './themes/loader.js';
 import { installGlobalFocusRing } from './themes/dark-theme-focus-ring.js';
+// Must precede the `./i18n/i18n.js` import below: that module issues its locale request at import
+// time, and the address bar has to be stripped of the spent `token` before it goes out, so the
+// credential is not in that request's `Referer` (WEBUI-2316).
+import './elements/entry-url-install.js';
+import { i18nReady } from './i18n/i18n.js';
 
 // Install the themeable keyboard-focus ring before any custom element attaches its shadow root,
 // so every root gets the rule from first paint. Dark themes make the ring visible; other themes
@@ -15,7 +20,7 @@ const setupRTLSupport = () => {
   window.nuxeo.I18n = window.nuxeo.I18n || {};
   const userLanguage = navigator.language || navigator.userLanguage || 'en';
   const rtlLanguages = ['ar', 'he', 'fa', 'ur'];
-  const isRTL = rtlLanguages.some((lang) => userLanguage?.startsWith(lang));
+  const isRTL = rtlLanguages.some((lang) => (userLanguage != null ? userLanguage.startsWith(lang) : undefined));
   window.nuxeo.I18n.direction = isRTL ? 'rtl' : 'ltr';
   document.documentElement.dir = window.nuxeo.I18n.direction;
 };
@@ -63,6 +68,7 @@ const setupApp = async () =>
     }
   });
 const loadRouting = async () => {
+  // The entry URL is already normalized by the `entry-url-install.js` import, above (WEBUI-2316).
   if (config.get('router.htmlImport')) {
     // Wrap importHref in a promise so the startup chain awaits routing.html actually loading
     // and load errors reject (surface) instead of being swallowed, matching the import() branch.
@@ -86,6 +92,12 @@ ready
   // Apply the theme early (before the app element loads) to avoid a flash of the wrong theme.
   // loadTheme() is invoked explicitly here rather than as a themes/loader.js import side effect.
   .then(loadTheme)
+  // Wait for the translations before loading the app element. Elements resolve their
+  // `[[i18n(...)]]` bindings on first render, so a locale that arrives later paints raw keys such as
+  // `defaultSearch.collections.placeholder` until `i18n-locale-loaded` refreshes those bindings,
+  // which is long enough for a user to see and act on (WEBUI-1570). i18n/i18n.js issues the request
+  // at import time, so this gate usually resolves without adding any latency.
+  .then(() => i18nReady)
   .then(loadApp)
   .then(loadLegacy)
   .then(loadBundle)

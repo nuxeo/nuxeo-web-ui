@@ -109,4 +109,51 @@ suite('nuxeo-replace-blob-button', () => {
       expect(iconButton.hasAttribute('aria-labelledby')).to.be.false;
     });
   });
+
+  // WEBUI-1820: replacing the main blob is a document write, so it takes part in optimistic locking
+  suite('optimistic locking', () => {
+    setup(() => {
+      element.xpath = 'file:content';
+      element.value = { name: 'new.pdf' };
+      element.document = {
+        uid: 'doc-1',
+        changeToken: '5-2',
+        properties: { 'file:content': { name: 'old.pdf' } },
+      };
+      sinon.stub(element, 'notify');
+      sinon.stub(element, 'fire');
+    });
+
+    teardown(() => {
+      element.notify.restore();
+      element.fire.restore();
+      if (element.$.doc.put.restore) {
+        element.$.doc.put.restore();
+      }
+    });
+
+    test('sends the change token of the loaded document', async () => {
+      sinon.stub(element.$.doc, 'put').resolves({ uid: 'doc-1' });
+      await element._replaceBlob();
+      expect(element.$.doc.data.changeToken).to.eql('5-2');
+    });
+
+    test('reports a conflict and reloads when the write is stale', async () => {
+      sinon.stub(element.$.doc, 'put').rejects({ status: 409 });
+      await element._replaceBlob();
+      expect(element.notify).to.have.been.calledOnce;
+      expect(element.notify.firstCall.args[0].message).to.eql(element.i18n('documentUpdate.conflict'));
+      expect(element.fire).to.have.been.calledWith('document-updated');
+    });
+
+    test('still rejects other failures', async () => {
+      sinon.stub(element.$.doc, 'put').rejects({ status: 500 });
+      let caught;
+      await element._replaceBlob().catch((err) => {
+        caught = err;
+      });
+      expect(caught).to.eql({ status: 500 });
+      expect(element.notify).to.not.have.been.called;
+    });
+  });
 });

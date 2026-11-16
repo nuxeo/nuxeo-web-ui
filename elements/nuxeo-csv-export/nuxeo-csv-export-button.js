@@ -140,12 +140,14 @@ Polymer({
       this._onProviderPageChanged = () => this._resolveSchemas();
     }
     // addEventListener with the same listener reference is idempotent, so re-binding is safe.
-    provider?.addEventListener?.('current-page-changed', this._onProviderPageChanged);
+    if (provider && provider.addEventListener) {
+      provider.addEventListener('current-page-changed', this._onProviderPageChanged);
+    }
   },
 
   _unbindProviderPageChanged(provider) {
-    if (this._onProviderPageChanged) {
-      provider?.removeEventListener?.('current-page-changed', this._onProviderPageChanged);
+    if (this._onProviderPageChanged && provider && provider.removeEventListener) {
+      provider.removeEventListener('current-page-changed', this._onProviderPageChanged);
     }
   },
 
@@ -165,11 +167,13 @@ Polymer({
       return;
     }
     const schemas = new Set(this._toList(provider.schemas));
-    const types = [...new Set((provider.currentPage || []).map((doc) => doc?.type).filter(Boolean))];
-    if (types.length > 0 && this.$?.types) {
+    const types = [
+      ...new Set((provider.currentPage || []).map((doc) => (doc != null ? doc.type : undefined)).filter(Boolean)),
+    ];
+    if (types.length > 0 && this.$ && this.$.types) {
       try {
         const config = await this._fetchTypes();
-        const doctypes = config?.doctypes || {};
+        const doctypes = (config && config.doctypes) || {};
         types.forEach((type) => {
           const info = doctypes[type];
           if (info && Array.isArray(info.schemas)) {
@@ -202,7 +206,10 @@ Polymer({
 
   _params() {
     const actionParams = {};
-    const schemas = this.schemas != null ? this.schemas : this._resolvedSchemas || this.provider?.schemas;
+    let schemas = this.schemas;
+    if (schemas == null) {
+      schemas = this._resolvedSchemas || (this.provider != null ? this.provider.schemas : undefined);
+    }
     if (schemas) {
       actionParams.schemas = this._toList(schemas);
     }
