@@ -258,8 +258,7 @@ Polymer({
          displayed document - keeps looking selected and two rows appear highlighted at once
          (WEBUI-2301). A row also keeps DOM focus after a mouse click. Keyboard focus stays
          visible through the focus-visible ring below. */
-      .list-item.selected,
-      .list-item.selected:focus {
+      .list-item.selected {
         @apply --hyland-drawer-item-selected;
       }
 
