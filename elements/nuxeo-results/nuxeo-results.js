@@ -52,8 +52,12 @@ const __docPrefsCache = new Map();
 
 // preference writes still pending per cache key, so the writes to one key reach the server in the order they were made
 const __prefsWrites = new Map();
-// resets made per cache key, so a save that was on its way when one happened does not restore what it cleared
-const __prefsResets = new Map();
+// writes started per cache key, saves and resets alike: a save only applies its prefs to the view while no newer write
+// started for its key, so an older save never replaces what a newer save or a reset left. Overtaken only by newer
+// saves, it still updates the cache, which follows the server until they land
+const __prefsWriteCounts = new Map();
+// number of the last reset write per cache key, so a save overtaken only by newer saves still keeps the cache in step
+const __prefsLastResets = new Map();
 
 /**
 An element to display results from a page provider.
@@ -1062,7 +1066,7 @@ Polymer({
           // Save to backend (primary)
           this.saveDocPrefs(this.document.path, docKey, this.view.settings)
             .then((saved) => {
-              // A reset made while saving already cleared the local copy too (WEBUI-2178)
+              // A newer save or a reset superseded this save and takes care of the local copy (WEBUI-2178)
               if (saved === false) {
                 return;
               }
@@ -1091,7 +1095,7 @@ Polymer({
           // Save to backend (primary)
           this.saveGlobalResultsPrefs(this.view.settings)
             .then((saved) => {
-              // A reset made while saving already cleared the local copy too (WEBUI-2178)
+              // A newer save or a reset superseded this save and takes care of the local copy (WEBUI-2178)
               if (saved === false) {
                 return;
               }
@@ -1199,10 +1203,21 @@ Polymer({
     return next;
   },
 
-  // Number of resets of the preferences stored under a cache key: a save that saw a lower count when it started is
-  // older than the last reset.
-  _prefsResetCount(cacheKey) {
-    return __prefsResets.get(cacheKey) || 0;
+  // Counts a new write, save or reset, of the preferences stored under a cache key and returns its number.
+  _startPrefsWrite(cacheKey) {
+    const count = (__prefsWriteCounts.get(cacheKey) || 0) + 1;
+    __prefsWriteCounts.set(cacheKey, count);
+    return count;
+  },
+
+  // Whether no newer write, save or reset, started for the cache key since the one with the given number.
+  _isLatestPrefsWrite(cacheKey, count) {
+    return __prefsWriteCounts.get(cacheKey) === count;
+  },
+
+  // Whether a reset started for the cache key after the write with the given number.
+  _isResetSincePrefsWrite(cacheKey, count) {
+    return (__prefsLastResets.get(cacheKey) || 0) > count;
   },
 
   // Replaces the in-session copy of the document preferences with the empty entry the backend is about to hold, so
@@ -1214,7 +1229,7 @@ Polymer({
     if (userId) {
       cacheKey = this._docCacheKey(userId, docPath, key);
       __docPrefsCache.set(cacheKey, {});
-      __prefsResets.set(cacheKey, this._prefsResetCount(cacheKey) + 1);
+      __prefsLastResets.set(cacheKey, this._startPrefsWrite(cacheKey));
     }
     this.__hasBackendDocPrefs = true;
     this.docPrefs = {};
@@ -1231,7 +1246,7 @@ Polymer({
       cacheKey = this._cacheKey(userId, providerName);
       __globalPrefsCache.set(cacheKey, {});
       __storedGlobalPrefs.add(cacheKey);
-      __prefsResets.set(cacheKey, this._prefsResetCount(cacheKey) + 1);
+      __prefsLastResets.set(cacheKey, this._startPrefsWrite(cacheKey));
     }
     // the table has just reset itself: the observer this runs (synchronously) must not reset it once more
     this.__clearingGlobalPrefs = true;
@@ -1670,7 +1685,7 @@ Polymer({
   },
 
   // Persists global results prefs for the current provider (PUT) and updates in-session cache/state immediately.
-  // Resolves to false when a reset made while saving superseded this save, true otherwise.
+  // Resolves to false when a newer save or a reset started while saving superseded this save, true otherwise.
   async saveGlobalResultsPrefs(prefsObj) {
     const providerName = this._getProviderName(this.nxProvider);
     if (!providerName) {
@@ -1684,12 +1699,17 @@ Polymer({
 
     const cloned = this._deepClone(prefsObj);
     const cacheKey = this._cacheKey(userId, providerName);
-    const resets = this._prefsResetCount(cacheKey);
+    const write = this._startPrefsWrite(cacheKey);
 
     await this._queuePrefsWrite(cacheKey, () => this._putGlobalPreference(providerName, cloned));
 
-    // A reset made while this save was on its way is newer: keep what it cleared (WEBUI-2178)
-    if (this._prefsResetCount(cacheKey) !== resets) {
+    // A newer save or a reset started while this save was on its way: keep what that one leaves (WEBUI-2178). When
+    // only newer saves did, the server holds this one until they land, so the cache follows it in case they fail.
+    if (!this._isLatestPrefsWrite(cacheKey, write)) {
+      if (!this._isResetSincePrefsWrite(cacheKey, write)) {
+        __globalPrefsCache.set(cacheKey, cloned);
+        __storedGlobalPrefs.add(cacheKey);
+      }
       return false;
     }
     __globalPrefsCache.set(cacheKey, cloned);
@@ -1822,7 +1842,7 @@ Polymer({
   },
 
   // Persists doc-level results prefs (PUT) and updates in-session cache/state so the UI reflects it immediately.
-  // Resolves to false when a reset made while saving superseded this save, true otherwise.
+  // Resolves to false when a newer save or a reset started while saving superseded this save, true otherwise.
   async saveDocPrefs(docPath, key, value) {
     if (!docPath) {
       throw new Error('Cannot save doc prefs: missing docPath');
@@ -1837,12 +1857,16 @@ Polymer({
 
     const cloned = this._deepClone(value);
     const cacheKey = this._docCacheKey(userId, docPath, key);
-    const resets = this._prefsResetCount(cacheKey);
+    const write = this._startPrefsWrite(cacheKey);
 
     await this._queuePrefsWrite(cacheKey, () => this._putDocPreference(docPath, key, cloned));
 
-    // A reset made while this save was on its way is newer: keep what it cleared (WEBUI-2178)
-    if (this._prefsResetCount(cacheKey) !== resets) {
+    // A newer save or a reset started while this save was on its way: keep what that one leaves (WEBUI-2178). When
+    // only newer saves did, the server holds this one until they land, so the cache follows it in case they fail.
+    if (!this._isLatestPrefsWrite(cacheKey, write)) {
+      if (!this._isResetSincePrefsWrite(cacheKey, write)) {
+        __docPrefsCache.set(cacheKey, cloned);
+      }
       return false;
     }
 

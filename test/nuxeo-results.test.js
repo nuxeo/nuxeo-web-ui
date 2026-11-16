@@ -969,7 +969,7 @@ suite('nuxeo-results', () => {
         results.nxProvider = null;
       });
 
-      test('_clearViewSettings replaces the cached doc prefs, so the document reloads at the defaults', () => {
+      test('_clearViewSettings replaces the cached doc prefs, so the document reloads at the defaults', async () => {
         const old = { columns: { 'dc:title': { width: '620px' } } };
         results._isRestoring = false;
         results.displayMode = 'table';
@@ -992,6 +992,9 @@ suite('nuxeo-results', () => {
         results._loadDocPrefs(true, doc, 'reset-doc-user');
         expect(results.docPrefs).to.deep.equal({});
         expect(results.__hasBackendDocPrefs).to.be.true;
+        // with a signed-in user the clear is queued: let it reach the stub before restoring it
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        expect(putStub.callCount).to.equal(1);
         putStub.restore();
         results.document = null;
         results._connectedUserId = null;
@@ -1017,6 +1020,111 @@ suite('nuxeo-results', () => {
         expect(results.globalPrefs).to.deep.equal({});
         await results._loadGlobalPrefs(true, provider, 'reset-global-user');
         expect(results.globalPrefs).to.deep.equal({});
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        expect(putStub.callCount).to.equal(1);
+        putStub.restore();
+        allPrefsStub.restore();
+        results.nxProvider = null;
+        results._connectedUserId = null;
+      });
+
+      test('when the newer of two document saves fails, the cache keeps the older one the server holds', async () => {
+        const older = { columns: { 'dc:title': { width: '620px' } } };
+        const newer = { columns: { 'dc:title': { width: '200px' } } };
+        const path = '/default-domain/failed-save';
+        results.name = 'default';
+        results._connectedUserId = 'failed-newer-save-user';
+        results.document = { path };
+        let calls = 0;
+        const putStub = sinon.stub(results, '_putDocPreference').callsFake(() => {
+          calls += 1;
+          return calls === 1 ? Promise.resolve() : Promise.reject(new Error('boom'));
+        });
+
+        const savingOlder = results.saveDocPrefs(path, 'documentPrefs.default', older);
+        const savingNewer = results.saveDocPrefs(path, 'documentPrefs.default', newer);
+        const olderSaved = await savingOlder;
+        const newerError = await savingNewer.catch((error) => error);
+
+        expect(olderSaved).to.be.false;
+        expect(newerError.message).to.equal('boom');
+        results._loadDocPrefs(true, results.document, 'failed-newer-save-user');
+        expect(results.docPrefs).to.deep.equal(older);
+        putStub.restore();
+        results.document = null;
+        results._connectedUserId = null;
+      });
+
+      test('an older document save that ends after a newer one started keeps the newer prefs', async () => {
+        const older = { columns: { 'dc:title': { width: '620px' } } };
+        const newer = { columns: { 'dc:title': { width: '200px' } } };
+        const path = '/default-domain/two-saves';
+        results.name = 'default';
+        results._connectedUserId = 'two-doc-saves-user';
+        results.document = { path };
+        const finishes = [];
+        const putStub = sinon.stub(results, '_putDocPreference').callsFake(
+          () =>
+            new Promise((resolve) => {
+              finishes.push(resolve);
+            }),
+        );
+
+        const savingOlder = results.saveDocPrefs(path, 'documentPrefs.default', older);
+        const savingNewer = results.saveDocPrefs(path, 'documentPrefs.default', newer);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        finishes[0]();
+        const olderSaved = await savingOlder;
+        const docPrefsAfterOlder = JSON.stringify(results.docPrefs);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        finishes[1]();
+        const newerSaved = await savingNewer;
+
+        expect(olderSaved).to.be.false;
+        expect(docPrefsAfterOlder).to.not.equal(JSON.stringify(older));
+        expect(newerSaved).to.be.true;
+        expect(results.docPrefs).to.deep.equal(newer);
+        // both reached the server, in order
+        expect(putStub.callCount).to.equal(2);
+        expect(putStub.secondCall.args[2]).to.deep.equal(newer);
+        putStub.restore();
+        results.document = null;
+        results._connectedUserId = null;
+      });
+
+      test('an older search save that ends after a newer one started keeps the newer prefs', async () => {
+        const older = { columns: { 'dc:title': { width: '620px' } } };
+        const newer = { columns: { 'dc:title': { width: '200px' } } };
+        results.document = null;
+        results._connectedUserId = 'two-search-saves-user';
+        const allPrefsStub = sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        const provider = createMockProvider();
+        provider.provider = 'two_saves_search';
+        results.nxProvider = provider;
+        await Promise.resolve();
+        const finishes = [];
+        const putStub = sinon.stub(results, '_putGlobalPreference').callsFake(
+          () =>
+            new Promise((resolve) => {
+              finishes.push(resolve);
+            }),
+        );
+
+        const savingOlder = results.saveGlobalResultsPrefs(older);
+        const savingNewer = results.saveGlobalResultsPrefs(newer);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        finishes[0]();
+        const olderSaved = await savingOlder;
+        const globalPrefsAfterOlder = results.globalPrefs;
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        finishes[1]();
+        const newerSaved = await savingNewer;
+
+        expect(olderSaved).to.be.false;
+        expect(JSON.stringify(globalPrefsAfterOlder)).to.not.equal(JSON.stringify(older));
+        expect(newerSaved).to.be.true;
+        expect(results.globalPrefs).to.deep.equal(newer);
+        expect(putStub.callCount).to.equal(2);
         putStub.restore();
         allPrefsStub.restore();
         results.nxProvider = null;
