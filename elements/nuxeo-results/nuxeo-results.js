@@ -188,6 +188,8 @@ Polymer({
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
     <nuxeo-resource id="preferences"></nuxeo-resource>
+    <!-- resets use their own resource, so they never abort a preferences load or save, nor get aborted by one -->
+    <nuxeo-resource id="resetPreferences" uncancelable></nuxeo-resource>
 
     <div class="main">
       <nuxeo-selection-toolbar
@@ -1120,7 +1122,8 @@ Polymer({
     // The backend is cleared right away rather than through the save debouncer, which is shared across documents: a
     // change made elsewhere within the delay would otherwise cancel the clear. A save still pending from an earlier
     // change is cancelled so it cannot land after the clear. The put helpers are called directly because the save
-    // helpers re-apply the result to whichever view is shown when the request ends, which may no longer be this one.
+    // helpers re-apply the result to whichever view is shown when the request ends, which may no longer be this one,
+    // and with a resource of their own, so the clear and a preferences load or save never abort each other.
 
     // ---- doc level (content views) ----
     if (this.document && this.document.path) {
@@ -1128,7 +1131,7 @@ Polymer({
       const docKey = this._getDocResultsPrefsKey();
       this._cancelPendingSave('_docPrefsSaveDebouncer');
       this._clearCachedDocPrefs(docPath, docKey);
-      this._putDocPreference(docPath, docKey, {}).catch((error) => {
+      this._putDocPreference(docPath, docKey, {}, this.$.resetPreferences).catch((error) => {
         // eslint-disable-next-line no-console
         console.warn('Failed to clear document results preferences in the backend', {
           path: docPath,
@@ -1144,7 +1147,7 @@ Polymer({
       const providerName = this._getProviderName(this.nxProvider);
       this._cancelPendingSave('_prefsSaveDebouncer');
       this._clearCachedGlobalPrefs(providerName);
-      this._putGlobalPreference(providerName, {}).catch((error) => {
+      this._putGlobalPreference(providerName, {}, this.$.resetPreferences).catch((error) => {
         // eslint-disable-next-line no-console
         console.warn('Failed to clear global results preferences in the backend', error);
       });
@@ -1516,22 +1519,22 @@ Polymer({
     }
   },
 
-  // Configures the nuxeo-resource instance to PUT a single global preference key at /me/preferences/<key>.
-  _configureGlobalPreferencesResource(prefKey) {
-    this.$.preferences.path = `/me/preferences/${encodeURIComponent(prefKey)}`;
-    this.$.preferences.params = null;
-    this.$.preferences.enrichers = {};
-    this.$.preferences.headers = this._prefAcceptHeaders();
-    this.$.preferences.data = null;
+  // Configures a nuxeo-resource instance to PUT a single global preference key at /me/preferences/<key>.
+  _configureGlobalPreferencesResource(prefKey, resource = this.$.preferences) {
+    resource.path = `/me/preferences/${encodeURIComponent(prefKey)}`;
+    resource.params = null;
+    resource.enrichers = {};
+    resource.headers = this._prefAcceptHeaders();
+    resource.data = null;
   },
 
   // Saves (PUT) a single global preference object under /me/preferences/<key> using a text/plain JSON payload.
-  async _putGlobalPreference(prefKey, obj) {
+  async _putGlobalPreference(prefKey, obj, resource = this.$.preferences) {
     const payload = JSON.stringify(obj || {});
-    this._configureGlobalPreferencesResource(prefKey);
-    this.$.preferences.contentType = 'text/plain';
-    this.$.preferences.data = payload;
-    await this.$.preferences.put();
+    this._configureGlobalPreferencesResource(prefKey, resource);
+    resource.contentType = 'text/plain';
+    resource.data = payload;
+    await resource.put();
   },
 
   // Loads global preferences for the current provider from the /me/preferences map and caches them per user+provider.
@@ -1638,9 +1641,10 @@ Polymer({
     if (prefs && Object.keys(prefs).length > 0) {
       settingsToApply = prefs;
     }
-    // An empty entry in the backend is a reset: it wins over a local copy another browser saved before (WEBUI-2178)
+    // An empty entry in the backend is a reset, possibly made in another browser: it wins over the local copy
     else if (this._hasStoredGlobalPrefs()) {
-      settingsToApply = {};
+      this._applyStoredReset(view);
+      return;
     }
     // 2. Fallback: localStorage (synced copy)
     else if (this._settings && this._settings[displayMode]) {
@@ -1659,6 +1663,30 @@ Polymer({
     this._applyPrefsToView(view, filteredSettings);
   },
 
+  // Applies the empty entry a reset leaves in the backend, possibly from another browser (WEBUI-2178). The table resets
+  // itself, which also restores the sort of its page provider and drops the column filters, beyond what empty settings
+  // reach. The local copy of this browser is dropped too, so it is not restored again on the next load.
+  _applyStoredReset(view) {
+    if (this._filterSettingsByCapabilities(view, {}) === undefined) {
+      return;
+    }
+    if (this._settings && this._settings.table && Object.keys(this._settings.table).length > 0) {
+      this.set('_settings.table', {});
+      this.saveSettings();
+    }
+    if (typeof view.resetSettings !== 'function') {
+      this._applyPrefsToView(view, {});
+      return;
+    }
+    // restoring: the reset the table announces is not one to clear the stored settings for
+    this._isRestoring = true;
+    try {
+      view.resetSettings();
+    } finally {
+      this._isRestoring = false;
+    }
+  },
+
   // Whether the backend holds a global prefs entry for the current user and provider, even an empty one.
   _hasStoredGlobalPrefs() {
     const userId = this._getUserId();
@@ -1674,30 +1702,30 @@ Polymer({
   // The path is left unencoded on purpose: the Nuxeo JS client percent-encodes the whole request path
   // when it builds the URL, so encoding it here would double-encode names holding a space or any other
   // reserved character (`My Content` -> `My%2520Content`), which the server resolves to a missing document.
-  _configureDocPreferencesResource(docPath) {
+  _configureDocPreferencesResource(docPath, resource = this.$.preferences) {
     const normalized = docPath.startsWith('/') ? docPath.substring(1) : docPath;
-    this.$.preferences.path = `/path/${normalized}/@preferences`;
-    this.$.preferences.params = null;
-    this.$.preferences.enrichers = {};
-    this.$.preferences.headers = { accept: 'application/json' };
-    this.$.preferences.data = null;
+    resource.path = `/path/${normalized}/@preferences`;
+    resource.params = null;
+    resource.enrichers = {};
+    resource.headers = { accept: 'application/json' };
+    resource.data = null;
   },
 
   // Saves (PUT) one doc preference key by sending a userPreferences payload to /path/<docPath>/@preferences.
-  async _putDocPreference(docPath, key, obj) {
-    this._configureDocPreferencesResource(docPath);
-    this.$.preferences.contentType = 'application/json';
+  async _putDocPreference(docPath, key, obj, resource = this.$.preferences) {
+    this._configureDocPreferencesResource(docPath, resource);
+    resource.contentType = 'application/json';
 
     const prefs = {};
     // store as JSON string so it matches enricher map format (string -> parse)
     prefs[key] = JSON.stringify(obj || {});
 
-    this.$.preferences.data = {
+    resource.data = {
       'entity-type': 'userPreferences',
       preferences: prefs,
     };
 
-    await this.$.preferences.put();
+    await resource.put();
   },
 
   // Persists doc-level results prefs (PUT) and updates in-session cache/state so the UI reflects it immediately.
@@ -1823,9 +1851,13 @@ Polymer({
     if (prefs && Object.keys(prefs).length > 0) {
       settingsToApply = prefs;
       this.__hasBackendDocPrefs = true;
+    } else if (this.__hasBackendDocPrefs) {
+      // An empty entry in the backend is a reset, possibly made in another browser: it wins over the local copy
+      this._applyStoredReset(view);
+      return;
     } else if (this._settings && this._settings[this.displayMode]) {
       // Only use localStorage if we never had backend prefs
-      settingsToApply = this.__hasBackendDocPrefs ? {} : this._settings[this.displayMode];
+      settingsToApply = this._settings[this.displayMode];
     } else {
       settingsToApply = {};
     }
