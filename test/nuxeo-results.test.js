@@ -592,6 +592,432 @@ suite('nuxeo-results', () => {
     });
   });
 
+  suite('Reset table to defaults (ELEMENTS-2017, WEBUI-2178)', () => {
+    const resettableView = (props = {}) =>
+      createMockView({ settingsEnabled: true, resetSettings: sinon.stub(), ...props });
+
+    const resetButton = () => results.shadowRoot.querySelector('paper-icon-button.resetTable');
+
+    suite('reset button', () => {
+      test('_canResetView accepts only a settings-enabled view that can reset itself', () => {
+        expect(results._canResetView(undefined)).to.be.false;
+        expect(results._canResetView(resettableView())).to.be.true;
+        expect(results._canResetView(resettableView({ settingsEnabled: false }))).to.be.false;
+        expect(results._canResetView(createMockView({ settingsEnabled: true }))).to.be.false;
+      });
+
+      test('is not rendered until a resettable view is selected', async () => {
+        expect(resetButton()).to.be.null;
+
+        results.view = createMockView();
+        await flush();
+        expect(resetButton()).to.be.null;
+
+        results.view = resettableView();
+        await flush();
+        expect(resetButton()).to.exist;
+      });
+
+      test('has an accessible name that matches its tooltip and is not a display mode button', async () => {
+        results.view = resettableView();
+        await flush();
+
+        const button = resetButton();
+        expect(button.getAttribute('aria-label')).to.be.a('string').and.not.be.empty;
+        expect(button.getAttribute('aria-label')).to.equal(button.getAttribute('title'));
+        expect(button.classList.contains('displayMode')).to.be.false;
+      });
+
+      test('resets the current view when clicked', async () => {
+        const view = resettableView();
+        results.view = view;
+        await flush();
+
+        resetButton().click();
+
+        expect(view.resetSettings).to.have.been.calledOnce;
+      });
+
+      test('_resetView does nothing when the view cannot reset itself', () => {
+        results.view = createMockView({ settingsEnabled: true });
+        expect(() => results._resetView()).to.not.throw();
+      });
+    });
+
+    suite('clearing the stored settings', () => {
+      test('_saveViewSettings clears stored prefs instead of saving them on a reset', () => {
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results.view = createMockView({ settings: { order: ['dc:title'] } });
+        const clearStub = sinon.stub(results, '_clearViewSettings');
+        const saveSpy = sinon.spy(results, 'saveSettings');
+
+        results._saveViewSettings({ detail: { source: 'reset' } });
+
+        expect(clearStub).to.have.been.calledOnce;
+        expect(saveSpy).to.not.have.been.called;
+        clearStub.restore();
+        saveSpy.restore();
+      });
+
+      test('_saveViewSettings still saves for other settings-changed sources', () => {
+        results._isRestoring = false;
+        results.displayMode = 'grid';
+        results._settings = {};
+        results.view = createMockView({ settings: { density: 'compact' } });
+        const clearStub = sinon.stub(results, '_clearViewSettings');
+        const saveSpy = sinon.spy(results, 'saveSettings');
+
+        results._saveViewSettings({ detail: { source: 'column-resize' } });
+
+        expect(clearStub).to.not.have.been.called;
+        expect(saveSpy).to.have.been.called;
+        clearStub.restore();
+        saveSpy.restore();
+      });
+
+      test('_clearViewSettings empties the local storage entry for the display mode', () => {
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = { displayMode: 'table', table: { columns: { 'dc:title': { width: '400px' } } } };
+        results.document = null;
+        const saveSpy = sinon.spy(results, 'saveSettings');
+
+        results._clearViewSettings();
+
+        expect(results._settings.table).to.deep.equal({});
+        expect(results._settings.displayMode).to.equal('table');
+        expect(saveSpy).to.have.been.called;
+        saveSpy.restore();
+      });
+
+      test('_clearViewSettings writes empty doc prefs right away in document context', () => {
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        results.name = 'default';
+        results.document = { path: '/default-domain' };
+        const debounceSpy = sinon.spy(results, '_debounceSave');
+        const putStub = sinon.stub(results, '_putDocPreference').resolves();
+
+        results._clearViewSettings();
+
+        expect(putStub).to.have.been.calledOnceWith('/default-domain', 'documentPrefs.default', {});
+        expect(debounceSpy).to.not.have.been.called;
+        debounceSpy.restore();
+        putStub.restore();
+        results.document = null;
+      });
+
+      test('_clearViewSettings does not re-apply prefs to the view shown when the backend write ends', async () => {
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        results.name = 'default';
+        results._connectedUserId = 'reset-nav-user';
+        results.document = { path: '/default-domain/a' };
+        let finishWrite;
+        const putStub = sinon.stub(results, '_putDocPreference').returns(
+          new Promise((resolve) => {
+            finishWrite = resolve;
+          }),
+        );
+
+        results._clearViewSettings();
+        // the user opens another document before the request ends
+        const otherDocPrefs = { columns: { 'dc:title': { width: '480px' } } };
+        results.document = { path: '/default-domain/b' };
+        results.docPrefs = otherDocPrefs;
+        finishWrite();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(results.docPrefs).to.equal(otherDocPrefs);
+        putStub.restore();
+        results.document = null;
+        results._connectedUserId = null;
+      });
+
+      test('_saveViewSettings saves an event without detail, as sent by the settings dialog', () => {
+        results._isRestoring = false;
+        results.displayMode = 'grid';
+        results._settings = {};
+        results.view = createMockView({ settings: { density: 'compact' } });
+        const clearStub = sinon.stub(results, '_clearViewSettings');
+        const saveSpy = sinon.spy(results, 'saveSettings');
+
+        results._saveViewSettings({ detail: null });
+
+        expect(clearStub).to.not.have.been.called;
+        expect(saveSpy).to.have.been.called;
+        clearStub.restore();
+        saveSpy.restore();
+      });
+
+      test('_clearViewSettings cancels a save that is still pending', () => {
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        results.name = 'default';
+        results.document = { path: '/default-domain' };
+        results.view = createMockView({ settings: { columns: { 'dc:title': { width: '620px' } } } });
+        const putStub = sinon.stub(results, '_putDocPreference').resolves();
+
+        results._saveViewSettings({ detail: { source: 'column-resize' } });
+        expect(results._docPrefsSaveDebouncer.isActive()).to.be.true;
+        results._clearViewSettings();
+
+        expect(results._docPrefsSaveDebouncer.isActive()).to.be.false;
+        expect(putStub).to.have.been.calledOnceWith('/default-domain', 'documentPrefs.default', {});
+        putStub.restore();
+        results.document = null;
+      });
+
+      test('_clearViewSettings writes empty global prefs right away for search providers', () => {
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        results.document = null;
+        // _shouldUseGlobalPrefs is computed, so drive it through its inputs rather than assigning it.
+        const allPrefsStub = sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        const provider = createMockProvider();
+        provider.provider = 'default_search';
+        results.nxProvider = provider;
+        const debounceSpy = sinon.spy(results, '_debounceSave');
+        const putStub = sinon.stub(results, '_putGlobalPreference').resolves();
+
+        results._clearViewSettings();
+
+        expect(results._shouldUseGlobalPrefs).to.be.true;
+        expect(putStub).to.have.been.calledOnceWith('default_search', {});
+        expect(debounceSpy).to.not.have.been.called;
+        debounceSpy.restore();
+        putStub.restore();
+        allPrefsStub.restore();
+        results.nxProvider = null;
+      });
+
+      test('_clearViewSettings replaces the cached doc prefs, so the document reloads at the defaults', () => {
+        const old = { columns: { 'dc:title': { width: '620px' } } };
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        results.name = 'default';
+        results._connectedUserId = 'reset-doc-user';
+        // the enricher still holds the old prefs, so only the cache entry written by the reset can hide them
+        const doc = {
+          path: '/default-domain/reset-doc',
+          contextParameters: { userPreferences: { preferences: { 'documentPrefs.default': JSON.stringify(old) } } },
+        };
+        results.document = doc;
+        results.docPrefs = old;
+        const putStub = sinon.stub(results, '_putDocPreference').resolves();
+
+        results._clearViewSettings();
+
+        expect(results.docPrefs).to.deep.equal({});
+        expect(results.__hasBackendDocPrefs).to.be.true;
+        results._loadDocPrefs(true, doc, 'reset-doc-user');
+        expect(results.docPrefs).to.deep.equal({});
+        expect(results.__hasBackendDocPrefs).to.be.true;
+        putStub.restore();
+        results.document = null;
+        results._connectedUserId = null;
+      });
+
+      test('_clearViewSettings replaces the cached global prefs, so the provider reloads at the defaults', async () => {
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        results.document = null;
+        results._connectedUserId = 'reset-global-user';
+        const allPrefsStub = sinon
+          .stub(results, '_getAllGlobalPreferencesOnce')
+          .resolves({ reset_search: JSON.stringify({ columns: { 'dc:title': { width: '620px' } } }) });
+        const provider = createMockProvider();
+        provider.provider = 'reset_search';
+        results.nxProvider = provider;
+        results.globalPrefs = { columns: { 'dc:title': { width: '620px' } } };
+        const putStub = sinon.stub(results, '_putGlobalPreference').resolves();
+
+        results._clearViewSettings();
+
+        expect(results.globalPrefs).to.deep.equal({});
+        await results._loadGlobalPrefs(true, provider, 'reset-global-user');
+        expect(results.globalPrefs).to.deep.equal({});
+        putStub.restore();
+        allPrefsStub.restore();
+        results.nxProvider = null;
+        results._connectedUserId = null;
+      });
+
+      test('a document reset elsewhere wins over the local copy of this browser', () => {
+        results.name = 'default';
+        results.displayMode = 'table';
+        results._connectedUserId = 'other-browser-doc-user';
+        // another browser reset the table: the enricher holds an empty entry, this browser still has its own copy
+        results._settings = { table: { columns: { 'dc:title': { width: '620px' } } } };
+        const doc = {
+          path: '/default-domain/elsewhere',
+          contextParameters: { userPreferences: { preferences: { 'documentPrefs.default': '{}' } } },
+        };
+        const applyStub = sinon.stub(results, '_applyPrefsToView');
+        const view = { localName: 'div' };
+
+        results._loadDocPrefs(true, doc, 'other-browser-doc-user');
+        results._applyDocPrefsImpl(true, results.docPrefs, view);
+        // and again once served from the in-session cache
+        results._loadDocPrefs(true, doc, 'other-browser-doc-user');
+        results._applyDocPrefsImpl(true, results.docPrefs, view);
+
+        expect(applyStub).to.have.been.calledTwice;
+        expect(applyStub.firstCall).to.have.been.calledWith(view, {});
+        expect(applyStub.secondCall).to.have.been.calledWith(view, {});
+        applyStub.restore();
+        results._connectedUserId = null;
+      });
+
+      test('a search reset elsewhere wins over the local copy of this browser', async () => {
+        results.displayMode = 'table';
+        results.document = null;
+        results._connectedUserId = 'other-browser-search-user';
+        results._settings = { table: { columns: { 'dc:title': { width: '620px' } } } };
+        const allPrefsStub = sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({ elsewhere_search: '{}' });
+        const provider = createMockProvider();
+        provider.provider = 'elsewhere_search';
+        results.nxProvider = provider;
+        const applyStub = sinon.stub(results, '_applyPrefsToView');
+        const view = { localName: 'div' };
+
+        await results._loadGlobalPrefs(true, provider, 'other-browser-search-user');
+        results._applyGlobalPrefs(true, results.globalPrefs, view, 'table');
+
+        expect(applyStub).to.have.been.calledOnceWith(view, {});
+        applyStub.restore();
+        allPrefsStub.restore();
+        results.nxProvider = null;
+        results._connectedUserId = null;
+      });
+
+      test('a search page without a stored entry still falls back to the local copy', async () => {
+        results.displayMode = 'table';
+        results.document = null;
+        results._connectedUserId = 'never-stored-user';
+        const local = { columns: { 'dc:title': { width: '620px' } } };
+        results._settings = { table: local };
+        const allPrefsStub = sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        const provider = createMockProvider();
+        provider.provider = 'never_stored_search';
+        results.nxProvider = provider;
+        const applyStub = sinon.stub(results, '_applyPrefsToView');
+        const view = { localName: 'div' };
+
+        await results._loadGlobalPrefs(true, provider, 'never-stored-user');
+        results._applyGlobalPrefs(true, results.globalPrefs, view, 'table');
+
+        expect(applyStub).to.have.been.calledOnceWith(view, local);
+        applyStub.restore();
+        allPrefsStub.restore();
+        results.nxProvider = null;
+        results._connectedUserId = null;
+      });
+
+      test('_loadGlobalPrefs keeps a reset that landed while the preferences were loading', async () => {
+        const stored = { columns: { 'dc:title': { width: '620px' } } };
+        let resolveLoad;
+        const allPrefsStub = sinon.stub(results, '_getAllGlobalPreferencesOnce').returns(
+          new Promise((resolve) => {
+            resolveLoad = resolve;
+          }),
+        );
+        results._connectedUserId = 'late-loader';
+        results.document = null;
+
+        const loading = results._loadGlobalPrefs(true, { provider: 'slow_search' }, 'late-loader');
+        results._clearCachedGlobalPrefs('slow_search');
+        resolveLoad({ slow_search: JSON.stringify(stored) });
+        await loading;
+
+        expect(results.globalPrefs).to.deep.equal({});
+        allPrefsStub.restore();
+        results._connectedUserId = null;
+      });
+
+      test('_clearViewSettings logs and swallows a doc prefs backend failure', async () => {
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        results.name = 'default';
+        results.document = { path: '/default-domain' };
+        const putStub = sinon.stub(results, '_putDocPreference').rejects(new Error('boom'));
+        const warnStub = sinon.stub(console, 'warn');
+
+        results._clearViewSettings();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(warnStub).to.have.been.calledWith(
+          'Failed to clear document results preferences in the backend',
+          sinon.match.object,
+        );
+        putStub.restore();
+        warnStub.restore();
+        results.document = null;
+      });
+
+      test('_clearViewSettings logs and swallows a global prefs backend failure', async () => {
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        results.document = null;
+        const allPrefsStub = sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        const provider = createMockProvider();
+        provider.provider = 'default_search';
+        results.nxProvider = provider;
+        const putStub = sinon.stub(results, '_putGlobalPreference').rejects(new Error('boom'));
+        const warnStub = sinon.stub(console, 'warn');
+
+        results._clearViewSettings();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(warnStub).to.have.been.calledWith(
+          'Failed to clear global results preferences in the backend',
+          sinon.match.instanceOf(Error),
+        );
+        putStub.restore();
+        warnStub.restore();
+        allPrefsStub.restore();
+        results.nxProvider = null;
+      });
+
+      test('_clearViewSettings leaves the backend alone outside the table display mode', () => {
+        results._isRestoring = false;
+        results.displayMode = 'grid';
+        results._settings = { grid: { density: 'compact' } };
+        results.document = { path: '/default-domain' };
+        const putStub = sinon.stub(results, '_putDocPreference').resolves();
+
+        results._clearViewSettings();
+
+        expect(results._settings.grid).to.deep.equal({});
+        expect(putStub).to.not.have.been.called;
+        putStub.restore();
+        results.document = null;
+      });
+
+      test('_clearViewSettings does nothing while restoring', () => {
+        results._isRestoring = true;
+        results.displayMode = 'table';
+        results._settings = { table: { columns: {} } };
+        const saveSpy = sinon.spy(results, 'saveSettings');
+
+        results._clearViewSettings();
+
+        expect(saveSpy).to.not.have.been.called;
+        saveSpy.restore();
+        results._isRestoring = false;
+      });
+    });
+  });
+
   suite('Column Management', () => {
     test('updates columns when columns-changed event is fired', () => {
       const newColumns = [
