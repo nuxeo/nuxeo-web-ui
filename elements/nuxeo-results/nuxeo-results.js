@@ -42,6 +42,8 @@ const hasSelectAllEnabled = config.get('selection.selectAllEnabled', false);
 
 // global (search provider) prefs cache
 const __globalPrefsCache = new Map();
+// cache keys of the global prefs the backend holds an entry for, including the empty entry a reset leaves behind
+const __storedGlobalPrefs = new Set();
 // session-only GET /me/preferences promise
 let __allGlobalPrefsPromise = null;
 
@@ -101,11 +103,13 @@ Polymer({
         height: calc(var(--nuxeo-results-view-height, calc(100vh - 130px - var(--nuxeo-app-top))) - 66px);
       }
 
-      .displayMode {
+      .displayMode,
+      .resetTable {
         @apply --nuxeo-action;
       }
 
-      .displayMode:hover {
+      .displayMode:hover,
+      .resetTable:hover {
         @apply --nuxeo-action-hover;
       }
 
@@ -218,6 +222,16 @@ Polymer({
             <slot name="actions">
               <nuxeo-slot name="RESULTS_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
             </slot>
+
+            <template is="dom-if" if="[[_canResetView(view, view.settingsEnabled)]]">
+              <paper-icon-button
+                class="resetTable"
+                icon="icons:settings-backup-restore"
+                title$="[[i18n('results.resetTable')]]"
+                aria-label$="[[i18n('results.resetTable')]]"
+                on-click="_resetView"
+              ></paper-icon-button>
+            </template>
 
             <div class="viewModes">
               <template is="dom-repeat" items="[[_displayModes]]">
@@ -828,6 +842,19 @@ Polymer({
     this.displayMode = e.model.item.name;
   },
 
+  // Only a table that lets the user customise its columns (`settings-enabled`) offers the reset button.
+  _canResetView(view) {
+    return !!(view && view.settingsEnabled && typeof view.resetSettings === 'function');
+  },
+
+  // Puts the table back to its layout defaults. The table then fires `settings-changed` with `source: 'reset'`,
+  // which _saveViewSettings turns into clearing the stored settings (ELEMENTS-2017, WEBUI-2178).
+  _resetView() {
+    if (this._canResetView(this.view)) {
+      this.view.resetSettings();
+    }
+  },
+
   _refreshAndFetch() {
     if (this.view) {
       this.view.reset();
@@ -1008,7 +1035,13 @@ Polymer({
     this.view.notifyResize();
   },
 
-  _saveViewSettings() {
+  _saveViewSettings(e) {
+    // A reset drops the stored settings instead of saving the defaults, so the table follows its layout again,
+    // including any later change to that layout (WEBUI-2178).
+    if (e && e.detail && e.detail.source === 'reset') {
+      this._clearViewSettings();
+      return;
+    }
     if (this.view.settings && !this._isRestoring) {
       this.set('_settings.displayMode', this.displayMode);
       this.saveSettings();
@@ -1067,6 +1100,83 @@ Polymer({
       this.set(`_settings.${this.displayMode}`, this.view.settings);
       this.saveSettings();
     }
+  },
+
+  // Drops the stored settings of the current view: the local storage copy and, for a table, the document or global
+  // preferences. Mirrors the branches of _saveViewSettings (WEBUI-2178).
+  _clearViewSettings() {
+    if (this._isRestoring) {
+      return;
+    }
+
+    // Written before the in-session prefs are emptied below: the prefs observers fall back to this copy.
+    this.set(`_settings.${this.displayMode}`, {});
+    this.saveSettings();
+
+    if (this.displayMode !== 'table') {
+      return;
+    }
+
+    // The backend is cleared right away rather than through the save debouncer, which is shared across documents: a
+    // change made elsewhere within the delay would otherwise cancel the clear. A save still pending from an earlier
+    // change is cancelled so it cannot land after the clear. The put helpers are called directly because the save
+    // helpers re-apply the result to whichever view is shown when the request ends, which may no longer be this one.
+
+    // ---- doc level (content views) ----
+    if (this.document && this.document.path) {
+      const docPath = this.document.path;
+      const docKey = this._getDocResultsPrefsKey();
+      this._cancelPendingSave('_docPrefsSaveDebouncer');
+      this._clearCachedDocPrefs(docPath, docKey);
+      this._putDocPreference(docPath, docKey, {}).catch((error) => {
+        // eslint-disable-next-line no-console
+        console.warn('Failed to clear document results preferences in the backend', {
+          path: docPath,
+          key: docKey,
+          error,
+        });
+      });
+      return;
+    }
+
+    // ---- global level (search providers) ----
+    if (this._shouldUseGlobalPrefs) {
+      const providerName = this._getProviderName(this.nxProvider);
+      this._cancelPendingSave('_prefsSaveDebouncer');
+      this._clearCachedGlobalPrefs(providerName);
+      this._putGlobalPreference(providerName, {}).catch((error) => {
+        // eslint-disable-next-line no-console
+        console.warn('Failed to clear global results preferences in the backend', error);
+      });
+    }
+  },
+
+  _cancelPendingSave(debouncerField) {
+    if (this[debouncerField]) {
+      this[debouncerField].cancel();
+    }
+  },
+
+  // Replaces the in-session copy of the document preferences with the empty entry the backend is about to hold, so
+  // the _applyDocPrefs observer never re-applies the old copy, e.g. when the display mode changes.
+  _clearCachedDocPrefs(docPath, key) {
+    const userId = this._getUserId();
+    if (userId) {
+      __docPrefsCache.set(this._docCacheKey(userId, docPath, key), {});
+    }
+    this.__hasBackendDocPrefs = true;
+    this.docPrefs = {};
+  },
+
+  // Same as _clearCachedDocPrefs, for the global preferences of a search provider.
+  _clearCachedGlobalPrefs(providerName) {
+    const userId = this._getUserId();
+    if (userId && providerName) {
+      const cacheKey = this._cacheKey(userId, providerName);
+      __globalPrefsCache.set(cacheKey, {});
+      __storedGlobalPrefs.add(cacheKey);
+    }
+    this.globalPrefs = {};
   },
 
   _providerChanged(provider, oldProvider) {
@@ -1459,6 +1569,12 @@ Polymer({
     try {
       const prefsMap = await this._getAllGlobalPreferencesOnce();
 
+      // A save or a reset that landed while the preferences were loading is newer than what was loaded (WEBUI-2178).
+      if (__globalPrefsCache.has(cacheKey)) {
+        this.globalPrefs = __globalPrefsCache.get(cacheKey);
+        return;
+      }
+
       if (!Object.hasOwn(prefsMap, providerName)) {
         const empty = {};
         __globalPrefsCache.set(cacheKey, empty);
@@ -1467,6 +1583,7 @@ Polymer({
       }
       const parsed = this._parsePrefMapValue(prefsMap[providerName]);
       __globalPrefsCache.set(cacheKey, parsed);
+      __storedGlobalPrefs.add(cacheKey);
       this.globalPrefs = parsed;
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -1496,6 +1613,7 @@ Polymer({
 
     const cacheKey = this._cacheKey(userId, providerName);
     __globalPrefsCache.set(cacheKey, cloned);
+    __storedGlobalPrefs.add(cacheKey);
     this.globalPrefs = cloned;
   },
 
@@ -1520,6 +1638,10 @@ Polymer({
     if (prefs && Object.keys(prefs).length > 0) {
       settingsToApply = prefs;
     }
+    // An empty entry in the backend is a reset: it wins over a local copy another browser saved before (WEBUI-2178)
+    else if (this._hasStoredGlobalPrefs()) {
+      settingsToApply = {};
+    }
     // 2. Fallback: localStorage (synced copy)
     else if (this._settings && this._settings[displayMode]) {
       settingsToApply = this._settings[displayMode];
@@ -1535,6 +1657,13 @@ Polymer({
     }
 
     this._applyPrefsToView(view, filteredSettings);
+  },
+
+  // Whether the backend holds a global prefs entry for the current user and provider, even an empty one.
+  _hasStoredGlobalPrefs() {
+    const userId = this._getUserId();
+    const providerName = this._getProviderName(this.nxProvider);
+    return !!(userId && providerName && __storedGlobalPrefs.has(this._cacheKey(userId, providerName)));
   },
 
   // ------------------------------
@@ -1661,8 +1790,9 @@ Polymer({
     if (__docPrefsCache.has(cacheKey)) {
       const cached = __docPrefsCache.get(cacheKey);
       this.docPrefs = cached;
-      // Mark that we have backend prefs if cache has data
-      this.__hasBackendDocPrefs = Object.keys(cached).length > 0;
+      // Every cached entry mirrors one stored in the backend (enricher, save or reset). An empty one is a reset and
+      // must win over the local storage copy like any other stored entry (WEBUI-2178).
+      this.__hasBackendDocPrefs = true;
       return;
     }
 
@@ -1735,6 +1865,7 @@ Polymer({
         });
         __allGlobalPrefsPromise = null;
         __globalPrefsCache.clear();
+        __storedGlobalPrefs.clear();
         __docPrefsCache.clear();
       }
     }
