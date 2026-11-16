@@ -25,6 +25,7 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
 import { config } from '@nuxeo/nuxeo-elements';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
+import { applyUserSort } from '@nuxeo/nuxeo-ui-elements/nuxeo-user-sort.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-quick-filters/nuxeo-quick-filters.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-actions-menu.js';
@@ -493,6 +494,7 @@ Polymer({
 
   observers: [
     '_selectAllChanged(view)',
+    '_rememberSortOrders(view, sortOptions)',
     '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns.*, document, view.*)',
 
     // doc prefs (auto)
@@ -663,15 +665,60 @@ Polymer({
     if (this.sortSelected && this.nxProvider) {
       const sort = {};
       sort[this.sortSelected.field] = this.sortSelected.order;
-      this.nxProvider.sort = sort;
+      // through applyUserSort, so resetting the table gives the provider its sort from before back (ELEMENTS-2017)
+      applyUserSort(this.nxProvider, sort);
       this.fetch();
     }
   },
 
   _sortSelectedChanged(newSort, oldSort) {
-    // do not trigger fetch results when sort options are being initialized
-    if (newSort && oldSort) {
+    // do not trigger fetch results when sort options are being initialized, nor when a reset puts them back
+    if (newSort && oldSort && !this.__resettingSortSelection) {
       this._sortChanged();
+    }
+  },
+
+  // Remembers the order each "Sort by" option declares, before the user reverses it, so a reset can restore it.
+  _rememberSortOrders() {
+    const options = this._sortOptions();
+    if (!Array.isArray(options)) {
+      return;
+    }
+    if (!this.__declaredSortOrders) {
+      this.__declaredSortOrders = new WeakMap();
+    }
+    options.forEach((option) => {
+      if (option && !this.__declaredSortOrders.has(option)) {
+        this.__declaredSortOrders.set(option, option.order);
+      }
+    });
+  },
+
+  // Puts the "Sort by" selector of the grid and list views back to its default option, with the order each option
+  // declares, as on a fresh load: resetting the table already gave the results their default order (ELEMENTS-2017).
+  // Nothing is fetched.
+  _resetSortSelection() {
+    const options = this._sortOptions();
+    if (!Array.isArray(options) || options.length === 0) {
+      return;
+    }
+    options.forEach((option) => {
+      if (option && this.__declaredSortOrders && this.__declaredSortOrders.has(option)) {
+        option.order = this.__declaredSortOrders.get(option);
+      }
+    });
+    const defaultOption = options.find((option) => option && option.selected) || null;
+    this.__resettingSortSelection = true;
+    try {
+      // A selector already rendered selects the option again even when it shows it, so its order arrow follows too.
+      const selector = this.shadowRoot.querySelector('nuxeo-sort-select');
+      if (selector) {
+        selector.selected = null;
+        selector.selected = defaultOption;
+      }
+      this.sortSelected = defaultOption;
+    } finally {
+      this.__resettingSortSelection = false;
     }
   },
 
@@ -1050,7 +1097,9 @@ Polymer({
     // A reset drops the stored settings instead of saving the defaults, so the table follows its layout again,
     // including any later change to that layout (WEBUI-2178).
     if (e && e.detail && e.detail.source === 'reset') {
+      this._rememberResetView(this.view);
       this._clearViewSettings();
+      this._resetSortSelection();
       return;
     }
     if (this.view.settings && !this._isRestoring) {
@@ -1782,6 +1831,13 @@ Polymer({
     if (this.__clearingGlobalPrefs || this._filterSettingsByCapabilities(view, {}) === undefined) {
       return;
     }
+    // A table still as its last reset left it has nothing to reset: doing it again, e.g. when switching back from the
+    // grid view, would also undo a sort chosen since with the "Sort by" selector, which leaves the table settings alone.
+    if (this.__resetViewSettings && this.__resetViewSettings.has(view)) {
+      if (this.__resetViewSettings.get(view) === JSON.stringify(view.settings)) {
+        return;
+      }
+    }
     if (dropLocalCopy && this._settings && this._settings.table && Object.keys(this._settings.table).length > 0) {
       this.set('_settings.table', {});
       this.saveSettings();
@@ -1798,6 +1854,19 @@ Polymer({
     } finally {
       this._isRestoring = wasRestoring;
     }
+    this._rememberResetView(view);
+  },
+
+  // Remembers the settings a view has right after a reset, so a stored reset applied again later can tell whether the
+  // view still is as that reset left it.
+  _rememberResetView(view) {
+    if (!view) {
+      return;
+    }
+    if (!this.__resetViewSettings) {
+      this.__resetViewSettings = new WeakMap();
+    }
+    this.__resetViewSettings.set(view, JSON.stringify(view.settings));
   },
 
   // Whether the backend holds a global prefs entry for the current user and provider, even an empty one.
