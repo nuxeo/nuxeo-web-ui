@@ -703,10 +703,31 @@ suite('nuxeo-results', () => {
         results._clearViewSettings();
 
         expect(putStub).to.have.been.calledOnceWith('/default-domain', 'documentPrefs.default', {});
+        // on a resource of its own, so it never aborts a preferences load or save, nor gets aborted by one
+        expect(putStub.firstCall.args[3]).to.equal(results.$.resetPreferences);
+        expect(results.$.resetPreferences).to.not.equal(results.$.preferences);
+        expect(results.$.resetPreferences.uncancelable).to.be.true;
         expect(debounceSpy).to.not.have.been.called;
         debounceSpy.restore();
         putStub.restore();
         results.document = null;
+      });
+
+      test('the put helpers configure the resource they are given and leave the shared one alone', async () => {
+        const resource = { put: sinon.stub().resolves() };
+        const shared = results.$.preferences;
+        const sharedPath = shared.path;
+
+        await results._putGlobalPreference('default_search', {}, resource);
+        expect(resource.path).to.equal('/me/preferences/default_search');
+        expect(resource.data).to.equal('{}');
+
+        await results._putDocPreference('/default-domain/ws', 'documentPrefs.default', {}, resource);
+        expect(resource.path).to.equal('/path/default-domain/ws/@preferences');
+        expect(resource.data.preferences).to.deep.equal({ 'documentPrefs.default': '{}' });
+
+        expect(resource.put).to.have.been.calledTwice;
+        expect(shared.path).to.equal(sharedPath);
       });
 
       test('_clearViewSettings does not re-apply prefs to the view shown when the backend write ends', async () => {
@@ -789,6 +810,7 @@ suite('nuxeo-results', () => {
 
         expect(results._shouldUseGlobalPrefs).to.be.true;
         expect(putStub).to.have.been.calledOnceWith('default_search', {});
+        expect(putStub.firstCall.args[2]).to.equal(results.$.resetPreferences);
         expect(debounceSpy).to.not.have.been.called;
         debounceSpy.restore();
         putStub.restore();
@@ -872,8 +894,37 @@ suite('nuxeo-results', () => {
         expect(applyStub).to.have.been.calledTwice;
         expect(applyStub.firstCall).to.have.been.calledWith(view, {});
         expect(applyStub.secondCall).to.have.been.calledWith(view, {});
+        // the stale local copy is dropped, so it is not restored again on the next load
+        expect(results._settings.table).to.deep.equal({});
         applyStub.restore();
         results._connectedUserId = null;
+      });
+
+      test('a stored reset lets the table reset itself, without clearing the stored settings again', () => {
+        results.name = 'default';
+        results.displayMode = 'table';
+        results._settings = {};
+        results.document = { path: '/default-domain/stored-reset' };
+        results.__hasBackendDocPrefs = true;
+        const putStub = sinon.stub(results, '_putDocPreference').resolves();
+        let restoringDuringReset;
+        const view = {
+          localName: 'div',
+          // a real table announces its reset, which reaches _saveViewSettings
+          resetSettings: sinon.spy(() => {
+            restoringDuringReset = results._isRestoring;
+            results._saveViewSettings({ detail: { source: 'reset' } });
+          }),
+        };
+
+        results._applyDocPrefsImpl(true, {}, view);
+
+        expect(view.resetSettings).to.have.been.calledOnce;
+        expect(restoringDuringReset).to.be.true;
+        expect(results._isRestoring).to.be.false;
+        expect(putStub).to.not.have.been.called;
+        putStub.restore();
+        results.document = null;
       });
 
       test('a search reset elsewhere wins over the local copy of this browser', async () => {
@@ -892,6 +943,7 @@ suite('nuxeo-results', () => {
         results._applyGlobalPrefs(true, results.globalPrefs, view, 'table');
 
         expect(applyStub).to.have.been.calledOnceWith(view, {});
+        expect(results._settings.table).to.deep.equal({});
         applyStub.restore();
         allPrefsStub.restore();
         results.nxProvider = null;
