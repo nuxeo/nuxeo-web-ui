@@ -50,6 +50,11 @@ let __allGlobalPrefsPromise = null;
 // doc prefs cache
 const __docPrefsCache = new Map();
 
+// preference writes still pending per cache key, so the writes to one key reach the server in the order they were made
+const __prefsWrites = new Map();
+// resets made per cache key, so a save that was on its way when one happened does not restore what it cleared
+const __prefsResets = new Map();
+
 /**
 An element to display results from a page provider.
 
@@ -1056,7 +1061,11 @@ Polymer({
         this._debounceSave('_docPrefsSaveDebouncer', () => {
           // Save to backend (primary)
           this.saveDocPrefs(this.document.path, docKey, this.view.settings)
-            .then(() => {
+            .then((saved) => {
+              // A reset made while saving already cleared the local copy too (WEBUI-2178)
+              if (saved === false) {
+                return;
+              }
               // Sync to localStorage on success (fallback cache)
               this.set(`_settings.${this.displayMode}`, this.view.settings);
               this.saveSettings();
@@ -1081,7 +1090,11 @@ Polymer({
         this._debounceSave('_prefsSaveDebouncer', () => {
           // Save to backend (primary)
           this.saveGlobalResultsPrefs(this.view.settings)
-            .then(() => {
+            .then((saved) => {
+              // A reset made while saving already cleared the local copy too (WEBUI-2178)
+              if (saved === false) {
+                return;
+              }
               // Sync to localStorage on success (fallback cache)
               this.set(`_settings.${this.displayMode}`, this.view.settings);
               this.saveSettings();
@@ -1130,15 +1143,17 @@ Polymer({
       const docPath = this.document.path;
       const docKey = this._getDocResultsPrefsKey();
       this._cancelPendingSave('_docPrefsSaveDebouncer');
-      this._clearCachedDocPrefs(docPath, docKey);
-      this._putDocPreference(docPath, docKey, {}, this.$.resetPreferences).catch((error) => {
-        // eslint-disable-next-line no-console
-        console.warn('Failed to clear document results preferences in the backend', {
-          path: docPath,
-          key: docKey,
-          error,
-        });
-      });
+      const cacheKey = this._clearCachedDocPrefs(docPath, docKey);
+      this._queuePrefsWrite(cacheKey, () => this._putDocPreference(docPath, docKey, {}, this.$.resetPreferences)).catch(
+        (error) => {
+          // eslint-disable-next-line no-console
+          console.warn('Failed to clear document results preferences in the backend', {
+            path: docPath,
+            key: docKey,
+            error,
+          });
+        },
+      );
       return;
     }
 
@@ -1146,40 +1161,86 @@ Polymer({
     if (this._shouldUseGlobalPrefs) {
       const providerName = this._getProviderName(this.nxProvider);
       this._cancelPendingSave('_prefsSaveDebouncer');
-      this._clearCachedGlobalPrefs(providerName);
-      this._putGlobalPreference(providerName, {}, this.$.resetPreferences).catch((error) => {
-        // eslint-disable-next-line no-console
-        console.warn('Failed to clear global results preferences in the backend', error);
-      });
+      const cacheKey = this._clearCachedGlobalPrefs(providerName);
+      this._queuePrefsWrite(cacheKey, () => this._putGlobalPreference(providerName, {}, this.$.resetPreferences)).catch(
+        (error) => {
+          // eslint-disable-next-line no-console
+          console.warn('Failed to clear global results preferences in the backend', error);
+        },
+      );
     }
   },
 
+  // Cancels the call still pending on one of the debouncers of this element.
   _cancelPendingSave(debouncerField) {
     if (this[debouncerField]) {
       this[debouncerField].cancel();
     }
   },
 
+  // Runs a preference write once the writes still pending for the same cache key have settled, so the server applies
+  // them in the order they were made. A write without a key (no user to scope it to) runs right away.
+  _queuePrefsWrite(cacheKey, write) {
+    if (!cacheKey) {
+      return write();
+    }
+    const previous = __prefsWrites.get(cacheKey) || Promise.resolve();
+    const next = previous.then(
+      () => write(),
+      () => write(),
+    );
+    __prefsWrites.set(cacheKey, next);
+    const forget = () => {
+      if (__prefsWrites.get(cacheKey) === next) {
+        __prefsWrites.delete(cacheKey);
+      }
+    };
+    next.then(forget, forget);
+    return next;
+  },
+
+  // Number of resets of the preferences stored under a cache key: a save that saw a lower count when it started is
+  // older than the last reset.
+  _prefsResetCount(cacheKey) {
+    return __prefsResets.get(cacheKey) || 0;
+  },
+
   // Replaces the in-session copy of the document preferences with the empty entry the backend is about to hold, so
-  // the _applyDocPrefs observer never re-applies the old copy, e.g. when the display mode changes.
+  // the _applyDocPrefs observer never re-applies the old copy, e.g. when the display mode changes. Returns the cache
+  // key of the entry, or null without a user.
   _clearCachedDocPrefs(docPath, key) {
     const userId = this._getUserId();
+    let cacheKey = null;
     if (userId) {
-      __docPrefsCache.set(this._docCacheKey(userId, docPath, key), {});
+      cacheKey = this._docCacheKey(userId, docPath, key);
+      __docPrefsCache.set(cacheKey, {});
+      __prefsResets.set(cacheKey, this._prefsResetCount(cacheKey) + 1);
     }
     this.__hasBackendDocPrefs = true;
     this.docPrefs = {};
+    // the table has just reset itself: drop the apply this schedules, which would only reset it once more
+    this._cancelPendingSave('_applyDocPrefsDebouncer');
+    return cacheKey;
   },
 
   // Same as _clearCachedDocPrefs, for the global preferences of a search provider.
   _clearCachedGlobalPrefs(providerName) {
     const userId = this._getUserId();
+    let cacheKey = null;
     if (userId && providerName) {
-      const cacheKey = this._cacheKey(userId, providerName);
+      cacheKey = this._cacheKey(userId, providerName);
       __globalPrefsCache.set(cacheKey, {});
       __storedGlobalPrefs.add(cacheKey);
+      __prefsResets.set(cacheKey, this._prefsResetCount(cacheKey) + 1);
     }
-    this.globalPrefs = {};
+    // the table has just reset itself: the observer this runs (synchronously) must not reset it once more
+    this.__clearingGlobalPrefs = true;
+    try {
+      this.globalPrefs = {};
+    } finally {
+      this.__clearingGlobalPrefs = false;
+    }
+    return cacheKey;
   },
 
   _providerChanged(provider, oldProvider) {
@@ -1572,6 +1633,12 @@ Polymer({
     try {
       const prefsMap = await this._getAllGlobalPreferencesOnce();
 
+      // The results moved to another provider while loading: its own load sets the state (WEBUI-2178).
+      const currentProvider = this._getProviderName(this.nxProvider);
+      if (currentProvider && currentProvider !== providerName) {
+        return;
+      }
+
       // A save or a reset that landed while the preferences were loading is newer than what was loaded (WEBUI-2178).
       if (__globalPrefsCache.has(cacheKey)) {
         this.globalPrefs = __globalPrefsCache.get(cacheKey);
@@ -1584,9 +1651,13 @@ Polymer({
         this.globalPrefs = empty;
         return;
       }
-      const parsed = this._parsePrefMapValue(prefsMap[providerName]);
+      const raw = prefsMap[providerName];
+      const parsed = this._parsePrefMapValue(raw);
       __globalPrefsCache.set(cacheKey, parsed);
-      __storedGlobalPrefs.add(cacheKey);
+      // An unreadable value parses to {} too: only a readable entry counts as stored, an empty one being a reset
+      if (Object.keys(parsed).length > 0 || this._isEmptyPrefsEntry(raw)) {
+        __storedGlobalPrefs.add(cacheKey);
+      }
       this.globalPrefs = parsed;
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -1599,6 +1670,7 @@ Polymer({
   },
 
   // Persists global results prefs for the current provider (PUT) and updates in-session cache/state immediately.
+  // Resolves to false when a reset made while saving superseded this save, true otherwise.
   async saveGlobalResultsPrefs(prefsObj) {
     const providerName = this._getProviderName(this.nxProvider);
     if (!providerName) {
@@ -1611,13 +1683,30 @@ Polymer({
     }
 
     const cloned = this._deepClone(prefsObj);
-
-    await this._putGlobalPreference(providerName, cloned);
-
     const cacheKey = this._cacheKey(userId, providerName);
+    const resets = this._prefsResetCount(cacheKey);
+
+    await this._queuePrefsWrite(cacheKey, () => this._putGlobalPreference(providerName, cloned));
+
+    // A reset made while this save was on its way is newer: keep what it cleared (WEBUI-2178)
+    if (this._prefsResetCount(cacheKey) !== resets) {
+      return false;
+    }
     __globalPrefsCache.set(cacheKey, cloned);
     __storedGlobalPrefs.add(cacheKey);
-    this.globalPrefs = cloned;
+    // the results may show another provider by now, whose own prefs must stay
+    if (this._cacheKey(this._getUserId(), this._getProviderName(this.nxProvider)) === cacheKey) {
+      this.globalPrefs = cloned;
+    }
+    return true;
+  },
+
+  // Whether a stored preferences value is an empty object, which is what a reset stores (WEBUI-2178).
+  _isEmptyPrefsEntry(raw) {
+    if (raw && typeof raw === 'object') {
+      return Object.keys(raw).length === 0;
+    }
+    return typeof raw === 'string' && raw.trim() === '{}';
   },
 
   // Applies global prefs to the table view only (avoids applying to other display modes).
@@ -1641,9 +1730,10 @@ Polymer({
     if (prefs && Object.keys(prefs).length > 0) {
       settingsToApply = prefs;
     }
-    // An empty entry in the backend is a reset, possibly made in another browser: it wins over the local copy
+    // An empty entry in the backend is a reset, possibly made in another browser: it wins over the local copy, which
+    // is dropped too since it belongs to this provider only
     else if (this._hasStoredGlobalPrefs()) {
-      this._applyStoredReset(view);
+      this._applyStoredReset(view, true);
       return;
     }
     // 2. Fallback: localStorage (synced copy)
@@ -1665,12 +1755,14 @@ Polymer({
 
   // Applies the empty entry a reset leaves in the backend, possibly from another browser (WEBUI-2178). The table resets
   // itself, which also restores the sort of its page provider and drops the column filters, beyond what empty settings
-  // reach. The local copy of this browser is dropped too, so it is not restored again on the next load.
-  _applyStoredReset(view) {
-    if (this._filterSettingsByCapabilities(view, {}) === undefined) {
+  // reach. With `dropLocalCopy`, the local copy of this browser is dropped as well, so it is not restored on the next
+  // load; document contexts keep it, since every folder of a content view shares it.
+  _applyStoredReset(view, dropLocalCopy) {
+    // a reset made here: the table has just reset itself
+    if (this.__clearingGlobalPrefs || this._filterSettingsByCapabilities(view, {}) === undefined) {
       return;
     }
-    if (this._settings && this._settings.table && Object.keys(this._settings.table).length > 0) {
+    if (dropLocalCopy && this._settings && this._settings.table && Object.keys(this._settings.table).length > 0) {
       this.set('_settings.table', {});
       this.saveSettings();
     }
@@ -1679,11 +1771,12 @@ Polymer({
       return;
     }
     // restoring: the reset the table announces is not one to clear the stored settings for
+    const wasRestoring = this._isRestoring;
     this._isRestoring = true;
     try {
       view.resetSettings();
     } finally {
-      this._isRestoring = false;
+      this._isRestoring = wasRestoring;
     }
   },
 
@@ -1729,6 +1822,7 @@ Polymer({
   },
 
   // Persists doc-level results prefs (PUT) and updates in-session cache/state so the UI reflects it immediately.
+  // Resolves to false when a reset made while saving superseded this save, true otherwise.
   async saveDocPrefs(docPath, key, value) {
     if (!docPath) {
       throw new Error('Cannot save doc prefs: missing docPath');
@@ -1742,13 +1836,24 @@ Polymer({
     }
 
     const cloned = this._deepClone(value);
+    const cacheKey = this._docCacheKey(userId, docPath, key);
+    const resets = this._prefsResetCount(cacheKey);
 
-    await this._putDocPreference(docPath, key, cloned);
+    await this._queuePrefsWrite(cacheKey, () => this._putDocPreference(docPath, key, cloned));
+
+    // A reset made while this save was on its way is newer: keep what it cleared (WEBUI-2178)
+    if (this._prefsResetCount(cacheKey) !== resets) {
+      return false;
+    }
 
     // update in-session cache
-    const cacheKey = this._docCacheKey(userId, docPath, key);
     __docPrefsCache.set(cacheKey, cloned);
-    this.docPrefs = cloned;
+    // the results may show another document by now, whose own prefs must stay; a direct call without one updates them
+    const shownDocument = this.document && this.document.path;
+    if (!shownDocument || this._docCacheKey(userId, shownDocument, this._getDocResultsPrefsKey()) === cacheKey) {
+      this.docPrefs = cloned;
+    }
+    return true;
   },
 
   // Returns the stable preference key used to store/retrieve results table prefs on a document.
@@ -1853,7 +1958,7 @@ Polymer({
       this.__hasBackendDocPrefs = true;
     } else if (this.__hasBackendDocPrefs) {
       // An empty entry in the backend is a reset, possibly made in another browser: it wins over the local copy
-      this._applyStoredReset(view);
+      this._applyStoredReset(view, false);
       return;
     } else if (this._settings && this._settings[this.displayMode]) {
       // Only use localStorage if we never had backend prefs

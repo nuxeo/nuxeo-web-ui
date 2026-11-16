@@ -691,7 +691,9 @@ suite('nuxeo-results', () => {
         saveSpy.restore();
       });
 
-      test('_clearViewSettings writes empty doc prefs right away in document context', () => {
+      test('_clearViewSettings writes empty doc prefs right away in document context', async () => {
+        // no signed-in user, so no module-level cache entry is written for later suites
+        results._connectedUserId = null;
         results._isRestoring = false;
         results.displayMode = 'table';
         results._settings = {};
@@ -701,13 +703,16 @@ suite('nuxeo-results', () => {
         const putStub = sinon.stub(results, '_putDocPreference').resolves();
 
         results._clearViewSettings();
+        // with a signed-in user, the write waits for the writes already pending for its key: none here
+        await new Promise((resolve) => setTimeout(resolve, 0));
 
-        expect(putStub).to.have.been.calledOnceWith('/default-domain', 'documentPrefs.default', {});
+        expect(putStub.callCount).to.equal(1);
+        expect(putStub.firstCall.args.slice(0, 3)).to.deep.equal(['/default-domain', 'documentPrefs.default', {}]);
         // on a resource of its own, so it never aborts a preferences load or save, nor gets aborted by one
-        expect(putStub.firstCall.args[3]).to.equal(results.$.resetPreferences);
-        expect(results.$.resetPreferences).to.not.equal(results.$.preferences);
+        expect(putStub.firstCall.args[3] === results.$.resetPreferences).to.be.true;
+        expect(results.$.resetPreferences === results.$.preferences).to.be.false;
         expect(results.$.resetPreferences.uncancelable).to.be.true;
-        expect(debounceSpy).to.not.have.been.called;
+        expect(debounceSpy.callCount).to.equal(0);
         debounceSpy.restore();
         putStub.restore();
         results.document = null;
@@ -745,6 +750,7 @@ suite('nuxeo-results', () => {
         );
 
         results._clearViewSettings();
+        await Promise.resolve();
         // the user opens another document before the request ends
         const otherDocPrefs = { columns: { 'dc:title': { width: '480px' } } };
         results.document = { path: '/default-domain/b' };
@@ -752,10 +758,147 @@ suite('nuxeo-results', () => {
         finishWrite();
         await new Promise((resolve) => setTimeout(resolve, 0));
 
+        expect(putStub.callCount).to.equal(1);
         expect(results.docPrefs).to.equal(otherDocPrefs);
         putStub.restore();
         results.document = null;
         results._connectedUserId = null;
+      });
+
+      test('a document save still on its way when reset is pressed does not bring the old prefs back', async () => {
+        const old = { columns: { 'dc:title': { width: '620px' } } };
+        const path = '/default-domain/stale-save';
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        results.name = 'default';
+        results._connectedUserId = 'stale-doc-user';
+        results.document = { path };
+        const written = [];
+        let finishSave;
+        const putStub = sinon.stub(results, '_putDocPreference').callsFake((docPath, key, value) => {
+          written.push(value);
+          return written.length === 1
+            ? new Promise((resolve) => {
+                finishSave = resolve;
+              })
+            : Promise.resolve();
+        });
+
+        const saving = results.saveDocPrefs(path, 'documentPrefs.default', old);
+        await Promise.resolve();
+        results._clearViewSettings();
+        await Promise.resolve();
+        // the clear waits for the save, so the server applies them in order
+        expect(written).to.have.length(1);
+        finishSave();
+        const saved = await saving;
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(saved).to.be.false;
+        expect(written).to.deep.equal([old, {}]);
+        expect(results.docPrefs).to.deep.equal({});
+        results._loadDocPrefs(true, results.document, 'stale-doc-user');
+        expect(results.docPrefs).to.deep.equal({});
+        // a save made after the reset applies as usual
+        const newer = { columns: { 'dc:title': { width: '200px' } } };
+        expect(await results.saveDocPrefs(path, 'documentPrefs.default', newer)).to.be.true;
+        expect(results.docPrefs).to.deep.equal(newer);
+        putStub.restore();
+        results.document = null;
+        results._connectedUserId = null;
+      });
+
+      test('a global save still on its way when reset is pressed does not bring the old prefs back', async () => {
+        const old = { columns: { 'dc:title': { width: '620px' } } };
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results._settings = {};
+        results.document = null;
+        results._connectedUserId = 'stale-global-user';
+        const allPrefsStub = sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+        const provider = createMockProvider();
+        provider.provider = 'stale_search';
+        results.nxProvider = provider;
+        const written = [];
+        let finishSave;
+        const putStub = sinon.stub(results, '_putGlobalPreference').callsFake((prefKey, value) => {
+          written.push(value);
+          return written.length === 1
+            ? new Promise((resolve) => {
+                finishSave = resolve;
+              })
+            : Promise.resolve();
+        });
+
+        const saving = results.saveGlobalResultsPrefs(old);
+        await Promise.resolve();
+        results._clearViewSettings();
+        await Promise.resolve();
+        expect(written).to.have.length(1);
+        finishSave();
+        const saved = await saving;
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(saved).to.be.false;
+        expect(written).to.deep.equal([old, {}]);
+        expect(results.globalPrefs).to.deep.equal({});
+        await results._loadGlobalPrefs(true, provider, 'stale-global-user');
+        expect(results.globalPrefs).to.deep.equal({});
+        putStub.restore();
+        allPrefsStub.restore();
+        results.nxProvider = null;
+        results._connectedUserId = null;
+      });
+
+      test('_saveViewSettings leaves local storage alone when a reset superseded the save', async () => {
+        results._isRestoring = false;
+        results.displayMode = 'table';
+        results.name = 'default';
+        results.document = { path: '/default-domain' };
+        // set the view first: setting it restores the stored settings onto it
+        results.view = createMockView();
+        results._settings = { table: {} };
+        results.view.settings = { columns: { 'dc:title': { width: '620px' } } };
+        const debounceStub = sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+        const saveDocStub = sinon.stub(results, 'saveDocPrefs').resolves(false);
+
+        results._saveViewSettings({ detail: { source: 'column-resize' } });
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(saveDocStub).to.have.been.calledOnce;
+        expect(results._settings.table).to.deep.equal({});
+        debounceStub.restore();
+        saveDocStub.restore();
+        results.document = null;
+      });
+
+      test('_queuePrefsWrite runs the writes for one key in order, even after a failed one', async () => {
+        const order = [];
+        let failFirst;
+        const first = results._queuePrefsWrite('queue-user::key', () => {
+          order.push('first');
+          return new Promise((resolve, reject) => {
+            failFirst = reject;
+          });
+        });
+        const second = results._queuePrefsWrite('queue-user::key', () => {
+          order.push('second');
+          return Promise.resolve();
+        });
+        await Promise.resolve();
+        expect(order).to.deep.equal(['first']);
+
+        failFirst(new Error('boom'));
+        const firstError = await first.catch((error) => error);
+        await second;
+
+        expect(firstError.message).to.equal('boom');
+
+        expect(order).to.deep.equal(['first', 'second']);
+        const unkeyed = sinon.stub().resolves();
+        await results._queuePrefsWrite(null, unkeyed);
+        expect(unkeyed).to.have.been.calledOnce;
       });
 
       test('_saveViewSettings saves an event without detail, as sent by the settings dialog', () => {
@@ -774,7 +917,9 @@ suite('nuxeo-results', () => {
         saveSpy.restore();
       });
 
-      test('_clearViewSettings cancels a save that is still pending', () => {
+      test('_clearViewSettings cancels a save that is still pending', async () => {
+        // no signed-in user, so no module-level cache entry is written for later suites
+        results._connectedUserId = null;
         results._isRestoring = false;
         results.displayMode = 'table';
         results._settings = {};
@@ -786,14 +931,18 @@ suite('nuxeo-results', () => {
         results._saveViewSettings({ detail: { source: 'column-resize' } });
         expect(results._docPrefsSaveDebouncer.isActive()).to.be.true;
         results._clearViewSettings();
+        await new Promise((resolve) => setTimeout(resolve, 0));
 
         expect(results._docPrefsSaveDebouncer.isActive()).to.be.false;
-        expect(putStub).to.have.been.calledOnceWith('/default-domain', 'documentPrefs.default', {});
+        expect(putStub.callCount).to.equal(1);
+        expect(putStub.firstCall.args.slice(0, 3)).to.deep.equal(['/default-domain', 'documentPrefs.default', {}]);
         putStub.restore();
         results.document = null;
       });
 
-      test('_clearViewSettings writes empty global prefs right away for search providers', () => {
+      test('_clearViewSettings writes empty global prefs right away for search providers', async () => {
+        // no signed-in user, so no module-level cache entry is written for later suites
+        results._connectedUserId = null;
         results._isRestoring = false;
         results.displayMode = 'table';
         results._settings = {};
@@ -807,11 +956,13 @@ suite('nuxeo-results', () => {
         const putStub = sinon.stub(results, '_putGlobalPreference').resolves();
 
         results._clearViewSettings();
+        await new Promise((resolve) => setTimeout(resolve, 0));
 
         expect(results._shouldUseGlobalPrefs).to.be.true;
-        expect(putStub).to.have.been.calledOnceWith('default_search', {});
-        expect(putStub.firstCall.args[2]).to.equal(results.$.resetPreferences);
-        expect(debounceSpy).to.not.have.been.called;
+        expect(putStub.callCount).to.equal(1);
+        expect(putStub.firstCall.args.slice(0, 2)).to.deep.equal(['default_search', {}]);
+        expect(putStub.firstCall.args[2] === results.$.resetPreferences).to.be.true;
+        expect(debounceSpy.callCount).to.equal(0);
         debounceSpy.restore();
         putStub.restore();
         allPrefsStub.restore();
@@ -894,13 +1045,163 @@ suite('nuxeo-results', () => {
         expect(applyStub).to.have.been.calledTwice;
         expect(applyStub.firstCall).to.have.been.calledWith(view, {});
         expect(applyStub.secondCall).to.have.been.calledWith(view, {});
-        // the stale local copy is dropped, so it is not restored again on the next load
-        expect(results._settings.table).to.deep.equal({});
+        // every folder of a content view shares the local copy, so a reset folder leaves it to the others
+        expect(results._settings.table).to.deep.equal({ columns: { 'dc:title': { width: '620px' } } });
         applyStub.restore();
         results._connectedUserId = null;
       });
 
+      test('a search reset made here runs the prefs observer with the table marked as already reset', () => {
+        let clearingWhenApplied;
+        const applyStub = sinon.stub(results, '_applyGlobalPrefs').callsFake(() => {
+          clearingWhenApplied = results.__clearingGlobalPrefs;
+        });
+        results._connectedUserId = 'single-reset-user';
+
+        results._clearCachedGlobalPrefs('single_reset_search');
+
+        expect(applyStub).to.have.been.called;
+        expect(clearingWhenApplied).to.be.true;
+        expect(results.__clearingGlobalPrefs).to.be.false;
+        applyStub.restore();
+        results._connectedUserId = null;
+      });
+
+      test('_applyStoredReset leaves a table that has just reset itself alone', () => {
+        const resetSettings = sinon.stub();
+        const view = { localName: 'div', resetSettings };
+
+        results.__clearingGlobalPrefs = true;
+        results._applyStoredReset(view, true);
+        const callsWhileClearing = resetSettings.callCount;
+        results.__clearingGlobalPrefs = false;
+        results._applyStoredReset(view, true);
+
+        expect(callsWhileClearing).to.equal(0);
+        expect(resetSettings.callCount).to.equal(1);
+      });
+
+      test('a document reset made here drops the prefs apply it schedules, which would reset the table once more', () => {
+        results._connectedUserId = null;
+
+        results._clearCachedDocPrefs('/default-domain/single-reset', 'documentPrefs.default');
+
+        // emptying docPrefs schedules the _applyDocPrefs debouncer, which the reset cancels at once
+        expect(results._applyDocPrefsDebouncer).to.exist;
+        expect(results._applyDocPrefsDebouncer.isActive()).to.be.false;
+        expect(results.docPrefs).to.deep.equal({});
+        expect(results.__hasBackendDocPrefs).to.be.true;
+      });
+
+      test('a document save that ends after moving to another document keeps that document prefs', async () => {
+        const savedA = { columns: { 'dc:title': { width: '620px' } } };
+        const shownB = { columns: { 'dc:title': { width: '200px' } } };
+        results.name = 'default';
+        results._connectedUserId = 'moving-doc-user';
+        results.document = { path: '/default-domain/a' };
+        let finishSave;
+        const putStub = sinon.stub(results, '_putDocPreference').returns(
+          new Promise((resolve) => {
+            finishSave = resolve;
+          }),
+        );
+
+        const saving = results.saveDocPrefs('/default-domain/a', 'documentPrefs.default', savedA);
+        results.document = { path: '/default-domain/b' };
+        results.docPrefs = shownB;
+        await Promise.resolve();
+        finishSave();
+
+        expect(await saving).to.be.true;
+        expect(results.docPrefs).to.equal(shownB);
+        // the saved prefs are still cached for the document they belong to
+        results.document = { path: '/default-domain/a' };
+        results._loadDocPrefs(true, results.document, 'moving-doc-user');
+        expect(results.docPrefs).to.deep.equal(savedA);
+        putStub.restore();
+        results.document = null;
+        results._connectedUserId = null;
+      });
+
+      test('a global save or load that ends after moving to another provider keeps that provider prefs', async () => {
+        results.document = null;
+        results._connectedUserId = 'moving-search-user';
+        let finishLoad;
+        const allPrefsStub = sinon.stub(results, '_getAllGlobalPreferencesOnce').returns(
+          new Promise((resolve) => {
+            finishLoad = resolve;
+          }),
+        );
+        const first = createMockProvider();
+        first.provider = 'first_search';
+        const second = createMockProvider();
+        second.provider = 'second_search';
+        let finishSave;
+        const putStub = sinon.stub(results, '_putGlobalPreference').returns(
+          new Promise((resolve) => {
+            finishSave = resolve;
+          }),
+        );
+        results.nxProvider = first;
+        const loadingFirst = results._loadGlobalPrefs(true, first, 'moving-search-user');
+        const savingFirst = results.saveGlobalResultsPrefs({ columns: { 'dc:title': { width: '620px' } } });
+
+        // the second provider's prefs are already cached, so its own load ends at once
+        results._clearCachedGlobalPrefs('second_search');
+        results.nxProvider = second;
+        const shownSecond = { columns: { 'dc:modified': { width: '90px' } } };
+        results.globalPrefs = shownSecond;
+        await Promise.resolve();
+        finishSave();
+        finishLoad({ first_search: JSON.stringify({ columns: { 'dc:creator': { hidden: true } } }) });
+        await savingFirst;
+        await loadingFirst;
+
+        expect(results.globalPrefs).to.equal(shownSecond);
+        putStub.restore();
+        allPrefsStub.restore();
+        results.nxProvider = null;
+        results._connectedUserId = null;
+      });
+
+      test('an unreadable stored search entry is not taken for a reset', async () => {
+        results.displayMode = 'table';
+        results.document = null;
+        results._connectedUserId = 'unreadable-entry-user';
+        const local = { columns: { 'dc:title': { width: '620px' } } };
+        results._settings = { table: local };
+        const allPrefsStub = sinon
+          .stub(results, '_getAllGlobalPreferencesOnce')
+          .resolves({ broken_search: 'not json' });
+        const provider = createMockProvider();
+        provider.provider = 'broken_search';
+        results.nxProvider = provider;
+        const applyStub = sinon.stub(results, '_applyPrefsToView');
+        const view = { localName: 'div' };
+
+        await results._loadGlobalPrefs(true, provider, 'unreadable-entry-user');
+        results._applyGlobalPrefs(true, results.globalPrefs, view, 'table');
+
+        expect(applyStub).to.have.been.calledOnceWith(view, local);
+        applyStub.restore();
+        allPrefsStub.restore();
+        results.nxProvider = null;
+        results._connectedUserId = null;
+      });
+
+      test('_applyStoredReset keeps the restoring guard of an outer restore', () => {
+        const view = { localName: 'div', resetSettings: sinon.spy() };
+        results._isRestoring = true;
+
+        results._applyStoredReset(view, false);
+
+        expect(view.resetSettings).to.have.been.calledOnce;
+        expect(results._isRestoring).to.be.true;
+        results._isRestoring = false;
+      });
+
       test('a stored reset lets the table reset itself, without clearing the stored settings again', () => {
+        results._isRestoring = false;
         results.name = 'default';
         results.displayMode = 'table';
         results._settings = {};
@@ -922,7 +1223,7 @@ suite('nuxeo-results', () => {
         expect(view.resetSettings).to.have.been.calledOnce;
         expect(restoringDuringReset).to.be.true;
         expect(results._isRestoring).to.be.false;
-        expect(putStub).to.not.have.been.called;
+        expect(putStub.callCount).to.equal(0);
         putStub.restore();
         results.document = null;
       });
@@ -995,6 +1296,8 @@ suite('nuxeo-results', () => {
       });
 
       test('_clearViewSettings logs and swallows a doc prefs backend failure', async () => {
+        // no signed-in user, so no module-level cache entry is written for later suites
+        results._connectedUserId = null;
         results._isRestoring = false;
         results.displayMode = 'table';
         results._settings = {};
@@ -1016,6 +1319,8 @@ suite('nuxeo-results', () => {
       });
 
       test('_clearViewSettings logs and swallows a global prefs backend failure', async () => {
+        // no signed-in user, so no module-level cache entry is written for later suites
+        results._connectedUserId = null;
         results._isRestoring = false;
         results.displayMode = 'table';
         results._settings = {};
@@ -1050,7 +1355,7 @@ suite('nuxeo-results', () => {
         results._clearViewSettings();
 
         expect(results._settings.grid).to.deep.equal({});
-        expect(putStub).to.not.have.been.called;
+        expect(putStub.callCount).to.equal(0);
         putStub.restore();
         results.document = null;
       });
