@@ -17,6 +17,7 @@ limitations under the License.
 */
 import { fixture, html, flush } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-results/nuxeo-results.js';
+import { restoreDefaultSort } from '@nuxeo/nuxeo-ui-elements/nuxeo-user-sort.js';
 
 // Mock view element for testing
 const createMockView = (props = {}) => {
@@ -641,6 +642,93 @@ suite('nuxeo-results', () => {
       test('_resetView does nothing when the view cannot reset itself', () => {
         results.view = createMockView({ settingsEnabled: true });
         expect(() => results._resetView()).to.not.throw();
+      });
+    });
+
+    suite('"Sort by" selector', () => {
+      const sortOptions = () => [
+        { field: 'dc:title', label: 'Title', order: 'asc', selected: true },
+        { field: 'dc:modified', label: 'Modified', order: 'desc' },
+        { field: 'dc:coverage', label: 'Coverage', order: 'asc' },
+      ];
+
+      test('_sortChanged applies the chosen sort as a user sort, which resetting the table gives back', () => {
+        const provider = createMockProvider();
+        const pageDefault = { 'ecm:pos': 'ASC' };
+        provider.sort = pageDefault;
+        results.nxProvider = provider;
+        const fetchStub = sinon.stub(results, 'fetch');
+        results.sortSelected = { field: 'dc:coverage', order: 'asc' };
+
+        results._sortChanged();
+
+        expect(provider.sort).to.deep.equal({ 'dc:coverage': 'asc' });
+        expect(restoreDefaultSort(provider)).to.be.true;
+        expect(provider.sort).to.equal(pageDefault);
+        fetchStub.restore();
+        results.nxProvider = null;
+      });
+
+      test('a reset puts the selector back to its default option and declared orders, without fetching', async () => {
+        const options = sortOptions();
+        const [title, modified, coverage] = options;
+        const sortChangedStub = sinon.stub(results, '_sortChanged');
+        const clearStub = sinon.stub(results, '_clearViewSettings');
+        results.displaySort = true;
+        results.sortOptions = options;
+        results.view = createMockView();
+        await flush();
+        const selector = results.shadowRoot.querySelector('nuxeo-sort-select');
+        // the user picked Coverage, reversed it, and had reversed Title before
+        results.sortSelected = coverage;
+        coverage.order = 'desc';
+        title.order = 'desc';
+        modified.order = 'asc';
+        sortChangedStub.resetHistory();
+
+        results._saveViewSettings({ detail: { source: 'reset' } });
+
+        expect(clearStub.callCount).to.equal(1);
+        expect(results.sortSelected === title).to.be.true;
+        expect(options.map((option) => option.order)).to.deep.equal(['asc', 'desc', 'asc']);
+        expect(selector.selected === title).to.be.true;
+        expect(selector._sortOrder).to.equal('asc');
+        expect(sortChangedStub.callCount).to.equal(0);
+        sortChangedStub.restore();
+        clearStub.restore();
+      });
+
+      test('a reset re-selects the default option even when it is the one shown, so its arrow follows', async () => {
+        const options = sortOptions();
+        const [title] = options;
+        const sortChangedStub = sinon.stub(results, '_sortChanged');
+        const clearStub = sinon.stub(results, '_clearViewSettings');
+        results.displaySort = true;
+        results.sortOptions = options;
+        results.view = createMockView();
+        await flush();
+        const selector = results.shadowRoot.querySelector('nuxeo-sort-select');
+        // Title is shown, reversed with the arrow
+        selector._toggleSortOrder();
+        expect(selector._sortOrder).to.equal('desc');
+        sortChangedStub.resetHistory();
+
+        results._saveViewSettings({ detail: { source: 'reset' } });
+
+        expect(title.order).to.equal('asc');
+        expect(selector._sortOrder).to.equal('asc');
+        expect(sortChangedStub.callCount).to.equal(0);
+        sortChangedStub.restore();
+        clearStub.restore();
+      });
+
+      test('a reset leaves results without a "Sort by" selector alone', () => {
+        const clearStub = sinon.stub(results, '_clearViewSettings');
+        results.sortOptions = [];
+
+        expect(() => results._saveViewSettings({ detail: { source: 'reset' } })).to.not.throw();
+        expect(results.sortSelected == null).to.be.true;
+        clearStub.restore();
       });
     });
 
@@ -1295,6 +1383,40 @@ suite('nuxeo-results', () => {
         allPrefsStub.restore();
         results.nxProvider = null;
         results._connectedUserId = null;
+      });
+
+      test('a stored reset is not applied again to a table left as its last reset made it', () => {
+        const provider = createMockProvider();
+        results.nxProvider = provider;
+        sinon.stub(results, 'fetch');
+        let tableSettings = { columns: {}, sortOrder: [] };
+        const view = {
+          localName: 'div',
+          get settings() {
+            return tableSettings;
+          },
+          // a real table announces its reset, which reaches _saveViewSettings
+          resetSettings: sinon.spy(() => {
+            results._saveViewSettings({ detail: { source: 'reset' } });
+          }),
+        };
+        results._isRestoring = false;
+
+        results._applyStoredReset(view, true);
+        // a sort chosen since with the "Sort by" selector, which leaves the table settings alone
+        results.sortSelected = { field: 'dc:modified', order: 'desc' };
+        results._sortChanged();
+        // e.g. switching back from the grid view to the table
+        results._applyStoredReset(view, true);
+
+        expect(view.resetSettings.callCount).to.equal(1);
+        expect(provider.sort).to.deep.equal({ 'dc:modified': 'desc' });
+        // whereas a table changed since, e.g. by a stale local copy, is reset again
+        tableSettings = { columns: { 'dc:title': { width: '620px' } }, sortOrder: [] };
+        results._applyStoredReset(view, true);
+        expect(view.resetSettings.callCount).to.equal(2);
+        results.fetch.restore();
+        results.nxProvider = null;
       });
 
       test('_applyStoredReset keeps the restoring guard of an outer restore', () => {
