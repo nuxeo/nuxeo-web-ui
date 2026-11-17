@@ -1323,6 +1323,7 @@
   "results.heading.count": "{0} result(s)",
   "results.heading.count.unknown": "Many results",
   "results.resetTable": "Reset table to defaults (columns, sorting and filters)",
+  "results.resetTableButton": "Reset to defaults",
   "results.sortBy": "Sort by",
   "searchAnalytics.callsPerHour.heading": "Calls per Hour",
   "searchAnalytics.callsPerPageProvider.heading": "Calls per PageProvider",
