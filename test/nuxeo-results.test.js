@@ -596,7 +596,7 @@ suite('nuxeo-results', () => {
     const resettableView = (props = {}) =>
       createMockView({ settingsEnabled: true, resetSettings: sinon.stub(), ...props });
 
-    const resetButton = () => results.shadowRoot.querySelector('paper-icon-button.resetTable');
+    const resetButton = () => results.shadowRoot.querySelector('paper-button.resetTable');
 
     suite('reset button', () => {
       test('_canResetView accepts only a settings-enabled view that can reset itself', () => {
@@ -618,14 +618,16 @@ suite('nuxeo-results', () => {
         expect(resetButton()).to.exist;
       });
 
-      test('has an accessible name that matches its tooltip and is not a display mode button', async () => {
+      test('shows a text label and a tooltip, before the result actions, and is not a display mode button', async () => {
         results.view = resettableView();
         await flush();
 
         const button = resetButton();
-        expect(button.getAttribute('aria-label')).to.be.a('string').and.not.be.empty;
-        expect(button.getAttribute('aria-label')).to.equal(button.getAttribute('title'));
+        expect(button.textContent.trim()).to.equal(results.i18n('results.resetTableButton'));
+        expect(button.getAttribute('title')).to.equal(results.i18n('results.resetTable'));
         expect(button.classList.contains('displayMode')).to.be.false;
+        const actions = results.shadowRoot.querySelector('slot[name="actions"]');
+        expect(button.compareDocumentPosition(actions)).to.equal(Node.DOCUMENT_POSITION_FOLLOWING);
       });
 
       test('resets the current view when clicked', async () => {
