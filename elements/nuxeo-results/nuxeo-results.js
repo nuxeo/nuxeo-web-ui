@@ -25,7 +25,6 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
 import { config } from '@nuxeo/nuxeo-elements';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
-import { applyUserSort } from '@nuxeo/nuxeo-ui-elements/nuxeo-user-sort.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-quick-filters/nuxeo-quick-filters.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-actions-menu.js';
@@ -665,9 +664,20 @@ Polymer({
     if (this.sortSelected && this.nxProvider) {
       const sort = {};
       sort[this.sortSelected.field] = this.sortSelected.order;
-      // through applyUserSort, so resetting the table gives the provider its sort from before back (ELEMENTS-2017)
-      applyUserSort(this.nxProvider, sort);
+      this._applyUserSort(sort);
       this.fetch();
+    }
+  },
+
+  // Gives the page provider a sort chosen with the "Sort by" selector. With an Elements build that provides
+  // Nuxeo.UserSort (ELEMENTS-2017), the sort is recorded as the user's, so resetting the table gives the provider its
+  // sort from before back; an older build just gets the sort, as before.
+  _applyUserSort(sort) {
+    const userSort = Nuxeo.UserSort;
+    if (userSort && typeof userSort.applyUserSort === 'function') {
+      userSort.applyUserSort(this.nxProvider, sort);
+    } else {
+      this.nxProvider.sort = sort;
     }
   },
 

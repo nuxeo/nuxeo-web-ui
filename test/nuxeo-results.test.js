@@ -17,7 +17,6 @@ limitations under the License.
 */
 import { fixture, html, flush } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-results/nuxeo-results.js';
-import { restoreDefaultSort } from '@nuxeo/nuxeo-ui-elements/nuxeo-user-sort.js';
 
 // Mock view element for testing
 const createMockView = (props = {}) => {
@@ -652,19 +651,48 @@ suite('nuxeo-results', () => {
         { field: 'dc:coverage', label: 'Coverage', order: 'asc' },
       ];
 
-      test('_sortChanged applies the chosen sort as a user sort, which resetting the table gives back', () => {
+      test('_sortChanged applies the chosen sort as a user sort when Nuxeo.UserSort is there', () => {
         const provider = createMockProvider();
-        const pageDefault = { 'ecm:pos': 'ASC' };
-        provider.sort = pageDefault;
         results.nxProvider = provider;
         const fetchStub = sinon.stub(results, 'fetch');
+        const previous = Nuxeo.UserSort;
+        const applyUserSort = sinon.spy((target, sort) => {
+          target.sort = sort;
+        });
+        Nuxeo.UserSort = { applyUserSort };
         results.sortSelected = { field: 'dc:coverage', order: 'asc' };
 
-        results._sortChanged();
+        try {
+          results._sortChanged();
+        } finally {
+          Nuxeo.UserSort = previous;
+        }
+
+        expect(applyUserSort.callCount).to.equal(1);
+        expect(applyUserSort.firstCall.args[0] === provider).to.be.true;
+        expect(applyUserSort.firstCall.args[1]).to.deep.equal({ 'dc:coverage': 'asc' });
+        expect(provider.sort).to.deep.equal({ 'dc:coverage': 'asc' });
+        expect(fetchStub.callCount).to.equal(1);
+        fetchStub.restore();
+        results.nxProvider = null;
+      });
+
+      test('_sortChanged still sets the sort with an Elements build without Nuxeo.UserSort', () => {
+        const provider = createMockProvider();
+        results.nxProvider = provider;
+        const fetchStub = sinon.stub(results, 'fetch');
+        const previous = Nuxeo.UserSort;
+        Nuxeo.UserSort = undefined;
+        results.sortSelected = { field: 'dc:coverage', order: 'asc' };
+
+        try {
+          results._sortChanged();
+        } finally {
+          Nuxeo.UserSort = previous;
+        }
 
         expect(provider.sort).to.deep.equal({ 'dc:coverage': 'asc' });
-        expect(restoreDefaultSort(provider)).to.be.true;
-        expect(provider.sort).to.equal(pageDefault);
+        expect(fetchStub.callCount).to.equal(1);
         fetchStub.restore();
         results.nxProvider = null;
       });
