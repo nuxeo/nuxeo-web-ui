@@ -19,7 +19,6 @@ import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/iron-localstorage/iron-localstorage.js';
 import '@polymer/iron-pages/iron-pages.js';
-import '@polymer/paper-button/paper-button.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
@@ -113,18 +112,14 @@ Polymer({
         height: calc(var(--nuxeo-results-view-height, calc(100vh - 130px - var(--nuxeo-app-top))) - 66px);
       }
 
-      .displayMode {
+      .displayMode,
+      .resetTable {
         @apply --nuxeo-action;
       }
 
-      .displayMode:hover {
+      .displayMode:hover,
+      .resetTable:hover {
         @apply --nuxeo-action-hover;
-      }
-
-      paper-button.resetTable {
-        margin: 0;
-        margin-inline-end: 8px;
-        white-space: nowrap;
       }
 
       .main {
@@ -235,19 +230,19 @@ Polymer({
           </template>
 
           <div class="rightHand">
-            <template is="dom-if" if="[[_canResetView(view, view.settingsEnabled)]]">
-              <paper-button
-                noink
-                class="primary small resetTable"
-                title$="[[i18n('results.resetTable')]]"
-                on-click="_resetView"
-                >[[i18n('results.resetTableButton')]]</paper-button
-              >
-            </template>
-
             <slot name="actions">
               <nuxeo-slot name="RESULTS_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
             </slot>
+
+            <template is="dom-if" if="[[_canResetView(view, view.settingsEnabled)]]">
+              <paper-icon-button
+                class="resetTable"
+                icon="icons:settings-backup-restore"
+                title$="[[i18n('results.resetTable')]]"
+                aria-label$="[[i18n('results.resetTable')]]"
+                on-click="_resetView"
+              ></paper-icon-button>
+            </template>
 
             <div class="viewModes">
               <template is="dom-repeat" items="[[_displayModes]]">
