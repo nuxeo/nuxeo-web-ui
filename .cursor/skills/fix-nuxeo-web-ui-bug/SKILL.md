@@ -27,7 +27,7 @@ gating to the [`nuxeo-web-ui-pr-checks`](../nuxeo-web-ui-pr-checks/SKILL.md) ski
 > before and after.** Never ask which format; always produce both.
 
 > **Core rule — every fix ships on BOTH bases.** For *every* fix, always create a new branch
-> from **`develop-2025`** *and* a new branch from **`develop-2023`** (the maintenance base),
+> from **`develop-2025`** *and* a new branch from **`develop-2023`** (the 2023 base),
 > each named with the ticket id (`<type>-WEBUI-<id>-<kebab-summary>-<base>`), and **raise a PR
 > for each**. Two branches, two PRs — never fix on only one base. (If the ticket's `fixVersions`
 > genuinely exclude a base, state that explicitly in your summary and skip it — no need to ask.)
@@ -36,7 +36,7 @@ Useful constants:
 - Atlassian cloudId: `252cce86-035e-4b0e-abd2-3c002935632f` (site `hyland.atlassian.net`)
 - Ready-for-QA checklist page: `4169400498` · Signed-commits guide: `4125330218`
 - Upstream repo: `nuxeo/nuxeo-web-ui` · bases: `develop-2025` and `develop-2023` (the dev branches;
-  `lts-2025` / `maintenance-3.1.x` are release-only and are not ticket PR targets)
+  `develop-2025` / `develop-2023` are release-only and are not ticket PR targets)
 
 ### Filesystem layout — write only inside these two roots
 Every file this skill creates belongs under one of these. Both are keyed by ticket id so a finished
@@ -292,8 +292,8 @@ bases (or a sibling `nuxeo-elements` checkout) live at the same time — a side-
 capture — create worktrees, and create them **under the ticket's `$WT` folder**:
 ```bash
 mkdir -p "$WT"
-git -C ~/Desktop/Projects/WebUI/nuxeo-web-ui   worktree add "$WT/webui-m31"    <branch-m31>
-git -C ~/Desktop/Projects/WebUI/nuxeo-elements worktree add "$WT/elements-lts" <branch-lts>
+git -C ~/Desktop/Projects/WebUI/nuxeo-web-ui   worktree add "$WT/webui-m31"    <branch-2023>
+git -C ~/Desktop/Projects/WebUI/nuxeo-elements worktree add "$WT/elements-lts" <branch-2025>
 ```
 Roles are `webui-lts`, `webui-m31`, `elements-lts`, `elements-m31`. This keeps every checkout for the
 ticket in one deletable folder instead of scattering `wt-<ticket>-*` directories across
@@ -566,7 +566,7 @@ and `-after.{png,mp4}`.
   drag-and-drop fallback so QA gets the recordings.
 
 ## Guardrails (these still hold in YOLO mode)
-- Never force-push to a shared branch (`develop-2025`, `develop-2023`, `lts-2025`, `maintenance-3.1.x`);
+- Never force-push to a shared branch (`develop-2025`, `develop-2023`, `develop-2025`, `develop-2023`);
   only to feature branches (`--force-with-lease`).
 - Never `git stash`, never git-write in the shared reference checkout, and never kill processes or
   containers by a pattern that could match another agent's run (Phase 1.5).

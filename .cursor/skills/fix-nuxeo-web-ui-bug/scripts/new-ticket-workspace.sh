@@ -40,7 +40,7 @@ set -euo pipefail
 
 # Ticket work targets the dev branches. The release branches stay accepted so an
 # already-merged fix or a hotfix can be reproduced against the code that actually shipped.
-BASES="develop-2025 develop-2023 lts-2025 maintenance-3.1.x maintenance-3.0.x"
+BASES="develop-2025 develop-2023 maintenance-3.0.x"
 
 die() {
   printf 'error: %s\n' "$*" >&2
@@ -173,8 +173,8 @@ ticket_num=$(printf '%s' "$TICKET" | tr -cd '[:digit:]')
 base_offset=0
 case "$BASE" in
   develop-2023) base_offset=1 ;;
-  lts-2025) base_offset=2 ;;
-  maintenance-3.1.x) base_offset=3 ;;
+  develop-2025) base_offset=2 ;;
+  develop-2023) base_offset=3 ;;
   maintenance-3.0.x) base_offset=4 ;;
 esac
 # Five consecutive ports per ticket (one per base), kept inside 8100..8849.

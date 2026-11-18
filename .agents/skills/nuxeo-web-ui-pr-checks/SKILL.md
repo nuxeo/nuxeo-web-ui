@@ -55,7 +55,7 @@ the lint gate, then commit the formatting changes.
 bash .cursor/skills/nuxeo-web-ui-pr-checks/scripts/pr-checks.sh && git push --force-with-lease origin HEAD
 ```
 
-Never force-push to a shared branch (`develop-2025`, `develop-2023`, `lts-2025`, `maintenance-3.1.x`)
+Never force-push to a shared branch (`develop-2025`, `develop-2023`, `develop-2025`, `develop-2023`)
 — only to the PR's feature branch.
 
 ## Common local gotchas
