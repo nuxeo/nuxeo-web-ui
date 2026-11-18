@@ -36,6 +36,28 @@ export const ANNOUNCEMENT_DIRECTORY_PATH = `directory/${ANNOUNCEMENT_DIRECTORY}`
 /** REST path used to read and update the one announcement entry. */
 export const ANNOUNCEMENT_ENTRY_PATH = `${ANNOUNCEMENT_DIRECTORY_PATH}/${ANNOUNCEMENT_ENTRY_ID}`;
 
+/**
+ * Picks the announcement out of a directory listing (`GET directory/webUIAnnouncement`).
+ *
+ * The banner reads the listing rather than the entry itself: on an instance where no administrator
+ * has saved an announcement yet, the entry does not exist, and asking for it by id answers 404 and
+ * makes the server log a WARN with a full stack trace on every page load (WEBUI-2449). The listing
+ * answers 200 with no entries instead.
+ *
+ * @param {Object} response the directory listing, `{ entries: [...] }`.
+ * @return {Object|null} the announcement entry, or `null` when none has been saved.
+ */
+export function findAnnouncementEntry(response) {
+  const entries = response != null && Array.isArray(response.entries) ? response.entries : [];
+  const found = entries.find(
+    (entry) =>
+      entry != null &&
+      (entry.id === ANNOUNCEMENT_ENTRY_ID ||
+        (entry.properties != null && entry.properties.id === ANNOUNCEMENT_ENTRY_ID)),
+  );
+  return found || null;
+}
+
 /** Event fired on `document` when an administrator saves the announcement. */
 export const ANNOUNCEMENT_UPDATED_EVENT = 'announcement-updated';
 
