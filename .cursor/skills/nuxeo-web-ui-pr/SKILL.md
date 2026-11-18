@@ -101,8 +101,8 @@ collects tickets until the release content is agreed:
 
 | LTS line | Base your PR on | Released through    |
 | -------- | --------------- | ------------------- |
-| LTS 2025 | `develop-2025`  | `lts-2025`          |
-| LTS 2023 | `develop-2023`  | `maintenance-3.1.x` |
+| LTS 2025 | `develop-2025`  | `develop-2025`          |
+| LTS 2023 | `develop-2023`  | `develop-2023` |
 
 **Default rule: every fix targets BOTH bases.** For each fix, create a branch off `develop-2025`
 *and* a branch off `develop-2023`, each named with the ticket id
@@ -110,7 +110,7 @@ collects tickets until the release content is agreed:
 Only skip a base when the Jira `fixVersions` explicitly exclude it — call that out.
 
 - Primary development: `develop-2025`.
-- Maintenance/backport: `develop-2023` (the repo default branch).
+- Backport: `develop-2023`.
 - Match the Jira `fixVersions`. When a fix targets multiple versions, open one PR per base.
   Backport by branching from the maintenance dev branch and cherry-picking the commit:
 
@@ -125,7 +125,7 @@ Ticket PRs are **squash**-merged. Only the dev → release merge and the release
 merge commit, and neither is part of ticket work.
 
 **Target a release branch only for a hotfix** to an already-released version. That path is
-unchanged: branch from `lts-2025` / `maintenance-3.1.x` and open the PR back into it.
+unchanged: branch from `develop-2025` / `develop-2023` and open the PR back into it.
 
 **Delete your branch once the PR is merged or closed.** Cross-repo CI pairs a Web UI PR with a
 `nuxeo-elements` branch of the *same name*, so an abandoned branch can be built in place of the one
@@ -176,5 +176,5 @@ git push origin HEAD
 ## Git safety
 
 - Never update git config; never force-push to a shared branch (`develop-2025`, `develop-2023`,
-  `lts-2025`, `maintenance-3.1.x`).
+  `develop-2025`, `develop-2023`).
 - Only commit when asked; keep the bug-fix PR focused (don't bundle unrelated files).
