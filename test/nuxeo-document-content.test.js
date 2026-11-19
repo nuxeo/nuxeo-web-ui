@@ -35,6 +35,33 @@ suite('nuxeo-document-content', () => {
     server.restore();
   });
 
+  suite('custom footer layout (WEBUI-2391)', () => {
+    test('reserves footer space without subtracting it from explicit custom heights', () => {
+      element.style.setProperty('--nuxeo-app-top', '100px');
+      element.style.setProperty('--nuxeo-app-bottom', '0px');
+      const probe = document.createElement('div');
+      const measure = () => {
+        probe.style.height = getComputedStyle(element.shadowRoot.querySelector('.results')).getPropertyValue(
+          '--nuxeo-results-view-height',
+        );
+        document.body.appendChild(probe);
+        const height = probe.getBoundingClientRect().height;
+        probe.remove();
+        return height;
+      };
+      const initialHeight = measure();
+      expect(initialHeight).to.be.greaterThan(0);
+      element.style.setProperty('--nuxeo-app-bottom', '100px');
+      expect(measure()).to.equal(initialHeight - 100);
+      element.style.setProperty('--nuxeo-app-bottom', '160px');
+      expect(measure()).to.equal(initialHeight - 160);
+      element.style.setProperty('--nuxeo-document-content-min-height', '420px');
+      expect(measure()).to.equal(420);
+      element.style.setProperty('--nuxeo-document-content-height', '380px');
+      expect(measure()).to.equal(380);
+      probe.remove();
+    });
+  });
   suite('initial state', () => {
     test('should default provider to advanced_document_content', () => {
       expect(element.provider).to.equal('advanced_document_content');
