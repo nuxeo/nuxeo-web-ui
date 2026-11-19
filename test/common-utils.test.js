@@ -15,7 +15,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { handleVerticalKeyNavigation, blurSelectionCheckOnPointerDeselect } from '../elements/common-utils.js';
+import {
+  handleVerticalKeyNavigation,
+  blurSelectionCheckOnPointerDeselect,
+  calendarDayInTimezone,
+} from '../elements/common-utils.js';
 
 suite('common-utils', () => {
   suite('handleVerticalKeyNavigation', () => {
@@ -133,6 +137,46 @@ suite('common-utils', () => {
 
     test('is a no-op when there is no host', () => {
       expect(() => blurSelectionCheckOnPointerDeselect(null, new MouseEvent('click'))).to.not.throw();
+    });
+  });
+
+  suite('calendarDayInTimezone', () => {
+    // 2026-01-20T03:00Z is still January 19 west of UTC-03:00 and already January 20 east of it.
+    const instant = '2026-01-20T03:00:00.000Z';
+
+    test('returns the calendar day of an instant in the given timezone', () => {
+      expect(calendarDayInTimezone(instant, 'America/New_York')).to.equal('2026-01-19');
+      expect(calendarDayInTimezone(instant, 'Etc/UTC')).to.equal('2026-01-20');
+      expect(calendarDayInTimezone(instant, 'Asia/Tokyo')).to.equal('2026-01-20');
+      expect(calendarDayInTimezone('2026-01-19T15:00:00.000Z', 'Asia/Tokyo')).to.equal('2026-01-20');
+      expect(calendarDayInTimezone('2026-01-20T10:30:00.000Z', 'Pacific/Kiritimati')).to.equal('2026-01-21');
+    });
+
+    test('keeps date-only strings unchanged', () => {
+      expect(calendarDayInTimezone('2026-01-20', 'Pacific/Pago_Pago')).to.equal('2026-01-20');
+    });
+
+    test('accepts Date objects, timestamps and padded zone ids', () => {
+      const date = new Date(instant);
+      expect(calendarDayInTimezone(date, ' America/New_York ')).to.equal('2026-01-19');
+      expect(calendarDayInTimezone(date.getTime(), 'Asia/Tokyo')).to.equal('2026-01-20');
+    });
+
+    test('uses the browser day without a timezone or with an unknown one', () => {
+      const local = new Date(instant);
+      const expected = [
+        String(local.getFullYear()),
+        String(local.getMonth() + 1).padStart(2, '0'),
+        String(local.getDate()).padStart(2, '0'),
+      ].join('-');
+      expect(calendarDayInTimezone(instant)).to.equal(expected);
+      expect(calendarDayInTimezone(instant, '')).to.equal(expected);
+      expect(calendarDayInTimezone(instant, 'Mars/Phobos')).to.equal(expected);
+    });
+
+    test('returns an empty day for missing or invalid dates', () => {
+      expect(calendarDayInTimezone(null, 'Asia/Tokyo')).to.equal('');
+      expect(calendarDayInTimezone('not a date', 'Asia/Tokyo')).to.equal('');
     });
   });
 });
