@@ -16,6 +16,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 import moment from '@nuxeo/moment';
+import { config } from '@nuxeo/nuxeo-elements';
+import { calendarDayInTimezone } from '../common-utils.js';
 
 // The three helpers below spell out `obj?.key`, `el?.getBoundingClientRect?.() ?? null` and the canvas lookup
 // of the resize snapshot, because the Designer catalog's analyzer cannot parse optional chaining.
@@ -278,14 +280,27 @@ export const ChartDataBehavior = {
     return `${heading}. ${points}`;
   },
 
+  /**
+   * Returns the last day of the range as a calendar day: the search reads a date-only upper bound as the whole day.
+   */
   _extendEndDate(date) {
-    if (date && moment) {
-      return this._formatDate(moment(date).add(1, 'days').subtract(1, 'ms').toJSON());
-    }
-    return date;
+    return date ? this._formatDate(date) : date;
   },
 
+  /**
+   * Returns the calendar day of a date (a picker value or a date-only string) in the Web UI timezone,
+   * so charts cover the days users pick and see.
+   */
   _formatDate(date) {
-    return moment(date).format('YYYY-MM-DD');
+    return calendarDayInTimezone(date, config.get('timezone'));
+  },
+
+  /**
+   * Returns the default analytics range: from one month ago up to today, in the Web UI timezone.
+   */
+  _defaultDateRange() {
+    const endDate = this._formatDate(new Date());
+    const startDate = moment(endDate, 'YYYY-MM-DD').locale('en').subtract(1, 'month').format('YYYY-MM-DD');
+    return { startDate, endDate };
   },
 };
