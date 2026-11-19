@@ -592,6 +592,225 @@ suite('nuxeo-results', () => {
     });
   });
 
+  suite('Reset Clears Stored Prefs (WEBUI-2178)', () => {
+    test('_saveViewSettings clears stored prefs instead of saving them on a reset', () => {
+      results._isRestoring = false;
+      results.displayMode = 'table';
+      results.view = createMockView({ settings: { order: ['dc:title'] } });
+      const clearStub = sinon.stub(results, '_clearViewSettings');
+      const saveSpy = sinon.spy(results, 'saveSettings');
+
+      results._saveViewSettings({ detail: { source: 'reset' } });
+
+      expect(clearStub).to.have.been.calledOnce;
+      expect(saveSpy).to.not.have.been.called;
+
+      clearStub.restore();
+      saveSpy.restore();
+    });
+
+    test('_saveViewSettings still saves for other settings-changed sources', () => {
+      results._isRestoring = false;
+      results.displayMode = 'grid';
+      results._settings = {};
+      results.view = createMockView({ settings: { density: 'compact' } });
+      const clearStub = sinon.stub(results, '_clearViewSettings');
+
+      results._saveViewSettings({ detail: { source: 'column-resize' } });
+
+      expect(clearStub).to.not.have.been.called;
+      clearStub.restore();
+    });
+
+    test('_clearViewSettings empties the local storage entry for the display mode', () => {
+      results._isRestoring = false;
+      results.displayMode = 'table';
+      results._settings = { displayMode: 'table', table: { columns: { 'dc:title': { width: '400px' } } } };
+      results.document = null;
+      const saveSpy = sinon.spy(results, 'saveSettings');
+
+      results._clearViewSettings();
+
+      expect(results._settings.table).to.deep.equal({});
+      expect(results._settings.displayMode).to.equal('table');
+      expect(saveSpy).to.have.been.called;
+      saveSpy.restore();
+    });
+
+    test('_clearViewSettings writes empty doc prefs in document context', () => {
+      results._isRestoring = false;
+      results.displayMode = 'table';
+      results._settings = {};
+      results.name = 'default';
+      results.document = { path: '/default-domain' };
+      const debounceStub = sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+      const saveDocStub = sinon.stub(results, 'saveDocPrefs').resolves();
+
+      results._clearViewSettings();
+
+      expect(saveDocStub).to.have.been.calledWith('/default-domain', 'documentPrefs.default', {});
+
+      debounceStub.restore();
+      saveDocStub.restore();
+      results.document = null;
+    });
+
+    test('_clearViewSettings writes empty global prefs for search providers', () => {
+      results._isRestoring = false;
+      results.displayMode = 'table';
+      results._settings = {};
+      results.document = null;
+      // _shouldUseGlobalPrefs is computed, so drive it through its inputs rather than assigning it.
+      const allPrefsStub = sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+      const provider = createMockProvider();
+      provider.provider = 'default_search';
+      results.nxProvider = provider;
+      const debounceStub = sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+      const saveGlobalStub = sinon.stub(results, 'saveGlobalResultsPrefs').resolves();
+
+      results._clearViewSettings();
+
+      expect(results._shouldUseGlobalPrefs).to.be.true;
+      expect(saveGlobalStub).to.have.been.calledWith({});
+
+      debounceStub.restore();
+      saveGlobalStub.restore();
+      allPrefsStub.restore();
+      results.nxProvider = null;
+    });
+
+    test('_clearViewSettings drops the in-session doc prefs before the debounced backend write', () => {
+      results._isRestoring = false;
+      results.displayMode = 'table';
+      results._settings = {};
+      results.name = 'default';
+      results._connectedUserId = 'jdoe';
+      results.document = { path: '/default-domain' };
+      results.docPrefs = { columns: { 'dc:title': { width: '620px' } } };
+      results.__hasBackendDocPrefs = true;
+      // Never run the backend call, so this asserts the state before it would have resolved.
+      const debounceStub = sinon.stub(results, '_debounceSave');
+
+      results._clearViewSettings();
+
+      expect(results.docPrefs).to.deep.equal({});
+      expect(results.__hasBackendDocPrefs).to.be.false;
+
+      // The module-level cache was cleared too, so re-loading does not resurrect the old prefs.
+      results.docPrefs = { columns: { 'dc:title': { width: '620px' } } };
+      results._loadDocPrefs(true, results.document, 'jdoe');
+      expect(results.docPrefs).to.deep.equal({});
+
+      debounceStub.restore();
+      results.document = null;
+      results._connectedUserId = null;
+    });
+
+    test('_clearViewSettings drops the in-session global prefs before the debounced backend write', () => {
+      results._isRestoring = false;
+      results.displayMode = 'table';
+      results._settings = {};
+      results.document = null;
+      results._connectedUserId = 'jdoe';
+      const allPrefsStub = sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+      const provider = createMockProvider();
+      provider.provider = 'default_search';
+      results.nxProvider = provider;
+      results.globalPrefs = { columns: { 'dc:title': { width: '620px' } } };
+      const debounceStub = sinon.stub(results, '_debounceSave');
+
+      results._clearViewSettings();
+
+      expect(results.globalPrefs).to.deep.equal({});
+
+      debounceStub.restore();
+      allPrefsStub.restore();
+      results.nxProvider = null;
+      results._connectedUserId = null;
+    });
+
+    test('_clearViewSettings logs and swallows a doc prefs backend failure', async () => {
+      results._isRestoring = false;
+      results.displayMode = 'table';
+      results._settings = {};
+      results.name = 'default';
+      results.document = { path: '/default-domain' };
+      const debounceStub = sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+      const saveDocStub = sinon.stub(results, 'saveDocPrefs').rejects(new Error('boom'));
+      const warnStub = sinon.stub(console, 'warn');
+
+      results._clearViewSettings();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(warnStub).to.have.been.calledWith(
+        'Failed to clear document results preferences in the backend',
+        sinon.match.object,
+      );
+
+      debounceStub.restore();
+      saveDocStub.restore();
+      warnStub.restore();
+      results.document = null;
+    });
+
+    test('_clearViewSettings logs and swallows a global prefs backend failure', async () => {
+      results._isRestoring = false;
+      results.displayMode = 'table';
+      results._settings = {};
+      results.document = null;
+      const allPrefsStub = sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+      const provider = createMockProvider();
+      provider.provider = 'default_search';
+      results.nxProvider = provider;
+      const debounceStub = sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+      const saveGlobalStub = sinon.stub(results, 'saveGlobalResultsPrefs').rejects(new Error('boom'));
+      const warnStub = sinon.stub(console, 'warn');
+
+      results._clearViewSettings();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(warnStub).to.have.been.calledWith(
+        'Failed to clear global results preferences in the backend',
+        sinon.match.instanceOf(Error),
+      );
+
+      debounceStub.restore();
+      saveGlobalStub.restore();
+      warnStub.restore();
+      allPrefsStub.restore();
+      results.nxProvider = null;
+    });
+
+    test('_clearViewSettings leaves the backend alone outside the table display mode', () => {
+      results._isRestoring = false;
+      results.displayMode = 'grid';
+      results._settings = {};
+      results.document = { path: '/default-domain' };
+      const saveDocStub = sinon.stub(results, 'saveDocPrefs').resolves();
+
+      results._clearViewSettings();
+
+      expect(saveDocStub).to.not.have.been.called;
+
+      saveDocStub.restore();
+      results.document = null;
+    });
+
+    test('_clearViewSettings does nothing while restoring', () => {
+      results._isRestoring = true;
+      results.displayMode = 'table';
+      results._settings = { table: { columns: {} } };
+      const saveSpy = sinon.spy(results, 'saveSettings');
+
+      results._clearViewSettings();
+
+      expect(saveSpy).to.not.have.been.called;
+
+      saveSpy.restore();
+      results._isRestoring = false;
+    });
+  });
+
   suite('Column Management', () => {
     test('updates columns when columns-changed event is fired', () => {
       const newColumns = [
