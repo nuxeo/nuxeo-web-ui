@@ -295,6 +295,22 @@ suite('nuxeo-vocabulary-management', () => {
     test('should return N/A when prop is empty', () => {
       expect(element._cellValue({ properties: { id: 'entry1' } }, '')).to.equal('N/A');
     });
+
+    test('should translate a label that holds an i18n key', () => {
+      element.i18n.callsFake((key) => (key === 'label.directories.continent.europe' ? 'Europe' : key));
+      const item = { properties: { id: 'europe', label: 'label.directories.continent.europe' } };
+      expect(element._cellValue(item, 'label')).to.equal('Europe');
+    });
+
+    test('should leave a label that is already plain text untouched', () => {
+      // Vocabularies added through Studio usually store readable text rather than a key. `i18n`
+      // echoes an unknown key back, so those labels have to survive the lookup unchanged.
+      expect(element._cellValue({ properties: { label: 'Finance' } }, 'label')).to.equal('Finance');
+    });
+
+    test('should return an empty label as-is instead of translating it', () => {
+      expect(element._cellValue({ properties: { label: '' } }, 'label')).to.equal('');
+    });
   });
 
   suite('_formattedFilterableValue', () => {
@@ -314,6 +330,16 @@ suite('nuxeo-vocabulary-management', () => {
     test('should return i18n yes/no for obsolete', () => {
       expect(element._formattedFilterableValue({ properties: { obsolete: 1 } }, 'obsolete')).to.equal('label.yes');
       expect(element._formattedFilterableValue({ properties: { obsolete: 0 } }, 'obsolete')).to.equal('label.no');
+    });
+
+    test('should translate a label that holds an i18n key', () => {
+      element.i18n.callsFake((key) => (key === 'label.directories.continent.europe' ? 'Europe' : key));
+      const entry = { properties: { label: 'label.directories.continent.europe' } };
+      expect(element._formattedFilterableValue(entry, 'label')).to.equal('Europe');
+    });
+
+    test('should leave a label that is already plain text untouched', () => {
+      expect(element._formattedFilterableValue({ properties: { label: 'Finance' } }, 'label')).to.equal('Finance');
     });
   });
 
@@ -443,6 +469,15 @@ suite('nuxeo-vocabulary-management', () => {
     test('should return an empty object when inputs are not arrays', () => {
       expect(element._computeAggregations(null, [{ key: 'id' }])).to.deep.equal({});
       expect(element._computeAggregations([], null)).to.deep.equal({});
+    });
+
+    test('should bucket labels by their translation so the filter matches what the cells show', () => {
+      // Buckets and cells both go through `_formattedFilterableValue`. If they ever diverged,
+      // picking a bucket in the Label filter would match no row at all.
+      element.i18n.callsFake((key) => (key === 'label.directories.continent.europe' ? 'Europe' : key));
+      const entries = [{ properties: { label: 'label.directories.continent.europe' } }];
+      const aggs = element._computeAggregations(entries, [{ key: 'label' }]);
+      expect(aggs.label.extendedBuckets).to.deep.equal([{ key: 'Europe', label: 'Europe', docCount: 1 }]);
     });
   });
 
@@ -767,6 +802,167 @@ suite('nuxeo-vocabulary-management', () => {
       fresh._visibleChanged();
       await fresh.$.directory.get.returnValues[0];
       expect(fresh.vocabularies).to.deep.equal(entries);
+    });
+
+    test('should sort vocabularies by their label rather than by their id', async () => {
+      const fresh = await fixture(html`<nuxeo-vocabulary-management></nuxeo-vocabulary-management>`);
+      // `zeta` sorts last by id but first by label, so this order can only come from the label.
+      const labels = { 'vocabulary.zeta': 'Alpha', 'vocabulary.alpha': 'Zeta' };
+      sinon.stub(fresh, 'i18n').callsFake((key) => labels[key] || key);
+      const entries = [
+        { name: 'alpha', schema: 's', parent: '' },
+        { name: 'zeta', schema: 's', parent: '' },
+      ];
+      sinon.stub(fresh.$.directory, 'get').resolves({ entries });
+      fresh.visible = true;
+      fresh._visibleChanged();
+      await fresh.$.directory.get.returnValues[0];
+      expect(fresh.vocabularies.map((v) => v.name)).to.deep.equal(['zeta', 'alpha']);
+    });
+
+    test('should fall back to sorting by id when no label is contributed', async () => {
+      const fresh = await fixture(html`<nuxeo-vocabulary-management></nuxeo-vocabulary-management>`);
+      sinon.stub(fresh, 'i18n').callsFake((key) => key);
+      const entries = [
+        { name: 'zeta', schema: 's', parent: '' },
+        { name: 'alpha', schema: 's', parent: '' },
+      ];
+      sinon.stub(fresh.$.directory, 'get').resolves({ entries });
+      fresh.visible = true;
+      fresh._visibleChanged();
+      await fresh.$.directory.get.returnValues[0];
+      expect(fresh.vocabularies.map((v) => v.name)).to.deep.equal(['alpha', 'zeta']);
+    });
+  });
+
+  suite('_vocabularyLabel', () => {
+    test('should return the translation contributed for the vocabulary id', () => {
+      element.i18n.callsFake((key) => (key === 'vocabulary.l10ncoverage' ? 'Coverage' : key));
+      expect(element._vocabularyLabel('l10ncoverage')).to.equal('Coverage');
+    });
+
+    test('should fall back to the id when no translation is contributed', () => {
+      // Vocabularies added through Studio have no `vocabulary.<id>` key. Leaking the key itself
+      // into the dropdown would read worse than the id this change set out to replace.
+      expect(element._vocabularyLabel('myVocabulary')).to.equal('myVocabulary');
+    });
+
+    test('should return an empty string when there is no name', () => {
+      expect(element._vocabularyLabel('')).to.equal('');
+      expect(element._vocabularyLabel(undefined)).to.equal('');
+    });
+  });
+
+  suite('_translate', () => {
+    test('should return the translation when one is contributed', () => {
+      element.i18n.callsFake((key) => (key === 'some.key' ? 'Some label' : key));
+      expect(element._translate('some.key', 'fallback')).to.equal('Some label');
+    });
+
+    test('should return the fallback when i18n echoes the key back', () => {
+      expect(element._translate('some.key', 'fallback')).to.equal('fallback');
+    });
+  });
+
+  suite('_onLocaleLoaded', () => {
+    test('should re-sort the picker when translations arrive after the vocabularies', () => {
+      element.vocabularies = [{ name: 'alpha' }, { name: 'zeta' }];
+      // Translations land late and invert the order: `zeta` reads "Alpha" and has to move first.
+      const labels = { 'vocabulary.zeta': 'Alpha', 'vocabulary.alpha': 'Zeta' };
+      element.i18n.callsFake((key) => labels[key] || key);
+      element._onLocaleLoaded();
+      expect(element.vocabularies.map((v) => v.name)).to.deep.equal(['zeta', 'alpha']);
+    });
+
+    test('should re-derive Label cells and filter buckets when translations arrive late', () => {
+      element.colDef = [{ key: 'label' }];
+      element._allEntries = [{ properties: { id: 'europe', label: 'label.directories.continent.europe' } }];
+      // Buckets were built from the untranslated key before the locale landed.
+      expect(element._aggregations.label.extendedBuckets[0].key).to.equal('label.directories.continent.europe');
+
+      element.i18n.callsFake((key) => (key === 'label.directories.continent.europe' ? 'Europe' : key));
+      element._onLocaleLoaded();
+
+      expect(element._aggregations.label.extendedBuckets[0].key).to.equal('Europe');
+      expect(element._cellValue(element.entries[0], 'label')).to.equal('Europe');
+    });
+
+    test('should do nothing when neither vocabularies nor entries have loaded', () => {
+      element.vocabularies = undefined;
+      element._allEntries = [];
+      expect(() => element._onLocaleLoaded()).to.not.throw();
+    });
+
+    test('should clear an active Label selection when translations arrive and preserve other filters', async () => {
+      sinon.stub(element, '_refresh');
+      element.selectedVocabulary = 'continent';
+      element.colDef = [
+        { key: 'id', name: 'ID' },
+        { key: 'label', name: 'Label' },
+      ];
+      const entries = [
+        { properties: { id: 'europe', label: 'label.directories.continent.europe' } },
+        { properties: { id: 'asia', label: 'label.directories.continent.asia' } },
+      ];
+      element._allEntries = entries;
+      element._applyFilters();
+      await flush();
+
+      const table = element.$$('#table');
+      const columns = Array.from(table.querySelectorAll('nuxeo-data-table-column'));
+      const labelColumn = columns.find((column) => column.key === 'label');
+      const idColumn = columns.find((column) => column.key === 'id');
+      idColumn.filterValue = ['europe'];
+      labelColumn.filterValue = ['label.directories.continent.europe'];
+      await flush();
+      expect(element._filters).to.deep.equal({
+        id: ['europe'],
+        label: ['label.directories.continent.europe'],
+      });
+      expect(element.entries).to.deep.equal([entries[0]]);
+      const labelDropdown = Array.from(table.querySelectorAll('nuxeo-dropdown-aggregation')).find(
+        (dropdown) => dropdown.closest('nuxeo-data-table-cell')?.column?.key === 'label',
+      );
+      expect(labelDropdown.value).to.deep.equal(['label.directories.continent.europe']);
+
+      element.i18n.callsFake((key) => (key === 'label.directories.continent.europe' ? 'Europe' : key));
+      element._onLocaleLoaded();
+      await flush();
+
+      expect(element._filters).to.deep.equal({ id: ['europe'] });
+      expect(labelColumn.filterValue).to.deep.equal([]);
+      expect(labelDropdown.value).to.deep.equal([]);
+      expect(idColumn.filterValue).to.deep.equal(['europe']);
+      expect(element.entries).to.deep.equal([entries[0]]);
+      expect(element._aggregations.label.extendedBuckets.some((bucket) => bucket.key === 'Europe')).to.be.true;
+      expect(entries[0].properties.label).to.equal('label.directories.continent.europe');
+
+      labelColumn.filterValue = ['Europe'];
+      await flush();
+      expect(element._filters.label).to.deep.equal(['Europe']);
+      expect(element.entries).to.deep.equal([entries[0]]);
+    });
+
+    test('should clear a Label text filter even when the table has not rendered', () => {
+      element._allEntries = [{ properties: { id: 'europe', label: 'label.directories.continent.europe' } }];
+      element._filters = { label: 'label.directories.continent' };
+      element._applyFilters();
+      expect(element.entries).to.have.lengthOf(1);
+
+      element.i18n.callsFake((key) => (key === 'label.directories.continent.europe' ? 'Europe' : key));
+      element._onLocaleLoaded();
+
+      expect(element._filters).to.deep.equal({});
+      expect(element.entries).to.have.lengthOf(1);
+    });
+  });
+
+  suite('_sortedVocabularies', () => {
+    test('should not mutate the array it is given', () => {
+      const entries = [{ name: 'zeta' }, { name: 'alpha' }];
+      const sorted = element._sortedVocabularies(entries);
+      expect(entries.map((v) => v.name)).to.deep.equal(['zeta', 'alpha']);
+      expect(sorted.map((v) => v.name)).to.deep.equal(['alpha', 'zeta']);
     });
   });
 
