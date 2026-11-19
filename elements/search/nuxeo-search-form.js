@@ -250,19 +250,21 @@ Polymer({
       }
 
       .list-item:hover {
-        @apply --hyland-drawer-item-selected;
+        @apply --hyland-drawer-item-hover;
       }
 
       /* Only the selected row carries the selected background. Plain focus must not, or a row
          left focused behind a selection that moved on its own - the queue now follows the
          displayed document - keeps looking selected and two rows appear highlighted at once
-         (WEBUI-2301). Keyboard focus stays visible through the focus-visible ring below. */
+         (WEBUI-2301). A row also keeps DOM focus after a mouse click. Keyboard focus stays
+         visible through the focus-visible ring below. */
       .list-item.selected {
         @apply --hyland-drawer-item-selected;
       }
+
       .list-item:focus {
-          border-radius: 54px;
-          outline: 0;
+        border-radius: 54px;
+        outline: 0;
       }
 
         /* Keyboard focus ring: --hyland-drawer-item-selected removes outline, so we apply
