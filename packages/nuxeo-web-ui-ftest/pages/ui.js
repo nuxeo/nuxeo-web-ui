@@ -277,6 +277,21 @@ export default class UI extends BasePage {
   }
 
   get filterView() {
-    return this.el.$('paper-icon-button[id="toogleFilter"]');
+    return this._displayedSearchViewTab('toogleFilter');
+  }
+
+  get queueView() {
+    return this._displayedSearchViewTab('toogleQueue');
+  }
+
+  async _displayedSearchViewTab(id) {
+    // Every search form renders its view tabs, so pick the one in the open drawer.
+    const tabs = await this.el.$$(`#${id}`);
+    for (const tab of tabs) {
+      if (await tab.isDisplayed()) {
+        return tab;
+      }
+    }
+    return this.el.$(`#${id}`);
   }
 }
