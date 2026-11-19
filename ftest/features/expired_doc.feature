@@ -18,6 +18,13 @@ Feature: Expired Document
       | subjects     | Gastronomy,Comics |
       | expired      | February 28, 2018 |
     When I click the "expiredSearch" button
-    And I switch to filter view
-    And I perform a fulltext search for File on expiredSearch
-    Then I can see 1 search results 
+    Then I can see the queue view on expiredSearch
+    When I switch to filter view
+    Then I can see the search criteria view on expiredSearch
+    When I perform a fulltext search for File on expiredSearch
+    Then I can see 1 search results
+    When I switch to queue view
+    Then I can see the queue view on expiredSearch
+    When I switch to filter view
+    Then I can see the search criteria view on expiredSearch
+    And I can see 1 search results
