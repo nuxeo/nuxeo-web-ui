@@ -34,6 +34,17 @@ suite('nuxeo-default-results', () => {
     server.restore();
   });
 
+  suite('table preference options (WEBUI-1380)', () => {
+    test('passes prefs-scope and prefs-layout to the results table', () => {
+      const results = element.shadowRoot.querySelector('nuxeo-results');
+      expect(results.prefsScope).to.equal('layout');
+      element.prefsScope = 'document';
+      element.prefsLayout = 'case-notes';
+      expect(results.prefsScope).to.equal('document');
+      expect(results.prefsLayout).to.equal('case-notes');
+    });
+  });
+
   suite('initial state', () => {
     test('should default _lastIndex to 0', () => {
       expect(element._lastIndex).to.equal(0);
