@@ -663,36 +663,45 @@ Polymer({
     }
   },
 
+  // The "Sort by" option sets of the results: their own, and those a view declares, which _sortOptions() still uses
+  // for the view shown.
+  _sortOptionSets() {
+    const sets = [this.sortOptions];
+    const views = (this.$.views && this.$.views.items) || [];
+    views.forEach((view) => sets.push(view.sortOptions));
+    return sets.filter((options, idx) => Array.isArray(options) && sets.indexOf(options) === idx);
+  },
+
   // Remembers the order each "Sort by" option declares, before the user reverses it, so Reset Layout can restore it.
   _rememberSortOrders() {
-    const options = this._sortOptions();
-    if (!Array.isArray(options)) {
-      return;
-    }
     if (!this.__declaredSortOrders) {
       this.__declaredSortOrders = new WeakMap();
     }
-    options.forEach((option) => {
-      if (option && !this.__declaredSortOrders.has(option)) {
-        this.__declaredSortOrders.set(option, option.order);
-      }
+    this._sortOptionSets().forEach((options) => {
+      options.forEach((option) => {
+        if (option && !this.__declaredSortOrders.has(option)) {
+          this.__declaredSortOrders.set(option, option.order);
+        }
+      });
     });
   },
 
   // Puts the "Sort by" selector of the grid and list views back to its default option, with the order each option
   // declares, as on a fresh load: Reset Layout in the table already gave the results their default order
-  // (ELEMENTS-2017). Nothing is fetched.
+  // (ELEMENTS-2017). Every option set gets its declared orders back, including those of a grid or list view that is not
+  // shown while the table is reset. Nothing is fetched.
   _resetSortSelection() {
-    const options = this._sortOptions();
-    if (!Array.isArray(options) || options.length === 0) {
-      return;
-    }
-    options.forEach((option) => {
-      if (option && this.__declaredSortOrders && this.__declaredSortOrders.has(option)) {
-        option.order = this.__declaredSortOrders.get(option);
-      }
+    this._sortOptionSets().forEach((optionSet) => {
+      optionSet.forEach((option) => {
+        if (option && this.__declaredSortOrders && this.__declaredSortOrders.has(option)) {
+          option.order = this.__declaredSortOrders.get(option);
+        }
+      });
     });
-    const defaultOption = options.find((option) => option && option.selected) || null;
+    // The view shown may have no options of its own, e.g. the table when the grid declares them: the selection is then
+    // cleared, and the selector picks the default option again when it shows them.
+    const options = this._sortOptions();
+    const defaultOption = (Array.isArray(options) && options.find((option) => option && option.selected)) || null;
     this.__resettingSortSelection = true;
     try {
       // A selector already rendered selects the option again even when it shows it, so its order arrow follows too.

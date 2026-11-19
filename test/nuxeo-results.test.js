@@ -731,6 +731,46 @@ suite('nuxeo-results', () => {
         sortChangedStub.restore();
       });
 
+      test('Reset Layout also restores the options a grid view declares, while the table is shown', async () => {
+        const viewResults = await fixture(html`
+          <nuxeo-results name="view-options">
+            <div name="grid"></div>
+            <div name="table"></div>
+          </nuxeo-results>
+        `);
+        await flush();
+        const [grid] = viewResults.$.views.items;
+        const options = sortOptions();
+        const [title, , coverage] = options;
+        viewResults.displaySort = true;
+        viewResults.displayMode = 'table';
+        await flush();
+        // the grid declares its options, which the selector shows once the grid is
+        grid.sortOptions = options;
+        viewResults.displayMode = 'grid';
+        await flush();
+        expect(viewResults.sortSelected === title).to.be.true;
+        // in the grid, the user picked Coverage and reversed it, and had reversed Title before
+        viewResults.sortSelected = coverage;
+        coverage.order = 'desc';
+        title.order = 'desc';
+        viewResults.displayMode = 'table';
+        await flush();
+        const sortChangedStub = sinon.stub(viewResults, '_sortChanged');
+
+        viewResults._saveViewSettings({ detail: { source: 'reset-layout' } });
+
+        expect(options.map((option) => option.order)).to.deep.equal(['asc', 'desc', 'asc']);
+        // the table has no options of its own: the grid shows its default option again when it is back
+        expect(viewResults.sortSelected == null).to.be.true;
+        viewResults.displayMode = 'grid';
+        await flush();
+        expect(viewResults._sortOptions() === options).to.be.true;
+        expect(viewResults.sortSelected === title).to.be.true;
+        expect(sortChangedStub.callCount).to.equal(0);
+        sortChangedStub.restore();
+      });
+
       test('Reset Layout leaves results without a "Sort by" selector alone', () => {
         results.sortOptions = [];
         results.view = createMockView({ settings: {} });
