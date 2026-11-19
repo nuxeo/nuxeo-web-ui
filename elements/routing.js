@@ -140,6 +140,13 @@ page('/browse', () => {
 // other regex route below. Unanchored, a path such as `/admin/browse/x` matched here and
 // was loaded as a browse path, because page() tries routes in registration order.
 page(/^\/browse\/([\s\S]*)/, (data) => {
+  const restoredPath = app.restoredPathFor(`/${data.params[0]}`);
+  if (restoredPath) {
+    // a URL of a trashed document that has since been restored, left in the browser history (WEBUI-2345)
+    const query = data.querystring ? `?${data.querystring}` : '';
+    page.redirect(app.router.browse(restoredPath) + query);
+    return;
+  }
   if (!data.state.contentView) {
     app.currentContentView = null;
   }
@@ -273,26 +280,47 @@ app.router = {
     return `/${name}`;
   },
 
-  navigate: (path) => {
+  // The route being shown. page.js sets it synchronously whenever a route is dispatched (documents, tasks, home...),
+  // before whatever that route loads has arrived, unlike the app's displayed page and document.
+  currentPath: () => page.current,
+
+  // `options.replace` swaps the current history entry instead of adding one, for when the current URL
+  // is about to stop resolving and browser Back must not return to it.
+  navigate: (path, options) => {
     if (path == null) {
       return;
     }
+    const replace = !!(options && options.replace);
+    const show = (route) => {
+      if (!replace) {
+        page(route);
+        return;
+      }
+      // page.js only counts pushed entries, and the search route reads `page.len === 0` as "opened directly".
+      // A replace is still an in-app navigation, so count it to keep that check unchanged.
+      page.len += 1;
+      page.replace(route);
+    };
     const isFullpath = /^http(s)?:\/\//.test(path);
     if (isFullpath) {
       const clientPath = sameRepositoryClientPath(path);
       if (clientPath != null) {
-        page(clientPath);
+        show(clientPath);
         return;
       }
       const isValidUrl = isTrustedDomain(path);
       if (isValidUrl) {
         const encodepath = encodeQueryParams(path);
+        if (replace) {
+          globalThis.location.replace(encodepath);
+          return;
+        }
         const link = document.createElement('a');
         link.setAttribute('href', encodepath);
         link.click();
       }
     } else {
-      page(path);
+      show(path);
     }
   },
 };
