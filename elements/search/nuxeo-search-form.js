@@ -393,6 +393,7 @@ Polymer({
           <nuxeo-data-list
             nx-provider="provider"
             id="list"
+            on-nuxeo-page-loaded="_queuePageLoaded"
             selected-item="{{selectedDocument}}"
             empty-label="[[i18n('searchForm.queue.noResults')]]"
             empty-label-when-filtered
@@ -786,6 +787,10 @@ Polymer({
       if (restoreSelection) {
         selectedUid = this.selectedDocument != null ? this.selectedDocument.uid : undefined;
       }
+      if (typeof index === 'number') {
+        // An explicit index is the caller's own selection and wins over a pending replay.
+        this.__queueSelectionPending = false;
+      }
       this.$.list.fetch().then(() => {
         if (typeof index === 'number') {
           const targetIndex = this._queueIndexOf(selectedUid, index);
@@ -848,8 +853,43 @@ Polymer({
     }
     // The list is guarded because `currentDocument` is bound from the host and can be pushed in
     // before the template is stamped, and `queue` is set as an attribute on some search forms.
+    // Such a form can be handed the document while still un-fetched, and an observer only runs
+    // on a change, so ask the next queue load to replay the lookup instead (WEBUI-2303).
+    if (!(this.$ && this.$.list && this.$.list.items && this.$.list.items.length)) {
+      this.__queueSelectionPending = true;
+      return;
+    }
+    // The entries are already in, so this lookup is the synchronisation a replay would have run.
+    // Spend a flag armed earlier against an empty queue, otherwise a later fetch could
+    // re-select the displayed document after a deliberate clear.
+    this.__queueSelectionPending = false;
+    this._selectCurrentDocumentInQueue();
+  },
+
+  _queuePageLoaded() {
+    // The list reports `nuxeo-page-loaded` only for a response that actually filled it: its own
+    // fetch, or the shared page provider fetching for the results view. An aborted request is not
+    // reported, so the replay cannot be spent against a queue that is still empty, and nothing here
+    // waits on a caller's promise, which a superseded or debounced fetch may never settle.
+    this._selectPendingCurrentDocument();
+  },
+
+  _selectPendingCurrentDocument() {
+    // Replay once, never after every fetch: sort, column filter and a new search each clear the
+    // selection and then fetch, and re-selecting there would fight them (WEBUI-2303). Keep it armed
+    // while the filters view is showing, since nothing can be highlighted there.
+    if (!this.__queueSelectionPending || !this.queue) {
+      return;
+    }
+    this.__queueSelectionPending = false;
+    this._selectCurrentDocumentInQueue();
+  },
+
+  _selectCurrentDocumentInQueue() {
+    // Read `currentDocument` fresh: the route may have moved on since the replay was armed.
+    const doc = this.currentDocument;
     const list = this.$ != null ? this.$.list : undefined;
-    if (!list) {
+    if (!this.queue || !(doc && doc.uid) || !list) {
       return;
     }
     // Nothing to do when the displayed document is already the selected one. This guard matters:
@@ -870,10 +910,10 @@ Polymer({
       list.clearSelection();
       list.selectIndex(index);
       // Selecting writes `selectedDocument`, which schedules `_selectedDocChanged`'s debounced
-      // navigation. This observer must only ever move the highlight: the route already shows this
-      // document. Leaving the timer armed lets it fire after a later host-driven `currentDocument`
-      // change that is not in the queue, navigating back to the stale document and overriding the
-      // external navigation.
+      // navigation. Following the route must only ever move the highlight: the route already
+      // shows this document. Leaving the timer armed lets it fire after a later host-driven
+      // `currentDocument` change that is not in the queue, navigating back to the stale document
+      // and overriding the external navigation.
       if (this.__renderDebouncer) {
         this.__renderDebouncer.cancel();
       }
