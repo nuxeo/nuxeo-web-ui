@@ -1322,7 +1322,6 @@
   "repositoryAnalytics.topNCreators.heading": "Top {0} Creators",
   "results.heading.count": "{0} result(s)",
   "results.heading.count.unknown": "Many results",
-  "results.resetTable": "Reset table layout (column visibility, order and width, sorting and filters)",
   "results.sortBy": "Sort by",
   "searchAnalytics.callsPerHour.heading": "Calls per Hour",
   "searchAnalytics.callsPerPageProvider.heading": "Calls per PageProvider",
