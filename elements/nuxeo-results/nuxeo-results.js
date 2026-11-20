@@ -468,6 +468,7 @@ Polymer({
 
   observers: [
     '_selectAllChanged(view)',
+    '_rememberSortOrders(view, sortOptions)',
     '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns.*, document, view.*)',
 
     // doc prefs (auto)
@@ -638,15 +639,80 @@ Polymer({
     if (this.sortSelected && this.nxProvider) {
       const sort = {};
       sort[this.sortSelected.field] = this.sortSelected.order;
-      this.nxProvider.sort = sort;
+      this._applyUserSort(sort);
       this.fetch();
     }
   },
 
+  // Gives the page provider a sort chosen with the "Sort by" selector. With an Elements build that provides
+  // Nuxeo.UserSort (ELEMENTS-2017), the sort is recorded as the user's, so Reset Layout in the table gives the provider
+  // its sort from before back; an older build just gets the sort, as before.
+  _applyUserSort(sort) {
+    const userSort = Nuxeo.UserSort;
+    if (userSort && typeof userSort.applyUserSort === 'function') {
+      userSort.applyUserSort(this.nxProvider, sort);
+    } else {
+      this.nxProvider.sort = sort;
+    }
+  },
+
   _sortSelectedChanged(newSort, oldSort) {
-    // do not trigger fetch results when sort options are being initialized
-    if (newSort && oldSort) {
+    // do not trigger fetch results when sort options are being initialized, nor when Reset Layout puts them back
+    if (newSort && oldSort && !this.__resettingSortSelection) {
       this._sortChanged();
+    }
+  },
+
+  // The "Sort by" option sets of the results: their own, and those a view declares, which _sortOptions() still uses
+  // for the view shown.
+  _sortOptionSets() {
+    const sets = [this.sortOptions];
+    const views = (this.$.views && this.$.views.items) || [];
+    views.forEach((view) => sets.push(view.sortOptions));
+    return sets.filter((options, idx) => Array.isArray(options) && sets.indexOf(options) === idx);
+  },
+
+  // Remembers the order each "Sort by" option declares, before the user reverses it, so Reset Layout can restore it.
+  _rememberSortOrders() {
+    if (!this.__declaredSortOrders) {
+      this.__declaredSortOrders = new WeakMap();
+    }
+    this._sortOptionSets().forEach((options) => {
+      options.forEach((option) => {
+        if (option && !this.__declaredSortOrders.has(option)) {
+          this.__declaredSortOrders.set(option, option.order);
+        }
+      });
+    });
+  },
+
+  // Puts the "Sort by" selector of the grid and list views back to its default option, with the order each option
+  // declares, as on a fresh load: Reset Layout in the table already gave the results their default order
+  // (ELEMENTS-2017). Every option set gets its declared orders back, including those of a grid or list view that is not
+  // shown while the table is reset. Nothing is fetched.
+  _resetSortSelection() {
+    this._sortOptionSets().forEach((optionSet) => {
+      optionSet.forEach((option) => {
+        if (option && this.__declaredSortOrders && this.__declaredSortOrders.has(option)) {
+          option.order = this.__declaredSortOrders.get(option);
+        }
+      });
+    });
+    // The view shown may have no options of its own, e.g. the table when the grid declares them: the selection is then
+    // cleared, and the selector picks the default option again when it shows them.
+    const options = this._sortOptions();
+    const defaultOption = (Array.isArray(options) && options.find((option) => option && option.selected)) || null;
+    this.__resettingSortSelection = true;
+    try {
+      // A selector already rendered selects the option again even when it shows it, so its order arrow follows too.
+      const selector = this.shadowRoot.querySelector('nuxeo-sort-select');
+      if (selector) {
+        selector.selected = null;
+        selector.selected = defaultOption;
+      }
+      this.sortSelected = defaultOption;
+    } finally {
+      this.__resettingSortSelection = false;
     }
   },
 
@@ -1013,34 +1079,45 @@ Polymer({
     this.view.notifyResize();
   },
 
-  _saveViewSettings() {
-    if (this.view.settings && !this._isRestoring) {
-      this.set('_settings.displayMode', this.displayMode);
+  _saveViewSettings(e) {
+    // Reset Layout, in the layout settings dialog of the table, also gave the results their default order: put the
+    // "Sort by" selector back too. The settings the reset left are then saved as for any other change (ELEMENTS-2017).
+    if (e && e.detail && e.detail.source === 'reset-layout') {
+      this._resetSortSelection();
+    }
+    // The settings, and where they go, are taken now: the backend saves below run after a delay, by when the view, the
+    // display mode or the results shown may have changed (WEBUI-2178).
+    const { settings } = this.view;
+    const { displayMode } = this;
+    if (settings && !this._isRestoring) {
+      this.set('_settings.displayMode', displayMode);
       this.saveSettings();
 
-      const isSettingsView = this.displayMode === 'table';
+      const isSettingsView = displayMode === 'table';
 
       // ---- doc level (content views) ----
       if (isSettingsView && this.document && this.document.path) {
+        const docPath = this.document.path;
         const docKey = this._getDocResultsPrefsKey();
-        this._debounceSave('_docPrefsSaveDebouncer', () => {
+        const destination = this._docPrefsDestination(docPath, docKey);
+        const isShown = () => !!this.document && this.document.path === docPath;
+        this._rememberLatestTableSettings(destination, settings);
+        this._debounceSaveTo('_docPrefsSaveDebouncer', destination, () => {
           // Save to backend (primary)
-          this.saveDocPrefs(this.document.path, docKey, this.view.settings)
+          this.saveDocPrefs(docPath, docKey, settings)
             .then(() => {
               // Sync to localStorage on success (fallback cache)
-              this.set(`_settings.${this.displayMode}`, this.view.settings);
-              this.saveSettings();
+              this._syncLocalTableSettings(destination, settings, isShown());
             })
             .catch((error) => {
               // eslint-disable-next-line no-console
               console.warn('Failed to save document results preferences to backend, syncing to localStorage only', {
-                path: this.document && this.document.path,
+                path: docPath,
                 key: docKey,
                 error,
               });
               // Fallback: save to localStorage even if backend fails
-              this.set(`_settings.${this.displayMode}`, this.view.settings);
-              this.saveSettings();
+              this._syncLocalTableSettings(destination, settings, isShown());
             });
         });
         return;
@@ -1048,20 +1125,22 @@ Polymer({
 
       // ---- global level (search providers) ----
       if (isSettingsView && this._shouldUseGlobalPrefs) {
-        this._debounceSave('_prefsSaveDebouncer', () => {
+        const providerName = this._getProviderName(this.nxProvider);
+        const destination = this._globalPrefsDestination(providerName);
+        const isShown = () => this._getProviderName(this.nxProvider) === providerName;
+        this._rememberLatestTableSettings(destination, settings);
+        this._debounceSaveTo('_prefsSaveDebouncer', destination, () => {
           // Save to backend (primary)
-          this.saveGlobalResultsPrefs(this.view.settings)
+          this.saveGlobalResultsPrefs(settings, providerName)
             .then(() => {
               // Sync to localStorage on success (fallback cache)
-              this.set(`_settings.${this.displayMode}`, this.view.settings);
-              this.saveSettings();
+              this._syncLocalTableSettings(destination, settings, isShown());
             })
             .catch((error) => {
               // eslint-disable-next-line no-console
               console.warn('Failed to save global results preferences to backend, syncing to localStorage only', error);
               // Fallback: save to localStorage even if backend fails
-              this.set(`_settings.${this.displayMode}`, this.view.settings);
-              this.saveSettings();
+              this._syncLocalTableSettings(destination, settings, isShown());
             });
         });
         return;
@@ -1069,9 +1148,46 @@ Polymer({
 
       // ---- localStorage only (anonymous users, no backend prefs available) ----
       // This branch runs when neither doc nor global prefs are applicable
-      this.set(`_settings.${this.displayMode}`, this.view.settings);
+      this.set(`_settings.${displayMode}`, settings);
       this.saveSettings();
     }
+  },
+
+  // Where table settings are saved: a document preference, or the global preference of a page provider (WEBUI-2178).
+  _docPrefsDestination(docPath, key) {
+    return `doc\n${docPath}\n${key}`;
+  },
+
+  _globalPrefsDestination(providerName) {
+    return `provider\n${providerName}`;
+  },
+
+  // Remembers the table settings last reported for a destination, so a save to it that ends after a newer change can
+  // tell it is outdated (WEBUI-2178).
+  _rememberLatestTableSettings(destination, settings) {
+    if (!this.__latestTableSettings) {
+      this.__latestTableSettings = {};
+    }
+    this.__latestTableSettings[destination] = JSON.stringify(settings);
+  },
+
+  // Whether table settings saved to a destination still are the latest the table reported for it. A save that ends
+  // after a newer change there must not apply its older settings to the table again, as that would undo the change,
+  // e.g. a Reset Layout; changes saved elsewhere, e.g. to another document, do not count (WEBUI-2178).
+  _isLatestTableSettings(destination, settings) {
+    const latest = this.__latestTableSettings && this.__latestTableSettings[destination];
+    return latest === undefined || latest === JSON.stringify(settings);
+  },
+
+  // Keeps the local copy of the table settings in step with a backend save, as long as the results still show where the
+  // settings were saved and the table did not change there since: the save of that change updates the copy
+  // (WEBUI-2178).
+  _syncLocalTableSettings(destination, settings, stillShown) {
+    if (!stillShown || !this._isLatestTableSettings(destination, settings)) {
+      return;
+    }
+    this.set('_settings.table', settings);
+    this.saveSettings();
   },
 
   _providerChanged(provider, oldProvider) {
@@ -1372,6 +1488,40 @@ Polymer({
     this[debouncerField] = Debouncer.debounce(this[debouncerField], timeOut.after(wait), fn);
   },
 
+  // Debounces a save to one destination (a document preference or a page provider): a save still waiting for another
+  // destination, e.g. the document shown before, is sent at once instead of being replaced (WEBUI-2178).
+  _debounceSaveTo(debouncerField, destination, fn) {
+    if (!this.__saveDestinations) {
+      this.__saveDestinations = {};
+    }
+    const pending = this[debouncerField];
+    if (pending && pending.isActive() && this.__saveDestinations[debouncerField] !== destination) {
+      pending.flush();
+    }
+    this.__saveDestinations[debouncerField] = destination;
+    this._debounceSave(debouncerField, fn);
+  },
+
+  // Runs the requests made with the preferences resource one after the other, reads and saves alike. A request on that
+  // resource aborts the one still on its way, and takes the path the resource has when it is sent, so two at once could
+  // lose a save or send it to the wrong document. Saves therefore also reach the backend in the order they were made. A
+  // request starts at once when none is on its way (WEBUI-2178).
+  _queuePreferencesRequest(request) {
+    const previous = this.__preferencesRequest;
+    const current = previous ? previous.then(request) : request();
+    const settled = current.then(
+      () => {},
+      () => {},
+    );
+    this.__preferencesRequest = settled;
+    settled.then(() => {
+      if (this.__preferencesRequest === settled) {
+        this.__preferencesRequest = null;
+      }
+    });
+    return current;
+  },
+
   // ------------------------------
   // Global prefs (/me/preferences) - ONLY for search providers
   // ------------------------------
@@ -1387,10 +1537,12 @@ Polymer({
 
   // Fetches all global preferences once from the server and returns the raw preferences map { key: value, ... }.
   async _getAllGlobalPreferences() {
-    this._configureAllGlobalPreferencesResource();
-    this.$.preferences.contentType = 'application/json';
     try {
-      const raw = await this.$.preferences.get();
+      const raw = await this._queuePreferencesRequest(() => {
+        this._configureAllGlobalPreferencesResource();
+        this.$.preferences.contentType = 'application/json';
+        return this.$.preferences.get();
+      });
       return (raw && raw.preferences) || {};
     } catch (error) {
       console.error('[nuxeo-results] Failed to fetch global preferences', error);
@@ -1423,10 +1575,12 @@ Polymer({
   // Saves (PUT) a single global preference object under /me/preferences/<key> using a text/plain JSON payload.
   async _putGlobalPreference(prefKey, obj) {
     const payload = JSON.stringify(obj || {});
-    this._configureGlobalPreferencesResource(prefKey);
-    this.$.preferences.contentType = 'text/plain';
-    this.$.preferences.data = payload;
-    await this.$.preferences.put();
+    await this._queuePreferencesRequest(() => {
+      this._configureGlobalPreferencesResource(prefKey);
+      this.$.preferences.contentType = 'text/plain';
+      this.$.preferences.data = payload;
+      return this.$.preferences.put();
+    });
   },
 
   // Loads global preferences for the current provider from the /me/preferences map and caches them per user+provider.
@@ -1483,9 +1637,9 @@ Polymer({
     }
   },
 
-  // Persists global results prefs for the current provider (PUT) and updates in-session cache/state immediately.
-  async saveGlobalResultsPrefs(prefsObj) {
-    const providerName = this._getProviderName(this.nxProvider);
+  // Persists global results prefs (PUT) for the given page provider name, by default the current provider's, and updates
+  // the in-session cache, and the state when they still apply to the table shown.
+  async saveGlobalResultsPrefs(prefsObj, providerName = this._getProviderName(this.nxProvider)) {
     if (!providerName) {
       throw new Error('Cannot save global results prefs: missing nxProvider.provider');
     }
@@ -1501,7 +1655,13 @@ Polymer({
 
     const cacheKey = this._cacheKey(userId, providerName);
     __globalPrefsCache.set(cacheKey, cloned);
-    this.globalPrefs = cloned;
+    // the table gets them again only while they are its latest settings, for the provider it shows (WEBUI-2178)
+    if (
+      this._isLatestTableSettings(this._globalPrefsDestination(providerName), cloned) &&
+      providerName === this._getProviderName(this.nxProvider)
+    ) {
+      this.globalPrefs = cloned;
+    }
   },
 
   // Applies global prefs to the table view only (avoids applying to other display modes).
@@ -1561,22 +1721,23 @@ Polymer({
 
   // Saves (PUT) one doc preference key by sending a userPreferences payload to /path/<docPath>/@preferences.
   async _putDocPreference(docPath, key, obj) {
-    this._configureDocPreferencesResource(docPath);
-    this.$.preferences.contentType = 'application/json';
-
     const prefs = {};
     // store as JSON string so it matches enricher map format (string -> parse)
     prefs[key] = JSON.stringify(obj || {});
 
-    this.$.preferences.data = {
-      'entity-type': 'userPreferences',
-      preferences: prefs,
-    };
-
-    await this.$.preferences.put();
+    await this._queuePreferencesRequest(() => {
+      this._configureDocPreferencesResource(docPath);
+      this.$.preferences.contentType = 'application/json';
+      this.$.preferences.data = {
+        'entity-type': 'userPreferences',
+        preferences: prefs,
+      };
+      return this.$.preferences.put();
+    });
   },
 
-  // Persists doc-level results prefs (PUT) and updates in-session cache/state so the UI reflects it immediately.
+  // Persists doc-level results prefs (PUT) and updates the in-session cache, and the state when they still apply to the
+  // table shown, so the UI reflects it immediately.
   async saveDocPrefs(docPath, key, value) {
     if (!docPath) {
       throw new Error('Cannot save doc prefs: missing docPath');
@@ -1596,7 +1757,14 @@ Polymer({
     // update in-session cache
     const cacheKey = this._docCacheKey(userId, docPath, key);
     __docPrefsCache.set(cacheKey, cloned);
-    this.docPrefs = cloned;
+    // the table gets them again only while they are its latest settings, for the document it shows (WEBUI-2178)
+    const shownPath = this.document && this.document.path;
+    if (
+      this._isLatestTableSettings(this._docPrefsDestination(docPath, key), cloned) &&
+      (!shownPath || shownPath === docPath)
+    ) {
+      this.docPrefs = cloned;
+    }
   },
 
   // Returns the stable preference key used to store/retrieve results table prefs on a document.
