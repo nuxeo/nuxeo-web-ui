@@ -855,6 +855,27 @@ suite('nuxeo-results', () => {
       expect(results._settings.table).to.deep.equal({ sortOrder: [] });
     });
 
+    test('still applies a save for a document after the table changed for another document', async () => {
+      const saves = [];
+      stub('_debounceSave', (field, fn) => saves.push(fn));
+      stub('_putDocPreference').resolves();
+      results.document = { path: '/doc-a' };
+      results.view = createMockView({ settings: { sortOrder: [] } });
+      results._saveViewSettings({ detail: { source: 'reset-layout' } });
+      results.document = { path: '/doc-b' };
+      results.view.settings = { sortOrder: [{ path: 'dc:title', direction: 'asc' }] };
+      results._saveViewSettings();
+      // back on A before its reset reached the backend
+      results.document = { path: '/doc-a' };
+
+      saves[0]();
+      await tick();
+      await tick();
+
+      expect(results.docPrefs).to.deep.equal({ sortOrder: [] });
+      expect(results._settings.table).to.deep.equal({ sortOrder: [] });
+    });
+
     test('sends a save still waiting for another document instead of dropping it', async () => {
       const saveDocStub = stub('saveDocPrefs').resolves();
       results.document = { path: '/doc-1' };
@@ -872,7 +893,7 @@ suite('nuxeo-results', () => {
       expect(saveDocStub.secondCall.args[0]).to.equal('/doc-2');
     });
 
-    test('runs the saves to one destination one after the other', async () => {
+    test('runs the requests of the preferences resource one after the other', async () => {
       let finishFirst;
       const first = sinon.stub().returns(
         new Promise((resolve) => {
@@ -880,14 +901,11 @@ suite('nuxeo-results', () => {
         }),
       );
       const second = sinon.stub().resolves();
-      const elsewhere = sinon.stub().resolves();
 
-      results._queueSave('/doc', first);
-      const queued = results._queueSave('/doc', second);
-      results._queueSave('/other', elsewhere);
+      results._queuePreferencesRequest(first);
+      const queued = results._queuePreferencesRequest(second);
 
       expect(first.callCount).to.equal(1);
-      expect(elsewhere.callCount).to.equal(1);
       await tick();
       expect(second.callCount).to.equal(0);
       finishFirst();
@@ -895,16 +913,67 @@ suite('nuxeo-results', () => {
       expect(second.callCount).to.equal(1);
     });
 
-    test('runs the next save to a destination after a failed one', async () => {
+    test('runs the next preferences request after a failed one', async () => {
       const failing = sinon.stub().rejects(new Error('offline'));
       const next = sinon.stub().resolves();
 
-      const failed = results._queueSave('/doc', failing);
-      const queued = results._queueSave('/doc', next);
+      const failed = results._queuePreferencesRequest(failing);
+      const queued = results._queuePreferencesRequest(next);
 
       await failed.catch(() => {});
       await queued;
       expect(next.callCount).to.equal(1);
+    });
+
+    test('sends saves for two documents one after the other, each to its own document', async () => {
+      const sent = [];
+      let finishFirst;
+      const putStub = sinon.stub(results.$.preferences, 'put').callsFake(() => {
+        sent.push(results.$.preferences.path);
+        return sent.length === 1
+          ? new Promise((resolve) => {
+              finishFirst = resolve;
+            })
+          : Promise.resolve();
+      });
+      restores.push(() => putStub.restore());
+
+      const firstSave = results._putDocPreference('/doc-1', 'documentPrefs.x', { sortOrder: [] });
+      const secondSave = results._putDocPreference('/doc-2', 'documentPrefs.x', { sortOrder: [] });
+      await tick();
+
+      // the second save would abort the first one, and change the path it is sent to, if it started now
+      expect(sent).to.deep.equal(['/path/doc-1/@preferences']);
+      finishFirst();
+      await firstSave;
+      await secondSave;
+      expect(sent).to.deep.equal(['/path/doc-1/@preferences', '/path/doc-2/@preferences']);
+    });
+
+    test('saveDocPrefs does not apply prefs saved for a document no longer shown', async () => {
+      stub('_putDocPreference').resolves();
+      results.document = { path: '/doc-2' };
+      results.docPrefs = { current: true };
+
+      await results.saveDocPrefs('/doc-1', 'documentPrefs.test', { sortOrder: [] });
+
+      expect(results.docPrefs).to.deep.equal({ current: true });
+    });
+
+    test('does not copy a save for a document no longer shown into the local settings', async () => {
+      const saves = [];
+      stub('_debounceSave', (field, fn) => saves.push(fn));
+      stub('_putDocPreference').resolves();
+      results.document = { path: '/doc-1' };
+      results.view = createMockView({ settings: { sortOrder: [] } });
+      results._saveViewSettings();
+      results.document = { path: '/doc-2' };
+
+      saves[0]();
+      await tick();
+      await tick();
+
+      expect(results._settings.table).to.be.undefined;
     });
 
     test('saveGlobalResultsPrefs does not apply prefs saved for a provider no longer shown', async () => {

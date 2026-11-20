@@ -1094,22 +1094,20 @@ Polymer({
       this.saveSettings();
 
       const isSettingsView = displayMode === 'table';
-      if (isSettingsView) {
-        this.__latestTableSettings = JSON.stringify(settings);
-      }
 
       // ---- doc level (content views) ----
       if (isSettingsView && this.document && this.document.path) {
         const docPath = this.document.path;
         const docKey = this._getDocResultsPrefsKey();
-        const destination = `${docPath}\n${docKey}`;
+        const destination = this._docPrefsDestination(docPath, docKey);
         const isShown = () => !!this.document && this.document.path === docPath;
+        this._rememberLatestTableSettings(destination, settings);
         this._debounceSaveTo('_docPrefsSaveDebouncer', destination, () => {
           // Save to backend (primary)
-          this._queueSave(destination, () => this.saveDocPrefs(docPath, docKey, settings))
+          this.saveDocPrefs(docPath, docKey, settings)
             .then(() => {
               // Sync to localStorage on success (fallback cache)
-              this._syncLocalTableSettings(settings, isShown());
+              this._syncLocalTableSettings(destination, settings, isShown());
             })
             .catch((error) => {
               // eslint-disable-next-line no-console
@@ -1119,7 +1117,7 @@ Polymer({
                 error,
               });
               // Fallback: save to localStorage even if backend fails
-              this._syncLocalTableSettings(settings, isShown());
+              this._syncLocalTableSettings(destination, settings, isShown());
             });
         });
         return;
@@ -1128,19 +1126,21 @@ Polymer({
       // ---- global level (search providers) ----
       if (isSettingsView && this._shouldUseGlobalPrefs) {
         const providerName = this._getProviderName(this.nxProvider);
+        const destination = this._globalPrefsDestination(providerName);
         const isShown = () => this._getProviderName(this.nxProvider) === providerName;
-        this._debounceSaveTo('_prefsSaveDebouncer', providerName, () => {
+        this._rememberLatestTableSettings(destination, settings);
+        this._debounceSaveTo('_prefsSaveDebouncer', destination, () => {
           // Save to backend (primary)
-          this._queueSave(providerName, () => this.saveGlobalResultsPrefs(settings, providerName))
+          this.saveGlobalResultsPrefs(settings, providerName)
             .then(() => {
               // Sync to localStorage on success (fallback cache)
-              this._syncLocalTableSettings(settings, isShown());
+              this._syncLocalTableSettings(destination, settings, isShown());
             })
             .catch((error) => {
               // eslint-disable-next-line no-console
               console.warn('Failed to save global results preferences to backend, syncing to localStorage only', error);
               // Fallback: save to localStorage even if backend fails
-              this._syncLocalTableSettings(settings, isShown());
+              this._syncLocalTableSettings(destination, settings, isShown());
             });
         });
         return;
@@ -1153,17 +1153,37 @@ Polymer({
     }
   },
 
-  // Whether table settings being saved still are the latest the table reported. A save that ends after a newer change
-  // must not apply its older settings to the table again, as that would undo the change, e.g. a Reset Layout
-  // (WEBUI-2178).
-  _isLatestTableSettings(settings) {
-    return this.__latestTableSettings === undefined || this.__latestTableSettings === JSON.stringify(settings);
+  // Where table settings are saved: a document preference, or the global preference of a page provider (WEBUI-2178).
+  _docPrefsDestination(docPath, key) {
+    return `doc\n${docPath}\n${key}`;
+  },
+
+  _globalPrefsDestination(providerName) {
+    return `provider\n${providerName}`;
+  },
+
+  // Remembers the table settings last reported for a destination, so a save to it that ends after a newer change can
+  // tell it is outdated (WEBUI-2178).
+  _rememberLatestTableSettings(destination, settings) {
+    if (!this.__latestTableSettings) {
+      this.__latestTableSettings = {};
+    }
+    this.__latestTableSettings[destination] = JSON.stringify(settings);
+  },
+
+  // Whether table settings saved to a destination still are the latest the table reported for it. A save that ends
+  // after a newer change there must not apply its older settings to the table again, as that would undo the change,
+  // e.g. a Reset Layout; changes saved elsewhere, e.g. to another document, do not count (WEBUI-2178).
+  _isLatestTableSettings(destination, settings) {
+    const latest = this.__latestTableSettings && this.__latestTableSettings[destination];
+    return latest === undefined || latest === JSON.stringify(settings);
   },
 
   // Keeps the local copy of the table settings in step with a backend save, as long as the results still show where the
-  // settings were saved and the table did not change since: the save of that change updates the copy (WEBUI-2178).
-  _syncLocalTableSettings(settings, stillShown) {
-    if (!stillShown || !this._isLatestTableSettings(settings)) {
+  // settings were saved and the table did not change there since: the save of that change updates the copy
+  // (WEBUI-2178).
+  _syncLocalTableSettings(destination, settings, stillShown) {
+    if (!stillShown || !this._isLatestTableSettings(destination, settings)) {
       return;
     }
     this.set('_settings.table', settings);
@@ -1482,22 +1502,21 @@ Polymer({
     this._debounceSave(debouncerField, fn);
   },
 
-  // Runs the saves to one destination one after the other, so the backend ends with the last one; a save starts at once
-  // when none is on its way (WEBUI-2178).
-  _queueSave(destination, save) {
-    if (!this.__pendingSaves) {
-      this.__pendingSaves = {};
-    }
-    const previous = this.__pendingSaves[destination];
-    const current = previous ? previous.then(save) : save();
+  // Runs the requests made with the preferences resource one after the other, reads and saves alike. A request on that
+  // resource aborts the one still on its way, and takes the path the resource has when it is sent, so two at once could
+  // lose a save or send it to the wrong document. Saves therefore also reach the backend in the order they were made. A
+  // request starts at once when none is on its way (WEBUI-2178).
+  _queuePreferencesRequest(request) {
+    const previous = this.__preferencesRequest;
+    const current = previous ? previous.then(request) : request();
     const settled = current.then(
       () => {},
       () => {},
     );
-    this.__pendingSaves[destination] = settled;
+    this.__preferencesRequest = settled;
     settled.then(() => {
-      if (this.__pendingSaves[destination] === settled) {
-        delete this.__pendingSaves[destination];
+      if (this.__preferencesRequest === settled) {
+        this.__preferencesRequest = null;
       }
     });
     return current;
@@ -1518,10 +1537,12 @@ Polymer({
 
   // Fetches all global preferences once from the server and returns the raw preferences map { key: value, ... }.
   async _getAllGlobalPreferences() {
-    this._configureAllGlobalPreferencesResource();
-    this.$.preferences.contentType = 'application/json';
     try {
-      const raw = await this.$.preferences.get();
+      const raw = await this._queuePreferencesRequest(() => {
+        this._configureAllGlobalPreferencesResource();
+        this.$.preferences.contentType = 'application/json';
+        return this.$.preferences.get();
+      });
       return (raw && raw.preferences) || {};
     } catch (error) {
       console.error('[nuxeo-results] Failed to fetch global preferences', error);
@@ -1554,10 +1575,12 @@ Polymer({
   // Saves (PUT) a single global preference object under /me/preferences/<key> using a text/plain JSON payload.
   async _putGlobalPreference(prefKey, obj) {
     const payload = JSON.stringify(obj || {});
-    this._configureGlobalPreferencesResource(prefKey);
-    this.$.preferences.contentType = 'text/plain';
-    this.$.preferences.data = payload;
-    await this.$.preferences.put();
+    await this._queuePreferencesRequest(() => {
+      this._configureGlobalPreferencesResource(prefKey);
+      this.$.preferences.contentType = 'text/plain';
+      this.$.preferences.data = payload;
+      return this.$.preferences.put();
+    });
   },
 
   // Loads global preferences for the current provider from the /me/preferences map and caches them per user+provider.
@@ -1633,7 +1656,10 @@ Polymer({
     const cacheKey = this._cacheKey(userId, providerName);
     __globalPrefsCache.set(cacheKey, cloned);
     // the table gets them again only while they are its latest settings, for the provider it shows (WEBUI-2178)
-    if (this._isLatestTableSettings(cloned) && providerName === this._getProviderName(this.nxProvider)) {
+    if (
+      this._isLatestTableSettings(this._globalPrefsDestination(providerName), cloned) &&
+      providerName === this._getProviderName(this.nxProvider)
+    ) {
       this.globalPrefs = cloned;
     }
   },
@@ -1695,19 +1721,19 @@ Polymer({
 
   // Saves (PUT) one doc preference key by sending a userPreferences payload to /path/<docPath>/@preferences.
   async _putDocPreference(docPath, key, obj) {
-    this._configureDocPreferencesResource(docPath);
-    this.$.preferences.contentType = 'application/json';
-
     const prefs = {};
     // store as JSON string so it matches enricher map format (string -> parse)
     prefs[key] = JSON.stringify(obj || {});
 
-    this.$.preferences.data = {
-      'entity-type': 'userPreferences',
-      preferences: prefs,
-    };
-
-    await this.$.preferences.put();
+    await this._queuePreferencesRequest(() => {
+      this._configureDocPreferencesResource(docPath);
+      this.$.preferences.contentType = 'application/json';
+      this.$.preferences.data = {
+        'entity-type': 'userPreferences',
+        preferences: prefs,
+      };
+      return this.$.preferences.put();
+    });
   },
 
   // Persists doc-level results prefs (PUT) and updates the in-session cache, and the state when they still apply to the
@@ -1733,7 +1759,10 @@ Polymer({
     __docPrefsCache.set(cacheKey, cloned);
     // the table gets them again only while they are its latest settings, for the document it shows (WEBUI-2178)
     const shownPath = this.document && this.document.path;
-    if (this._isLatestTableSettings(cloned) && (!shownPath || shownPath === docPath)) {
+    if (
+      this._isLatestTableSettings(this._docPrefsDestination(docPath, key), cloned) &&
+      (!shownPath || shownPath === docPath)
+    ) {
       this.docPrefs = cloned;
     }
   },
