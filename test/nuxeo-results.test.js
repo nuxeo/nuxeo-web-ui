@@ -592,6 +592,407 @@ suite('nuxeo-results', () => {
     });
   });
 
+  suite('Reset Layout (ELEMENTS-2017, WEBUI-2178)', () => {
+    test('saves the settings Reset Layout left, as for any other change', () => {
+      results._isRestoring = false;
+      results.displayMode = 'table';
+      results._settings = {};
+      results.document = { path: '/default-domain' };
+      results.view = createMockView();
+      results.view.settings = { columns: { 'dc:title': { hidden: true, order: 0 } }, sortOrder: [] };
+      const debounceStub = sinon.stub(results, '_debounceSave');
+      const resetSortStub = sinon.stub(results, '_resetSortSelection');
+
+      results._saveViewSettings({ detail: { source: 'reset-layout' } });
+
+      expect(resetSortStub.callCount).to.equal(1);
+      expect(debounceStub.callCount).to.equal(1);
+      expect(debounceStub.firstCall.args[0]).to.equal('_docPrefsSaveDebouncer');
+      debounceStub.restore();
+      resetSortStub.restore();
+      results.document = null;
+    });
+
+    test('leaves the "Sort by" selector alone on any other settings change', () => {
+      results._settings = {};
+      results.view = createMockView({ settings: {} });
+      const resetSortStub = sinon.stub(results, '_resetSortSelection');
+
+      results._saveViewSettings();
+      results._saveViewSettings({ detail: { source: 'column-resize' } });
+      results._saveViewSettings({ detail: { source: 'sort' } });
+
+      expect(resetSortStub.callCount).to.equal(0);
+      resetSortStub.restore();
+    });
+
+    suite('"Sort by" selector', () => {
+      const sortOptions = () => [
+        { field: 'dc:title', label: 'Title', order: 'asc', selected: true },
+        { field: 'dc:modified', label: 'Modified', order: 'desc' },
+        { field: 'dc:coverage', label: 'Coverage', order: 'asc' },
+      ];
+
+      setup(() => {
+        results._settings = {};
+      });
+
+      test('_sortChanged applies the chosen sort as a user sort when Nuxeo.UserSort is there', () => {
+        const provider = createMockProvider();
+        results.nxProvider = provider;
+        const fetchStub = sinon.stub(results, 'fetch');
+        const previous = Nuxeo.UserSort;
+        const applyUserSort = sinon.spy((target, sort) => {
+          target.sort = sort;
+        });
+        Nuxeo.UserSort = { applyUserSort };
+        results.sortSelected = { field: 'dc:coverage', order: 'asc' };
+
+        try {
+          results._sortChanged();
+        } finally {
+          Nuxeo.UserSort = previous;
+        }
+
+        expect(applyUserSort.callCount).to.equal(1);
+        expect(applyUserSort.firstCall.args[0] === provider).to.be.true;
+        expect(applyUserSort.firstCall.args[1]).to.deep.equal({ 'dc:coverage': 'asc' });
+        expect(provider.sort).to.deep.equal({ 'dc:coverage': 'asc' });
+        expect(fetchStub.callCount).to.equal(1);
+        fetchStub.restore();
+        results.nxProvider = null;
+      });
+
+      test('_sortChanged still sets the sort with an Elements build without Nuxeo.UserSort', () => {
+        const provider = createMockProvider();
+        results.nxProvider = provider;
+        const fetchStub = sinon.stub(results, 'fetch');
+        const previous = Nuxeo.UserSort;
+        Nuxeo.UserSort = undefined;
+        results.sortSelected = { field: 'dc:coverage', order: 'asc' };
+
+        try {
+          results._sortChanged();
+        } finally {
+          Nuxeo.UserSort = previous;
+        }
+
+        expect(provider.sort).to.deep.equal({ 'dc:coverage': 'asc' });
+        expect(fetchStub.callCount).to.equal(1);
+        fetchStub.restore();
+        results.nxProvider = null;
+      });
+
+      test('Reset Layout puts the selector back to its default option and declared orders, without fetching', async () => {
+        const options = sortOptions();
+        const [title, modified, coverage] = options;
+        const sortChangedStub = sinon.stub(results, '_sortChanged');
+        results.displaySort = true;
+        results.sortOptions = options;
+        results.view = createMockView();
+        await flush();
+        const selector = results.shadowRoot.querySelector('nuxeo-sort-select');
+        // the user picked Coverage, reversed it, and had reversed Title before
+        results.sortSelected = coverage;
+        coverage.order = 'desc';
+        title.order = 'desc';
+        modified.order = 'asc';
+        sortChangedStub.resetHistory();
+
+        results._saveViewSettings({ detail: { source: 'reset-layout' } });
+
+        expect(results.sortSelected === title).to.be.true;
+        expect(options.map((option) => option.order)).to.deep.equal(['asc', 'desc', 'asc']);
+        expect(selector.selected === title).to.be.true;
+        expect(selector._sortOrder).to.equal('asc');
+        expect(sortChangedStub.callCount).to.equal(0);
+        sortChangedStub.restore();
+      });
+
+      test('Reset Layout re-selects the default option even when it is the one shown, so its arrow follows', async () => {
+        const options = sortOptions();
+        const [title] = options;
+        const sortChangedStub = sinon.stub(results, '_sortChanged');
+        results.displaySort = true;
+        results.sortOptions = options;
+        results.view = createMockView();
+        await flush();
+        const selector = results.shadowRoot.querySelector('nuxeo-sort-select');
+        // Title is shown, reversed with the arrow
+        selector._toggleSortOrder();
+        expect(selector._sortOrder).to.equal('desc');
+        sortChangedStub.resetHistory();
+
+        results._saveViewSettings({ detail: { source: 'reset-layout' } });
+
+        expect(title.order).to.equal('asc');
+        expect(selector._sortOrder).to.equal('asc');
+        expect(sortChangedStub.callCount).to.equal(0);
+        sortChangedStub.restore();
+      });
+
+      test('Reset Layout also restores the options a grid view declares, while the table is shown', async () => {
+        const viewResults = await fixture(html`
+          <nuxeo-results name="view-options">
+            <div name="grid"></div>
+            <div name="table"></div>
+          </nuxeo-results>
+        `);
+        await flush();
+        const [grid] = viewResults.$.views.items;
+        const options = sortOptions();
+        const [title, , coverage] = options;
+        viewResults.displaySort = true;
+        viewResults.displayMode = 'table';
+        await flush();
+        // the grid declares its options, which the selector shows once the grid is
+        grid.sortOptions = options;
+        viewResults.displayMode = 'grid';
+        await flush();
+        expect(viewResults.sortSelected === title).to.be.true;
+        // in the grid, the user picked Coverage and reversed it, and had reversed Title before
+        viewResults.sortSelected = coverage;
+        coverage.order = 'desc';
+        title.order = 'desc';
+        viewResults.displayMode = 'table';
+        await flush();
+        const sortChangedStub = sinon.stub(viewResults, '_sortChanged');
+
+        viewResults._saveViewSettings({ detail: { source: 'reset-layout' } });
+
+        expect(options.map((option) => option.order)).to.deep.equal(['asc', 'desc', 'asc']);
+        // the table has no options of its own: the grid shows its default option again when it is back
+        expect(viewResults.sortSelected == null).to.be.true;
+        viewResults.displayMode = 'grid';
+        await flush();
+        expect(viewResults._sortOptions() === options).to.be.true;
+        expect(viewResults.sortSelected === title).to.be.true;
+        expect(sortChangedStub.callCount).to.equal(0);
+        sortChangedStub.restore();
+      });
+
+      test('Reset Layout leaves results without a "Sort by" selector alone', () => {
+        results.sortOptions = [];
+        results.view = createMockView({ settings: {} });
+
+        expect(() => results._saveViewSettings({ detail: { source: 'reset-layout' } })).to.not.throw();
+        expect(results.sortSelected == null).to.be.true;
+      });
+    });
+  });
+
+  suite('Saving the table settings (WEBUI-2178)', () => {
+    const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+    let restores;
+
+    setup(() => {
+      restores = [];
+      results._isRestoring = false;
+      results._settings = {};
+      results.displayMode = 'table';
+      results._connectedUserId = 'user-1';
+    });
+
+    teardown(() => {
+      restores.forEach((restore) => restore());
+      results._connectedUserId = null;
+      results.document = null;
+    });
+
+    const stub = (name, ...args) => {
+      const s = sinon.stub(results, name);
+      if (args.length) {
+        s.callsFake(...args);
+      }
+      restores.push(() => s.restore());
+      return s;
+    };
+
+    test('saves the settings and the document of the change, even if they changed before the save runs', async () => {
+      const saves = [];
+      stub('_debounceSave', (field, fn) => saves.push(fn));
+      const saveDocStub = stub('saveDocPrefs').resolves();
+      results.document = { path: '/doc-1' };
+      results.view = createMockView({ settings: { sortOrder: [], columns: { 'dc:title': { width: '120px' } } } });
+
+      results._saveViewSettings({ detail: { source: 'reset-layout' } });
+      // before the delayed save runs, the user switches to the grid of another document
+      results.document = { path: '/doc-2' };
+      results.displayMode = 'grid';
+      results.view = createMockView({ settings: {} });
+      saves[0]();
+      await tick();
+
+      expect(saveDocStub.callCount).to.equal(1);
+      expect(saveDocStub.firstCall.args[0]).to.equal('/doc-1');
+      expect(saveDocStub.firstCall.args[2]).to.deep.equal({
+        sortOrder: [],
+        columns: { 'dc:title': { width: '120px' } },
+      });
+    });
+
+    test('does not apply an earlier save to the table again once the table changed since', async () => {
+      const saves = [];
+      stub('_debounceSave', (field, fn) => saves.push(fn));
+      stub('_putDocPreference').resolves();
+      results.document = { path: '/doc' };
+      results.docPrefs = { initial: true };
+      results.view = createMockView({ settings: { sortOrder: [{ path: 'dc:title', direction: 'asc' }] } });
+      results._saveViewSettings();
+      // e.g. Reset Layout, while the first save is on its way
+      results.view.settings = { sortOrder: [] };
+      results._saveViewSettings({ detail: { source: 'reset-layout' } });
+
+      saves[0]();
+      await tick();
+      expect(results.docPrefs).to.deep.equal({ initial: true });
+      expect(results._settings.table).to.be.undefined;
+
+      saves[1]();
+      await tick();
+      await tick();
+      expect(results.docPrefs).to.deep.equal({ sortOrder: [] });
+      expect(results._settings.table).to.deep.equal({ sortOrder: [] });
+    });
+
+    test('still applies a save for a document after the table changed for another document', async () => {
+      const saves = [];
+      stub('_debounceSave', (field, fn) => saves.push(fn));
+      stub('_putDocPreference').resolves();
+      results.document = { path: '/doc-a' };
+      results.view = createMockView({ settings: { sortOrder: [] } });
+      results._saveViewSettings({ detail: { source: 'reset-layout' } });
+      results.document = { path: '/doc-b' };
+      results.view.settings = { sortOrder: [{ path: 'dc:title', direction: 'asc' }] };
+      results._saveViewSettings();
+      // back on A before its reset reached the backend
+      results.document = { path: '/doc-a' };
+
+      saves[0]();
+      await tick();
+      await tick();
+
+      expect(results.docPrefs).to.deep.equal({ sortOrder: [] });
+      expect(results._settings.table).to.deep.equal({ sortOrder: [] });
+    });
+
+    test('sends a save still waiting for another document instead of dropping it', async () => {
+      const saveDocStub = stub('saveDocPrefs').resolves();
+      results.document = { path: '/doc-1' };
+      results.view = createMockView({ settings: { sortOrder: [] } });
+      results._saveViewSettings();
+      expect(saveDocStub.callCount).to.equal(0);
+
+      results.document = { path: '/doc-2' };
+      results._saveViewSettings();
+
+      expect(saveDocStub.callCount).to.equal(1);
+      expect(saveDocStub.firstCall.args[0]).to.equal('/doc-1');
+      results._docPrefsSaveDebouncer.flush();
+      expect(saveDocStub.callCount).to.equal(2);
+      expect(saveDocStub.secondCall.args[0]).to.equal('/doc-2');
+    });
+
+    test('runs the requests of the preferences resource one after the other', async () => {
+      let finishFirst;
+      const first = sinon.stub().returns(
+        new Promise((resolve) => {
+          finishFirst = resolve;
+        }),
+      );
+      const second = sinon.stub().resolves();
+
+      results._queuePreferencesRequest(first);
+      const queued = results._queuePreferencesRequest(second);
+
+      expect(first.callCount).to.equal(1);
+      await tick();
+      expect(second.callCount).to.equal(0);
+      finishFirst();
+      await queued;
+      expect(second.callCount).to.equal(1);
+    });
+
+    test('runs the next preferences request after a failed one', async () => {
+      const failing = sinon.stub().rejects(new Error('offline'));
+      const next = sinon.stub().resolves();
+
+      const failed = results._queuePreferencesRequest(failing);
+      const queued = results._queuePreferencesRequest(next);
+
+      await failed.catch(() => {});
+      await queued;
+      expect(next.callCount).to.equal(1);
+    });
+
+    test('sends saves for two documents one after the other, each to its own document', async () => {
+      const sent = [];
+      let finishFirst;
+      const putStub = sinon.stub(results.$.preferences, 'put').callsFake(() => {
+        sent.push(results.$.preferences.path);
+        return sent.length === 1
+          ? new Promise((resolve) => {
+              finishFirst = resolve;
+            })
+          : Promise.resolve();
+      });
+      restores.push(() => putStub.restore());
+
+      const firstSave = results._putDocPreference('/doc-1', 'documentPrefs.x', { sortOrder: [] });
+      const secondSave = results._putDocPreference('/doc-2', 'documentPrefs.x', { sortOrder: [] });
+      await tick();
+
+      // the second save would abort the first one, and change the path it is sent to, if it started now
+      expect(sent).to.deep.equal(['/path/doc-1/@preferences']);
+      finishFirst();
+      await firstSave;
+      await secondSave;
+      expect(sent).to.deep.equal(['/path/doc-1/@preferences', '/path/doc-2/@preferences']);
+    });
+
+    test('saveDocPrefs does not apply prefs saved for a document no longer shown', async () => {
+      stub('_putDocPreference').resolves();
+      results.document = { path: '/doc-2' };
+      results.docPrefs = { current: true };
+
+      await results.saveDocPrefs('/doc-1', 'documentPrefs.test', { sortOrder: [] });
+
+      expect(results.docPrefs).to.deep.equal({ current: true });
+    });
+
+    test('does not copy a save for a document no longer shown into the local settings', async () => {
+      const saves = [];
+      stub('_debounceSave', (field, fn) => saves.push(fn));
+      stub('_putDocPreference').resolves();
+      results.document = { path: '/doc-1' };
+      results.view = createMockView({ settings: { sortOrder: [] } });
+      results._saveViewSettings();
+      results.document = { path: '/doc-2' };
+
+      saves[0]();
+      await tick();
+      await tick();
+
+      expect(results._settings.table).to.be.undefined;
+    });
+
+    test('saveGlobalResultsPrefs does not apply prefs saved for a provider no longer shown', async () => {
+      stub('_putGlobalPreference').resolves();
+      // the prefs of the provider shown are not loaded here
+      stub('_loadGlobalPrefs');
+      const provider = createMockProvider();
+      provider.provider = 'other_search';
+      results.nxProvider = provider;
+      await tick();
+      results.globalPrefs = { current: true };
+
+      await results.saveGlobalResultsPrefs({ sortOrder: [] }, 'default_search');
+
+      expect(results.globalPrefs).to.deep.equal({ current: true });
+      results.nxProvider = null;
+    });
+  });
+
   suite('Column Management', () => {
     test('updates columns when columns-changed event is fired', () => {
       const newColumns = [
