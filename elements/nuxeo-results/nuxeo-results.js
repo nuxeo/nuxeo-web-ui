@@ -1080,33 +1080,41 @@ Polymer({
     if (e && e.detail && e.detail.source === 'reset-layout') {
       this._resetSortSelection();
     }
-    if (this.view.settings && !this._isRestoring) {
-      this.set('_settings.displayMode', this.displayMode);
+    // The settings, and where they go, are taken now: the backend saves below run after a delay, by when the view, the
+    // display mode or the results shown may have changed (WEBUI-2178).
+    const { settings } = this.view;
+    const { displayMode } = this;
+    if (settings && !this._isRestoring) {
+      this.set('_settings.displayMode', displayMode);
       this.saveSettings();
 
-      const isSettingsView = this.displayMode === 'table';
+      const isSettingsView = displayMode === 'table';
+      if (isSettingsView) {
+        this.__latestTableSettings = JSON.stringify(settings);
+      }
 
       // ---- doc level (content views) ----
       if (isSettingsView && this.document && this.document.path) {
+        const docPath = this.document.path;
         const docKey = this._getDocResultsPrefsKey();
-        this._debounceSave('_docPrefsSaveDebouncer', () => {
+        const destination = `${docPath}\n${docKey}`;
+        const isShown = () => !!this.document && this.document.path === docPath;
+        this._debounceSaveTo('_docPrefsSaveDebouncer', destination, () => {
           // Save to backend (primary)
-          this.saveDocPrefs(this.document.path, docKey, this.view.settings)
+          this._queueSave(destination, () => this.saveDocPrefs(docPath, docKey, settings))
             .then(() => {
               // Sync to localStorage on success (fallback cache)
-              this.set(`_settings.${this.displayMode}`, this.view.settings);
-              this.saveSettings();
+              this._syncLocalTableSettings(settings, isShown());
             })
             .catch((error) => {
               // eslint-disable-next-line no-console
               console.warn('Failed to save document results preferences to backend, syncing to localStorage only', {
-                path: this.document && this.document.path,
+                path: docPath,
                 key: docKey,
                 error,
               });
               // Fallback: save to localStorage even if backend fails
-              this.set(`_settings.${this.displayMode}`, this.view.settings);
-              this.saveSettings();
+              this._syncLocalTableSettings(settings, isShown());
             });
         });
         return;
@@ -1114,20 +1122,20 @@ Polymer({
 
       // ---- global level (search providers) ----
       if (isSettingsView && this._shouldUseGlobalPrefs) {
-        this._debounceSave('_prefsSaveDebouncer', () => {
+        const providerName = this._getProviderName(this.nxProvider);
+        const isShown = () => this._getProviderName(this.nxProvider) === providerName;
+        this._debounceSaveTo('_prefsSaveDebouncer', providerName, () => {
           // Save to backend (primary)
-          this.saveGlobalResultsPrefs(this.view.settings)
+          this._queueSave(providerName, () => this.saveGlobalResultsPrefs(settings, providerName))
             .then(() => {
               // Sync to localStorage on success (fallback cache)
-              this.set(`_settings.${this.displayMode}`, this.view.settings);
-              this.saveSettings();
+              this._syncLocalTableSettings(settings, isShown());
             })
             .catch((error) => {
               // eslint-disable-next-line no-console
               console.warn('Failed to save global results preferences to backend, syncing to localStorage only', error);
               // Fallback: save to localStorage even if backend fails
-              this.set(`_settings.${this.displayMode}`, this.view.settings);
-              this.saveSettings();
+              this._syncLocalTableSettings(settings, isShown());
             });
         });
         return;
@@ -1135,9 +1143,26 @@ Polymer({
 
       // ---- localStorage only (anonymous users, no backend prefs available) ----
       // This branch runs when neither doc nor global prefs are applicable
-      this.set(`_settings.${this.displayMode}`, this.view.settings);
+      this.set(`_settings.${displayMode}`, settings);
       this.saveSettings();
     }
+  },
+
+  // Whether table settings being saved still are the latest the table reported. A save that ends after a newer change
+  // must not apply its older settings to the table again, as that would undo the change, e.g. a Reset Layout
+  // (WEBUI-2178).
+  _isLatestTableSettings(settings) {
+    return this.__latestTableSettings === undefined || this.__latestTableSettings === JSON.stringify(settings);
+  },
+
+  // Keeps the local copy of the table settings in step with a backend save, as long as the results still show where the
+  // settings were saved and the table did not change since: the save of that change updates the copy (WEBUI-2178).
+  _syncLocalTableSettings(settings, stillShown) {
+    if (!stillShown || !this._isLatestTableSettings(settings)) {
+      return;
+    }
+    this.set('_settings.table', settings);
+    this.saveSettings();
   },
 
   _providerChanged(provider, oldProvider) {
@@ -1438,6 +1463,41 @@ Polymer({
     this[debouncerField] = Debouncer.debounce(this[debouncerField], timeOut.after(wait), fn);
   },
 
+  // Debounces a save to one destination (a document preference or a page provider): a save still waiting for another
+  // destination, e.g. the document shown before, is sent at once instead of being replaced (WEBUI-2178).
+  _debounceSaveTo(debouncerField, destination, fn) {
+    if (!this.__saveDestinations) {
+      this.__saveDestinations = {};
+    }
+    const pending = this[debouncerField];
+    if (pending && pending.isActive() && this.__saveDestinations[debouncerField] !== destination) {
+      pending.flush();
+    }
+    this.__saveDestinations[debouncerField] = destination;
+    this._debounceSave(debouncerField, fn);
+  },
+
+  // Runs the saves to one destination one after the other, so the backend ends with the last one; a save starts at once
+  // when none is on its way (WEBUI-2178).
+  _queueSave(destination, save) {
+    if (!this.__pendingSaves) {
+      this.__pendingSaves = {};
+    }
+    const previous = this.__pendingSaves[destination];
+    const current = previous ? previous.then(save) : save();
+    const settled = current.then(
+      () => {},
+      () => {},
+    );
+    this.__pendingSaves[destination] = settled;
+    settled.then(() => {
+      if (this.__pendingSaves[destination] === settled) {
+        delete this.__pendingSaves[destination];
+      }
+    });
+    return current;
+  },
+
   // ------------------------------
   // Global prefs (/me/preferences) - ONLY for search providers
   // ------------------------------
@@ -1549,9 +1609,9 @@ Polymer({
     }
   },
 
-  // Persists global results prefs for the current provider (PUT) and updates in-session cache/state immediately.
-  async saveGlobalResultsPrefs(prefsObj) {
-    const providerName = this._getProviderName(this.nxProvider);
+  // Persists global results prefs (PUT) for the given page provider name, by default the current provider's, and updates
+  // the in-session cache, and the state when they still apply to the table shown.
+  async saveGlobalResultsPrefs(prefsObj, providerName = this._getProviderName(this.nxProvider)) {
     if (!providerName) {
       throw new Error('Cannot save global results prefs: missing nxProvider.provider');
     }
@@ -1567,7 +1627,10 @@ Polymer({
 
     const cacheKey = this._cacheKey(userId, providerName);
     __globalPrefsCache.set(cacheKey, cloned);
-    this.globalPrefs = cloned;
+    // the table gets them again only while they are its latest settings, for the provider it shows (WEBUI-2178)
+    if (this._isLatestTableSettings(cloned) && providerName === this._getProviderName(this.nxProvider)) {
+      this.globalPrefs = cloned;
+    }
   },
 
   // Applies global prefs to the table view only (avoids applying to other display modes).
@@ -1642,7 +1705,8 @@ Polymer({
     await this.$.preferences.put();
   },
 
-  // Persists doc-level results prefs (PUT) and updates in-session cache/state so the UI reflects it immediately.
+  // Persists doc-level results prefs (PUT) and updates the in-session cache, and the state when they still apply to the
+  // table shown, so the UI reflects it immediately.
   async saveDocPrefs(docPath, key, value) {
     if (!docPath) {
       throw new Error('Cannot save doc prefs: missing docPath');
@@ -1662,7 +1726,11 @@ Polymer({
     // update in-session cache
     const cacheKey = this._docCacheKey(userId, docPath, key);
     __docPrefsCache.set(cacheKey, cloned);
-    this.docPrefs = cloned;
+    // the table gets them again only while they are its latest settings, for the document it shows (WEBUI-2178)
+    const shownPath = this.document && this.document.path;
+    if (this._isLatestTableSettings(cloned) && (!shownPath || shownPath === docPath)) {
+      this.docPrefs = cloned;
+    }
   },
 
   // Returns the stable preference key used to store/retrieve results table prefs on a document.

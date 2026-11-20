@@ -781,6 +781,149 @@ suite('nuxeo-results', () => {
     });
   });
 
+  suite('Saving the table settings (WEBUI-2178)', () => {
+    const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+    let restores;
+
+    setup(() => {
+      restores = [];
+      results._isRestoring = false;
+      results._settings = {};
+      results.displayMode = 'table';
+      results._connectedUserId = 'user-1';
+    });
+
+    teardown(() => {
+      restores.forEach((restore) => restore());
+      results._connectedUserId = null;
+      results.document = null;
+    });
+
+    const stub = (name, ...args) => {
+      const s = sinon.stub(results, name);
+      if (args.length) {
+        s.callsFake(...args);
+      }
+      restores.push(() => s.restore());
+      return s;
+    };
+
+    test('saves the settings and the document of the change, even if they changed before the save runs', async () => {
+      const saves = [];
+      stub('_debounceSave', (field, fn) => saves.push(fn));
+      const saveDocStub = stub('saveDocPrefs').resolves();
+      results.document = { path: '/doc-1' };
+      results.view = createMockView({ settings: { sortOrder: [], columns: { 'dc:title': { width: '120px' } } } });
+
+      results._saveViewSettings({ detail: { source: 'reset-layout' } });
+      // before the delayed save runs, the user switches to the grid of another document
+      results.document = { path: '/doc-2' };
+      results.displayMode = 'grid';
+      results.view = createMockView({ settings: {} });
+      saves[0]();
+      await tick();
+
+      expect(saveDocStub.callCount).to.equal(1);
+      expect(saveDocStub.firstCall.args[0]).to.equal('/doc-1');
+      expect(saveDocStub.firstCall.args[2]).to.deep.equal({
+        sortOrder: [],
+        columns: { 'dc:title': { width: '120px' } },
+      });
+    });
+
+    test('does not apply an earlier save to the table again once the table changed since', async () => {
+      const saves = [];
+      stub('_debounceSave', (field, fn) => saves.push(fn));
+      stub('_putDocPreference').resolves();
+      results.document = { path: '/doc' };
+      results.docPrefs = { initial: true };
+      results.view = createMockView({ settings: { sortOrder: [{ path: 'dc:title', direction: 'asc' }] } });
+      results._saveViewSettings();
+      // e.g. Reset Layout, while the first save is on its way
+      results.view.settings = { sortOrder: [] };
+      results._saveViewSettings({ detail: { source: 'reset-layout' } });
+
+      saves[0]();
+      await tick();
+      expect(results.docPrefs).to.deep.equal({ initial: true });
+      expect(results._settings.table).to.be.undefined;
+
+      saves[1]();
+      await tick();
+      await tick();
+      expect(results.docPrefs).to.deep.equal({ sortOrder: [] });
+      expect(results._settings.table).to.deep.equal({ sortOrder: [] });
+    });
+
+    test('sends a save still waiting for another document instead of dropping it', async () => {
+      const saveDocStub = stub('saveDocPrefs').resolves();
+      results.document = { path: '/doc-1' };
+      results.view = createMockView({ settings: { sortOrder: [] } });
+      results._saveViewSettings();
+      expect(saveDocStub.callCount).to.equal(0);
+
+      results.document = { path: '/doc-2' };
+      results._saveViewSettings();
+
+      expect(saveDocStub.callCount).to.equal(1);
+      expect(saveDocStub.firstCall.args[0]).to.equal('/doc-1');
+      results._docPrefsSaveDebouncer.flush();
+      expect(saveDocStub.callCount).to.equal(2);
+      expect(saveDocStub.secondCall.args[0]).to.equal('/doc-2');
+    });
+
+    test('runs the saves to one destination one after the other', async () => {
+      let finishFirst;
+      const first = sinon.stub().returns(
+        new Promise((resolve) => {
+          finishFirst = resolve;
+        }),
+      );
+      const second = sinon.stub().resolves();
+      const elsewhere = sinon.stub().resolves();
+
+      results._queueSave('/doc', first);
+      const queued = results._queueSave('/doc', second);
+      results._queueSave('/other', elsewhere);
+
+      expect(first.callCount).to.equal(1);
+      expect(elsewhere.callCount).to.equal(1);
+      await tick();
+      expect(second.callCount).to.equal(0);
+      finishFirst();
+      await queued;
+      expect(second.callCount).to.equal(1);
+    });
+
+    test('runs the next save to a destination after a failed one', async () => {
+      const failing = sinon.stub().rejects(new Error('offline'));
+      const next = sinon.stub().resolves();
+
+      const failed = results._queueSave('/doc', failing);
+      const queued = results._queueSave('/doc', next);
+
+      await failed.catch(() => {});
+      await queued;
+      expect(next.callCount).to.equal(1);
+    });
+
+    test('saveGlobalResultsPrefs does not apply prefs saved for a provider no longer shown', async () => {
+      stub('_putGlobalPreference').resolves();
+      // the prefs of the provider shown are not loaded here
+      stub('_loadGlobalPrefs');
+      const provider = createMockProvider();
+      provider.provider = 'other_search';
+      results.nxProvider = provider;
+      await tick();
+      results.globalPrefs = { current: true };
+
+      await results.saveGlobalResultsPrefs({ sortOrder: [] }, 'default_search');
+
+      expect(results.globalPrefs).to.deep.equal({ current: true });
+      results.nxProvider = null;
+    });
+  });
+
   suite('Column Management', () => {
     test('updates columns when columns-changed event is fired', () => {
       const newColumns = [
