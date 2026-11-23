@@ -37,8 +37,6 @@ const path = require('node:path');
 const { fileURLToPath } = require('node:url');
 const { Analyzer, Analysis, FsUrlLoader, PackageUrlResolver } = require('polymer-analyzer');
 
-const catalogPackages = require('../data/applications/nuxeo/2023.0/catalog-packages.json');
-
 const SYNTAX_WARNINGS = new Set(['parse-error', 'could-not-load']);
 
 // Third-party code that is known not to parse and has no impact on the catalog. Matched on the file that
@@ -105,6 +103,27 @@ const EXPECTED_BEHAVIORS = [
 ];
 
 const root = path.resolve(process.argv[2] || path.join(__dirname, '..', '..', '..'));
+
+// The catalog data of the line this Web UI belongs to, derived as in .github/workflows/catalog.yaml: 3.1.x is
+// the LTS 2023 line, and a YYYY.N.M version builds for the YYYY.0 platform. A new LTS line therefore only needs
+// its own data/applications/nuxeo/YYYY.0/catalog-packages.json.
+function targetPlatform(version) {
+  if (/^3\.1\./.test(version)) {
+    return '2023.0';
+  }
+  const match = /^(20\d\d)\./.exec(version);
+  if (!match) {
+    throw new Error(`Cannot derive the catalog target platform from Web UI version '${version}'.`);
+  }
+  return `${match[1]}.0`;
+}
+
+const platform = targetPlatform(JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8')).version);
+const catalogPackagesFile = path.join(__dirname, '../data/applications/nuxeo', platform, 'catalog-packages.json');
+if (!fs.existsSync(catalogPackagesFile)) {
+  throw new Error(`No Designer catalog data for platform ${platform}: add ${catalogPackagesFile}.`);
+}
+const catalogPackages = require(catalogPackagesFile);
 const { sourcePaths } = catalogPackages.packages.find((pkg) => pkg.isApplication);
 
 const info = (message) => process.stdout.write(`${message}\n`);
@@ -178,7 +197,7 @@ async function main() {
   const missingElements = EXPECTED_ELEMENTS.filter((tag) => !elements.has(tag));
   const missingBehaviors = EXPECTED_BEHAVIORS.filter((name) => !behaviors.has(name));
 
-  info(`Analyzed ${sourcePaths.length} catalog entry points in ${Date.now() - started} ms:`);
+  info(`Analyzed ${sourcePaths.length} catalog entry points of platform ${platform} in ${Date.now() - started} ms:`);
   info(`  ${elements.size} elements, ${behaviors.size} behaviors found (total for information only, not checked)`);
   info(
     `  safety net: ${EXPECTED_ELEMENTS.length - missingElements.length}/${EXPECTED_ELEMENTS.length} key elements, ` +

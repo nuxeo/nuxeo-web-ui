@@ -4,12 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to promote (e.g.: 2025.1.0-rc.2)'
+        description: 'Version to promote (e.g.: 2027.1.0-rc.2)'
         required: true
       referenceBranch:
         description: 'Branch to be updated after the promotion'
         required: true
-        default: 'lts-2025'
+        default: 'lts-2027'
       dryRun:
         description: 'Run the workflow without pushing code or publishing artifacts'
         type: boolean
@@ -39,13 +39,18 @@ jobs:
 
       # 3.1.x is lower than the 2025.x versions already published, and npm refuses to apply the
       # implicit "latest" tag then. Always publish with an explicit tag: "latest" stays on 2025.x.
+      # The version and the branch updated after the promotion are checked together, before anything is
+      # tagged or published: with the lts-2027 default, a 2025.* RC would otherwise be released and then
+      # rewrite lts-2027 with the next 2025 SNAPSHOT. 2027.* has no pair until the release work is enabled.
       - name: Resolve the npm dist-tag
+        env:
+          REFERENCE_BRANCH: ${{ github.event.inputs.referenceBranch }}
         run: |
-          case "$VERSION" in
-            2025.*) echo "NPM_TAG=latest" >> $GITHUB_ENV ;;
-            3.1.*) echo "NPM_TAG=lts-2023" >> $GITHUB_ENV ;;
+          case "$VERSION:$REFERENCE_BRANCH" in
+            2025.*:lts-2025) echo "NPM_TAG=latest" >> $GITHUB_ENV ;;
+            3.1.*:maintenance-3.1.x) echo "NPM_TAG=lts-2023" >> $GITHUB_ENV ;;
             *)
-              echo "::error::No npm dist-tag is mapped for version $VERSION"
+              echo "::error::Version $VERSION cannot be promoted onto $REFERENCE_BRANCH: no npm dist-tag is mapped for this pair."
               exit 1
               ;;
           esac
@@ -209,7 +214,7 @@ jobs:
           # Checked first: the sync workflow takes a choice input, so anything outside the
           # list fails the dispatch with a 422 that continue-on-error would swallow.
           case "$REFERENCE_BRANCH" in
-            lts-2025 | maintenance-3.1.x) ;;
+            lts-2027 | lts-2025 | maintenance-3.1.x) ;;
             *)
               echo "::warning::No dev branch is mapped for $REFERENCE_BRANCH; skipping the sync dispatch."
               exit 0

@@ -80,6 +80,7 @@ jobs:
           PACKAGE_VERSION=$(jq -r .version package.json)
           case "$PACKAGE_VERSION" in
             3.1.*)    echo "version=17" >> "$GITHUB_OUTPUT" ;;
+            # TEMP-2027-PLATFORM: 2027.* also builds on Java 21 until the LTS 2027 platform sets its level.
             20[0-9][0-9].*) echo "version=21" >> "$GITHUB_OUTPUT" ;;
             *)
               # Explicit rather than defaulting: an unreadable package.json or a version shape

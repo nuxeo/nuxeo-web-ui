@@ -79,7 +79,7 @@ jobs:
           ELEMENTS_VERSION=$(
             for pkg in @nuxeo/nuxeo-elements @nuxeo/nuxeo-ui-elements @nuxeo/nuxeo-dataviz-elements @nuxeo/testing-helpers; do
               npm view "$pkg" versions --json | jq -r '.[]'
-            done | grep -E "2025\.[0-9]+\.[0-9]+-rc\.[0-9]+$" \
+            done | grep -E "2027\.[0-9]+\.[0-9]+-rc\.[0-9]+$" \
                  | sort | uniq -c | awk '$1 == 4 {print $2}' | sort -V | tail -n1
           )
           echo "Resolved latest nuxeo-elements RC: $ELEMENTS_VERSION"

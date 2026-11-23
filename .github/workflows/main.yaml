@@ -3,7 +3,7 @@ name: Main
 on:
   push:
     branches:
-      - lts-2025
+      - lts-2027
   workflow_dispatch:
 
 jobs:
@@ -21,7 +21,7 @@ jobs:
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
     with:
-      branch: lts-2025
+      branch: lts-2027
 
   a11y:
     uses: ./.github/workflows/a11y.yaml
@@ -32,7 +32,7 @@ jobs:
       REPOSITORY_MANAGER_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
       REPOSITORY_MANAGER_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
     with:
-      branch: lts-2025
+      branch: lts-2027
 
   sonar:
     uses: ./.github/workflows/sonar.yaml
@@ -42,7 +42,7 @@ jobs:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     with:
-      branch: lts-2025
+      branch: lts-2027
 
   ftest:
     uses: ./.github/workflows/ftest.yaml
@@ -53,9 +53,13 @@ jobs:
       REPOSITORY_MANAGER_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
       REPOSITORY_MANAGER_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
     with:
-      branch: lts-2025
+      branch: lts-2027
 
   build:
+    # TEMP-2027-PLATFORM: LTS 2027 only produces test builds (alpha.yaml) until the release work
+    # is enabled. Skip the RC build on lts-2027 so a sync cannot tag, upload or publish a 2027 RC.
+    # The guard below also keeps lts-2027 out of the publishable branches until then.
+    if: ${{ github.ref != 'refs/heads/lts-2027' }}
     needs: [lint, test, a11y, ftest, sonar]
     runs-on:
       group: medium-4cpu-runners
@@ -102,6 +106,7 @@ jobs:
       - name: Setup Maven build
         uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@314c39e8c2e913db2dc63a31670612ccb2b6e569 # v0.10.4
         with:
+          # TEMP-2027-PLATFORM: the LTS 2025 Java level until the LTS 2027 platform sets its own.
           java-version: '21'
 
       - name: Purge cached Nuxeo artifacts
@@ -132,7 +137,7 @@ jobs:
           npm version ${VERSION} --no-git-tag-version
 
           # Get latest UI Elements version
-          ELEMENTS_VERSION=$(npm view @nuxeo/nuxeo-ui-elements versions --json | jq -r '.[]' | grep -E "2025\.[0-9]+\.[0-9]+-rc\.[0-9]+$" | sort -V | tail -n1)
+          ELEMENTS_VERSION=$(npm view @nuxeo/nuxeo-ui-elements versions --json | jq -r '.[]' | grep -E "2027\.[0-9]+\.[0-9]+-rc\.[0-9]+$" | sort -V | tail -n1)
 
           echo "Latest nuxeo-elements version: $ELEMENTS_VERSION"
 

@@ -64,6 +64,7 @@ jobs:
           PACKAGE_VERSION=$(jq -r .version package.json)
           case "$PACKAGE_VERSION" in
             3.1.*)    echo "version=17" >> "$GITHUB_OUTPUT" ;;
+            # TEMP-2027-PLATFORM: 2027.* also builds on Java 21 until the LTS 2027 platform sets its level.
             20[0-9][0-9].*) echo "version=21" >> "$GITHUB_OUTPUT" ;;
             *)
               # Explicit rather than defaulting: an unreadable package.json or a version shape
@@ -112,7 +113,7 @@ jobs:
           ELEMENTS_VERSION=$(
             for pkg in @nuxeo/nuxeo-elements @nuxeo/nuxeo-ui-elements @nuxeo/nuxeo-dataviz-elements @nuxeo/testing-helpers; do
               npm view "$pkg" versions --json | jq -r '.[]'
-            done | grep -E "2025\.[0-9]+\.[0-9]+-rc\.[0-9]+$" \
+            done | grep -E "2027\.[0-9]+\.[0-9]+-rc\.[0-9]+$" \
                  | sort | uniq -c | awk '$1 == 4 {print $2}' | sort -V | tail -n1
           )
           echo "Resolved latest nuxeo-elements RC: $ELEMENTS_VERSION"
