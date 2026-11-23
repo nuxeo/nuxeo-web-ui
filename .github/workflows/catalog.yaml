@@ -5,12 +5,12 @@ on:
   workflow_dispatch:
     inputs:
       webui_ref:
-        description: 'Web UI branch or tag (e.g. lts-2025 or v2025.1.0)'
-        default: 'lts-2025'
+        description: 'Web UI branch or tag (e.g. lts-2027 or v2027.1.0)'
+        default: 'lts-2027'
         required: true
       target_platform:
         description: 'The Nuxeo server target platform to build the catalog for.'
-        default: '2025.0'
+        default: '2027.0'
         required: true
       debug_only:
         description: 'Run catalog generation without publishing or generating PRs'
@@ -35,9 +35,12 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    # A release runs the copy of this workflow from its tagged commit, so this copy only sees releases of
+    # its own line: v3.1.x releases keep generating the 2023.0 catalog from maintenance-3.1.x. Only
+    # promote.yaml publishes GitHub releases; alpha builds push git tags without a release.
     if: |
       github.event_name != 'release' ||
-      startsWith(github.event.release.tag_name, 'v3.1.')
+      startsWith(github.event.release.tag_name, 'v20')
     steps:
       - uses: actions/checkout@v6
 
@@ -57,11 +60,20 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libxml2-utils
 
       - name: Normalize execution context
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
           if [[ "${{ github.event_name }}" == "release" ]]; then
             echo "DEBUG_ONLY=false" >> $GITHUB_ENV
-            echo "WEBUI_REF=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
-            echo "TARGET_PLATFORM=2023.0" >> $GITHUB_ENV
+            echo "WEBUI_REF=$RELEASE_TAG" >> $GITHUB_ENV
+            # vYYYY.N.M builds the catalog for the YYYY.0 platform, so a new LTS line needs no change
+            # here, only its packages/nuxeo-designer-catalog/data/applications/nuxeo/YYYY.0 directory.
+            if [[ "$RELEASE_TAG" =~ ^v(20[0-9]{2})\.[0-9]+\.[0-9]+$ ]]; then
+              echo "TARGET_PLATFORM=${BASH_REMATCH[1]}.0" >> $GITHUB_ENV
+            else
+              echo "::error::Cannot derive a catalog target platform from release tag '$RELEASE_TAG'."
+              exit 1
+            fi
           else
             echo "DEBUG_ONLY=${{ github.event.inputs.debug_only }}" >> $GITHUB_ENV
             echo "WEBUI_REF=${{ github.event.inputs.webui_ref }}" >> $GITHUB_ENV
@@ -165,7 +177,8 @@ jobs:
             git checkout -b "$BRANCH"
           fi
 
-          mvn versions:set-property -Dproperty=view.designer.catalog.2023.0 -DnewVersion="$CATALOG_VERSION"
+          # One property per platform, so a 2027.0 catalog never overwrites the 2023.0 one.
+          mvn versions:set-property -Dproperty="view.designer.catalog.$TARGET_PLATFORM" -DnewVersion="$CATALOG_VERSION"
           git add .
           
           if git diff --cached --quiet; then
