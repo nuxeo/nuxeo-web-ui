@@ -255,8 +255,8 @@ jobs:
             plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
             plugin/itests/marketplace/target/nuxeo-web-ui-marketplace-itests-*.zip
 
-  # Branch protection on maintenance-3.1.x, lts-2025, develop-2023 and develop-2025 requires a
-  # status check named exactly `ftests`. A matrix job reports `ftests (shard 1)`, `ftests (shard 2)`
+  # Branch protection on maintenance-3.1.x, lts-2025, lts-2027, develop-2023, develop-2025 and
+  # develop-2027 requires a status check named exactly `ftests`. A matrix job reports `ftests (shard 1)`, `ftests (shard 2)`
   # and so on but never a bare `ftests`, so moving the matrix onto a job of that name would leave
   # the required check pending forever and block every pull request. Keeping the shards under their
   # own job id and gating on them here means `ftests` is still reported, passing only when all four
