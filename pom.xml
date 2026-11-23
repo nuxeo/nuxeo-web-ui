@@ -3,8 +3,8 @@
   <parent>
     <groupId>org.nuxeo</groupId>
     <artifactId>nuxeo-parent</artifactId>
-    <!-- TEMP-2027-PLATFORM: LTS 2025 parent until the LTS 2027 platform build is published. -->
-    <version>2025.12</version>
+    <!-- TEMP-2027-PLATFORM: platform alignment build; move to the stable LTS 2027 build (WEBUI-2456). -->
+    <version>2027.0.210</version>
   </parent>
 
   <groupId>org.nuxeo.web.ui</groupId>
@@ -15,8 +15,7 @@
   <version>2027.1.0-SNAPSHOT</version>
 
   <properties>
-    <!-- TEMP-2027-PLATFORM: LTS 2025 target until the LTS 2027 platform build is published. -->
-    <nuxeo.target.version>2025.*</nuxeo.target.version>
+    <nuxeo.target.version>2027.*</nuxeo.target.version>
   </properties>
 
   <modules>

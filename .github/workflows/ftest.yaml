@@ -76,12 +76,13 @@ jobs:
         id: jdk
         run: |
           # Derived from the version being built, not the branch name, so it stays correct on
-          # dev branches. LTS 2023 (3.1.x) builds on Java 17; 2025 and later on Java 21.
+          # dev branches. LTS 2023 (3.1.x) builds on Java 17, LTS 2025 on Java 21 and LTS 2027 on Java 25.
           PACKAGE_VERSION=$(jq -r .version package.json)
           case "$PACKAGE_VERSION" in
             3.1.*)    echo "version=17" >> "$GITHUB_OUTPUT" ;;
-            # TEMP-2027-PLATFORM: 2027.* also builds on Java 21 until the LTS 2027 platform sets its level.
-            20[0-9][0-9].*) echo "version=21" >> "$GITHUB_OUTPUT" ;;
+            2025.*)   echo "version=21" >> "$GITHUB_OUTPUT" ;;
+            # TEMP-2027-PLATFORM: Java level of the platform alignment build; re-check with the stable build (WEBUI-2456).
+            2027.*)   echo "version=25" >> "$GITHUB_OUTPUT" ;;
             *)
               # Explicit rather than defaulting: an unreadable package.json or a version shape
               # nobody has taught this about should stop the build, not silently pick a JDK.

@@ -249,8 +249,8 @@ jobs:
       - name: Setup Maven build
         uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@314c39e8c2e913db2dc63a31670612ccb2b6e569 # v0.10.4
         with:
-          # TEMP-2027-PLATFORM: the LTS 2025 Java level until the LTS 2027 platform sets its own.
-          java-version: '21'
+          # TEMP-2027-PLATFORM: Java level of the platform alignment build; re-check with the stable build (WEBUI-2456).
+          java-version: '25'
 
       - name: Install Web UI
         env:
@@ -463,8 +463,8 @@ jobs:
       - name: Setup Maven build
         uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@314c39e8c2e913db2dc63a31670612ccb2b6e569 # v0.10.4
         with:
-          # TEMP-2027-PLATFORM: the LTS 2025 Java level until the LTS 2027 platform sets its own.
-          java-version: '21'
+          # TEMP-2027-PLATFORM: Java level of the platform alignment build; re-check with the stable build (WEBUI-2456).
+          java-version: '25'
 
       # plugin/a11y is not installed here: its checks run once, in `build`.
       - name: Install Web UI
