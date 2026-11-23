@@ -3,6 +3,7 @@
   <parent>
     <groupId>org.nuxeo</groupId>
     <artifactId>nuxeo-parent</artifactId>
+    <!-- TEMP-2027-PLATFORM: LTS 2025 parent until the LTS 2027 platform build is published. -->
     <version>2025.12</version>
   </parent>
 
@@ -14,6 +15,7 @@
   <version>2027.1.0-SNAPSHOT</version>
 
   <properties>
+    <!-- TEMP-2027-PLATFORM: LTS 2025 target until the LTS 2027 platform build is published. -->
     <nuxeo.target.version>2025.*</nuxeo.target.version>
   </properties>
 

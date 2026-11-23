@@ -16,11 +16,15 @@ on:
 
 env:
   PREID: alpha
+  # LTS 2027 test builds publish the ftest package under their own npm dist-tag, so they never
+  # move the shared `alpha` tag used by the other lines. PREID stays `alpha`: it also drives the
+  # version (2027.1.0-alpha.N) and the git tag names.
+  NPM_TAG: 2027-test
 
 jobs:
   # No lint/test/a11y/ftest/sonar gates here on purpose: those already run on
   # every push to the rebranding PR (each check has an `on: pull_request`
-  # trigger against lts-2025). Re-running them here would just duplicate the
+  # trigger against the dev and release branches). Re-running them here would just duplicate the
   # same checks on the same commit. Dispatch this workflow from a commit whose
   # PR checks are green.
   build:
@@ -51,6 +55,7 @@ jobs:
       - name: Setup Maven build
         uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@314c39e8c2e913db2dc63a31670612ccb2b6e569 # v0.10.4
         with:
+          # TEMP-2027-PLATFORM: the LTS 2025 Java level until the LTS 2027 platform sets its own.
           java-version: '21'
 
       - name: Purge cached Nuxeo artifacts
@@ -175,4 +180,4 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
           cd packages/nuxeo-web-ui-ftest
-          npm publish --@nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/ --tag ${PREID}
+          npm publish --@nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/ --tag ${NPM_TAG}

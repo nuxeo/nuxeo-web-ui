@@ -4,12 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to promote (e.g.: 2025.1.0-rc.2)'
+        description: 'Version to promote (e.g.: 2027.1.0-rc.2)'
         required: true
       referenceBranch:
         description: 'Branch to be updated after the promotion'
         required: true
-        default: 'lts-2025'
+        default: 'lts-2027'
       dryRun:
         description: 'Run the workflow without pushing code or publishing artifacts'
         type: boolean
@@ -209,7 +209,7 @@ jobs:
           # Checked first: the sync workflow takes a choice input, so anything outside the
           # list fails the dispatch with a 422 that continue-on-error would swallow.
           case "$REFERENCE_BRANCH" in
-            lts-2025 | maintenance-3.1.x) ;;
+            lts-2027 | lts-2025 | maintenance-3.1.x) ;;
             *)
               echo "::warning::No dev branch is mapped for $REFERENCE_BRANCH; skipping the sync dispatch."
               exit 0

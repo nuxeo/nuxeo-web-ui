@@ -13,6 +13,7 @@
   <supported>true</supported>
   <target-platform>
     <name>@DISTRIBUTION_NAME@</name>
+    <!-- TEMP-2027-PLATFORM: [2025.0,) until the LTS 2027 platform build exists, then [2027.0,). -->
     <version>[2025.0,)</version>
   </target-platform>
   <license>Apache License, Version 2.0</license>
