@@ -121,21 +121,24 @@ jobs:
           name: catalog
           path: packages/nuxeo-designer-catalog/data/applications/nuxeo/${{ env.TARGET_PLATFORM }}/${{ env.CATALOG_NAME }}
 
-      # The catalog takes its version from the Web UI checkout, so a ref from another line would publish
-      # that line's version under this platform's NOS property. For example, lts-2027 stays at the cut point
-      # (2025.x) until the 2027 release work is done. Debug runs publish nothing and are not checked.
-      - name: Check the Web UI version matches the platform
+      # This copy of the workflow publishes only the catalog of its own LTS line, read from the version of the
+      # branch it runs from (2027.x -> 2027.0). Other lines publish from their own branches: the 2023.0 catalog
+      # from maintenance-3.1.x, and LTS 2025 has none. The catalog also takes its version from the Web UI
+      # checkout, so a ref from another line is refused too: lts-2027 stays at the cut point (2025.x) until
+      # the 2027 release work is done. Debug runs publish nothing and are not checked.
+      - name: Check the catalog belongs to this LTS line
         if: env.DEBUG_ONLY != 'true'
         run: |
-          case "$TARGET_PLATFORM:$CATALOG_VERSION" in
-            2023.0:3.1.*) ;;
-            *)
-              if [[ "$CATALOG_VERSION" != "${TARGET_PLATFORM%%.*}."* ]]; then
-                echo "::error::Web UI ref '$WEBUI_REF' is version $CATALOG_VERSION, which is not a $TARGET_PLATFORM version. Pick a ref of that line, or run in debug mode."
-                exit 1
-              fi
-              ;;
-          esac
+          LINE_VERSION=$(jq -r .version package.json)
+          LINE_PLATFORM="${LINE_VERSION%%.*}.0"
+          if [[ "$TARGET_PLATFORM" != "$LINE_PLATFORM" ]]; then
+            echo "::error::This workflow runs from the $LINE_PLATFORM line and only publishes the $LINE_PLATFORM catalog, not $TARGET_PLATFORM. Run the catalog workflow from that line's branch."
+            exit 1
+          fi
+          if [[ "$CATALOG_VERSION" != "${LINE_PLATFORM%%.*}."* ]]; then
+            echo "::error::Web UI ref '$WEBUI_REF' is version $CATALOG_VERSION, which is not a $TARGET_PLATFORM version. Pick a ref of that line, or run in debug mode."
+            exit 1
+          fi
 
       - name: Upload catalog
         if: env.DEBUG_ONLY != 'true'
