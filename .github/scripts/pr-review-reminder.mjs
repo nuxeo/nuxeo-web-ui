@@ -30,7 +30,8 @@
  *   ALLOWED_BASE_BRANCHES  Comma-separated base branches to include; PRs targeting anything
  *                          else are skipped. Covers the dev branches that ticket PRs target
  *                          and the release branches that dev-to-release and hotfix PRs target.
- *                          Default: develop-2025,develop-2023,lts-2025,maintenance-3.1.x
+ *                          Default: develop-2027,develop-2025,develop-2023,lts-2027,lts-2025,
+ *                          maintenance-3.1.x
  *                          Set to empty to include every base branch.
  *   SKIP_BOTS              'true' (default) skips PRs authored by bot accounts (any login
  *                          ending in [bot], plus dependabot / github-actions / crowdin).
@@ -139,7 +140,9 @@ const config = {
   skipChangesRequested: asBool(env('SKIP_CHANGES_REQUESTED'), true),
   // Read straight from process.env: env() maps '' to its fallback, so going through it would make
   // ALLOWED_BASE_BRANCHES='' restore the default list instead of disabling the filter.
-  allowedBaseBranches: (process.env.ALLOWED_BASE_BRANCHES ?? 'develop-2025,develop-2023,lts-2025,maintenance-3.1.x')
+  allowedBaseBranches: (
+    process.env.ALLOWED_BASE_BRANCHES ?? 'develop-2027,develop-2025,develop-2023,lts-2027,lts-2025,maintenance-3.1.x'
+  )
     .split(',')
     .map((b) => b.trim().toLowerCase())
     .filter(Boolean),
