@@ -198,7 +198,7 @@ job only ever reports `ftests (shard 1)` and never a bare `ftests`.
 - `.html` files contain real Polymer components with inline JS — don't treat them as static HTML.
 - The `NUXEO_PACKAGES` env var controls which addon JS bundles are imported at runtime via `Nuxeo.UI.bundles`. If unset, addon resources are still copied to the build but no addon entry points are imported (except `nuxeo-spreadsheet`, which is always loaded).
 - `@nuxeo` npm packages come from `https://packages.nuxeo.com/repository/npm-public/`, not npmjs.org.
-- Maven build requires **Java 21**.
+- Maven build requires **Java 25**. <!-- TEMP-2027-PLATFORM: Java level of the platform alignment build (WEBUI-2456) -->
 
 ## Environment Variables
 
