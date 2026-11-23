@@ -1,6 +1,6 @@
 {
   "name": "@nuxeo/nuxeo-web-ui-ftest",
-  "version": "2025.24.0-SNAPSHOT",
+  "version": "2027.1.0-SNAPSHOT",
   "type": "module",
   "bin": {
     "nuxeo-web-ui-ftest": "./bin/nuxeo-web-ui-ftest.js"
@@ -10,7 +10,7 @@
   },
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=22.13.0"
+    "node": ">=24"
   },
   "overrides": {
     "@puppeteer/browsers": "3.2.6",
