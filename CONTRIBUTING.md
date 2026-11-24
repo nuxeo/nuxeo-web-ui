@@ -4,7 +4,7 @@
 
 - **Node.js** ≥ 22.13 (`.nvmrc` pins 24 — run `nvm use` or `fnm use` in the repo root)
 - **npm** (bundled with Node — no yarn or pnpm)
-- **Maven** and **Java 21** for marketplace builds
+- **Maven** and **Java 25** for marketplace builds <!-- TEMP-2027-PLATFORM: Java level of the platform alignment build (WEBUI-2456) -->
 - A running **Nuxeo Server** at `localhost:8080` for development and functional testing
 
 ## Getting Started
@@ -183,7 +183,7 @@ mvn clean install -Pftest         # Build + functional tests
 mvn clean install -Pa11y          # Build + accessibility tests
 ```
 
-Requires Java version 21.
+Requires Java version 25. <!-- TEMP-2027-PLATFORM: Java level of the platform alignment build (WEBUI-2456) -->
 
 ## Docker Development
 

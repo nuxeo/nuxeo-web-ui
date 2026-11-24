@@ -94,7 +94,9 @@ jobs:
   probe:
     name: Probe the Web UI checkout for sharding support
     needs: id
-    if: ${{ github.event.inputs.skip_ftests == 'false' }}
+    # TEMP-2027-PLATFORM: functional tests are skipped on the LTS 2027 line until CI provides an
+    # OpenSearch 3 server (see ftest.yaml, WEBUI-2456). Restore the skip_ftests condition then.
+    if: false
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -249,8 +251,8 @@ jobs:
       - name: Setup Maven build
         uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@314c39e8c2e913db2dc63a31670612ccb2b6e569 # v0.10.4
         with:
-          # TEMP-2027-PLATFORM: the LTS 2025 Java level until the LTS 2027 platform sets its own.
-          java-version: '21'
+          # TEMP-2027-PLATFORM: Java level of the platform alignment build; re-check with the stable build (WEBUI-2456).
+          java-version: '25'
 
       - name: Install Web UI
         env:
@@ -388,7 +390,8 @@ jobs:
     # shell above assembled the `ftest` profile under `[ "$SKIP_FTESTS" = "false" ]`, so an absent
     # or malformed input meant no functional tests rather than running them. Skipped jobs count as
     # success towards the run conclusion, so `skip_ftests: true` leaves the run green.
-    if: ${{ github.event.inputs.skip_ftests == 'false' }}
+    # TEMP-2027-PLATFORM: skipped on the LTS 2027 line, like the probe above (WEBUI-2456).
+    if: false
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -463,8 +466,8 @@ jobs:
       - name: Setup Maven build
         uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@314c39e8c2e913db2dc63a31670612ccb2b6e569 # v0.10.4
         with:
-          # TEMP-2027-PLATFORM: the LTS 2025 Java level until the LTS 2027 platform sets its own.
-          java-version: '21'
+          # TEMP-2027-PLATFORM: Java level of the platform alignment build; re-check with the stable build (WEBUI-2456).
+          java-version: '25'
 
       # plugin/a11y is not installed here: its checks run once, in `build`.
       - name: Install Web UI

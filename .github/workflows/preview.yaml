@@ -33,7 +33,9 @@ env:
   REGISTRY: docker-internal.packages.nuxeo.com
   REPOSITORY: nuxeo/nuxeo-web-ui
   # Base Nuxeo server image tag; nuxeo-docker-build pulls docker-private.packages.nuxeo.com/nuxeo/nuxeo:<tag>.
-  BASE_IMAGE_TAG: '2025'
+  # TEMP-2027-PLATFORM: image of the platform alignment build. Java 25 code cannot run on the 2025 image;
+  # move to the stable (or a moving 2027) tag with the stable build (WEBUI-2456).
+  BASE_IMAGE_TAG: '2027.0.210'
 
 jobs:
   id:
@@ -180,8 +182,8 @@ jobs:
       - name: Set up Maven build
         uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@314c39e8c2e913db2dc63a31670612ccb2b6e569 # v0.10.4
         with:
-          # TEMP-2027-PLATFORM: the LTS 2025 Java level until the LTS 2027 platform sets its own.
-          java-version: '21'
+          # TEMP-2027-PLATFORM: Java level of the platform alignment build; re-check with the stable build (WEBUI-2456).
+          java-version: '25'
 
       - name: Build Web UI marketplace package
         # Reuses the dist/ produced by the Webpack build above (-DskipInstall -DskipBuild).

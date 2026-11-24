@@ -38,6 +38,10 @@ jobs:
   # CI when a feature file is assigned to no shard or to more than one.
   ftests-shard:
     name: ftests (shard ${{ matrix.shard }})
+    # TEMP-2027-PLATFORM: skipped on the LTS 2027 line. The 2027 platform moved to OpenSearch 3 and has
+    # no embedded OpenSearch package any more, and CI does not provide an OpenSearch 3 server yet.
+    # Re-enable with that server (WEBUI-2456); a11y still runs Web UI on the 2027 server meanwhile.
+    if: false
     runs-on:
       group: medium-4cpu-runners
     permissions:
@@ -76,12 +80,13 @@ jobs:
         id: jdk
         run: |
           # Derived from the version being built, not the branch name, so it stays correct on
-          # dev branches. LTS 2023 (3.1.x) builds on Java 17; 2025 and later on Java 21.
+          # dev branches. LTS 2023 (3.1.x) builds on Java 17, LTS 2025 on Java 21 and LTS 2027 on Java 25.
           PACKAGE_VERSION=$(jq -r .version package.json)
           case "$PACKAGE_VERSION" in
             3.1.*)    echo "version=17" >> "$GITHUB_OUTPUT" ;;
-            # TEMP-2027-PLATFORM: 2027.* also builds on Java 21 until the LTS 2027 platform sets its level.
-            20[0-9][0-9].*) echo "version=21" >> "$GITHUB_OUTPUT" ;;
+            2025.*)   echo "version=21" >> "$GITHUB_OUTPUT" ;;
+            # TEMP-2027-PLATFORM: Java level of the platform alignment build; re-check with the stable build (WEBUI-2456).
+            2027.*)   echo "version=25" >> "$GITHUB_OUTPUT" ;;
             *)
               # Explicit rather than defaulting: an unreadable package.json or a version shape
               # nobody has taught this about should stop the build, not silently pick a JDK.
@@ -250,8 +255,8 @@ jobs:
             plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
             plugin/itests/marketplace/target/nuxeo-web-ui-marketplace-itests-*.zip
 
-  # Branch protection on maintenance-3.1.x, lts-2025, develop-2023 and develop-2025 requires a
-  # status check named exactly `ftests`. A matrix job reports `ftests (shard 1)`, `ftests (shard 2)`
+  # Branch protection on maintenance-3.1.x, lts-2025, lts-2027, develop-2023, develop-2025 and
+  # develop-2027 requires a status check named exactly `ftests`. A matrix job reports `ftests (shard 1)`, `ftests (shard 2)`
   # and so on but never a bare `ftests`, so moving the matrix onto a job of that name would leave
   # the required check pending forever and block every pull request. Keeping the shards under their
   # own job id and gating on them here means `ftests` is still reported, passing only when all four
@@ -272,6 +277,12 @@ jobs:
           RESULT: ${{ needs.ftests-shard.result }}
         run: |
           echo "Functional test shards: $RESULT"
+          # TEMP-2027-PLATFORM: the shards are skipped on purpose on the LTS 2027 line (see ftests-shard).
+          # Pass the required `ftests` check with a visible warning instead of blocking every PR.
+          if [ "$RESULT" = "skipped" ]; then
+            echo "::warning::Functional tests are skipped on the LTS 2027 line until CI provides an OpenSearch 3 server (WEBUI-2456)."
+            exit 0
+          fi
           if [ "$RESULT" != "success" ]; then
             echo "::error::At least one functional test shard did not pass (result: $RESULT)."
             exit 1
