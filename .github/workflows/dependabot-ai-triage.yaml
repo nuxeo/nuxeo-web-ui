@@ -27,7 +27,7 @@ permissions:
 
 jobs:
   triage:
-    uses: nuxeo/ui-team-gh-actions/.github/workflows/dependabot-ai-triage.yaml@ad227d000409acd5c170882e5f8f3db930f6e6fd
+    uses: nuxeo/ui-team-gh-actions/.github/workflows/dependabot-ai-triage.yaml@87dd42a43649c69122f86667d9ea51fc818f9561
     with:
       mode: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || '' }}
     # Passed by name, never `inherit`: the shared workflow receives only what it uses.
