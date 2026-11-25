@@ -51,6 +51,7 @@ scripts/              → Build helpers (merge-messages.js, test/unit/, test/fte
 | Install             | `npm install`                                     | Also runs `check-engine` and installs sub-packages                                         |
 | Dev server          | `npm start`                                       | Webpack dev server at `:5000`, proxies to Nuxeo at `NUXEO_HOST` (default `localhost:8080`) |
 | Lint                | `npm run lint`                                    | ESLint (flat config) + Prettier check                                                      |
+| Catalog check       | `npm run check:catalog`                           | polymer-analyzer on the catalog entry points; needs `npm ci --prefix packages/nuxeo-designer-catalog` once |
 | Format              | `npm run format`                                  | Prettier write → ESLint fix                                                                |
 | Unit tests          | `npm test`                                        | Web Test Runner + Chrome headless; 1 runner file, all suites via `test/load-all-tests.js`  |
 | Unit tests (watch)  | `npm run test:watch`                              | Auto-rerun on changes (no coverage)                                                        |
@@ -76,7 +77,7 @@ scripts/              → Build helpers (merge-messages.js, test/unit/, test/fte
 - **ESLint**: Flat config (`eslint.config.mjs`), `eslint-plugin-html` for `.html` files, `eslint-plugin-wc` for web component rules
 - **Max line length**: 120 characters
 - **`Polymer` global**: Declared as `readonly` in ESLint; `Nuxeo` is `writable`
-- **No `?.`, `??`, `catch { }`, `||=`/`&&=`/`??=`, class fields, private `#` members or other post-ES2019 syntax** in `elements/`, `addons/`, `themes/`, `i18n/`, `index.js` or `legacy.js` — the Designer catalog generator (`polymer-analyzer` 3.2.4) cannot parse it and drops the file and the elements it defines from the catalog. ESLint (`no-restricted-syntax`) enforces it. Use `a && a.b` (truthiness only), `a != null ? a.b : undefined` (value used), an explicit `!= null` check instead of `??`, or `catch (e)`.
+- **No `?.`, `??`, `catch { }`, `||=`/`&&=`/`??=`, class fields, private `#` members or other post-ES2019 syntax** in `elements/`, `addons/`, `themes/`, `i18n/`, `index.js` or `legacy.js` — the Designer catalog generator (`polymer-analyzer` 3.2.4) cannot parse it and drops the file and the elements it defines from the catalog. ESLint (`no-restricted-syntax`) enforces it, and `npm run check:catalog` (run by the Lint CI job) also catches it in the published `@nuxeo` packages. Use `a && a.b` (truthiness only), `a != null ? a.b : undefined` (value used), an explicit `!= null` check instead of `??`, or `catch (e)`.
 - Run `npm run format` before committing (enforced by husky + lint-staged).
 
 ### Naming
