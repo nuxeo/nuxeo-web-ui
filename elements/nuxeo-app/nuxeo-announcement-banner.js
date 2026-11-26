@@ -23,7 +23,12 @@ import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
-import { ANNOUNCEMENT_ENTRY_PATH, ANNOUNCEMENT_UPDATED_EVENT, sanitizeAnnouncementLink } from './nuxeo-announcement.js';
+import {
+  ANNOUNCEMENT_DIRECTORY_PATH,
+  ANNOUNCEMENT_UPDATED_EVENT,
+  findAnnouncementEntry,
+  sanitizeAnnouncementLink,
+} from './nuxeo-announcement.js';
 
 // Dispatched on `document` by `setI18n` once a locale's messages are in place.
 const I18N_LOCALE_LOADED_EVENT = 'i18n-locale-loaded';
@@ -150,7 +155,7 @@ class AnnouncementBanner extends mixinBehaviors([I18nBehavior], Nuxeo.Element) {
       _path: {
         type: String,
         readOnly: true,
-        value: ANNOUNCEMENT_ENTRY_PATH,
+        value: ANNOUNCEMENT_DIRECTORY_PATH,
       },
 
       _opened: {
@@ -246,7 +251,7 @@ class AnnouncementBanner extends mixinBehaviors([I18nBehavior], Nuxeo.Element) {
     this._requestId += 1;
     const requestId = this._requestId;
     return this.$.announcement.get().then(
-      (response) => this._applyIfCurrent(requestId, response),
+      (response) => this._applyIfCurrent(requestId, findAnnouncementEntry(response)),
       // A server without the announcement directory (or an unreachable one) simply has no
       // announcement to show: stay hidden rather than failing the whole application shell.
       () => this._applyIfCurrent(requestId, null),
