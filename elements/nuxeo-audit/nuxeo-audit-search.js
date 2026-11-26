@@ -31,6 +31,8 @@ import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.j
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-action-button-styles.js';
 import moment from '@nuxeo/moment';
+import { config } from '@nuxeo/nuxeo-elements';
+import { calendarDayInTimezone } from '../common-utils.js';
 
 /**
 `nuxeo-audit-search`
@@ -274,7 +276,9 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
     const end = this._hasValidDate(this.endDate) && Date.parse(this.endDate);
     const refresh = !start || !end || start < end;
     if (start && end && start > end) {
-      this.startDate = moment(end).subtract(7, 'day').format('YYYY-MM-DD');
+      // A week before the end day the user sees, counted in the Web UI timezone.
+      const endDay = calendarDayInTimezone(this.endDate, config.get('timezone'));
+      this.startDate = moment(endDay, 'YYYY-MM-DD').locale('en').subtract(7, 'day').format('YYYY-MM-DD');
     }
 
     if (refresh) {

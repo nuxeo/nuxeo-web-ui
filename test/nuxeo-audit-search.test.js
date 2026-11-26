@@ -16,6 +16,7 @@ All Hyland product names are registered or unregistered trademarks of Hyland Sof
  limitations under the License.
  */
 import { fixture, html, login } from '@nuxeo/testing-helpers';
+import { config } from '@nuxeo/nuxeo-elements';
 import '../elements/nuxeo-audit/nuxeo-audit-search.js';
 
 const document = {
@@ -94,6 +95,35 @@ suite('nuxeo-audit-search', () => {
 
   teardown(() => {
     server.restore();
+  });
+
+  suite('date range', () => {
+    let previousTimezone;
+
+    setup(() => {
+      previousTimezone = config.get('timezone');
+      // Only the computed range matters here, not the audit query it triggers.
+      sinon.stub(element, '_refresh');
+    });
+
+    teardown(() => {
+      config.set('timezone', previousTimezone);
+    });
+
+    test('moves a start date after the end date to a week before the end day in the configured timezone', () => {
+      config.set('timezone', 'Asia/Tokyo');
+      // The pickers store Tokyo midnight: the end date is January 20 there.
+      element.endDate = '2026-01-19T15:00:00.000Z';
+      element.startDate = '2026-01-24T15:00:00.000Z';
+      expect(element.startDate).to.equal('2026-01-13');
+    });
+
+    test('counts the week from the end day in a timezone west of UTC', () => {
+      config.set('timezone', 'America/New_York');
+      element.endDate = '2026-01-20T05:00:00.000Z';
+      element.startDate = '2026-01-25T05:00:00.000Z';
+      expect(element.startDate).to.equal('2026-01-13');
+    });
   });
 
   suite('format comment', () => {

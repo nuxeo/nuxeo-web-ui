@@ -15,6 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+import { config } from '@nuxeo/nuxeo-elements';
 import { ChartDataBehavior } from '../elements/nuxeo-admin/nuxeo-chart-data-behavior.js';
 
 suite('ChartDataBehavior', () => {
@@ -480,20 +481,70 @@ suite('ChartDataBehavior', () => {
     });
   });
 
-  suite('_formatDate', () => {
-    test('should format date to YYYY-MM-DD', () => {
-      expect(behavior._formatDate('2024-03-15T10:30:00Z')).to.equal('2024-03-15');
-    });
-  });
+  suite('date ranges in the Web UI timezone', () => {
+    let previousTimezone;
+    let clock;
 
-  suite('_extendEndDate', () => {
-    test('should extend date close to end of day', () => {
-      const result = behavior._extendEndDate('2024-03-15T00:00:00Z');
-      expect(result).to.match(/^2024-03-1[56]$/);
+    setup(() => {
+      previousTimezone = config.get('timezone');
     });
 
-    test('should return the date unchanged when null', () => {
-      expect(behavior._extendEndDate(null)).to.be.null;
+    teardown(() => {
+      config.set('timezone', previousTimezone);
+      if (clock) {
+        clock.restore();
+        clock = null;
+      }
+    });
+
+    suite('_formatDate', () => {
+      test('should format date to YYYY-MM-DD', () => {
+        config.set('timezone', 'Etc/UTC');
+        expect(behavior._formatDate('2024-03-15T10:30:00Z')).to.equal('2024-03-15');
+      });
+
+      test('returns the day a picker value stands for in the configured timezone', () => {
+        // The date pickers store the configured zone's midnight: January 20 in New York and in Tokyo.
+        config.set('timezone', 'America/New_York');
+        expect(behavior._formatDate('2026-01-20T05:00:00.000Z')).to.equal('2026-01-20');
+        config.set('timezone', 'Asia/Tokyo');
+        expect(behavior._formatDate('2026-01-19T15:00:00.000Z')).to.equal('2026-01-20');
+      });
+
+      test('keeps date-only values', () => {
+        config.set('timezone', 'Pacific/Pago_Pago');
+        expect(behavior._formatDate('2026-01-20')).to.equal('2026-01-20');
+      });
+    });
+
+    suite('_extendEndDate', () => {
+      test('ends the range on the picked calendar day', () => {
+        config.set('timezone', 'America/New_York');
+        expect(behavior._extendEndDate('2026-01-20T05:00:00.000Z')).to.equal('2026-01-20');
+        config.set('timezone', 'Pacific/Kiritimati');
+        expect(behavior._extendEndDate('2026-01-19T10:00:00.000Z')).to.equal('2026-01-20');
+      });
+
+      test('uses the browser day when no timezone is configured', () => {
+        config.set('timezone', '');
+        const localMidnight = new Date(2024, 2, 15);
+        expect(behavior._extendEndDate(localMidnight.toISOString())).to.equal('2024-03-15');
+      });
+
+      test('should return the date unchanged when null', () => {
+        expect(behavior._extendEndDate(null)).to.be.null;
+      });
+    });
+
+    suite('_defaultDateRange', () => {
+      test('covers the last month up to today in the configured timezone', () => {
+        // 2026-03-01T03:00Z is still February 28 in New York and already March 1 in Tokyo.
+        clock = sinon.useFakeTimers({ now: Date.parse('2026-03-01T03:00:00.000Z'), toFake: ['Date'] });
+        config.set('timezone', 'America/New_York');
+        expect(behavior._defaultDateRange()).to.deep.equal({ startDate: '2026-01-28', endDate: '2026-02-28' });
+        config.set('timezone', 'Asia/Tokyo');
+        expect(behavior._defaultDateRange()).to.deep.equal({ startDate: '2026-02-01', endDate: '2026-03-01' });
+      });
     });
   });
 });
