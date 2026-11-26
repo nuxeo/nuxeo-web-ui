@@ -98,7 +98,13 @@ Polymer({
       #views slot::slotted(:not([handles-sorting])),
       #views::slotted(:not([handles-select-all])) /* edge */,
       #views::slotted(:not([handles-sorting])) /* edge */ {
-        height: calc(var(--nuxeo-results-view-height, calc(100vh - 130px - var(--nuxeo-app-top))) - 66px);
+        height: calc(
+          var(
+              --nuxeo-results-view-height,
+              calc(100vh - 130px - (var(--nuxeo-app-top, 0px) + var(--nuxeo-app-bottom, 0px)))
+            ) -
+            66px
+        );
       }
 
       .displayMode {
