@@ -50,12 +50,17 @@ Polymer({
         text-decoration: none;
       }
 
-      /* iron-selector adds .iron-selected (Administration, Profile drawers) */
+      /* Hover only: a clicked item keeps DOM focus on its <a>, so :focus-within would leave a stale
+         hover fill behind after the pointer leaves. Keyboard focus is shown by a:focus-visible. */
+      :host(:hover) {
+        @apply --hyland-drawer-item-hover;
+      }
+
+      /* iron-selector adds .iron-selected (Administration, Profile drawers). These come after the
+         hover rule so the selected item keeps its own colour while the pointer is over it. */
       :host(.iron-selected),
       :host(.iron-selected:hover),
-      :host(.iron-selected:focus),
-      :host(:hover),
-      :host(:focus-within) {
+      :host(.iron-selected:focus) {
         @apply --hyland-drawer-item-selected;
       }
 
@@ -69,8 +74,7 @@ Polymer({
       :host(.iron-selected) a:hover,
       :host(.iron-selected) a:focus,
       :host(.iron-selected) a:active,
-      :host(:hover) a,
-      :host(:focus-within) a {
+      :host(:hover) a {
         background-color: transparent;
         color: var(--nuxeo-drawer-text);
       }
