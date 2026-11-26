@@ -26,7 +26,6 @@ import '@nuxeo/chart-elements/chart-pie.js';
 import '@nuxeo/chart-elements/chart-bar.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-import moment from '@nuxeo/moment';
 import { ChartDataBehavior } from './nuxeo-chart-data-behavior.js';
 
 /**
@@ -265,8 +264,9 @@ Polymer({
   },
 
   ready() {
-    this.startDate = moment().subtract(1, 'month').format('YYYY-MM-DD');
-    this.endDate = moment().format('YYYY-MM-DD');
+    const { startDate, endDate } = this._defaultDateRange();
+    this.startDate = startDate;
+    this.endDate = endDate;
   },
 
   _range(start, end) {
